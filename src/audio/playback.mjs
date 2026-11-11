@@ -3,7 +3,7 @@
 // Overlap the last second with the beginning once, then let Web Audio loop
 // the buffer on its own clock. The last sample leads into the first sample
 // of the unblended section, including when the page is in a background tab.
-function prepareRecording(context, buffer, normalize) {
+export function prepareRecording(context, buffer, normalize) {
   const overlap = Math.min(buffer.sampleRate, Math.floor(buffer.length / 5));
   if (buffer.duration < 0.25) throw new Error("录音太短");
   const length = buffer.length - overlap;
@@ -37,7 +37,7 @@ function prepareRecording(context, buffer, normalize) {
   return result;
 }
 
-function playInstrumentNote(context, out, sample, frequency, volume, when) {
+export function playInstrumentNote(context, out, sample, frequency, volume, when) {
   const midi = 69 + 12 * Math.log2(frequency / 440);
   const { roots, noteLength } = sample.meta;
   let index = 0;

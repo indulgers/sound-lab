@@ -1,6 +1,6 @@
 Sound Lab 音频素材
 
-逐条作者、来源和许可位于 catalog.js，同时会显示在网页的音源清单中。
+逐条作者、来源和许可位于 src/audio/catalog.mjs，同时会显示在网页的音源清单中。
 音频文件保留各自的许可。
 
 现场录音从 Freesound 的公开高质量试听文件、Blanket 收录的录音或

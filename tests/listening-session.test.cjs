@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { createSession, freeMix, isFreeSound } = require('../assets/listening-session.js');
+const { createSession, freeMix, isFreeSound } = require('../src/listening-session.mjs');
 
 function fixture() {
   let time = 1000;

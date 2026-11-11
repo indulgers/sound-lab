@@ -10,18 +10,21 @@
 
 ## 本地运行
 
+需要 Node.js 22.12 或更新版本。
+
 ```sh
-python3 -m http.server 8080
+npm ci
+npm run dev
 ```
 
-打开 [http://localhost:8080](http://localhost:8080)。项目不需要构建或安装依赖，音源随仓库部署。直接打开 `index.html` 时，浏览器的文件协议限制会让内置音源走合成回退；仍可通过「音源清单」选择本地录音试听。
+首页 `/` 和沉浸页 `/focus` 由 TanStack Router 管理，共用一个 Web Audio 控制器。直接访问沉浸页时可按「继续播放」开始。
 
-用 `node --test` 运行体验计时与配方权限测试。
+用 `npm test` 运行计时与配方权限测试。用 `npm run build` 构建，再用 `npm run preview` 预览生产包。
 
 ## 音频素材
 
-作者、原始链接及逐条许可见 [音源目录](assets/audio/catalog.js) 和页面内的「音源清单」。详见 [素材整理说明](assets/audio/README.txt)。
+作者、原始链接及逐条许可见 [音源目录](src/audio/catalog.mjs) 和页面内的「音源清单」。详见 [素材整理说明](public/assets/audio/README.txt)。
 
 ## 部署
 
-Cloudflare Pages 通过 Git 直连部署 `main`。构建命令留空，输出目录使用仓库根目录。
+Cloudflare Pages 的生产分支为 `main`。部署 React 版本前，在项目构建设置中将命令设为 `npm run build`，输出目录设为 `dist`，Node.js 版本设为 22 或更高。构建会把音源复制到 `dist`。Cloudflare Pages 的单页应用回退会把 `/focus` 交给 TanStack Router。
