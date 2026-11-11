@@ -1,6 +1,6 @@
 "use strict";
 
-const AUDIO_LICENSES = {
+export const AUDIO_LICENSES = {
   "CC0 1.0": "https://creativecommons.org/publicdomain/zero/1.0/",
   "CC BY 3.0": "https://creativecommons.org/licenses/by/3.0/",
   "CC BY 4.0": "https://creativecommons.org/licenses/by/4.0/",
@@ -8,19 +8,19 @@ const AUDIO_LICENSES = {
 };
 
 function fieldRecording(id, title, author, source, license, editor) {
-  return { file: "assets/audio/" + id + ".mp3", title, author, source, license, editor };
+  return { file: "/assets/audio/" + id + ".mp3", title, author, source, license, editor };
 }
 
 function instrumentSamples(id, title, instrument, roots) {
   return {
-    file: "assets/audio/" + id + "-notes.mp3",
+    file: "/assets/audio/" + id + "-notes.mp3",
     title, author: "Frank Wen · FluidR3 GM / gleitz",
     source: "https://github.com/gleitz/midi-js-soundfonts/blob/gh-pages/FluidR3_GM/" + instrument + "-mp3.js",
     license: "CC BY 3.0", roots, noteLength: 4
   };
 }
 
-const SOUND_AUDIO = {
+export const SOUND_AUDIO = {
   rain: fieldRecording("rain", "rain ambience", "alex36917", "https://freesound.org/people/alex36917/sounds/524605/", "CC BY 4.0", "Porrumentzio / Blanket"),
   wind: fieldRecording("wind", "Wind blowing on the sea (or through the window)", "Félix Blume", "https://freesound.org/people/felix.blume/sounds/217506/", "CC0 1.0", "Porrumentzio / Blanket"),
   waves: fieldRecording("waves", "oceanwavescrushing.wav", "Luftrum", "https://freesound.org/people/Luftrum/sounds/48412/", "CC BY 4.0", "Porrumentzio / Blanket"),
