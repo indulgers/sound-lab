@@ -22,3 +22,5 @@
 5. push 到 `main` 就自动部署；PR 会部署预览。
 
 替代方案（更简单，不用 token）：Cloudflare Pages 里选 Connect to Git，选这个仓库，Build command 留空，Output directory 填 `.`，每次 push 自动部署。两种方式二选一，不要同时开。
+
+部署状态：Cloudflare Pages 项目 sound-lab，GitHub Actions 自动部署。
