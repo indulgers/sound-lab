@@ -27,4 +27,4 @@ npm run dev
 
 ## 部署
 
-Cloudflare Pages 的生产分支为 `main`。部署 React 版本前，在项目构建设置中将命令设为 `npm run build`，输出目录设为 `dist`，Node.js 版本设为 22 或更高。构建会把音源复制到 `dist`。Cloudflare Pages 的单页应用回退会把 `/focus` 交给 TanStack Router。
+[生产站点](https://sound-lab-97n.pages.dev/) 由 Cloudflare Pages 从 `main` 部署。构建命令为 `npm run build`，输出目录为 `dist`，运行环境为 Node.js 22 或更高。构建会把音源复制到 `dist`。Cloudflare Pages 的单页应用回退会把 `/focus` 交给 TanStack Router。
