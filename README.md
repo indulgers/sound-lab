@@ -1,26 +1,27 @@
 # 声音实验室 Sound Lab
 
-手绘可爱风的声音调配 + 专注产品：调声音就像调一杯鸡尾酒。
+选一个场景开始专注，再把现场录音和乐器调成自己的一杯。手绘涂鸦玻璃杯随配比变化，调音台旁的小杯同步显示液位。
 
-- 19 种合成音：自然 8 种、城市/乡村社会 6 种、乐器 5 种，每条通道除音量外有五维调音（密度、明亮度、远近、随机度、节奏）
-- 手绘水彩杯：液位、颜色、波纹、气泡、冰块、柠檬/樱桃/薄荷装饰全部由混音状态实时驱动，颜色和液位用缓动过渡
-- 沉浸模式、专注 25 分钟（淡出结束 + 安静完成卡）、保存配方、分享卡、配方码
-- 真实录音：把 mp3 放进 `assets/audio/<通道 id>.mp3`，对应通道自动改播真实录音
+- 22 条通道，包括 18 条现场录音、3 条乐器采样和 1 条实时合成通道。另有白、粉、褐三种底噪。
+- 录音按需加载，在 Web Audio 缓冲区内交叉淡化循环。每条通道可调音量、亮度、远近和节奏，乐器采样与合成通道还可调密度和随机度。
+- 免费版可直接听 4 个场景配方、12 条基础通道与 3 种底噪。首次播放开始 10 分钟体验，暂停、切换配方和刷新继续使用同一个截止时间。最后 5 秒淡出，到点后可主动再开一段。
+- 首页可按写作、深度专注或短暂放松进入沉浸模式。调音台支持本地保存、配方码和分享卡。
+- 进阶入口展示 6 个额外配方、10 条额外通道和长时体验。当前为浏览器内的产品原型，正式上线需接入账号、服务端权益和付费音源交付。
 
 ## 本地运行
 
-直接用浏览器打开 `index.html` 就能用，不用装依赖、不用联网（字体走 Google Fonts，离线回落系统字体）。
+```sh
+python3 -m http.server 8080
+```
 
-## 部署（Cloudflare Pages + GitHub Actions CI/CD）
+打开 [http://localhost:8080](http://localhost:8080)。项目不需要构建或安装依赖，音源随仓库部署。直接打开 `index.html` 时，浏览器的文件协议限制会让内置音源走合成回退；仍可通过「音源清单」选择本地录音试听。
 
-1. 在 GitHub 新建仓库，把这个仓库 push 上去（`main` 分支）。
-2. 在 Cloudflare Dashboard → Workers & Pages → Create → Pages，新建项目 `sound-lab`（先建空项目，部署由 GitHub Actions 完成；也可以改用 Cloudflare 的 Git 直连，见下）。
-3. 在 Cloudflare → My Profile → API Tokens，新建一个有 `Cloudflare Pages: Edit` 权限的 token。
-4. 在 GitHub 仓库 → Settings → Secrets and variables → Actions，加两个 secret：
-   - `CLOUDFLARE_API_TOKEN`：第 3 步的 token
-   - `CLOUDFLARE_ACCOUNT_ID`：Cloudflare Dashboard 右侧的 Account ID
-5. push 到 `main` 就自动部署；PR 会部署预览。
+用 `node --test` 运行体验计时与配方权限测试。
 
-替代方案（更简单，不用 token）：Cloudflare Pages 里选 Connect to Git，选这个仓库，Build command 留空，Output directory 填 `.`，每次 push 自动部署。两种方式二选一，不要同时开。
+## 音频素材
 
-部署状态：Cloudflare Pages 项目 sound-lab，GitHub Actions 自动部署。
+作者、原始链接及逐条许可见 [音源目录](assets/audio/catalog.js) 和页面内的「音源清单」。详见 [素材整理说明](assets/audio/README.txt)。
+
+## 部署
+
+Cloudflare Pages 通过 Git 直连部署 `main`。构建命令留空，输出目录使用仓库根目录。

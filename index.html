@@ -4,9 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light" />
-    <meta name="description" content="声音实验室：像调一杯鸡尾酒一样混合雨声、篝火与钢琴。19 条通道、五维调音、专注计时，为睡前、工作与雨夜调一杯属于今晚的声音。" />
+    <meta name="description" content="混合 22 种声音，听雨落在车窗上，听咖啡馆里的轻声谈话。调成一杯保存，留给专注或放空的时间。" />
     <meta property="og:title" content="声音实验室 · 自己调一杯属于今晚的声音" />
-    <meta property="og:description" content="19 种声音像原料一样调配：鸡尾酒杯的液位与颜色实时跟随混音，五维调音，专注 25 分钟柔和淡出。" />
+    <meta property="og:description" content="现场录音、乐器采样与实时合成。选几种声音，调一杯自己的声景。" />
     <meta property="og:type" content="website" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FFF3D6'/%3E%3Cpath d='M7 8h18c0 5-3.4 8.6-7.6 9.4V24h3.4v3H11v-3h3.4V17.4C10.4 16.6 7 13 7 8z' fill='%23E8A06A'/%3E%3C/svg%3E" />
     <title>声音实验室</title>
@@ -954,7 +954,6 @@
       /* bubbles and ice are positioned and faded by the cup's own rAF
          state machine (soft spawn, gentle rise, soft fade out) — no CSS
          keyframe loops that pop elements in or out */
-      #wcCondG{transition:opacity 1.2s ease}
 
       /* ================================================================
          v9 · research pass (aesthetics report 2026-11-11): calm premium
@@ -1262,6 +1261,89 @@
         .btn:active,.play-btn:active{transform:none}
       }
 
+      .blk[id]{scroll-margin-top:86px}
+      .chan .c-pct{margin-top:9px}
+      .glass-wrap{gap:8px}
+      .ck-scene{width:min(354px,84vw);isolation:isolate}
+      .ck-scene::before{inset:-3% -8%;background:radial-gradient(ellipse at 48% 43%,#fff9ee 8%,#f6e3e75e 50%,transparent 73%)}
+      .ck-glow{opacity:.16;inset:5% -9% 12%}
+      .cup-stage{width:100%;height:auto;aspect-ratio:320/340;cursor:grab}
+      .cup-stage:active{cursor:grabbing}
+      #wcSvg{filter:none}
+      .cup-hint{margin:-7px 0 4px}
+      @media(prefers-reduced-motion:reduce){.cup-hint{display:none}}
+      .glass-cap{min-height:22px;color:var(--ink-2)}
+      .immersive .cup-stage{width:min(270px,66vw);height:auto}
+      .immersive .ck-scene::before{opacity:.35}
+      .src-item a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+      .param-row[hidden],.chan[hidden],.chan-group[hidden]{display:none}
+      .mixer-controls{position:sticky;top:76px;z-index:6;display:flex;align-items:center;justify-content:space-between;gap:12px;
+        border-block:1px solid #e9d9c5;background:#fffdf4;padding:4px 8px;margin:0 0 16px}
+      .mixer-cup{display:flex;align-items:center;gap:8px;color:var(--ink-2);font-size:12px}
+      .mixer-cup svg{width:42px;height:48px;flex:none;overflow:visible}
+      .sound-filters{display:flex;flex-wrap:wrap;gap:6px}
+      @media(max-width:600px){
+        .mixer-controls{top:63px;padding:3px 0;gap:6px}
+        .mixer-cup span{display:none}
+        .sound-filters .chip{padding:4px 7px;font-size:11px}
+      }
+      .empty-filter{padding:20px 0;color:var(--ink-2)}
+      .featured-scenes{
+        display:grid;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        gap:9px;
+        max-width:480px;
+        margin:0 0 14px;
+      }
+      .scene-option{
+        position:relative;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        gap:5px;
+        min-height:72px;
+        padding:10px 12px;
+        border:1.5px solid #aa7d63;
+        border-radius:12px 14px 12px 15px;
+        background:#fff1d9;
+        box-shadow:1.5px 2px 0 rgba(67,48,30,.14);
+        color:var(--ink);
+        font-family:var(--cute);
+        text-align:left;
+        cursor:pointer;
+      }
+      .scene-option:nth-child(2){background:#e6eef1;border-color:#8495a0}
+      .scene-option:nth-child(3){background:#f9e1d8;border-color:#ae827a}
+      .scene-option:hover{box-shadow:2px 3px 0 rgba(67,48,30,.24)}
+      .scene-option:focus-visible{outline:2px solid var(--ember-deep);outline-offset:3px}
+      .scene-intent{font-size:11px;line-height:1.2;color:var(--ink-2)}
+      .scene-name{font-size:15px;line-height:1.25}
+      .hero .scene-limit{margin:0 0 21px}
+      @media(max-width:400px){
+        .featured-scenes{gap:6px}
+        .scene-option{min-height:64px;padding:8px}
+        .scene-name{font-size:13px}
+      }
+      .access-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .access-dialog{border:0;background:transparent;color:var(--ink);padding:12px;max-width:min(100% - 24px,520px);max-height:100dvh}
+      .access-dialog::backdrop{background:rgba(62,40,30,.45)}
+      .access-dialog .sd-card{width:100%;margin:0}
+      .access-dialog form{margin:0}
+      .premium-source{margin:10px auto 0}
+      .chan-premium .c-pct{color:var(--ink-3)}
+      .chan-premium .fader{opacity:.55;cursor:default}
+      .recipe-card .tag.premium{background:var(--gold);color:var(--ink)}
+      .immersive.open{height:100dvh;overflow:auto}
+      body.is-immersive{overflow:hidden}
+      #immFocus{font-variant-numeric:tabular-nums}
+      @media(max-width:560px){.access-cards{grid-template-columns:1fr}.immersive.open{gap:14px}}
+      @media(max-width:440px){
+        .topbar a[href="#sources"]{display:none}
+        .hero{row-gap:24px}
+        .hero .cta-row{gap:7px}
+        .hero .cta-row .btn{padding-inline:8px;font-size:13px}
+        .glass-wrap .ck-scene{width:min(292px,80vw)}
+      }
     </style>
   </head>
   <body>
@@ -1292,8 +1374,8 @@
       <span class="mark"><span class="dot"></span>声音实验室</span>
       <a href="#mixer">调音台</a>
       <a href="#recipes">配方</a>
+      <a href="#plus">进阶</a>
       <a href="#mine">我的配方</a>
-      <a href="#packs">声音包</a>
       <a href="#sources">音源清单</a>
     </nav>
 
@@ -1301,73 +1383,167 @@
       <!-- HERO -->
       <div class="hero">
         <div>
-          <span class="kicker">SOUND LAB · 每晚一杯</span>
-          <h1 id="heroTitle">自己调一杯<br />属于今晚的声音</h1>
-          <p class="slogan-line"><span class="shiny">自己调一杯声音，安静地专注这一刻。</span></p>
-          <p class="lead">雨声打底，篝火取暖，钢琴收尾——像调一杯睡前酒一样，把推子一格一格拉到刚好。睡前助眠、工作专注、雨夜放空，配方都由你定，调好了存下来，明晚接着喝。</p>
+          <span class="kicker">SOUND LAB</span>
+          <h1 id="heroTitle">调一杯声音</h1>
+          <p class="lead">选个场景，留十分钟给手上的事。隔壁桌低声聊天，雨落在窗上，想听哪种声音多一点，随时回来调。</p>
+          <div class="featured-scenes" id="featuredScenes" role="group" aria-label="选择一个免费场景"></div>
+          <p class="hint scene-limit">免费场景 · 每次最多 10 分钟</p>
           <div class="cta-row">
-            <button class="btn btn-primary" id="ctaPlay">▶ 开始调音</button>
+            <button class="btn btn-primary" id="ctaPlay">▶ 自己调一杯</button>
             <button class="btn btn-ember" id="ctaImmersive">沉浸模式</button>
-            <a href="#recipes" class="btn btn-ghost" style="text-decoration:none">先看看配方</a>
+            <a href="#recipes" class="btn btn-ghost" style="text-decoration:none">查看全部配方</a>
           </div>
-          <p class="hint">19 种合成音 · 基础 12 种免费 · 每种都能调密度、明亮度、远近、随机度、节奏，不只是音量 · 真实录音放进 assets/audio/ 后自动替换同名合成通道 · 开始 3 秒柔和淡入，停止 5 秒淡出 · 总音量有舒适上限，不突然、不刺耳</p>
         </div>
         <div class="glass-wrap">
-          <span class="cup-renderer" id="cupRendererLabel">手绘水彩 · 分层 SVG 实时驱动</span>
           <div class="ck-scene" id="ckScene" aria-hidden="true">
             <div class="ck-glow"></div>
             <div class="cup-stage" id="cupStage">
-              <div class="cup-pane" id="cupB">
-<svg id="wcSvg" viewBox="0 0 320 372" role="img" aria-label="手绘水彩鸡尾酒杯">
-  <defs>
-    <filter id="wcDisplace" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.035 0.055" numOctaves="3" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="8"/></filter>
-    <filter id="wcPaint" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.014 0.085" numOctaves="3" seed="11" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="11"/></filter>
-    <filter id="wcBleed" x="-12%" y="-12%" width="124%" height="124%"><feGaussianBlur stdDeviation="2.4" result="b"/><feTurbulence type="fractalNoise" baseFrequency="0.03 0.07" numOctaves="3" seed="9" result="n"/><feDisplacementMap in="b" in2="n" scale="13"/></filter>
-    <filter id="wcPaper" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.6"/></filter>
-    <filter id="wcBlur"><feGaussianBlur stdDeviation="3"/></filter>
-    <filter id="wcBlur6"><feGaussianBlur stdDeviation="6"/></filter>
-    <clipPath id="wcClip"><path d="M50,68 C55,132 96,186 160,190 C224,186 265,132 270,68 Z"/></clipPath>
-    <linearGradient id="wcGlass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".30"/><stop offset=".28" stop-color="#fff" stop-opacity=".05"/><stop offset=".55" stop-color="#fff" stop-opacity=".02"/><stop offset=".82" stop-color="#fff" stop-opacity=".10"/><stop offset="1" stop-color="#fff" stop-opacity=".26"/></linearGradient>
-    <linearGradient id="wcSheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".45" stop-color="#fff" stop-opacity=".04"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-  </defs>
-  <defs id="wcDynDefs"></defs>
-  <g id="wcSway">
-  <ellipse cx="160" cy="361" rx="92" ry="9" fill="#8A6B4A" opacity=".28" filter="url(#wcBlur6)"/>
-  <!-- ONE connected coupe silhouette: bowl, knot, stem and foot in a single path.
-       The stem runs y220 to y326 and flares straight into the foot (top y~340,
-       bottom y366) with no gap; the foot is part of the same outline. -->
-  <path id="wcBody" filter="url(#wcPaper)" fill="url(#wcGlass)" stroke="#5A4632" stroke-opacity=".6" stroke-width="2.4" stroke-linejoin="round"
-    d="M42,64 C46,132 92,190 146,199 L141,206 L141,214 L147,220 L154,224 L154,326 C150,336 128,340 110,344 C96,347 90,350 90,354 C90,361 124,366 160,366 C196,366 230,361 230,354 C230,350 224,347 210,344 C192,340 170,336 166,326 L166,224 L173,220 L179,214 L179,206 L174,199 C228,190 274,132 278,64 C236,55 84,55 42,64 Z"/>
-  <g clip-path="url(#wcClip)"><g id="wcLayerG"></g><g id="wcWaveG"></g><g id="wcBubbleG"></g><g id="wcIceG"></g></g>
-  <g id="wcCondG" opacity="0"></g>
-  <g filter="url(#wcDisplace)">
-    <path d="M58,84 C63,126 82,164 112,182" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="6" stroke-linecap="round" opacity=".55"/>
-    <path d="M238,92 C232,128 216,160 196,178" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="4" stroke-linecap="round" opacity=".5"/>
-    <ellipse cx="160" cy="64" rx="118" ry="10" fill="rgba(190,225,245,.28)" stroke="#5A4632" stroke-opacity=".65" stroke-width="2.4"/>
-    <ellipse cx="160" cy="64" rx="104" ry="7.5" fill="none" stroke="#5A4632" stroke-opacity=".3" stroke-width="1.4"/>
-  </g>
-  <g id="wcGarnish">
-    <g id="wcGarLemon" opacity="0" style="display:none" transform="translate(258,55) rotate(16)"><circle r="16" fill="#F2B705" opacity=".9"/><circle r="11.5" fill="#FCE38A" opacity=".92"/><g stroke="#D99A00" stroke-width="1.2"><path d="M0,0 L0,-11 M0,0 L10,5 M0,0 L-10,5 M0,0 L9,-6 M0,0 L-9,-6"/></g></g>
-    <g id="wcGarCherry" opacity="0" style="display:none" transform="translate(252,48)"><path d="M4,14 C8,4 16,-2 24,-4" stroke="#5E7A3A" stroke-width="2" fill="none"/><circle cx="2" cy="18" r="11" fill="#C1273A" opacity=".92"/><circle cx="-2" cy="14" r="3.5" fill="#fff" opacity=".55"/></g>
-    <g id="wcGarMint" opacity="0" style="display:none" transform="translate(250,57) rotate(-10)"><path d="M2,2 C-8,-6 -12,-14 -10,-20 C-2,-18 3,-10 2,2Z" fill="#6FA653" opacity=".92"/><path d="M4,-2 C2,-12 6,-20 12,-24 C16,-16 12,-6 4,-2Z" fill="#86BC66" opacity=".92"/><path d="M6,4 C12,-2 20,-3 26,1 C21,8 12,9 6,4Z" fill="#5E9243" opacity=".92"/></g>
-  </g>
-  </g>
-</svg>
-</div>
+              <svg id="wcSvg" viewBox="0 0 320 340" role="img" aria-label="随配比变化的手绘涂鸦鸡尾酒杯">
+                <defs>
+                  <radialGradient id="wcHalo">
+                    <stop stop-color="#FFE9B3" stop-opacity=".72"/>
+                    <stop offset="1" stop-color="#FFE9B3" stop-opacity="0"/>
+                  </radialGradient>
+                  <radialGradient id="wcShadow">
+                    <stop stop-color="#A46A36" stop-opacity=".33"/>
+                    <stop offset="1" stop-color="#A46A36" stop-opacity="0"/>
+                  </radialGradient>
+                  <linearGradient id="wcGlass">
+                    <stop stop-color="#B6CDD0" stop-opacity=".52"/>
+                    <stop offset=".18" stop-color="#FFFEF4" stop-opacity=".83"/>
+                    <stop offset=".46" stop-color="#FFFEF4" stop-opacity=".17"/>
+                    <stop offset=".74" stop-color="#E2ECE2" stop-opacity=".24"/>
+                    <stop offset="1" stop-color="#91AEAD" stop-opacity=".54"/>
+                  </linearGradient>
+                  <linearGradient id="wcFoot" x2="0" y2="1">
+                    <stop stop-color="#FFFDF0" stop-opacity=".9"/>
+                    <stop offset="1" stop-color="#8CA4A5" stop-opacity=".48"/>
+                  </linearGradient>
+                  <linearGradient id="wcLiquidGradient" x2="0" y2="1">
+                    <stop id="wcLiquidTop"/>
+                    <stop id="wcLiquidMiddle" offset=".52"/>
+                    <stop id="wcLiquidBottom" offset="1"/>
+                  </linearGradient>
+                  <linearGradient id="wcLiquidLight">
+                    <stop stop-color="#FFF9D9" stop-opacity="0"/>
+                    <stop offset=".27" stop-color="#FFF9D9" stop-opacity=".57"/>
+                    <stop offset=".49" stop-color="#FFF9D9" stop-opacity=".08"/>
+                    <stop offset=".75" stop-color="#FFF9D9" stop-opacity=".18"/>
+                    <stop offset="1" stop-color="#FFF9D9" stop-opacity="0"/>
+                  </linearGradient>
+                  <linearGradient id="wcIce" x2="1" y2="1">
+                    <stop stop-color="#FFFDF0" stop-opacity=".91"/>
+                    <stop offset=".56" stop-color="#FFFBEC" stop-opacity=".34"/>
+                    <stop offset="1" stop-color="#A9C6C7" stop-opacity=".43"/>
+                  </linearGradient>
+                  <linearGradient id="wcCitrus" x2=".7" y2="1">
+                    <stop stop-color="#FFECB7"/>
+                    <stop offset="1" stop-color="#F1AB56"/>
+                  </linearGradient>
+                  <linearGradient id="wcLeaf" x2=".65" y2="1">
+                    <stop stop-color="#B2C181"/>
+                    <stop offset="1" stop-color="#628554"/>
+                  </linearGradient>
+                  <path id="wcBowl" d="M49 78 C53 128 95 201 160 204 C225 201 267 128 271 78 Z"/>
+                  <clipPath id="wcClip"><use href="#wcBowl"/></clipPath>
+                </defs>
+                <g id="wcBackdrop">
+                  <ellipse cx="158" cy="164" rx="151" ry="144" fill="url(#wcHalo)"/>
+                  <g fill="none" stroke="#AC8060" stroke-width="1.15" stroke-linecap="round">
+                    <path d="M41 122q2 7 8 9-6 2-8 9-2-7-8-9 6-2 8-9Z" opacity=".62"/>
+                    <path d="M277 173q2 5 6 6-4 1-6 6-1-5-5-6 4-1 5-6Z" opacity=".54"/>
+                    <path d="M48 225q9-3 14 1m195 18q8 2 16-3" opacity=".24"/>
+                  </g>
+                  <circle cx="53" cy="182" r="1.5" fill="#BB9271" opacity=".43"/>
+                  <circle cx="269" cy="144" r="1.8" fill="#BB9271" opacity=".43"/>
+                </g>
+                <ellipse cx="160" cy="319" rx="102" ry="16" fill="url(#wcShadow)"/>
+                <g id="wcSway" stroke-linecap="round" stroke-linejoin="round">
+                  <!-- The stem and foot share an outline so the glass reads as one piece. -->
+                  <path d="M151 199 Q161 202 169 199 C165 222 164 257 166 281
+                           C167 291 186 294 210 299 Q230 303 230 308
+                           Q229 318 159 319 Q90 318 90 310 Q88 304 109 300
+                           C132 295 152 292 153 281 C156 256 154 225 151 199Z"
+                        fill="url(#wcGlass)" stroke="#6E8E91" stroke-width="1.75"/>
+                  <path d="M155 211 Q161 249 156 283 Q154 297 130 300 M164 243q-1 37 4 45"
+                        fill="none" stroke="#FFFBEE" stroke-width="2.6" opacity=".84"/>
+                  <path d="M91 309 Q150 320 229 307 Q225 317 160 319 Q103 319 91 309Z"
+                        fill="url(#wcFoot)" stroke="#7C9897" stroke-width="1.2"/>
+                  <path d="M102 307q31-9 52-5m24 0q21-2 42 2" fill="none" stroke="#FFFEF3" stroke-width="2.1" opacity=".75"/>
+
+                  <use href="#wcBowl" fill="url(#wcGlass)"/>
+                  <ellipse cx="160" cy="78" rx="111" ry="18" fill="#FFFDF2" fill-opacity=".29" stroke="#7F9A9B" stroke-width="1.75"/>
+                  <path d="M52 75 C79 61 222 56 265 74" fill="none" stroke="#FFFDF2" stroke-width="2.9" opacity=".85"/>
+
+                  <g id="wcPour" clip-path="url(#wcClip)" visibility="hidden">
+                    <path id="wcLiquid" fill="url(#wcLiquidGradient)" opacity=".88"/>
+                    <path id="wcLiquidWash" fill="url(#wcLiquidLight)"/>
+                    <path id="wcSurface" fill-opacity=".67"/>
+                    <g id="wcIceG" fill="url(#wcIce)" stroke="#FFFBE8" stroke-width="1" opacity="0">
+                      <g>
+                        <path d="M-14-5-9-13 7-15 15-6 12 7 4 11-11 8Z"/>
+                        <path d="M-14-5 4-3 15-6M4-3 4 11M-10-5-7-10 5-12" fill="none" opacity=".7"/>
+                      </g>
+                      <g>
+                        <path d="M-12-5-7-11 7-11 13-3 10 8-5 9-12 4Z"/>
+                        <path d="M-12-5 3-3 13-3M3-3-1 9M-6-8 5-9" fill="none" opacity=".7"/>
+                      </g>
+                    </g>
+                    <g id="wcBubbleG" fill="#FFFDF2" fill-opacity=".35" stroke="#FFFDF2" stroke-width=".8">
+                      <circle r="1.1"/><circle r="1.5"/><circle r="1"/><circle r="1.25"/><circle r="1.35"/>
+                    </g>
+                    <path id="wcSurfaceEdge" fill="none" stroke="#FFFADE" stroke-width="1.1" opacity=".83"/>
+                  </g>
+
+                  <path d="M49 78 C53 128 95 201 160 204 C225 201 267 128 271 78"
+                        fill="none" stroke="#66878B" stroke-width="2.05"/>
+                  <path d="M51 80 C80 100 228 103 269 81 M55 84 C87 101 230 104 265 87"
+                        fill="none" stroke="#6F9295" stroke-width="1.4" opacity=".8"/>
+                  <path d="M56 86 C61 124 88 169 118 185 M126 190l11 5 M260 105 C251 143 230 171 209 187"
+                        fill="none" stroke="#FFFEF1" stroke-width="3.3" opacity=".86"/>
+                  <g fill="none" stroke="#4e6e6e" stroke-width=".85" opacity=".48">
+                    <path d="M48 91q8 30 23 53m-4-2q8 19 23 32m91 24q22-6 39-20m17-27q14-22 20-44"/>
+                    <path d="M70 138l8-5m-6 11 9-5m-5 11 9-5m-5 11 8-4m121 20 5 5m2-11 5 5m1-13 4 5"/>
+                    <path d="M98 312q19 7 44 8m37-1q19-2 32-4m-47-29q5 6 12 8"/>
+                  </g>
+                  <path d="M60 113q15 47 48 68m136-48q-13 27-33 42" fill="none" stroke="#799897" stroke-width=".88" opacity=".46"/>
+                  <g id="wcCondG" fill="#FDFDF0" stroke="#A0BABA" stroke-width=".75" opacity="0">
+                    <path d="M72 122q-3 5 .7 6 3.8-.9-.7-6ZM237 137q-2.8 4.7.5 5.7 3.7-.8-.5-5.7Z"/>
+                    <circle cx="82" cy="136" r="1.7"/><circle cx="228" cy="149" r="1.25"/>
+                  </g>
+
+                  <g id="wcGarLemon" transform="translate(256 74) rotate(-26)" opacity="0">
+                    <path d="M-23 0A23 23 0 0 1 23 0L21 3-22 3Z" fill="url(#wcCitrus)" stroke="#BA7844" stroke-width="1.35"/>
+                    <path d="M-19 0a19 19 0 0 1 38 0M0 0-13-13M0 0-6-18M0 0 3-18M0 0 12-14M0 0 17-8"
+                          fill="none" stroke="#FFF4D4" stroke-width="1.4"/>
+                    <path d="M-17 2q19-1 34 0" fill="none" stroke="#E2934E" stroke-width=".8"/>
+                  </g>
+                  <g id="wcGarMint" transform="translate(254 79) rotate(-9)" opacity="0">
+                    <path d="M-1 2Q6-13 22-27" fill="none" stroke="#57774C" stroke-width="1.5"/>
+                    <path d="M7-9C-4-11-11-22-8-32 3-29 10-21 7-9Z M13-14C13-25 22-31 30-29 26-19 22-15 13-14Z M6-6C14-11 25-10 30-4 23 3 12 1 6-6Z"
+                          fill="url(#wcLeaf)" stroke="#5F7955" stroke-width="1.05"/>
+                    <path d="M-5-26 6-11m10-6 10-8M9-6l15 1" fill="none" stroke="#DDE2A7" stroke-width=".9" opacity=".76"/>
+                  </g>
+                  <g id="wcGarCherry" transform="translate(254 76)" opacity="0">
+                    <path d="M-2-3Q1-22 17-29" fill="none" stroke="#728250" stroke-width="1.55"/>
+                    <path d="M8-23q9-13 20-8-4 11-20 8Z" fill="url(#wcLeaf)" stroke="#6A8153" stroke-width=".85"/>
+                    <path d="M-2-4C-18-9-18 13-6 16 8 21 15 2 4-4Q1-5-2-4Z" fill="#CB777E" stroke="#9E5D69" stroke-width="1.25"/>
+                    <path d="M-10 2q2-4 7-3" fill="none" stroke="#FFE5CC" stroke-width="1.7" opacity=".85"/>
+                  </g>
+                </g>
+              </svg>
             </div>
-            <div class="ck-shadow"></div>
-            <div class="ck-empty" id="glassEmpty">这杯还空着<br />去拉第一格推子</div>
-            <p class="cup-hint">推子一动，液位、颜色与装饰慢慢跟着变 · 轻轻拖一下杯子，它会晃一晃</p>
+            <div class="ck-empty" id="glassEmpty" hidden>拉一格推子，开始调配</div>
+            <p class="cup-hint">轻拖杯子，晃一晃</p>
           </div>
-<div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-          <div class="glass-cap" id="glassCap">今晚这一杯 · <b>尚未调配</b></div>
+          <div class="glass-cap" id="glassCap">这杯还空着</div>
         </div>
       </div>
 
       <!-- MIXER -->
       <section class="blk" id="mixer">
         <div class="sec-head"><h2>调音台</h2><span class="en">the mixing board</span></div>
-        <p class="sec-sub">每一格推子都是一味原料，往上拉就浓一点。点开每条通道下面的「调音参数」，还能调它的密度（出现得多密）、明亮度（闷还是亮）、远近（贴耳还是在远处）、随机度（规整还是随性）、节奏（快还是慢）——拖动时立刻能听见变化。全部归零，就是安静。</p>
+        <p class="sec-sub">拉动推子叠加声音，打开「调音参数」调亮度、距离和节奏。乐器采样还能调音符的疏密与随机度。</p>
         <div class="mixer">
           <div class="mixer-bar">
             <button class="play-btn" id="playBtn" aria-label="播放或暂停">
@@ -1378,46 +1554,47 @@
               <input type="range" class="master-vol" id="masterVol" min="0" max="85" value="55" aria-label="总音量（舒适上限 85）" />
             </div>
             <div class="mb-group">
-              <span class="mb-label">睡眠定时 TIMER</span>
-              <div class="chips" id="timerChips">
-                <button class="chip on" data-min="0">关</button>
-                <button class="chip" data-min="15">15 分</button>
-                <button class="chip" data-min="30">30 分</button>
-                <button class="chip" data-min="45">45 分</button>
-                <button class="chip" data-min="60">60 分</button>
-              </div>
-            </div>
-            <div class="mb-group" id="timerReadWrap" style="display:none">
-              <span class="mb-label">剩余</span>
-              <span class="timer-read" id="timerRead">--:--</span>
-            </div>
-            <div class="mb-group">
-              <span class="mb-label">专注 FOCUS · 25 分钟</span>
-              <div class="chips">
-                <button class="chip" id="focusBtn">开始专注</button>
-                <span class="timer-read" id="focusRead" style="align-self:center"></span>
-              </div>
+              <span class="mb-label">本次剩余 · 免费体验</span>
+              <span class="timer-read" id="focusRead" role="timer">10:00</span>
             </div>
             <div class="spacer"></div>
             <button class="text-btn" id="immersiveBtn">进入沉浸模式</button>
             <button class="text-btn" id="randomBtn">随机一杯</button>
             <button class="text-btn" id="clearBtn">全部归零</button>
           </div>
-          <p class="comfort-note" style="margin:0 0 18px">舒适上限已开启：配方总音量自动压在 <b>舒适区</b> 内，单声默认更轻，录音经过柔和低通、去掉突兀高频；循环录音用双碟交叉淡化衔接，接点无咔哒声。</p>
+          <p class="comfort-note" style="margin:0 0 18px">首次播放开始计时。暂停或切换配方后，倒计时继续。</p>
+          <div class="mixer-controls">
+            <div class="mixer-cup" aria-hidden="true">
+              <svg viewBox="42 38 241 286"><use href="#wcSway"/></svg>
+              <span id="mixerCupName"></span>
+            </div>
+            <div class="sound-filters" id="soundFilters" aria-label="筛选音源">
+              <button class="chip on" data-filter="all" aria-pressed="true">全部</button>
+              <button class="chip" data-filter="active" aria-pressed="false">正在调配</button>
+              <button class="chip" data-filter="nature" aria-pressed="false">自然</button>
+              <button class="chip" data-filter="city" aria-pressed="false">场所</button>
+              <button class="chip" data-filter="inst" aria-pressed="false">乐器</button>
+            </div>
+          </div>
+          <p class="empty-filter" id="emptyFilter" hidden>当前杯子为空。切到「全部」添加声音。</p>
           <div id="faders"></div>
         </div>
-      </section>
-
-      <!-- TAGLINE REVEAL · skill B11: words activate one at a time on scroll -->
-      <section class="blk tagline-sec" id="tagline" aria-label="核心理念">
-        <p class="tagline-reveal" id="taglineReveal">睡前不用再翻歌单，工作时不用忍广告和弹窗。把雨声、篝火和钢琴调到刚好的比例，这一杯只为今晚的安静而调。</p>
       </section>
 
       <!-- RECIPES -->
       <section class="blk" id="recipes">
         <div class="sec-head"><h2>配方</h2><span class="en">recipes</span></div>
-        <p class="sec-sub">调酒师先行一步调好的几杯。点「就调这杯」，推子会自动落到配方的位置，你可以在它的基础上再改成自己的味道。</p>
+        <p class="sec-sub">按想做的事选一杯。免费配方可以直接听，也可以继续调整。</p>
         <div class="cards" id="recipeCards"></div>
+      </section>
+
+      <section class="blk" id="plus">
+        <div class="sec-head"><h2>声音实验室进阶</h2><span class="en">PLUS</span></div>
+        <p class="sec-sub">想把一杯声音留得久一些，或去更远的地方听一听。</p>
+        <div class="cards access-cards">
+          <article class="card"><h3>免费</h3><p>4 款场景配方、12 种基础音效、3 种底噪。每次播放最多 10 分钟。</p></article>
+          <article class="card"><h3>进阶 <span class="tag">筹备中</span></h3><p>解锁全部配方和音效，延长专注与沉浸时间。</p></article>
+        </div>
       </section>
 
       <!-- MINE -->
@@ -1455,9 +1632,9 @@
       <!-- SOURCES / v2 real recordings -->
       <section class="blk" id="sources">
         <div class="sec-head"><h2>音源清单</h2><span class="en">real recordings · sources &amp; licences</span></div>
-        <p class="sec-sub">合成与真实录音并存：19 种声音默认由本站合成引擎实时生成，每条通道都标着「合成」；把逐条核对授权后的真实录音放进 <code>assets/audio/&lt;id&gt;.mp3</code>（或在下方逐条点「替换录音」选本地文件），同名通道会自动改播真实录音——两台播放器轮换、结尾前 1.2 秒互补斜坡交叉淡化，接点无咔哒——徽标随即变为「真实录音播放中」。收录音继续按清单顺序推进，合成引擎负责在录音到位前把每种音色先调出来。白噪音 / 粉红噪音 / 褐色噪音床声保留实时合成（见下方开关）。</p>
+        <p class="sec-sub">查看录音和采样的作者与授权。可用本地文件替换基础通道，文件只在当前页面使用。</p>
         <div class="src-list" id="srcList"><div class="skl skl-row" aria-hidden="true"></div><div class="skl skl-row" aria-hidden="true"></div><div class="skl skl-row" aria-hidden="true"></div></div>
-        <p class="comfort-note" style="margin-top:14px">合成保留项 · 床声（不计入 19 通道，音量固定放轻）：</p>
+        <p class="comfort-note" style="margin-top:14px">底噪 · 可单独开关</p>
         <div class="chips" style="margin-top:8px">
           <button class="chip" data-bed="white">白噪音 床声</button>
           <button class="chip" data-bed="pink">粉红噪音 床声</button>
@@ -1465,69 +1642,55 @@
         </div>
       </section>
 
-      <!-- PACKS -->
-      <section class="blk" id="packs">
-        <div class="sec-head"><h2>声音包</h2><span class="en">sound packs</span></div>
-        <p class="sec-sub">基础 12 种声音一直免费。想把杯子调得更深一点，再解锁进阶原料和成套配方——一次买断，不是订阅。本页为原型，解锁入口为演示，不接真实支付。</p>
-        <div class="cards" id="packCards"></div>
-      </section>
-
       <footer>
         <span class="serif">声音实验室</span>
         <span>自己调一杯声音 · 睡前、工作、雨夜</span>
-        <span class="en">mix your own cup of sound</span>
+        <a href="#sources">音源清单</a>
       </footer>
     </main>
 
-    <!-- unlock sheet -->
-    <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
-      <div class="sheet">
-        <h3 id="sheetTitle">声音包</h3>
-        <p class="sub" id="sheetDesc"></p>
-        <div class="sounds" id="sheetSounds"></div>
-        <div class="price-row">
-          <span class="price" id="sheetPrice"></span>
-          <span style="color:var(--ink-3);font-size:12.5px">一次买断 · 永久使用</span>
-        </div>
-        <div class="row">
-          <button class="btn btn-ghost" id="sheetCancel">再想想</button>
-          <button class="btn btn-ember" id="sheetBuy">演示解锁</button>
-        </div>
-        <p class="fineprint">这是产品原型：点击「演示解锁」会直接在本页解锁，不接真实支付、不产生扣款。正式版将通过支付宝 Vibe Pay 完成购买。</p>
-      </div>
-    </div>
-
     <!-- immersive overlay -->
-    <div class="immersive" id="immersive" aria-hidden="true">
+    <div class="immersive" id="immersive" role="dialog" aria-modal="true" aria-labelledby="immTitle" aria-hidden="true">
       <div class="flow" id="immFlow"></div>
-      <div class="breath" id="breathCircle">呼吸</div>
       <div class="ck-scene ck-imm" id="immScene" aria-hidden="true"></div>
       <h2 id="immTitle">今晚这一杯</h2>
-      <p class="sub2" id="immSub">跟着圆呼吸：吸气 4 秒，呼气 4 秒。界面只剩声音和呼吸。</p>
-      <div class="focus-read" id="immFocus"></div>
+      <p class="sub2" id="immSub">留一点时间给手上的事。</p>
+      <div class="focus-read" id="immFocus" role="timer" aria-label="本次体验剩余时间"></div>
       <div class="row2">
         <button class="ibtn" id="immPlay">暂停</button>
-        <button class="ibtn" id="immFocusBtn">专注 25 分钟</button>
-        <button class="ibtn" id="immExit">退出沉浸</button>
+        <button class="ibtn" id="immExit">回调音台</button>
       </div>
     </div>
 
-    <!-- focus completion: quiet end state, shown when a focus session finishes -->
-    <div class="session-done" id="sessionDone" role="dialog" aria-modal="true" aria-labelledby="sdTitle" hidden>
+    <dialog class="access-dialog" id="sessionDone" aria-labelledby="sdTitle">
       <div class="sd-card">
-        <p class="sd-k">本节完成</p>
-        <h3 id="sdTitle">专注完成</h3>
-        <p class="sd-sub">25 分钟到了，声音已经用 5 秒柔和淡出。杯子先放着，休息一下再决定下一杯。</p>
+        <h3 id="sdTitle">这 10 分钟结束了</h3>
+        <p class="sd-sub">这杯还在。可以存下来，或再开一段体验。</p>
         <div class="sd-row">
-          <button class="btn btn-primary" id="sdAgain">再来一节</button>
-          <button class="btn btn-ghost" id="sdSave">保存这一杯</button>
+          <button class="btn btn-primary" id="sdAgain">再听 10 分钟</button>
+          <button class="btn btn-ghost" id="sdSave">保存这杯</button>
+          <button class="btn btn-ghost" data-see-plus>了解进阶</button>
           <button class="btn btn-ghost" id="sdClose">关闭</button>
         </div>
       </div>
-    </div>
+    </dialog>
+
+    <dialog class="access-dialog" id="premiumDialog" aria-labelledby="premiumTitle">
+      <div class="sd-card">
+        <h3 id="premiumTitle">进阶内容</h3>
+        <p class="sd-sub" id="premiumMessage"></p>
+        <div class="sd-row">
+          <button class="btn btn-primary" data-see-plus>了解进阶</button>
+          <form method="dialog"><button class="btn btn-ghost">继续调音</button></form>
+        </div>
+      </div>
+    </dialog>
 
     <div class="toast" id="toast" role="status"></div>
 
+    <script src="assets/audio/catalog.js"></script>
+    <script src="assets/audio/playback.js"></script>
+    <script src="assets/listening-session.js"></script>
     <script>
     (function(){
       "use strict";
@@ -1551,84 +1714,87 @@
         guitar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="15" r="5.2"/><circle cx="9.5" cy="15" r="1.9"/><path d="M13 11.5L19.5 5M17 4.5h2.5V7"/></svg>',
         chimes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 5.5h16M8 5.5V14M12 5.5v10.5M16 5.5V13"/><rect x="6.6" y="14" width="2.8" height="5" rx="1.4"/><rect x="10.6" y="16" width="2.8" height="5" rx="1.4"/><rect x="14.6" y="13" width="2.8" height="5" rx="1.4"/></svg>',
         muyu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13.5a7 5.8 0 0 0 14 0z"/><path d="M8.5 12.6c2.2 1.3 4.8 1.3 7 0M15.5 4L19 10"/></svg>',
+        forest:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4 3 12h3l-3 5h10l-3-5h3L8 4zm0 13v3m8-14-3 5h3l-3 5h8l-2-4h2l-5-6zm1 10v4"/></svg>',
+        boat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h16l-2 4H7l-3-4zm8 0V4l6 7h-6M3 21q2-2 4 0 2-2 5 0 2-2 5 0 2-2 4 0"/></svg>',
+        keyboard:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h1m3 0h1m3 0h1m-9 3h1m3 0h1m3 0h1m-7 2.5h6"/></svg>',
         harp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 3.5v17M6 3.5c5 0 11 2.4 12.5 8 .9 3.4-.6 6.7-3.5 9H6"/><path d="M9.5 4.2v15M13 5.4v13.4M16 7.6v9.6"/></svg>',
-        lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2" fill="currentColor" stroke="none"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>'
-      };
-
-      var PACKS = {
-        sleep:{ name:"助眠包", price:9,  tag:"夜里那一杯", desc:"夜行火车的低鸣、乡村夜晚的虫声与远山，是给大脑的「熄灯号」。适合躺下之后、翻来覆去睡不着的夜里。", sounds:["train","rural","insects"], recipe:"深度助眠" },
-        focus:{ name:"专注包", price:6,  tag:"市井那一杯", desc:"市场的热闹人声垫底，木鱼与手鼓敲出稳定的拍子——像坐在茶摊边写东西，闹中取静。适合写代码、写文档、赶稿。", sounds:["market","muyu"], recipe:"市井专注" },
-        yuye:{  name:"雨夜包", price:12, tag:"雨夜那一杯", desc:"远处的雷加上雨夜街道的水光与车声，把雨夜调到电影级。是本实验室的招牌特调。", sounds:["thunder","rainstreet"], recipe:"午夜雷雨" }
       };
 
       var GROUPS = [
         { id:"nature", name:"自然", en:"NATURE" },
-        { id:"city",   name:"城市 · 乡村社会", en:"CITY & COUNTRY" },
+        { id:"city",   name:"场所", en:"PLACES" },
         { id:"inst",   name:"乐器", en:"INSTRUMENTS" }
       ];
       /* cat: nature 自然 / city 城市·乡村 / inst 乐器。p 为出厂参数（密度 density / 明亮度 bright / 远近 dist / 随机度 rand / 节奏 tempo） */
       var SOUNDS = [
-        { id:"rain",    name:"雨",       en:"RAIN",       cat:"nature", color:"#5b8db8", pack:null, src:"Pixabay · 雨声实录候选", lic:"Pixabay Content Licence（逐条核对）", file:"assets/audio/rain.mp3" },
-        { id:"wind",    name:"风",       en:"WIND",       cat:"nature", color:"#8b9a8e", pack:null, src:"Pixabay · 风声实录候选", lic:"Pixabay Content Licence（逐条核对）", file:"assets/audio/wind.mp3" },
-        { id:"waves",   name:"海浪",     en:"WAVES",      cat:"nature", color:"#4d9a94", pack:null, src:"Pixabay · 海浪实录候选", lic:"Pixabay Content Licence（逐条核对）", file:"assets/audio/waves.mp3" },
-        { id:"stream",  name:"溪流",     en:"STREAM",     cat:"nature", color:"#4fa3a5", pack:null, src:"Freesound / Pixabay · 溪流实录候选", lic:"逐条核对后使用", file:"assets/audio/stream.mp3" },
-        { id:"thunder", name:"雷",       en:"THUNDER",    cat:"nature", color:"#66707e", pack:"yuye", p:{bright:.22,dist:.55,density:.4}, src:"99Sounds Rain & Thunder · 雷声实录候选", lic:"99Sounds 授权（逐条核对）", file:"assets/audio/thunder.mp3" },
-        { id:"birds",   name:"鸟鸣",     en:"BIRDS",      cat:"nature", color:"#7a9a52", pack:null, p:{bright:.65}, src:"Freesound · 鸟鸣实录候选", lic:"CC0 / CC-BY 逐条核对", file:"assets/audio/birds.mp3" },
-        { id:"insects", name:"虫鸣",     en:"INSECTS",    cat:"nature", color:"#8fae4c", pack:"sleep", p:{bright:.7,dist:.45}, src:"Freesound · 蟋蟀虫鸣实录候选", lic:"CC0 / CC-BY 逐条核对", file:"assets/audio/insects.mp3" },
-        { id:"fire",    name:"篝火",     en:"FIRE",       cat:"nature", color:"#d97e3f", pack:null, src:"99Sounds / Pixabay · 篝火实录候选", lic:"逐条核对后使用", file:"assets/audio/fire.mp3" },
-        { id:"cafe",    name:"咖啡馆人声", en:"CAFÉ VOICES", cat:"city", color:"#a9743f", pack:null, src:"Freesound · 咖啡馆实录候选", lic:"CC0 / CC-BY 逐条核对", file:"assets/audio/cafe.mp3" },
-        { id:"traffic", name:"街道车流", en:"TRAFFIC",    cat:"city",   color:"#9c6b4f", pack:null, p:{bright:.35,dist:.5}, src:"Freesound / Pixabay · 街道实录候选", lic:"逐条核对后使用", file:"assets/audio/traffic.mp3" },
-        { id:"train",   name:"夜行火车", en:"NIGHT TRAIN", cat:"city",  color:"#7a7264", pack:"sleep", p:{bright:.25,dist:.5}, src:"99Sounds / Freesound · 火车实录候选", lic:"逐条核对后使用", file:"assets/audio/train.mp3" },
-        { id:"rural",   name:"乡村夜晚", en:"RURAL NIGHT", cat:"city",  color:"#6f7f56", pack:"sleep", p:{bright:.3,dist:.45}, src:"Freesound · 乡村夜野外实录候选", lic:"CC0 / CC-BY 逐条核对", file:"assets/audio/rural.mp3" },
-        { id:"market",  name:"市场",     en:"MARKET",     cat:"city",   color:"#c08a3e", pack:"focus", src:"Freesound · 市场实录候选", lic:"CC0 / CC-BY 逐条核对", file:"assets/audio/market.mp3" },
-        { id:"rainstreet", name:"雨夜街道", en:"RAINY STREET", cat:"city", color:"#5b7fa6", pack:"yuye", p:{dist:.4}, src:"Pixabay / Freesound · 雨夜街景实录候选", lic:"逐条核对后使用", file:"assets/audio/rainstreet.mp3" },
-        { id:"piano",   name:"钢琴",     en:"PIANO",      cat:"inst",   color:"#a8894f", pack:null, src:"Freesound · 钢琴实录候选", lic:"CC0 / CC-BY 逐条核对", file:"assets/audio/piano.mp3" },
-        { id:"guitar",  name:"吉他拨弦", en:"GUITAR",     cat:"inst",   color:"#b3854d", pack:null, src:"自录 / Freesound · 吉他实录候选", lic:"逐条核对后使用", file:"assets/audio/guitar.mp3" },
-        { id:"chimes",  name:"风铃",     en:"WIND CHIMES", cat:"inst",  color:"#7fb3c8", pack:null, p:{bright:.78,density:.45}, src:"Freesound · 风铃实录候选", lic:"CC0 / CC-BY 逐条核对", file:"assets/audio/chimes.mp3" },
-        { id:"muyu",    name:"木鱼 / 手鼓", en:"WOODEN FISH & DRUM", cat:"inst", color:"#a05c3f", pack:"focus", p:{density:.6,bright:.4}, src:"自录 / Freesound · 木鱼实录候选", lic:"逐条核对后使用", file:"assets/audio/muyu.mp3" },
-        { id:"harp",    name:"单音竖琴", en:"HARP NOTES", cat:"inst",   color:"#a58f5f", pack:null, p:{bright:.6,density:.4}, src:"自录 / Freesound · 竖琴实录候选", lic:"逐条核对后使用", file:"assets/audio/harp.mp3" }
+        { id:"rain",    name:"雨",       en:"RAIN",       cat:"nature", color:"#5b8db8" },
+        { id:"wind",    name:"风",       en:"WIND",       cat:"nature", color:"#8b9a8e" },
+        { id:"waves",   name:"海浪",     en:"WAVES",      cat:"nature", color:"#4d9a94" },
+        { id:"stream",  name:"溪流",     en:"STREAM",     cat:"nature", color:"#4fa3a5" },
+        { id:"thunder", name:"雷",       en:"THUNDER",    cat:"nature", color:"#66707e", p:{bright:.22,dist:.55,density:.4} },
+        { id:"birds",   name:"鸟鸣",     en:"BIRDS",      cat:"nature", color:"#7a9a52", p:{bright:.65} },
+        { id:"insects", name:"虫鸣",     en:"INSECTS",    cat:"nature", color:"#8fae4c", p:{bright:.7,dist:.45} },
+        { id:"fire",    name:"篝火",     en:"FIRE",       cat:"nature", color:"#d97e3f" },
+        { id:"cafe",    name:"咖啡馆人声", en:"CAFÉ VOICES", cat:"city", color:"#a9743f" },
+        { id:"traffic", name:"街道车流", en:"TRAFFIC",    cat:"city",   color:"#9c6b4f", p:{bright:.35,dist:.5} },
+        { id:"train",   name:"夜行火车", en:"NIGHT TRAIN", cat:"city",  color:"#7a7264", p:{bright:.25,dist:.5} },
+        { id:"rural",   name:"乡村夜晚", en:"RURAL NIGHT", cat:"city",  color:"#6f7f56", p:{bright:.3,dist:.45} },
+        { id:"market",  name:"市场",     en:"MARKET",     cat:"city",   color:"#c08a3e" },
+        { id:"rainstreet", name:"雨夜街道", en:"RAINY STREET", cat:"city", color:"#5b7fa6", p:{dist:.4} },
+        { id:"piano",   name:"钢琴",     en:"PIANO",      cat:"inst",   color:"#a8894f" },
+        { id:"guitar",  name:"吉他拨弦", en:"GUITAR",     cat:"inst",   color:"#b3854d" },
+        { id:"chimes",  name:"风铃",     en:"WIND CHIMES", cat:"inst",  color:"#7fb3c8", p:{bright:.78,density:.45} },
+        { id:"muyu",    name:"木鱼 / 手鼓", en:"WOODEN FISH & DRUM", cat:"inst", color:"#a05c3f", p:{density:.6,bright:.4} },
+        { id:"harp",    name:"单音竖琴", en:"HARP NOTES", cat:"inst",   color:"#a58f5f", p:{bright:.6,density:.4} },
+        { id:"forest", name:"森林", en:"FOREST", cat:"nature", color:"#769478", p:{bright:.7} },
+        { id:"boat", name:"船舱", en:"BOAT CABIN", cat:"city", color:"#688e9b" },
+        { id:"keyboard", name:"键盘轻敲", en:"KEYBOARD", cat:"city", color:"#b59477" }
       ];
-      /* 每种声音是一味酒液：top/mid/bot 三段色阶、a 透明度、bub 气泡密度、
-         turbid 浑浊度（果汁/奶感）、garnish 杯口装饰（lemon 柠檬片 / mint 薄荷叶）。
-         雨=清透蓝、篝火=琥珀、钢琴=淡金、夜=深紫。 */
-      var LIQUIDS = {
-        rain:      { top:"#A8D4F0", mid:"#5B8DB8", bot:"#2C5A86", a:.84, bub:.30, turbid:0,   garnish:"mint"  },
-        wind:      { top:"#E6EFEB", mid:"#B9C8C2", bot:"#8B9A8E", a:.38, bub:.06, turbid:.35, garnish:"mint"  },
-        waves:     { top:"#9FE0D2", mid:"#4D9A94", bot:"#25665F", a:.86, bub:.55, turbid:.05, garnish:"mint"  },
-        stream:    { top:"#B4EDE6", mid:"#4FA3A5", bot:"#2A6E78", a:.88, bub:.75, turbid:0,   garnish:"mint"  },
-        thunder:   { top:"#8A7FB8", mid:"#57497A", bot:"#2A2342", a:.96, bub:.12, turbid:.45, garnish:"lemon" },
-        birds:     { top:"#D6EFAE", mid:"#93B45E", bot:"#5F7F36", a:.82, bub:.30, turbid:.05, garnish:"mint"  },
-        insects:   { top:"#E4EE9E", mid:"#A9BC54", bot:"#71822F", a:.84, bub:.20, turbid:.10, garnish:"mint"  },
-        fire:      { top:"#FFD08A", mid:"#E08A35", bot:"#8A3F0E", a:.94, bub:.50, turbid:.10, garnish:"lemon", bubC:"#FFC37A" },
-        cafe:      { top:"#E3B078", mid:"#A9743F", bot:"#5E3A1D", a:.96, bub:.15, turbid:.80, garnish:"lemon" },
-        traffic:   { top:"#D9B183", mid:"#9C6B4F", bot:"#5F3B28", a:.92, bub:.10, turbid:.45, garnish:"lemon" },
-        train:     { top:"#9A90D8", mid:"#55497F", bot:"#241E42", a:.96, bub:.08, turbid:.30, garnish:"lemon" },
-        rural:     { top:"#B294E8", mid:"#6E4FA3", bot:"#2E1F52", a:.96, bub:.10, turbid:.35, garnish:"lemon" },
-        market:    { top:"#FFD98C", mid:"#F0A83E", bot:"#C46A17", a:.95, bub:.35, turbid:.85, garnish:"lemon" },
-        rainstreet:{ top:"#A9C6E8", mid:"#5B7FA6", bot:"#2F4A70", a:.88, bub:.30, turbid:.15, garnish:"mint"  },
-        piano:     { top:"#F7E7BC", mid:"#D9B968", bot:"#A8823A", a:.80, bub:.60, turbid:0,   garnish:"lemon" },
-        guitar:    { top:"#F6CD8C", mid:"#C08F3E", bot:"#7E5416", a:.88, bub:.30, turbid:.10, garnish:"lemon" },
-        chimes:    { top:"#DFF6FA", mid:"#9CC8D9", bot:"#5E93A8", a:.62, bub:.45, turbid:0,   garnish:"mint"  },
-        muyu:      { top:"#E8BC85", mid:"#B07A42", bot:"#6E3F1E", a:.93, bub:.12, turbid:.55, garnish:"lemon" },
-        harp:      { top:"#F9ECC0", mid:"#DEC078", bot:"#A8893F", a:.78, bub:.70, turbid:0,   garnish:"lemon" }
+      /* Ingredients choose a clear drink tint together. Source colors stay on the faders. */
+      var CUP_TINTS={
+        amber:{colors:["#FFF1BD","#F4BE67","#CD7B36","#FFE09A"], garnish:"Lemon"},
+        tide:{colors:["#E0F5EB","#A5D9CA","#69A69F","#C7EEE2"], garnish:"Mint"},
+        green:{colors:["#F4F2C5","#C9D28E","#92AC65","#E8EBAF"], garnish:"Mint"},
+        lilac:{colors:["#F6E5F0","#DAB9D9","#AC83AC","#F4D4E8"], garnish:"Cherry"},
+        rose:{colors:["#FFE9CB","#F3B7A4","#D98B83","#FFDAC1"], garnish:"Lemon"}
       };
-      function hx(h){ h=h.replace("#",""); return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)]; }
-      function mixH(a,b,t){ var A=hx(a),B=hx(b); return "rgb("+Math.round(A[0]+(B[0]-A[0])*t)+","+Math.round(A[1]+(B[1]-A[1])*t)+","+Math.round(A[2]+(B[2]-A[2])*t)+")"; }
-      function rgbaH(a,al){ var A=hx(a); return "rgba("+A[0]+","+A[1]+","+A[2]+","+al+")"; }
-      function liqOf(s){
-        return LIQUIDS[s.id] || { top:mixH(s.color,"#ffffff",.35), mid:s.color, bot:mixH(s.color,"#000000",.3), a:.85, bub:.3, turbid:.2, garnish:"lemon" };
+      var CUP_INGREDIENTS={
+        rain:"tide", wind:"tide", waves:"tide", stream:"tide", rainstreet:"tide", chimes:"tide",
+        birds:"green", insects:"green", rural:"green", forest:"green", boat:"tide",
+        thunder:"lilac", train:"lilac",
+        market:"rose", harp:"rose"
+      };
+      function cupMix(mix){
+        var active=SOUNDS.filter(function(s){return mix[s.id]>0.02;}).sort(function(a,b){return mix[b.id]-mix[a.id];});
+        var weight={amber:0,tide:0,green:0,lilac:0,rose:0};
+        var total=0, density=0, brightness=0, tempo=0;
+        active.forEach(function(s){
+          var n=mix[s.id], p=params[s.id];
+          weight[CUP_INGREDIENTS[s.id]||"amber"]+=n;
+          total+=n;
+          if(p){ density+=n*p.density; brightness+=n*p.bright; tempo+=n*p.tempo; }
+        });
+        var tint=Object.keys(weight).reduce(function(a,b){return weight[b]>weight[a]?b:a;});
+        return {
+          active:active, total:total, fill:Math.min(1,total/2.6), tint:tint,
+          density:total?density/total:0, brightness:total?brightness/total:0.5, tempo:total?tempo/total:0.5
+        };
       }
-      var COMFORT_CAP = 2.0; /* sum of levels cap for recipes */
+      function cupRGB(hex){return hex.match(/[0-9A-F]{2}/gi).map(function(part){return parseInt(part,16);});}
+      function cupCSS(rgb){return "rgb("+rgb.map(Math.round).join(",")+")";}
       var MASTER_CAP = 0.85;
 
       var RECIPES = [
-        { name:"雨夜独处", tag:"免费配方", free:true, desc:"下班回家的雨夜，一个人把窗帘拉上。雨声打底，钢琴只留一点点，像隔壁房间传来的。", mix:{rain:.8, piano:.5, wind:.2} },
-        { name:"篝火边", tag:"免费配方", free:true, desc:"想象自己在营地或者壁炉前。篝火是主角，微风把火苗吹得忽明忽暗，适合发呆和读闲书。", mix:{fire:.8, wind:.3, piano:.22} },
-        { name:"海边清晨", tag:"免费配方", free:true, desc:"浪一层一层推上来，鸟刚醒。适合周末赖床，或者把起床气慢慢放掉。", mix:{waves:.72, birds:.5, wind:.3} },
-        { name:"林间小屋", tag:"免费配方", free:true, desc:"小雨落在树叶上，鸟鸣在远处。适合午休小憩，或者给房间换一个季节。", mix:{rain:.34, birds:.55, wind:.42} },
-        { name:"深度助眠", tag:"助眠包配方", free:false, pack:"sleep", desc:"乡村夜晚垫底，虫鸣细细碎碎，火车在远处匀速地走，雨声把剩下的缝隙填满。给大脑一个明确的信号：可以睡了。", mix:{rural:.6, insects:.45, train:.42, rain:.3} },
-        { name:"市井专注", tag:"专注包配方", free:false, pack:"focus", desc:"市场的人声是热闹的白噪音，木鱼手鼓把拍子敲稳，咖啡馆人声再垫一层。闹中取静，适合长工作。", mix:{market:.5, muyu:.34, cafe:.45, rain:.3} },
-        { name:"午夜雷雨", tag:"雨夜包配方", free:false, pack:"yuye", desc:"雷在很远的地方滚，雨下得正密，雨夜街道偶尔有车慢慢驶过。越听越安静的那种热闹，雨夜党的终极一杯。", mix:{thunder:.6, rain:.85, rainstreet:.55} }
+        { name:"咖啡馆靠窗", tag:"写作", featured:true, intent:"写作", desc:"隔桌的谈话、键盘轻敲，偶尔有一两下吉他拨弦。", mix:{cafe:.62,keyboard:.38,guitar:.18} },
+        { name:"雨夜独处", tag:"深度专注", featured:true, intent:"深度专注", desc:"窗外下着雨，远处的钢琴只留一点，适合埋头做一件事。", mix:{rain:.76,piano:.24,wind:.18} },
+        { name:"篝火边", tag:"放松", featured:true, intent:"短暂放松", desc:"坐在火堆边。风很轻，木柴偶尔响一下。", mix:{fire:.75,wind:.24,piano:.16} },
+        { name:"海边清晨", tag:"阅读", desc:"鸟刚醒，浪一层一层推上来，留几页书的时间。", mix:{waves:.70,birds:.35,wind:.24} },
+        { name:"林间小屋", tag:"阅读", premium:true, desc:"雨落在树叶上，溪水从屋后流过。", mix:{rain:.32,forest:.65,stream:.24} },
+        { name:"乡村夜晚", tag:"入夜", premium:true, desc:"虫鸣细碎，远处一班火车从田野边经过。", mix:{rural:.6,insects:.38,train:.29,rain:.26} },
+        { name:"市井专注", tag:"写作", premium:true, desc:"市场人声在前，木鱼和手鼓轻轻打着拍子。", mix:{market:.53,muyu:.25,cafe:.32,rain:.22} },
+        { name:"午夜雷雨", tag:"雨夜", premium:true, desc:"雨下得密，远处有雷，偶尔一辆车驶过积水。", mix:{thunder:.34,rain:.75,rainstreet:.43} },
+        { name:"末班车窗边", tag:"放空", premium:true, desc:"车厢轻轻震动，雨从窗边经过，竖琴留在远处。", mix:{train:.72,rain:.42,harp:.26} },
+        { name:"港湾来信", tag:"放空", premium:true, desc:"船舱随浪微晃，海风从身边吹过。", mix:{boat:.62,waves:.38,wind:.28} }
       ];
 
       /* ============================== state ============================== */
@@ -1645,18 +1811,33 @@
         if(s.p) PARAM_DEFS.forEach(function(d){ if(typeof s.p[d.k]==="number") p[d.k]=s.p[d.k]; });
         params[s.id]=p;
       });
-      var unlocked = { sleep:false, focus:false, yuye:false };
-      var myRecipes = [];
+      var RECIPE_STORAGE="sound-lab.recipes";
+      var myRecipes=loadSavedRecipes();
+      function loadSavedRecipes(){
+        try{
+          var saved=JSON.parse(localStorage.getItem(RECIPE_STORAGE)||"[]");
+          if(!Array.isArray(saved)) return [];
+          return saved.filter(function(r){ return r && typeof r.name==="string" && r.mix && r.at; })
+            .map(function(r){ r.at=new Date(r.at); return r; });
+        }catch(error){ return []; }
+      }
+      function persistRecipes(){
+        try{
+          localStorage.setItem(RECIPE_STORAGE,JSON.stringify(myRecipes));
+          return true;
+        }catch(error){ return false; }
+      }
       var playing = false;
       var masterVol = .55;
-      var fadeFactor = 0; /* 0..1 global gentle fade */
-      var focusLeft = 0, focusInt = null, focusOn = false;
-      var timerMin = 0, timerLeft = 0, timerInt = null;
-      var currentSheetPack = null;
+      var sessionTools=window.SoundLabSession;
+      var session=sessionTools.createSession({
+        getItem:function(key){ return localStorage.getItem(key); },
+        setItem:function(key,value){ localStorage.setItem(key,value); }
+      });
+      var activeScene=null, pendingScene=null;
 
       function $(id){ return document.getElementById(id); }
       function soundById(id){ for(var i=0;i<SOUNDS.length;i++) if(SOUNDS[i].id===id) return SOUNDS[i]; return null; }
-      function isLocked(s){ return s.pack && !unlocked[s.pack]; }
       function clamp01(v){ return Math.max(0, Math.min(1, v)); }
       function toast(msg){
         var t=$("toast"); t.textContent=msg; t.classList.add("show");
@@ -1664,19 +1845,23 @@
       }
 
       /* ============================== audio engine ============================== */
-      var AC=null, master=null, masterAnalyser=null;
+      var AC=null, master=null, transport=null, sessionGain=null, masterAnalyser=null;
       var buffers={};
-      var chans={}; // id -> {in, gain, analyser, bag}
+      var chans={};
+      var recordings={};
 
       function ensureCtx(){
         if(AC) return;
         var Ctx = window.AudioContext || window.webkitAudioContext;
         AC = new Ctx();
         var comp = AC.createDynamicsCompressor();
-        comp.threshold.value=-20; comp.ratio.value=6;
-        master = AC.createGain(); master.gain.value = masterVol*masterVol;
+        comp.threshold.value=-18; comp.knee.value=14; comp.ratio.value=8;
+        comp.attack.value=.005; comp.release.value=.25;
+        master = AC.createGain(); master.gain.value=masterVol*masterVol;
+        sessionGain=AC.createGain(); sessionGain.gain.value=0; sessionGain.connect(master);
+        transport=AC.createGain(); transport.gain.value=0; transport.connect(sessionGain);
         masterAnalyser = AC.createAnalyser(); masterAnalyser.fftSize=256;
-        master.connect(masterAnalyser); masterAnalyser.connect(comp); comp.connect(AC.destination);
+        master.connect(comp); comp.connect(masterAnalyser); masterAnalyser.connect(AC.destination);
         SOUNDS.forEach(function(s){
           var g=AC.createGain(); g.gain.value=0;
           var an=AC.createAnalyser(); an.fftSize=256;
@@ -1688,10 +1873,13 @@
           var dly=AC.createDelay(1); dly.delayTime.value=.19;
           var fb=AC.createGain(); fb.gain.value=.32;
           var wet=AC.createGain(); wet.gain.value=0;
-          inp.connect(brightF); brightF.connect(g); g.connect(distG); distG.connect(an); an.connect(master);
+          inp.connect(brightF); brightF.connect(g); g.connect(distG); distG.connect(an); an.connect(transport);
           distG.connect(dly); dly.connect(fb); fb.connect(dly); dly.connect(wet); wet.connect(an);
           chans[s.id]={ in:inp, gain:g, analyser:an, bag:null, brightF:brightF, distG:distG, wet:wet };
           applyParams(s.id);
+        });
+        AC.addEventListener("statechange", function(){
+          if(AC.state==="running") armSessionGain();
         });
       }
       /* push one sound's 明亮度/远近 into its tone chain — called live while sliders move */
@@ -1699,14 +1887,15 @@
         if(!AC) return;
         var ch=chans[id]; if(!ch || !ch.brightF) return;
         var P=params[id], t=AC.currentTime;
-        var fc=500+Math.pow(P.bright,1.5)*7800;
+        var fc=800+Math.pow(P.bright,1.15)*9800;
         fc*= (1-P.dist*0.55);
         fc=Math.max(280, Math.min(9200, fc));
         ch.brightF.frequency.setTargetAtTime(fc, t, .05);
         ch.distG.gain.setTargetAtTime(1-P.dist*0.35, t, .05);
-        ch.wet.gain.setTargetAtTime(P.dist*0.20, t, .05);
+        var loop=ch.bag && ch.bag.loop;
+        ch.wet.gain.setTargetAtTime(P.dist*(loop ? .09 : .20), t, .05);
+        if(loop) loop.playbackRate.setTargetAtTime(0.82+P.tempo*.36, t, .12);
       }
-      function applyAllParams(){ SOUNDS.forEach(function(s){ applyParams(s.id); }); }
       function noiseBuffer(kind){
         if(buffers[kind]) return buffers[kind];
         var len=AC.sampleRate*2, buf=AC.createBuffer(1,len,AC.sampleRate), d=buf.getChannelData(0), i, last=0, w;
@@ -1741,6 +1930,7 @@
         g.gain.exponentialRampToValueAtTime(Math.max(opt.gain||.3,0.0002), t+(opt.a||0.004));
         g.gain.exponentialRampToValueAtTime(0.0001, t+(opt.dur||0.08));
         src.connect(f); f.connect(g); g.connect(out);
+        src.onended=function(){ src.disconnect(); f.disconnect(); g.disconnect(); };
         src.start(); src.stop(t+(opt.dur||0.08)+0.05);
       }
       function tone(bag, out, opt){
@@ -1753,7 +1943,9 @@
         g.gain.setValueAtTime(0.0001,t);
         g.gain.exponentialRampToValueAtTime(opt.gain||.2, t+(opt.a||0.01));
         g.gain.exponentialRampToValueAtTime(0.0001, t+(opt.dur||0.3));
-        o.connect(g); g.connect(out); o.start(t); o.stop(t+(opt.dur||0.3)+0.1);
+        o.connect(g); g.connect(out);
+        o.onended=function(){ o.disconnect(); g.disconnect(); };
+        o.start(t); o.stop(t+(opt.dur||0.3)+0.1);
         if(opt.oct){ tone(bag,out,{f0:opt.f0*2, gain:(opt.gain||.2)*0.22, dur:opt.dur, a:opt.a, at:opt.at, type:"sine"}); }
       }
 
@@ -1786,11 +1978,11 @@
           bag.every(1250,function(){
             if(levels.piano<=0.02) return;
             var ch=chords[Math.floor(step/2)%chords.length];
-            if(step%2===0){ for(var i=0;i<ch.length;i++) tone(bag,lp,{f0:ch[i], gain:.05, dur:3.4, a:.02, at:i*0.03}); }
+            if(step%2===0){ for(var i=0;i<ch.length;i++) playPiano(bag,lp,ch[i],.045,i*.06); }
             if(Math.random()<.88){
               var n=mel[Math.floor(Math.random()*mel.length)];
-              tone(bag,lp,{f0:n, gain:.14+Math.random()*.06, dur:2.8, a:.006, oct:true});
-              if(Math.random()<.3) tone(bag,lp,{f0:mel[Math.floor(Math.random()*mel.length)], gain:.08, dur:2.2, a:.006, at:.28});
+              playPiano(bag,lp,n,.12+Math.random()*.035,0);
+              if(Math.random()<.24) playPiano(bag,lp,mel[Math.floor(Math.random()*mel.length)],.075,.35);
             }
             step++;
           });
@@ -1965,11 +2157,11 @@
           bag.every(980,function(){
             if(levels.guitar<=0.02) return;
             var ch=chords[Math.floor(step/2)%chords.length];
-            if(step%2===0) pluck(bag,lp,ch[0], .30, 2600);
+            if(step%2===0) playString("guitar",bag,lp,ch[0],.19);
             var seq=[1,2,3,2];
             var idx=seq[step%seq.length];
-            pluck(bag,lp,ch[idx]*(Math.random()<.25?2:1), .20+Math.random()*.08, 3400);
-            if(Math.random()<.4) (function(f){ bag.after(210,function(){ pluck(bag,lp,f, .13, 3400); }); })(ch[Math.floor(Math.random()*ch.length)]*2);
+            playString("guitar",bag,lp,ch[idx]*(Math.random()<.2?2:1),.17+Math.random()*.05,.055);
+            if(Math.random()<.27) playString("guitar",bag,lp,ch[2]*2,.09,.28);
             step++;
           });
         },
@@ -2004,6 +2196,15 @@
             });
           })();
         },
+        keyboard: function(bag,out){
+          function type(){
+            bag.after(95+Math.random()*410,function(){
+              burst(bag,out,{freq:1100+Math.random()*1100,q:1.2,gain:.07,dur:.034});
+              type();
+            });
+          }
+          type();
+        },
         muyu: function(bag,out){
           var step=0;
           bag.every(880,function(){
@@ -2023,7 +2224,7 @@
         harp: function(bag,out){
           var lp=filt("lowpass",3100); lp.connect(out);
           var dly=AC.createDelay(1); dly.delayTime.value=.31;
-          var fb=AC.createGain(); fb.gain.value=.26; var wet=AC.createGain(); wet.gain.value=.18;
+          var fb=AC.createGain(); fb.gain.value=.17; var wet=AC.createGain(); wet.gain.value=.13;
           lp.connect(dly); dly.connect(fb); fb.connect(dly); dly.connect(wet); wet.connect(out);
           var scale=[261.63,293.66,329.63,392,440,523.25,587.33,659.25];
           var last=3;
@@ -2031,8 +2232,8 @@
             bag.after(1900+Math.random()*2300, function(){
               if(levels.harp>0.02){
                 last=Math.max(0, Math.min(scale.length-1, last + (Math.floor(Math.random()*5)-2)));
-                pluck(bag,lp,scale[last], .16, 3900);
-                if(Math.random()<.3) (function(f){ bag.after(340,function(){ pluck(bag,lp,f, .08, 3900); }); })(scale[Math.floor(Math.random()*scale.length)]);
+                playString("harp",bag,lp,scale[last],.19);
+                if(Math.random()<.25) playString("harp",bag,lp,scale[Math.max(0,last-2)],.09,.38);
               }
               note();
             });
@@ -2040,168 +2241,163 @@
         }
       };
 
-      /* Karplus-Strong plucked-string excitation buffers (guitar / harp) */
-      var ksCache={};
-      function ksBuffer(freq){
-        var key=Math.round(freq);
-        if(ksCache[key]) return ksCache[key];
-        var n=Math.max(2, Math.round(AC.sampleRate/freq));
-        var buf=AC.createBuffer(1, n, AC.sampleRate), d=buf.getChannelData(0);
-        for(var i=0;i<n;i++) d[i]=Math.random()*2-1;
-        ksCache[key]=buf; return buf;
+      function playPiano(bag,out,freq,volume,at){
+        var sample=recordings.piano && recordings.piano.sample;
+        if(sample) playInstrumentNote(AC,out,sample,freq,volume,AC.currentTime+.015+at);
+        else tone(bag,out,{f0:freq,gain:volume*.65,dur:2.8,a:.02,at:at,oct:true});
       }
-      function pluck(bag, out, freq, vel, brightHz){
-        if(!bag.alive) return;
-        var exc=AC.createBufferSource(); exc.buffer=ksBuffer(freq);
-        var dly=AC.createDelay(0.1); dly.delayTime.value=1/freq;
-        var fbF=filt("lowpass", brightHz||3400);
-        var fbG=AC.createGain(); fbG.gain.value=0.962;
-        var g=AC.createGain(); g.gain.value=vel;
-        exc.connect(dly); dly.connect(fbF); fbF.connect(fbG); fbG.connect(dly);
-        dly.connect(g); g.connect(out);
-        exc.start();
-        var t=setTimeout(function(){ fbG.gain.value=0; try{ g.disconnect(); }catch(e){} }, 3200);
-        bag.timers.push(t);
-      }
-      function startGen(id){
-        var ch=chans[id]; if(!ch || ch.bag) return;
-        /* v3 scheduler: every gap is recomputed from the sound's live params, so
-           密度/随机度/节奏 sliders are audible immediately, mid-playback.
-           - density: after() gaps shrink as density rises; every() events are gated by it
-           - tempo:   both schedulers run faster/slower
-           - rand:    gap jitter grows with randomness */
-        var bag={ timers:[], srcs:[], alive:true,
-          every:function(ms,fn){
-            (function tick(){
-              if(!bag.alive) return;
-              var P=params[id];
-              var delay=ms*(1.35-P.tempo*0.85)*(1+(Math.random()-0.5)*P.rand*0.5);
-              var t=setTimeout(function(){
-                if(!bag.alive) return;
-                if(ms<400 || Math.random() <= 0.3+P.density*0.7) fn();
-                tick();
-              }, Math.max(40, delay));
-              bag.timers.push(t);
-            })();
-          },
-          after:function(ms,fn){
-            var P=params[id];
-            var delay=ms*(1.55-P.density*1.05)*(1.25-P.tempo*0.5)*(1+(Math.random()-0.5)*P.rand*0.9);
-            var t=setTimeout(function(){ if(bag.alive) fn(); }, Math.max(30, delay));
-            bag.timers.push(t);
-          }
-        };
-        var outNode=AC.createGain(); outNode.gain.value=1; outNode.connect(ch.in);
-        bag.out=outNode;
-        try{ GENS[id](bag, outNode); }catch(e){ /* generator failed: stay silent */ }
-        ch.bag=bag;
-      }
-      function stopGen(id){
-        var ch=chans[id]; if(!ch || !ch.bag) return;
-        var bag=ch.bag; ch.bag=null; bag.alive=false;
-        bag.timers.forEach(function(t){ clearInterval(t); clearTimeout(t); });
-        bag.srcs.forEach(function(s){ try{ s.stop(); }catch(e){} });
-        var o=bag.out; o.gain.setTargetAtTime(0.0001, AC.currentTime, .08);
-        setTimeout(function(){ try{ o.disconnect(); }catch(e){} }, 350);
-      }
-      /* ===== v2 real-recording decks: HTMLAudio x2 per channel, crossfade loop ===== */
-      var decks={};
-      function initDecks(){
-        SOUNDS.forEach(function(s){
-          if(decks[s.id]) return;
-          function mk(){
-            var a=new Audio(); a.preload="none"; a.volume=0;
-            return a;
-          }
-          var d={ a:mk(), b:mk(), cur:0, ok:false, custom:false, fade:null };
-          [d.a,d.b].forEach(function(el){
-            el.addEventListener("canplay", function(){
-              d.ok=true;
-              document.querySelectorAll('[data-srcbadge="'+s.id+'"]').forEach(function(it){ it.textContent="真实录音播放中"; it.classList.remove("wait"); it.classList.add("ok"); });
-              document.querySelectorAll('[data-cardbadge="'+s.id+'"]').forEach(function(it){ it.textContent="真实录音播放中"; it.classList.add("real"); });
-              if(playing && levels[s.id]>0.02) applyGain(s.id);
-            });
-            el.addEventListener("error", function(){ if(!d.custom) d.ok=false; });
-          });
-          decks[s.id]=d;
-          /* probe lazily: only assign src when the file actually exists (no 404 noise) */
-          if(window.fetch){
-            fetch(s.file, {method:"HEAD"}).then(function(r){
-              if(r.ok){ d.a.src=s.file; d.b.src=s.file; }
-            }).catch(function(){});
-          }
-        });
-        setInterval(crossfadeTick, 250);
-      }
-      function deckEls(id){ var d=decks[id]; return d? [d.a,d.b] : []; }
-      function crossfadeTick(){
-        if(!playing) return;
-        SOUNDS.forEach(function(s){
-          var d=decks[s.id]; if(!d || !d.ok) return;
-          var els=[d.a,d.b], cur=els[d.cur], nxt=els[1-d.cur];
-          if(levels[s.id]<=0.02 || !cur.duration) return;
-          var remain=cur.duration-cur.currentTime;
-          /* start the next deck 1.2s before the end; volumes ramp complementarily in syncDeckVolumes */
-          if(remain<1.2 && remain>0 && nxt.paused && !d.fade){
-            try{ nxt.currentTime=0; nxt.play(); }catch(e){}
-            d.fade={ t0:Date.now(), dur:1200, out:d.cur, inn:1-d.cur };
-            d.cur=1-d.cur;
-          }
-        });
-        syncDeckVolumes();
-      }
-      function syncDeckVolumes(){
-        SOUNDS.forEach(function(s){
-          var d=decks[s.id]; if(!d) return;
-          var target = (playing && d.ok) ? Math.pow(levels[s.id],1.5)*0.9*masterVol*fadeFactor : 0;
-          var els=deckEls(s.id);
-          if(target===0){ els.forEach(function(el){ if(!el.paused) el.pause(); el.volume=0; }); d.fade=null; return; }
-          var fIn=1, fOut=0, fading=false;
-          if(d.fade){
-            var p=Math.min(1,(Date.now()-d.fade.t0)/d.fade.dur);
-            fIn=p; fOut=1-p; fading=true;
-            if(p>=1){ var outEl=els[d.fade.out]; if(!outEl.paused) outEl.pause(); d.fade=null; fading=false; }
-          }
-          els.forEach(function(el, idx){
-            var f = fading ? (idx===d.fade.inn ? fIn : fOut) : (idx===d.cur ? 1 : 0);
-            el.volume=Math.max(0,Math.min(1,target*f));
-            if(f>0 && el.paused && levels[s.id]>0.02){ try{ el.play(); }catch(e){} }
-            if(f===0 && !el.paused && !fading){ el.pause(); }
-          });
-        });
-      }
-      function applyGain(id){
-        var d=decks[id];
-        if(d && d.ok){
-          syncDeckVolumes();
-          if(AC){ var ch0=chans[id]; if(ch0) ch0.gain.gain.setTargetAtTime(0, AC.currentTime, .06); if(playing) stopGen(id); }
+
+      function playString(id,bag,out,freq,volume,at){
+        var sample=recordings[id] && recordings[id].sample;
+        if(sample){
+          playInstrumentNote(AC,out,sample,freq,volume,AC.currentTime+.015+(at||0));
           return;
         }
-        if(!AC) return;
-        var ch=chans[id]; if(!ch) return;
-        var v=levels[id];
-        ch.gain.gain.setTargetAtTime(Math.pow(v,1.5)*0.82*fadeFactor, AC.currentTime, .06);
-        if(playing){
-          if(v>0.02) startGen(id); else stopGen(id);
+        // Deterministic, decaying harmonics for offline playback. No feedback loop.
+        var harp=id==="harp";
+        var partials=harp ? [1,.46,.19,.07] : [1,.35,.23,.10];
+        [1,2,3,4].forEach(function(harmonic,i){
+          tone(bag,out,{f0:freq*harmonic, gain:volume*partials[i]*.46,
+            dur:(harp?2.15:1.35)/(1+i*.42), a:.018, at:at});
+        });
+      }
+
+      function startGen(id){
+        var ch=chans[id];
+        if(ch.bag) return;
+        var bag={ timers:new Set(), srcs:[], alive:true, out:AC.createGain() };
+        function schedule(delay,fn){
+          var timer=setTimeout(function(){
+            bag.timers.delete(timer);
+            if(bag.alive) fn();
+          },delay);
+          bag.timers.add(timer);
+        }
+        bag.every=function(ms,fn){
+          function tick(){
+            var p=params[id];
+            var delay=ms*(1.35-p.tempo*.85)*(1+(Math.random()-.5)*p.rand*.5);
+            schedule(Math.max(40,delay),function(){
+              if(ms<400 || Math.random()<=.3+params[id].density*.7) fn();
+              tick();
+            });
+          }
+          tick();
+        };
+        bag.after=function(ms,fn){
+          var p=params[id];
+          var delay=ms*(1.55-p.density*1.05)*(1.25-p.tempo*.5)*(1+(Math.random()-.5)*p.rand*.9);
+          schedule(Math.max(30,delay),fn);
+        };
+        var t=AC.currentTime;
+        bag.out.gain.setValueAtTime(0,t);
+        bag.out.gain.linearRampToValueAtTime(1,t+.32);
+        bag.out.connect(ch.in);
+        ch.bag=bag;
+        var recording=recordings[id];
+        if(recording && recording.loop){
+          var loop=AC.createBufferSource();
+          loop.buffer=recording.loop;
+          loop.loop=true;
+          loop.playbackRate.value=.82+params[id].tempo*.36;
+          loop.connect(bag.out);
+          loop.start();
+          bag.srcs.push(loop);
+          bag.loop=loop;
+          applyParams(id);
+        } else {
+          var fallback={ forest:"wind", boat:"waves" };
+          GENS[fallback[id]||id](bag,bag.out);
         }
       }
-      function applyAllGains(){ SOUNDS.forEach(function(s){ applyGain(s.id); }); syncDeckVolumes(); }
-      /* gentle global fades: in 3s, out 5s */
-      var fadeInt=null;
-      function fadeTo(target, seconds, done){
-        if(fadeInt) clearInterval(fadeInt);
-        var from=fadeFactor, steps=Math.max(1,Math.round(seconds*20)), i=0;
-        fadeInt=setInterval(function(){
-          i++; var p=i/steps; p=1-Math.pow(1-p,2);
-          fadeFactor=from+(target-from)*p;
-          if(AC && master) master.gain.setTargetAtTime(masterVol*masterVol*fadeFactor, AC.currentTime, .05);
-          applyAllGains();
-          if(i>=steps){ clearInterval(fadeInt); fadeInt=null; if(done) done(); }
-        },50);
+
+      function stopGen(id){
+        var ch=chans[id], bag=ch && ch.bag;
+        if(!bag) return;
+        ch.bag=null;
+        bag.alive=false;
+        bag.timers.forEach(function(timer){ clearTimeout(timer); });
+        bag.timers.clear();
+        var t=AC.currentTime;
+        bag.out.gain.cancelScheduledValues(t);
+        bag.out.gain.setTargetAtTime(0,t,.075);
+        bag.srcs.forEach(function(node){ node.stop(t+.34); });
+        setTimeout(function(){ bag.out.disconnect(); },400);
+      }
+
+      function loadBundledSound(id){
+        var meta=SOUND_AUDIO[id];
+        if(!meta || location.protocol==="file:" || recordings[id]) return;
+        var entry={loading:true};
+        recordings[id]=entry;
+        updateSourceUI(id);
+        fetch(meta.file).then(function(response){
+          if(!response.ok) throw new Error("HTTP "+response.status);
+          return response.arrayBuffer();
+        }).then(function(bytes){
+          return AC.decodeAudioData(bytes);
+        }).then(function(buffer){
+          if(recordings[id]!==entry) return;
+          if(meta.roots) entry.sample={buffer:buffer,meta:meta};
+          else entry.loop=prepareRecording(AC,buffer,false);
+        }).catch(function(){
+          entry.failed=true;
+        }).finally(function(){
+          entry.loading=false;
+          if(recordings[id]===entry){
+            updateSourceUI(id);
+            applyGain(id);
+          }
+        });
+      }
+
+      function applyGain(id){
+        if(!AC) return;
+        var ch=chans[id], level=sessionTools.isFreeSound(id) ? levels[id] : 0;
+        ch.gain.gain.setTargetAtTime(level>.02 ? Math.pow(level,1.35) : 0, AC.currentTime, .055);
+        if(!playing) return;
+        if(level>.02){
+          loadBundledSound(id);
+          if(!recordings[id] || !recordings[id].loading) startGen(id);
+        } else {
+          stopGen(id);
+        }
+      }
+
+      function updateMasterGain(){
+        if(!master) return;
+        var power=SOUNDS.reduce(function(sum,s){ return sum+Math.pow(levels[s.id],2.7); },0);
+        var headroom=1/Math.sqrt(Math.max(1,power));
+        master.gain.setTargetAtTime(masterVol*masterVol*headroom,AC.currentTime,.09);
       }
 
       /* ============================== faders UI ============================== */
       var faderEls={};
+      var soundFilter="all";
+      function updateSoundFilter(){
+        var visible=0;
+        SOUNDS.forEach(function(s){
+          var ui=faderEls[s.id];
+          if(!ui) return;
+          var show=soundFilter==="all" || s.cat===soundFilter || (soundFilter==="active" && levels[s.id]>.02);
+          ui.root.hidden=!show;
+          if(show) visible++;
+        });
+        $("faders").querySelectorAll(".chan-group").forEach(function(group){
+          group.hidden=!group.querySelector(".chan:not([hidden])");
+        });
+        $("emptyFilter").hidden=visible!==0;
+      }
+      $("soundFilters").addEventListener("click",function(event){
+        var button=event.target.closest("[data-filter]");
+        if(!button) return;
+        soundFilter=button.dataset.filter;
+        this.querySelectorAll("button").forEach(function(item){
+          item.classList.toggle("on",item===button);
+          item.setAttribute("aria-pressed",String(item===button));
+        });
+        updateSoundFilter();
+      });
       function buildFaders(){
         var wrap=$("faders");
         GROUPS.forEach(function(g){
@@ -2211,11 +2407,9 @@
           var grid=document.createElement("div"); grid.className="faders";
           sec.appendChild(grid); wrap.appendChild(sec);
           groupSounds.forEach(function(s){
-            var locked=isLocked(s);
-            var d=decks[s.id];
-            var isReal=!!(d && d.ok);
+            var premium=!sessionTools.isFreeSound(s.id);
             var el=document.createElement("div");
-            el.className="chan"+(locked?" locked faded":"");
+            el.className=premium ? "chan chan-premium" : "chan";
             el.style.setProperty("--cc", s.color);
             var paramsHTML="";
             PARAM_DEFS.forEach(function(pd){
@@ -2224,44 +2418,46 @@
                 '<span class="pv" data-pv="'+pd.k+'">'+Math.round(params[s.id][pd.k]*100)+'</span></div>';
             });
             el.innerHTML =
-              (locked ? '<button class="lock-badge" data-unlock="'+s.pack+'">'+ICONS.lock+PACKS[s.pack].name+'</button>' : '')+
               '<div class="c-icon">'+ICONS[s.id]+'</div>'+
               '<div><div class="c-name">'+s.name+'</div><div class="c-en">'+s.en+'</div></div>'+
-              '<span class="src-badge'+(isReal?" real":"")+'" data-cardbadge="'+s.id+'">'+(isReal?"真实录音播放中":"合成")+'</span>'+
-              '<div class="fader-zone"><div class="fader" role="slider" tabindex="'+(locked?-1:0)+'" aria-label="'+s.name+'音量" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">'+
+              '<span class="src-badge" data-cardbadge="'+s.id+'"></span>'+
+              '<div class="fader-zone"><div class="fader" role="slider" tabindex="0" aria-label="'+s.name+'音量" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">'+
                 '<div class="ticks"><i></i><i></i><i></i><i></i><i></i><i class="r" style="top:0"></i><i class="r" style="top:25%"></i><i class="r" style="top:50%"></i><i class="r" style="top:75%"></i><i class="r" style="bottom:0;top:auto"></i></div>'+
                 '<div class="slot"><div class="fill"></div></div>'+
                 '<div class="handle"></div>'+
               '</div><div class="meter"><i></i></div></div>'+
-              '<div class="c-pct">'+(locked ? '<span class="pack-tag">解锁后可用</span>' : '静音')+'</div>'+
-              (locked
-                ? '<button class="tune-toggle" disabled>调音参数 · 解锁后可调</button>'
-                : '<button class="tune-toggle" data-tune="'+s.id+'" aria-expanded="false">调音参数 ▾</button>'+
-                  '<div class="params" data-params="'+s.id+'">'+paramsHTML+'<span class="p-note">拖动即生效：密度/节奏改出现的疏密与快慢，明亮度/远近改音色与空间感，随机度改每一下的不可预测程度。</span></div>');
+              '<div class="c-pct">静音</div>'+
+              '<button class="tune-toggle" data-tune="'+s.id+'" aria-expanded="false">调音参数 ▾</button>'+
+              '<div class="params" data-params="'+s.id+'">'+paramsHTML+'</div>';
             grid.appendChild(el);
             var fader=el.querySelector(".fader");
             faderEls[s.id]={ root:el, fader:fader, fill:el.querySelector(".fill"), handle:el.querySelector(".handle"), pct:el.querySelector(".c-pct"), meter:el.querySelector(".meter i") };
-            if(!locked){
-              bindFader(s.id, fader);
-              var toggle=el.querySelector("[data-tune]");
-              var panel=el.querySelector("[data-params]");
-              toggle.addEventListener("click", function(){
-                var open=panel.classList.toggle("open");
-                toggle.setAttribute("aria-expanded", open?"true":"false");
-                toggle.textContent= open? "调音参数 ▴":"调音参数 ▾";
-              });
-              panel.querySelectorAll("[data-param]").forEach(function(inp){
-                inp.addEventListener("input", function(){
-                  var k=this.getAttribute("data-param");
-                  params[s.id][k]=this.value/100;
-                  panel.querySelector('[data-pv="'+k+'"]').textContent=this.value;
-                  applyParams(s.id);
-                  scheduleGlass();
-                });
-              });
+            var toggle=el.querySelector("[data-tune]");
+            var panel=el.querySelector("[data-params]");
+            if(premium){
+              fader.tabIndex=-1;
+              fader.setAttribute("aria-disabled","true");
+              panel.remove();
+              toggle.textContent="了解进阶音效";
+              toggle.removeAttribute("aria-expanded");
+              toggle.addEventListener("click",function(){ showPremium(s.name); });
+              return;
             }
-            var badge=el.querySelector("[data-unlock]");
-            if(badge) badge.addEventListener("click", function(){ openSheet(s.pack); });
+            bindFader(s.id, fader);
+            toggle.addEventListener("click", function(){
+              var open=panel.classList.toggle("open");
+              toggle.setAttribute("aria-expanded",String(open));
+              toggle.textContent=open ? "调音参数 ▴" : "调音参数 ▾";
+            });
+            panel.querySelectorAll("[data-param]").forEach(function(inp){
+              inp.addEventListener("input",function(){
+                var k=this.getAttribute("data-param");
+                params[s.id][k]=this.value/100;
+                panel.querySelector('[data-pv="'+k+'"]').textContent=this.value;
+                applyParams(s.id);
+              });
+            });
+            updateSourceUI(s.id);
           });
         });
       }
@@ -2328,14 +2524,17 @@
           setLevel(id, clamp01(levels[id] + (e.deltaY<0?0.05:-0.05)));
         }, {passive:false});
       }
-      var tweenTimers={};
-      function setLevel(id, v, animate){
+      var mixFrame=0;
+      function setLevel(id, v){
+        if(!sessionTools.isFreeSound(id)) return;
+        cancelAnimationFrame(mixFrame);
+        activeScene=null;
         levels[id]=clamp01(v);
         paintFader(id);
         applyGain(id);
+        updateMasterGain();
         scheduleGlass();
         paintCurrentMix();
-        if(animate){ /* reserved */ }
       }
       function paintFader(id){
         var ui=faderEls[id]; if(!ui) return;
@@ -2344,432 +2543,192 @@
         ui.fill.style.height=(v*100)+"%";
         ui.handle.style.bottom=(v*100)+"%";
         ui.fader.setAttribute("aria-valuenow", pct);
-        if(!isLocked(soundById(id))){
-          ui.pct.innerHTML = v<=0.001 ? "静音" : ("音量 <b>"+pct+"</b>");
-        }
+        ui.pct.innerHTML = !sessionTools.isFreeSound(id) ? "进阶" : v<=0.001 ? "静音" : ("音量 <b>"+pct+"</b>");
       }
-      function tweenTo(mix, done){
-        /* comfort cap: scale recipe so total never exceeds COMFORT_CAP */
-        var sum=Object.keys(mix).reduce(function(a,k){return a+(mix[k]||0);},0);
-        var scaled={};
-        Object.keys(mix).forEach(function(k){ scaled[k]= sum>COMFORT_CAP ? mix[k]*(COMFORT_CAP/sum) : mix[k]; });
-        mix=scaled;
-        var start={}, keys=Object.keys(mix), t0=null;
+      function tweenTo(mix){
+        cancelAnimationFrame(mixFrame);
+        mix=sessionTools.freeMix(mix);
+        var start={}, t0=null;
         SOUNDS.forEach(function(s){ start[s.id]=levels[s.id]; });
         var target={}; SOUNDS.forEach(function(s){ target[s.id]= mix[s.id]||0; });
         function frame(ts){
           if(!t0) t0=ts;
           var p=Math.min(1,(ts-t0)/650), e=1-Math.pow(1-p,3);
-          SOUNDS.forEach(function(s){ if(!isLocked(s)) setLevel(s.id, start[s.id]+(target[s.id]-start[s.id])*e); });
-          if(p<1) requestAnimationFrame(frame); else if(done) done();
+          SOUNDS.forEach(function(s){
+            levels[s.id]=start[s.id]+(target[s.id]-start[s.id])*e;
+            paintFader(s.id);
+            applyGain(s.id);
+          });
+          updateMasterGain();
+          scheduleGlass();
+          paintCurrentMix();
+          if(p<1) mixFrame=requestAnimationFrame(frame);
+
         }
-        requestAnimationFrame(frame);
+        mixFrame=requestAnimationFrame(frame);
       }
 
-      /* ============================== watercolor cup: one mode, eased state ==============================
-         The A mode photoreal 3D cup (WebGL2 renderer, software 3D
-         fallback, A/B toggle) is removed entirely. Only the hand-drawn
-         watercolor coupe remains, and the mix state never writes the
-         SVG directly: renderGlass() records a TARGET (layer geometry
-         and colours from getMixVisual), and a per-frame state machine
-         eases the DISPLAYED state toward it, in the slow rhythm of the
-         hand-drawn style:
-         - colour: exponential lerp (tau ~0.5s), never an instant jump
-         - level: spring with velocity, so liquid rises with inertia,
-           breathes past the mark and settles
-         - layers fade in and out by opacity as they enter or leave
-         - bubbles spawn at a layer floor fully transparent, rise
-           slowly, and fade out below the surface; nothing pops
-         - garnish, ice and condensation crossfade by opacity only
-         - fader movement and gentle cup drags feed a sway spring on
-           the whole cup; on release it settles back slowly
-         Reduced motion: springs, sway and wave motion are off, targets
-         apply at once, and only opacity fades remain. */
+      /* Watercolor cup: continuous fill, quiet meniscus and one coordinated tint. */
+      var CUP_BOWL_BOTTOM=204, CUP_BOWL_TOP=82;
+      var WC_REDUCED=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var cupState={total:0, fill:0, tint:"amber", density:0, brightness:.5, tempo:.5};
+      var cupLevel=CUP_BOWL_BOTTOM, cupLevelSpeed=0, cupTilt=0, cupTiltSpeed=0, cupPhase=0;
+      var cupMotion=0, cupIce=0, cupCondensation=0, cupDirty=true, cupLastFrame=0;
+      var currentCupColors=CUP_TINTS.amber.colors.map(cupRGB);
+      var cupTargets=currentCupColors;
+      var cupGarnishes=["Lemon","Mint","Cherry"].map(function(name){
+        return {name:name, el:$("wcGar"+name), opacity:0};
+      });
+      var cupNodes={
+        pour:$("wcPour"), liquid:$("wcLiquid"), wash:$("wcLiquidWash"), surface:$("wcSurface"),
+        edge:$("wcSurfaceEdge"), swing:$("wcSway"), condensation:$("wcCondG"),
+        stops:[$("wcLiquidTop"),$("wcLiquidMiddle"),$("wcLiquidBottom")],
+        ice:$("wcIceG"), bubbles:$("wcBubbleG").children
+      };
       var glassQueued=false;
-      function scheduleGlass(){ if(glassQueued) return; glassQueued=true; requestAnimationFrame(function(){ glassQueued=false; renderGlass(); }); }
-      var BOWL_BOT=191, BOWL_TOP=78;
-      var WC_REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-      var cupState={active:[],total:0,fillFrac:0,bounds:[],dominant:null};
-      var lastTotal=0;
-      var sway={a:0,v:0};
-      var wavePhase=0, waveAmpCur=2, wcTempoAvg=0.5;
-      function getMixVisual(){
-        var active=SOUNDS.filter(function(s){ return levels[s.id]>0.02; }).sort(function(a,b){ return levels[b.id]-levels[a.id]; });
-        var total=active.reduce(function(a,s){ return a+levels[s.id]; },0);
-        var fillFrac=Math.min(1,total/2.6);
-        var liqH=fillFrac*(BOWL_BOT-BOWL_TOP);
-        var hs=active.map(function(s){ return total? Math.max(4.5, liqH*(levels[s.id]/total)):0; });
-        var hSum=hs.reduce(function(a,b){return a+b;},0)||1; hs=hs.map(function(h){ return h/hSum*liqH; });
-        var bounds=[], y=BOWL_BOT;
-        active.forEach(function(s,i){
-          var L=liqOf(s), P=params[s.id];
-          var L2={ top:mixH(L.top,"#ffffff",P.bright*0.22), mid:L.mid, bot:mixH(L.bot,"#000000",(1-P.bright)*0.12),
-                   a:Math.max(0.3,Math.min(0.99, L.a*(1-P.dist*0.22))), bub:L.bub, turbid:L.turbid, garnish:L.garnish };
-          bounds.push({s:s,yBot:y,yTop:y-hs[i],frac: total?levels[s.id]/total:0, L:L2}); y-=hs[i];
-        });
-        return {active:active,total:total,fillFrac:fillFrac,bounds:bounds,dominant:active[0]||null, surfY:BOWL_BOT-liqH};
+      function scheduleGlass(){
+        if(glassQueued) return;
+        glassQueued=true;
+        requestAnimationFrame(function(){glassQueued=false; renderGlass();});
       }
       function renderGlass(){
-        cupState=getMixVisual();
-        var dT=cupState.total-lastTotal; lastTotal=cupState.total;
-        if(!WC_REDUCED && dT) sway.v+=Math.max(-30,Math.min(30,dT*34));
-        var ge=$("glassEmpty"); if(ge) ge.style.display=cupState.active.length?"none":"block";
-        var scene=$("ckScene"); if(scene) scene.style.setProperty("--ck-glow", cupState.dominant?cupState.dominant.color:"transparent");
-        var cap=$("glassCap");
-        if(cap){ if(!cupState.active.length) cap.innerHTML='今晚这一杯 · <b>尚未调配</b>'; else { var names=cupState.active.slice(0,3).map(function(s){return s.name;}).join(" + "); cap.innerHTML='今晚这一杯 · <b>'+names+(cupState.active.length>3?" 等 "+cupState.active.length+" 种":"")+'</b>'; } }
-        if(window.__onMixChange){ var cols=cupState.active.slice(0,3).map(function(s){return s.color;}); var avgT=cupState.active.length?cupState.active.reduce(function(a,s){return a+params[s.id].tempo;},0)/cupState.active.length:.5; window.__onMixChange(cols,8-avgT*4); }
-        wcSyncTargets();
-      }
-      /* ---------- helpers ---------- */
-      function colArr(c){ if(!c) return [203,182,150]; if(c.charAt(0)==="#") return hx(c); var m=c.match(/[\d.]+/g); return m?[parseFloat(m[0]),parseFloat(m[1]),parseFloat(m[2])]:[203,182,150]; }
-      function colCss(c){ return "rgb("+Math.round(c[0])+","+Math.round(c[1])+","+Math.round(c[2])+")"; }
-      function wcSeed(str){ var h=0; for(var i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; }
-      function wcRand(seed, k){ var x=Math.sin(seed*127.1+k*311.7)*43758.5453; return x-Math.floor(x); }
-      function wcWavePath(y, amp, phase){
-        var a1=amp, a2=amp*0.55;
-        return "M30,"+y.toFixed(1)+
-          " C70,"+(y+Math.sin(phase)*a1).toFixed(1)+" 105,"+(y+Math.sin(phase+1.7)*a2).toFixed(1)+" 140,"+(y+Math.cos(phase*0.8)*a1*0.7).toFixed(1)+
-          " C180,"+(y+Math.sin(phase+3.1)*a2).toFixed(1)+" 235,"+(y+Math.cos(phase+0.6)*a1).toFixed(1)+" 290,"+(y+Math.sin(phase+2.2)*a2*0.6).toFixed(1);
-      }
-      function lerpC(cur,tgt,f){ for(var i=0;i<3;i++) cur[i]+=(tgt[i]-cur[i])*f; }
-      /* ---------- displayed layer state ---------- */
-      var wcLayers=[];
-      var SVGNS="http://www.w3.org/2000/svg";
-      function wcBuildLayer(b, ord){
-        var seed=wcSeed(b.s.id);
-        var g=document.createElementNS(SVGNS,"g");
-        g.innerHTML=
-          '<path class="wc-body" filter="url(#wcPaint)"/>'+
-          '<path class="wc-bodybot" filter="url(#wcBlur)"/>'+
-          '<path class="wc-bleed" fill="none" stroke-width="6" filter="url(#wcBleed)"/>'+
-          '<g class="wc-tex"></g>'+
-          '<ellipse class="wc-cloudy" cx="152" fill="#FFF6E8" filter="url(#wcBlur6)"/>'+
-          '<path class="wc-sheen" fill="url(#wcSheen)"/>';
-        var clip=document.createElementNS(SVGNS,"clipPath");
-        clip.setAttribute("id","wcl-"+b.s.id);
-        clip.innerHTML='<path/>';
-        var dd=document.getElementById("wcDynDefs"); if(dd) dd.appendChild(clip);
-        g.querySelector(".wc-bleed").setAttribute("clip-path","url(#wcl-"+b.s.id+")");
-        g.querySelector(".wc-tex").setAttribute("clip-path","url(#wcl-"+b.s.id+")");
-        var tex=g.querySelector(".wc-tex"), th="";
-        var mot=[],strk=[],gran=[],spk=[];
-        for(var mI=0;mI<7;mI++){
-          mot.push({fx:wcRand(seed,mI), fy:0.10+wcRand(seed,mI+20)*0.72, frx:0.10+wcRand(seed,mI+40)*0.24, fry:0.16+wcRand(seed,mI+60)*0.30,
-                    col:mI%3===0?"top":(mI%3===1?"bot":"paper"), o:0.12+wcRand(seed,mI+80)*0.18});
-          th+='<ellipse class="wc-mot" filter="url(#wcBlur6)"/>';
-        }
-        for(var sI=0;sI<8;sI++){
-          strk.push({fx:wcRand(seed,sI+100), fy:0.10+wcRand(seed,sI+120)*0.78, len:26+wcRand(seed,sI+140)*64,
-                     lift:wcRand(seed,sI+160)*4-2, col:sI%2?"top":"bot", w:1.6+wcRand(seed,sI+180)*2.6, o:0.07+wcRand(seed,sI+200)*0.10});
-          th+='<path class="wc-strk" fill="none" stroke-linecap="round"/>';
-        }
-        for(var gI=0;gI<14;gI++){
-          gran.push({fx:wcRand(seed,gI+220), fy:0.55+wcRand(seed,gI+240)*0.42, r:0.9+wcRand(seed,gI+260)*2.1, o:0.16+wcRand(seed,gI+280)*0.26});
-          th+='<circle class="wc-gran"/>';
-        }
-        for(var pI=0;pI<22;pI++){
-          spk.push({fx:wcRand(seed,pI+300), fy:0.04+wcRand(seed,pI+320)*0.92, r:0.6+wcRand(seed,pI+340)*0.9,
-                    col:pI%3?"#FFFFFF":"#2A2118", o:0.05+wcRand(seed,pI+360)*0.08});
-          th+='<circle class="wc-spk"/>';
-        }
-        th+='<ellipse class="wc-stain" fill="none" stroke-width="1.7" filter="url(#wcBlur)"/>';
-        tex.innerHTML=th;
-        var stain={fx:0.18+wcRand(seed,400)*0.55, rx:30+wcRand(seed,420)*44, ry:3.6+wcRand(seed,440)*2.6,
-                   dash:(26+wcRand(seed,460)*30).toFixed(0)+" "+(8+wcRand(seed,480)*14).toFixed(0), o:0.38};
-        var layerG=document.getElementById("wcLayerG"); if(layerG) layerG.appendChild(g);
-        var L={ id:b.s.id, ord:ord, dead:false, g:g, clipPath:clip.firstChild,
-          body:g.querySelector(".wc-body"), bodyBot:g.querySelector(".wc-bodybot"), bleed:g.querySelector(".wc-bleed"),
-          sheen:g.querySelector(".wc-sheen"), cloudy:g.querySelector(".wc-cloudy"), texG:tex,
-          motEls:tex.querySelectorAll(".wc-mot"), strkEls:tex.querySelectorAll(".wc-strk"),
-          granEls:tex.querySelectorAll(".wc-gran"), spkEls:tex.querySelectorAll(".wc-spk"),
-          stainEl:tex.querySelector(".wc-stain"), mot:mot, strk:strk, gran:gran, spk:spk, stain:stain,
-          cur:{ yTop:b.yBot, yBot:b.yBot, vT:0, vB:0,
-                top:colArr(b.L.top), mid:colArr(b.L.mid), bot:colArr(b.L.bot),
-                a:b.L.a, alpha:0, turbid:b.L.turbid||0, frac:b.frac },
-          tgt:null };
-        wcSetTarget(L,b,ord);
-        if(WC_REDUCED){ L.cur.yTop=L.tgt.yTop; L.cur.yBot=L.tgt.yBot; L.cur.alpha=1; }
-        return L;
-      }
-      function wcSetTarget(L,b,ord){
-        L.ord=ord; L.dead=false;
-        L.tgt={ yTop:b.yTop, yBot:b.yBot, top:colArr(b.L.top), mid:colArr(b.L.mid), bot:colArr(b.L.bot),
-                a:b.L.a, turbid:b.L.turbid||0, frac:b.frac, bub:b.L.bub||0,
-                density:(params[b.s.id]?params[b.s.id].density:0.55) };
-      }
-      var wcTopId=null;
-      function wcSyncTargets(){
-        wcTempoAvg = cupState.active.length? cupState.active.reduce(function(a,s){return a+params[s.id].tempo;},0)/cupState.active.length : 0.5;
-        var seen={};
-        cupState.bounds.forEach(function(b,i){
-          seen[b.s.id]=true;
-          var L=null;
-          for(var j=0;j<wcLayers.length;j++) if(wcLayers[j].id===b.s.id){ L=wcLayers[j]; break; }
-          if(L) wcSetTarget(L,b,i); else wcLayers.push(wcBuildLayer(b,i));
+        var previousTotal=cupState.total;
+        cupState=cupMix(levels);
+        if(!WC_REDUCED) cupTiltSpeed+=Math.max(-16,Math.min(16,(cupState.total-previousTotal)*14));
+        var tint=CUP_TINTS[cupState.tint];
+        cupTargets=tint.colors.map(cupRGB);
+        var white=.14*cupState.brightness;
+        cupTargets=cupTargets.map(function(rgb){
+          return rgb.map(function(channel){return channel+(255-channel)*white;});
         });
-        wcLayers.forEach(function(L){
-          if(!seen[L.id] && !L.dead){
-            L.dead=true;
-            var yb=L.tgt?L.tgt.yBot:L.cur.yBot;
-            L.tgt={ yTop:yb, yBot:yb, top:L.cur.top, mid:L.cur.mid, bot:L.cur.bot, a:L.cur.a,
-                    turbid:L.cur.turbid, frac:0, bub:0, density:0.5 };
-          }
-        });
-        var lg=document.getElementById("wcLayerG");
-        if(lg){ wcLayers.slice().sort(function(a,b){return a.ord-b.ord;}).forEach(function(L){ lg.appendChild(L.g); }); }
-        var topB=cupState.bounds.length?cupState.bounds[cupState.bounds.length-1]:null;
-        var newTopId=topB?topB.s.id:null;
-        if(newTopId!==wcTopId){
-          wcTopId=newTopId;
-          var wg=document.getElementById("wcWaveG");
-          if(wg){
-            if(topB){
-              var tseed=wcSeed(topB.s.id), foam="";
-              for(var fI=0;fI<9;fI++){ foam+='<circle class="wc-foam" cx="'+(70+wcRand(tseed,fI+500)*180).toFixed(0)+'" r="'+(0.8+wcRand(tseed,fI+540)*1.5).toFixed(1)+'" fill="#FFFFFF" opacity="'+(0.25+wcRand(tseed,fI+560)*0.3).toFixed(2)+'"/>'; }
-              wg.innerHTML='<path id="wcTopStroke" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="26 7 12 9" opacity="0.75" filter="url(#wcDisplace)"/>'
-                +'<path id="wcTopStroke2" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="14 10 30 12" opacity="0.5" filter="url(#wcDisplace)"/>'+foam;
-            } else wg.innerHTML="";
-          }
+        $("glassEmpty").hidden=Boolean(cupState.active.length);
+        var names=cupState.active.slice(0,3).map(function(sound){ return sound.name; });
+        var caption=names.length ? names.join(" · ")+(cupState.active.length>3?" 等 "+cupState.active.length+" 种":"") : "这杯还空着";
+        $("glassCap").textContent=caption;
+        $("mixerCupName").textContent=caption;
+        $("ckScene").style.setProperty("--ck-glow",tint.colors[1]);
+        if(soundFilter==="active") updateSoundFilter();
+        if(window.__onMixChange){
+          window.__onMixChange(cupState.active.slice(0,3).map(function(sound){ return sound.color; }),8-cupState.tempo*4);
         }
-        if(topB){
-          var ts1=document.getElementById("wcTopStroke");
-          if(ts1) ts1.setAttribute("stroke", colCss(colArr(topB.L.top)));
-        }
-        var cg=document.getElementById("wcCondG");
-        if(cg){
-          if(!cg._built){
-            cg._built=true; var dots="";
-            for(var dI=0;dI<16;dI++){
-              var sd=wcSeed("cond"+dI);
-              var dx=78+wcRand(sd,1)*164, dy=104+wcRand(sd,2)*76, dr=1.2+wcRand(sd,3)*1.8;
-              dots+='<circle cx="'+dx.toFixed(0)+'" cy="'+dy.toFixed(0)+'" r="'+dr.toFixed(1)+'" fill="#A8D4F0" opacity=".9"/><circle cx="'+(dx-0.6).toFixed(1)+'" cy="'+(dy-0.6).toFixed(1)+'" r="'+(dr*0.38).toFixed(1)+'" fill="#fff"/>';
-            }
-            cg.innerHTML=dots;
-          }
-          var cool=cupState.dominant&&["rain","waves","stream","chimes","rainstreet"].indexOf(cupState.dominant.id)>=0;
-          cg.setAttribute("opacity", (cool&&cupState.fillFrac>0.18)? "0.85":"0");
-        }
+        if($("immersive").classList.contains("open")) renderImmersive();
+        cupDirty=true;
       }
-      /* ---------- bubbles: continuous lifecycle, soft in and out ---------- */
-      var wcBubbles=[];
-      function wcBubbleStep(dt){
-        var bg=document.getElementById("wcBubbleG"); if(!bg) return;
-        wcLayers.forEach(function(L){
-          if(L.dead) return;
-          var want=Math.round(L.tgt.bub*20*L.tgt.frac*(0.45+L.tgt.density*1.1));
-          var have=0; wcBubbles.forEach(function(bb){ if(bb.layer===L) have++; });
-          if(have<want && Math.random()<dt*7){
-            var el=document.createElementNS(SVGNS,"circle");
-            el.setAttribute("fill","#fff"); el.setAttribute("opacity","0");
-            bg.appendChild(el);
-            wcBubbles.push({ el:el, layer:L, p:WC_REDUCED? 0.15+Math.random()*0.7 : 0, fx:Math.random(),
-                             r:1.1+Math.random()*1.9, spd:11+wcTempoAvg*13+Math.random()*5, seed:Math.random()*6.28 });
-          }
-        });
-        for(var i=wcBubbles.length-1;i>=0;i--){
-          var bb=wcBubbles[i], L=bb.layer;
-          var hgt=Math.max(6,L.cur.yBot-L.cur.yTop);
-          if(!WC_REDUCED) bb.p+=dt*bb.spd/hgt;
-          var env=Math.min(1, Math.max(0,bb.p/0.16), Math.max(0,(1-bb.p)/0.22));
-          if(bb.p>=1 || (L.dead && L.cur.alpha<0.03)){
-            if(bb.el.parentNode) bb.el.parentNode.removeChild(bb.el);
-            wcBubbles.splice(i,1); continue;
-          }
-          bb.el.setAttribute("cx",(64+bb.fx*192+Math.sin(wavePhase*2+bb.seed)*1.8).toFixed(1));
-          bb.el.setAttribute("cy",(L.cur.yBot-2-bb.p*(hgt-4)).toFixed(1));
-          bb.el.setAttribute("r",bb.r.toFixed(1));
-          bb.el.setAttribute("opacity",(0.75*env*L.cur.alpha).toFixed(2));
-        }
-      }
-      /* ---------- ice: built once, fades and rides the surface ---------- */
-      var wcIceState=[0,0,0];
-      function wcIceStep(dt){
-        var ig=document.getElementById("wcIceG"); if(!ig) return;
-        if(!ig._built){
-          ig._built=true; var ih="";
-          for(var q=0;q<3;q++){
-            var iw=30-q*3, ihh=22-q*2;
-            ih+='<g class="wc-ice-cube" opacity="0" style="display:none"><rect width="'+iw+'" height="'+ihh+'" rx="6" fill="#E4F3FF" opacity=".88"/><rect width="'+iw+'" height="'+(ihh*0.42)+'" rx="6" fill="#fff" opacity=".65"/><path d="M4,'+ihh+' L'+(iw*0.5)+',6 L'+(iw-3)+','+ihh+'" fill="none" stroke="#BFE0F5" stroke-width="1.4" opacity=".8"/></g>';
-          }
-          ig.innerHTML=ih;
-        }
-        var topL=null;
-        wcLayers.forEach(function(L){ if(!L.dead && (!topL || L.ord>topL.ord)) topL=L; });
-        var cubes=(cupState.fillFrac>0.13 && topL)? Math.min(3,1+Math.floor(cupState.fillFrac*3)) : 0;
-        var f=WC_REDUCED?1:1-Math.exp(-dt/0.55);
-        var cubesEls=ig.querySelectorAll(".wc-ice-cube");
-        for(var i2=0;i2<3;i2++){
-          var want=(i2<cubes)?1:0;
-          wcIceState[i2]+=(want-wcIceState[i2])*f;
-          var el=cubesEls[i2]; if(!el) continue;
-          var o=wcIceState[i2];
-          if(o<0.02){ el.style.display="none"; continue; }
-          el.style.display="";
-          el.setAttribute("opacity",o.toFixed(2));
-          if(topL){
-            var iw2=30-i2*3, ihh2=22-i2*2;
-            var bob=WC_REDUCED?0:Math.sin(performance.now()*0.0009+i2*1.7)*1.6;
-            el.setAttribute("transform","translate("+(104+i2*46-iw2/2).toFixed(1)+","+(topL.cur.yTop-ihh2+7+bob).toFixed(1)+") rotate("+(-8+i2*9)+")");
-          }
-        }
-      }
-      /* ---------- garnish: crossfade by opacity, never a hard swap ---------- */
-      var wcGarState={lemon:0,mint:0,cherry:0};
-      function wcGarnishStep(dt){
-        var night=cupState.dominant&&["thunder","rural","train"].indexOf(cupState.dominant.id)>=0;
-        var gtype=!cupState.dominant?null:(night?"cherry":liqOf(cupState.dominant).garnish);
-        var els={ lemon:document.getElementById("wcGarLemon"), mint:document.getElementById("wcGarMint"), cherry:document.getElementById("wcGarCherry") };
-        var f=WC_REDUCED?1:1-Math.exp(-dt/0.5);
-        ["lemon","mint","cherry"].forEach(function(k){
-          var el=els[k]; if(!el) return;
-          var want=(gtype===k)?1:0;
-          wcGarState[k]+=(want-wcGarState[k])*f;
-          var o=wcGarState[k];
-          if(o<0.02){ el.style.display="none"; el.setAttribute("opacity","0"); return; }
-          el.style.display=""; el.setAttribute("opacity",o.toFixed(2));
-        });
-      }
-      /* ---------- per-frame step: springs, colour easing, texture follow ---------- */
-      function wcStepLayer(L, dt, isTop){
-        var cur=L.cur, tgt=L.tgt; if(!tgt) return;
-        var fc=WC_REDUCED?1:1-Math.exp(-dt/0.5);
-        lerpC(cur.top,tgt.top,fc); lerpC(cur.mid,tgt.mid,fc); lerpC(cur.bot,tgt.bot,fc);
-        cur.a+=(tgt.a-cur.a)*fc;
-        cur.turbid+=(tgt.turbid-cur.turbid)*fc;
-        cur.frac+=(tgt.frac-cur.frac)*fc;
-        var fa=WC_REDUCED?1:1-Math.exp(-dt/0.42);
-        cur.alpha+=(((L.dead)?0:1)-cur.alpha)*fa;
-        if(WC_REDUCED){ cur.yTop=tgt.yTop; cur.yBot=tgt.yBot; cur.vT=0; cur.vB=0; }
-        else{
-          var K=30, C=9.2;
-          cur.vT+=((tgt.yTop-cur.yTop)*K - cur.vT*C)*dt; cur.yTop+=cur.vT*dt;
-          cur.vB+=((tgt.yBot-cur.yBot)*K - cur.vB*C)*dt; cur.yBot+=cur.vB*dt;
-        }
-        var hgt=Math.max(0,cur.yBot-cur.yTop);
-        var amp=isTop? waveAmpCur : 1.5+waveAmpCur*0.3;
-        var ph=wavePhase*(isTop?1:0.35)+L.ord*1.37;
-        var d=wcWavePath(cur.yTop, amp, ph)+" L290,"+cur.yBot.toFixed(1)+" L30,"+cur.yBot.toFixed(1)+" Z";
-        L.body.setAttribute("d",d);
-        L.body.setAttribute("fill",colCss(cur.mid));
-        L.body.setAttribute("opacity",(cur.a*0.80*cur.alpha).toFixed(3));
-        L.bodyBot.setAttribute("d",d);
-        L.bodyBot.setAttribute("fill",colCss(cur.bot));
-        L.bodyBot.setAttribute("opacity",((0.30+cur.frac*0.25)*cur.alpha).toFixed(3));
-        L.bleed.setAttribute("d",d);
-        L.bleed.setAttribute("stroke",colCss(cur.bot));
-        L.bleed.setAttribute("opacity",(0.30*cur.alpha).toFixed(3));
-        L.clipPath.setAttribute("d",d);
-        L.sheen.setAttribute("d",d);
-        L.sheen.setAttribute("opacity",((0.30+cur.turbid*0.22)*cur.alpha).toFixed(3));
-        L.cloudy.setAttribute("cy",((cur.yTop+cur.yBot)/2).toFixed(1));
-        L.cloudy.setAttribute("ry",Math.max(4,hgt*0.30).toFixed(1));
-        L.cloudy.setAttribute("opacity",(cur.turbid>0.2? 0.16*cur.turbid*cur.alpha : 0).toFixed(3));
-        L.texG.setAttribute("opacity",cur.alpha.toFixed(3));
-        var topCss=colCss(cur.top), botCss=colCss(cur.bot);
-        for(var mI=0;mI<L.mot.length;mI++){
-          var m=L.mot[mI], me=L.motEls[mI]; if(!me) continue;
-          me.setAttribute("cx",(52+m.fx*216).toFixed(0));
-          me.setAttribute("cy",(cur.yTop+m.fy*hgt).toFixed(1));
-          me.setAttribute("rx",(m.frx*216).toFixed(0));
-          me.setAttribute("ry",Math.max(2.5,m.fry*hgt).toFixed(1));
-          me.setAttribute("fill", m.col==="top"?topCss:(m.col==="bot"?botCss:"#FFF8EC"));
-          me.setAttribute("opacity",m.o.toFixed(2));
-        }
-        for(var sI=0;sI<L.strk.length;sI++){
-          var s2=L.strk[sI], se=L.strkEls[sI]; if(!se) continue;
-          var sx=48+s2.fx*200, sy=cur.yTop+s2.fy*hgt;
-          se.setAttribute("d","M"+sx.toFixed(0)+","+sy.toFixed(1)+" q"+(s2.len*0.5).toFixed(0)+","+s2.lift.toFixed(1)+" "+s2.len.toFixed(0)+",0");
-          se.setAttribute("stroke", s2.col==="top"?topCss:botCss);
-          se.setAttribute("stroke-width",s2.w.toFixed(1));
-          se.setAttribute("opacity",s2.o.toFixed(2));
-        }
-        for(var gI=0;gI<L.gran.length;gI++){
-          var gr=L.gran[gI], ge2=L.granEls[gI]; if(!ge2) continue;
-          ge2.setAttribute("cx",(58+gr.fx*204).toFixed(0));
-          ge2.setAttribute("cy",(cur.yTop+gr.fy*hgt).toFixed(1));
-          ge2.setAttribute("r",gr.r.toFixed(1));
-          ge2.setAttribute("fill",botCss);
-          ge2.setAttribute("opacity",gr.o.toFixed(2));
-        }
-        for(var pI=0;pI<L.spk.length;pI++){
-          var pk=L.spk[pI], pe=L.spkEls[pI]; if(!pe) continue;
-          pe.setAttribute("cx",(54+pk.fx*212).toFixed(0));
-          pe.setAttribute("cy",(cur.yTop+pk.fy*hgt).toFixed(1));
-          pe.setAttribute("r",pk.r.toFixed(1));
-          pe.setAttribute("fill",pk.col);
-          pe.setAttribute("opacity",pk.o.toFixed(2));
-        }
-        if(L.stainEl){
-          L.stainEl.setAttribute("cx",(90+L.stain.fx*140).toFixed(0));
-          L.stainEl.setAttribute("cy",(cur.yTop+2.5).toFixed(1));
-          L.stainEl.setAttribute("rx",L.stain.rx.toFixed(0));
-          L.stainEl.setAttribute("ry",L.stain.ry.toFixed(1));
-          L.stainEl.setAttribute("stroke",botCss);
-          L.stainEl.setAttribute("stroke-dasharray",L.stain.dash);
-          L.stainEl.setAttribute("opacity",L.stain.o.toFixed(2));
-        }
-      }
-      var wcLastT=0;
-      (function wcLoop(now){
-        requestAnimationFrame(wcLoop);
-        var t=now||performance.now();
-        var dt=Math.min(0.05, wcLastT? (t-wcLastT)/1000 : 0.016); wcLastT=t;
-        if(dt<=0) dt=0.016;
-        if(!WC_REDUCED){
-          sway.v+=(-20*sway.a - 4.6*sway.v)*dt;
-          sway.a+=sway.v*dt;
-          if(sway.a>3.4){ sway.a=3.4; sway.v*=0.4; } if(sway.a<-3.4){ sway.a=-3.4; sway.v*=0.4; }
-          var sw=document.getElementById("wcSway");
-          if(sw) sw.setAttribute("transform","rotate("+sway.a.toFixed(2)+" 160 366)");
-          wavePhase+=dt*(0.55+wcTempoAvg*0.9);
-        }
-        var ampTgt=2.0+Math.min(5.5,Math.abs(sway.v)*0.30)+cupState.fillFrac*1.6;
-        waveAmpCur+=(ampTgt-waveAmpCur)*(WC_REDUCED?1:1-Math.exp(-dt/0.6));
-        var topL=null;
-        wcLayers.forEach(function(L){ if(!L.dead && (!topL || L.ord>topL.ord)) topL=L; });
-        for(var i=wcLayers.length-1;i>=0;i--){
-          var L=wcLayers[i];
-          wcStepLayer(L, dt, L===topL);
-          if(L.dead && L.cur.alpha<0.02 && (L.cur.yBot-L.cur.yTop)<2){
-            if(L.g.parentNode) L.g.parentNode.removeChild(L.g);
-            var cp=document.getElementById("wcl-"+L.id); if(cp && cp.parentNode) cp.parentNode.removeChild(cp);
-            wcBubbles=wcBubbles.filter(function(bb){ if(bb.layer===L){ if(bb.el.parentNode) bb.el.parentNode.removeChild(bb.el); return false; } return true; });
-            wcLayers.splice(i,1);
-          }
-        }
-        if(topL){
-          var ws1=document.getElementById("wcTopStroke"), ws2=document.getElementById("wcTopStroke2");
-          if(ws1){ ws1.setAttribute("d",wcWavePath(topL.cur.yTop, waveAmpCur, wavePhase)); ws1.setAttribute("opacity",(0.75*topL.cur.alpha).toFixed(2)); }
-          if(ws2){ ws2.setAttribute("d",wcWavePath(topL.cur.yTop+3.5, waveAmpCur*0.6, wavePhase+0.9)); ws2.setAttribute("opacity",(0.5*topL.cur.alpha).toFixed(2)); }
-          var wgEl=document.getElementById("wcWaveG");
-          if(wgEl){
-            wgEl.setAttribute("opacity",topL.cur.alpha.toFixed(2));
-            var foams=wgEl.querySelectorAll(".wc-foam");
-            foams.forEach(function(fe,fi){
-              var fx=parseFloat(fe.getAttribute("cx"))||160;
-              fe.setAttribute("cy",(topL.cur.yTop-1.5+Math.sin(wavePhase+fx*0.05+fi)*waveAmpCur*0.55+1.5).toFixed(1));
-            });
-          }
-        }
-        wcBubbleStep(dt);
-        wcIceStep(dt);
-        wcGarnishStep(dt);
-      })(performance.now());
-      /* gentle drag on the cup itself: a small sway while held, then the
-         spring above settles it back slowly. No rotation mode remains. */
-      (function bindCupSway(){
-        var stage=document.getElementById("cupStage"); if(!stage || WC_REDUCED) return;
-        var dragging=false, lx=0;
-        stage.addEventListener("pointerdown",function(e){ dragging=true; lx=e.clientX; });
-        stage.addEventListener("pointermove",function(e){
-          if(!dragging) return;
-          var dx=e.clientX-lx; lx=e.clientX;
-          sway.v+=Math.max(-14,Math.min(14,dx*0.55));
-        });
-        function end(){ dragging=false; }
-        stage.addEventListener("pointerup",end); stage.addEventListener("pointercancel",end); stage.addEventListener("pointerleave",end);
-      })();
 
+      /* Find the liquid's width against the cubic left wall of the glass. */
+      function cupHalfWidth(y){
+        var lo=0, hi=1;
+        for(var i=0;i<12;i++){
+          var t=(lo+hi)*.5, u=1-t;
+          var wallY=78*u*u*u+384*u*u*t+603*u*t*t+204*t*t*t;
+          if(wallY<y) lo=t; else hi=t;
+        }
+        var p=(lo+hi)*.5, q=1-p;
+        return 160-(49*q*q*q+159*q*q*p+285*q*p*p+160*p*p*p);
+      }
+      function paintCupLiquid(y, ripple){
+        var width=cupHalfWidth(y);
+        var depth=Math.min(width*.135,(CUP_BOWL_BOTTOM-y)*.46);
+        var left=160-width-1, right=160+width+1;
+        var yLeft=y+ripple, yRight=y-ripple;
+        var front="M"+left+" "+yLeft+" C"+left+" "+(yLeft+depth)+" "+right+" "+(yRight+depth)+" "+right+" "+yRight;
+        var back=" C"+right+" "+(yRight-depth)+" "+left+" "+(yLeft-depth)+" "+left+" "+yLeft+" Z";
+        var body=front+" V205 H"+left+" Z";
+        cupNodes.liquid.setAttribute("d",body);
+        cupNodes.wash.setAttribute("d",body);
+        cupNodes.surface.setAttribute("d",front+back);
+        cupNodes.edge.setAttribute("d",front);
+        return width;
+      }
+      function easeCupFrame(now){
+        requestAnimationFrame(easeCupFrame);
+        var dt=Math.min(.05,cupLastFrame?(now-cupLastFrame)/1000:.016);
+        cupLastFrame=now;
+        var animating=playing&&!WC_REDUCED&&cupState.fill>0;
+        if(!cupDirty&&!animating) return;
+        var target=CUP_BOWL_BOTTOM-cupState.fill*(CUP_BOWL_BOTTOM-CUP_BOWL_TOP);
+        var f=WC_REDUCED?1:1-Math.exp(-dt/.22);
+        if(WC_REDUCED){
+          cupLevel=target;
+        }else{
+          cupLevelSpeed+=((target-cupLevel)*33-10*cupLevelSpeed)*dt;
+          cupLevel+=cupLevelSpeed*dt;
+          cupTiltSpeed+=(-24*cupTilt-6*cupTiltSpeed)*dt;
+          cupTilt=Math.max(-3.2,Math.min(3.2,cupTilt+cupTiltSpeed*dt));
+        }
+        var motionTarget=animating?1:0;
+        cupMotion+=(motionTarget-cupMotion)*f;
+        cupPhase+=dt*(.75+cupState.tempo*.75)*cupMotion;
+        var garnish=CUP_TINTS[cupState.tint].garnish;
+        var iceTarget=cupState.fill>.22?.85:0;
+        var condTarget=cupState.fill>.22&&cupState.tint==="tide"?.67:0;
+        cupIce+=(iceTarget-cupIce)*f;
+        cupCondensation+=(condTarget-cupCondensation)*f;
+        cupDirty=Math.abs(cupLevel-target)>.025||Math.abs(cupLevelSpeed)>.045||
+          Math.abs(cupTilt)>.025||Math.abs(cupTiltSpeed)>.045||Math.abs(cupMotion-motionTarget)>.01||
+          Math.abs(cupIce-iceTarget)>.01||Math.abs(cupCondensation-condTarget)>.01;
+        cupGarnishes.forEach(function(g){
+          var alpha=cupState.fill>0&&g.name===garnish?1:0;
+          g.opacity+=(alpha-g.opacity)*f;
+          g.el.setAttribute("opacity",g.opacity.toFixed(3));
+          if(Math.abs(g.opacity-alpha)>.008) cupDirty=true;
+        });
+        currentCupColors=currentCupColors.map(function(rgb,i){
+          var next=rgb.map(function(channel,j){
+            var goal=cupTargets[i][j];
+            if(Math.abs(goal-channel)>.28) cupDirty=true;
+            return channel+(goal-channel)*f;
+          });
+          var value=cupCSS(next);
+          if(i<3) cupNodes.stops[i].setAttribute("stop-color",value);
+          else cupNodes.surface.setAttribute("fill",value);
+          return next;
+        });
+        cupNodes.swing.setAttribute("transform","rotate("+cupTilt.toFixed(3)+" 160 319)");
+        cupNodes.condensation.setAttribute("opacity",cupCondensation.toFixed(3));
+
+        var y=Math.max(CUP_BOWL_TOP,Math.min(CUP_BOWL_BOTTOM,cupLevel));
+        var height=CUP_BOWL_BOTTOM-y;
+        cupNodes.pour.setAttribute("visibility",height>.2?"visible":"hidden");
+        if(height<=.2) return;
+        var ripple=cupTilt*.75+Math.sin(cupPhase)*1.25*cupMotion;
+        var width=paintCupLiquid(y,ripple);
+        cupNodes.ice.setAttribute("opacity",cupIce.toFixed(3));
+        Array.prototype.forEach.call(cupNodes.ice.children,function(ice,i){
+          var x=160+width*(i? .25:-.38);
+          var bob=Math.sin(cupPhase+i*1.7)*1.15*cupMotion;
+          ice.setAttribute("transform","translate("+x+" "+(y+4+i*3+bob)+") rotate("+(i?12:-12)+")");
+        });
+        Array.prototype.forEach.call(cupNodes.bubbles,function(bubble,i){
+          var progress=(cupPhase*.23+(i+1)*.37)%1;
+          var bx=160+width*(i-2)*.22*(.4+progress*.6);
+          var by=y+height*(.83-progress*.7);
+          var opacity=Math.min(1,progress*5,(1-progress)*5)*(.24+cupState.density*.28);
+          bubble.setAttribute("cx",bx.toFixed(2));
+          bubble.setAttribute("cy",by.toFixed(2));
+          bubble.setAttribute("opacity",(height<14?0:opacity).toFixed(3));
+        });
+      }
+      requestAnimationFrame(easeCupFrame);
+
+      (function bindCupSway(){
+        var stage=$("cupStage");
+        if(WC_REDUCED) return;
+        var pointer=null, x=0;
+        stage.addEventListener("pointerdown",function(event){
+          if(event.button!==0||pointer!==null) return;
+          pointer=event.pointerId;
+          x=event.clientX;
+          stage.setPointerCapture(pointer);
+        });
+        stage.addEventListener("pointermove",function(event){
+          if(event.pointerId!==pointer) return;
+          cupTiltSpeed+=Math.max(-10,Math.min(10,(event.clientX-x)*.34));
+          x=event.clientX;
+          cupDirty=true;
+        });
+        stage.addEventListener("lostpointercapture",function(){pointer=null;});
+      })();
 
       function paintCurrentMix(){
         var active=SOUNDS.filter(function(s){ return levels[s.id]>0.02; });
@@ -2802,90 +2761,112 @@
       /* ============================== transport ============================== */
       var ICON_PLAY='<path d="M8 5.5v13l11-6.5z"/>';
       var ICON_PAUSE='<path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/>';
-      function setPlaying(on){
-        ensureCtx(); initDecks();
-        if(on){
-          AC.resume();
-          playing=true;
-          if(!SOUNDS.some(function(s){ return levels[s.id]>0.02; })){
-            tweenTo({rain:.45, fire:.25, piano:.22});
-            toast("先替你倒了小半杯：雨声 + 篝火 + 钢琴，音量放轻了，接着调");
-          }
-          SOUNDS.forEach(function(s){ var d=decks[s.id]; if(!(d&&d.ok) && levels[s.id]>0.02) startGen(s.id); });
-          fadeFactor=0; fadeTo(1, 3); /* 3s gentle fade-in */
-          startTimerIfNeeded();
-        }else{
-          /* 5s gentle fade-out, never cut abruptly */
-          var wasFocus=focusOn; stopFocus(true);
-          fadeTo(0, 5, function(){
-            playing=false;
-            SOUNDS.forEach(function(s){ stopGen(s.id); });
-            syncDeckVolumes();
-            document.body.classList.toggle("is-playing", false);
-            $("playIcon").innerHTML=ICON_PLAY;
-            $("ctaPlay").textContent="▶ 开始调音";
-            var ip=$("immPlay"); if(ip) ip.textContent="继续播放";
-          });
-          stopTimer();
-          document.body.classList.toggle("is-playing", true);
-          return;
+      var stopVoicesTimer;
+      function fmtTime(seconds){
+        var minutes=Math.floor(seconds/60), rest=seconds%60;
+        return String(minutes).padStart(2,"0")+":"+String(rest).padStart(2,"0");
+      }
+      function armSessionGain(){
+        if(!sessionGain) return;
+        var remaining=session.remaining()||0, now=AC.currentTime;
+        var gain=sessionGain.gain;
+        gain.cancelScheduledValues(now);
+        gain.setValueAtTime(Math.min(1,remaining/5000),now);
+        if(remaining>5000) gain.setValueAtTime(1,now+(remaining-5000)/1000);
+        if(remaining>0) gain.linearRampToValueAtTime(0,now+remaining/1000);
+      }
+      function paintSession(){
+        var remaining=session.remaining();
+        var display=fmtTime(remaining===null ? 600 : Math.ceil(remaining/1000));
+        ["focusRead","immFocus"].forEach(function(id){
+          var el=$(id);
+          if(el.textContent!==display) el.textContent=display;
+        });
+      }
+      function tickSession(){
+        paintSession();
+        if(session.remaining()!==0 || (!playing && !Object.keys(bedNodes).length)) return;
+        replayMix=playing;
+        replayBeds=Object.keys(bedNodes);
+        armSessionGain();
+        if(playing) setPlaying(false);
+        replayBeds.forEach(stopBed);
+        showSessionDone();
+      }
+      function openListeningWindow(){
+        if(session.remaining()!==0){
+          try{ ensureCtx(); }
+          catch(error){ toast("浏览器暂时无法播放声音"); return false; }
         }
-        document.body.classList.toggle("is-playing", playing);
-        $("playIcon").innerHTML = playing? ICON_PAUSE : ICON_PLAY;
-        $("ctaPlay").textContent = playing? "⏸ 暂停这一杯" : "▶ 开始调音";
-        var ip2=$("immPlay"); if(ip2) ip2.textContent = playing? "暂停":"继续播放";
+        if(!session.begin()){
+          tickSession();
+          showSessionDone();
+          return false;
+        }
+        armSessionGain();
+        paintSession();
+        return true;
       }
-      $("playBtn").addEventListener("click", function(){ setPlaying(!playing); });
-      $("ctaPlay").addEventListener("click", function(){
-        document.getElementById("mixer").scrollIntoView({behavior:"smooth"});
-        if(!playing) setPlaying(true);
-      });
-      $("masterVol").addEventListener("input", function(){
-        masterVol=Math.min(MASTER_CAP, this.value/100);
-        if(master) master.gain.setTargetAtTime(masterVol*masterVol*fadeFactor, AC.currentTime, .05);
-        syncDeckVolumes();
-      });
-      $("clearBtn").addEventListener("click", function(){ tweenTo({}); toast("全部归零，安静了"); });
-      $("randomBtn").addEventListener("click", function(){
-        var pool=SOUNDS.filter(function(s){ return !isLocked(s); });
-        var picks=[]; var copy=pool.slice();
-        var n=2+Math.floor(Math.random()*3);
-        for(var i=0;i<n;i++){ picks.push(copy.splice(Math.floor(Math.random()*copy.length),1)[0]); }
-        var mix={};
-        picks.forEach(function(s){ mix[s.id]=0.3+Math.random()*0.6; });
-        tweenTo(mix);
-        if(!playing) setPlaying(true);
-        toast("随机一杯："+picks.map(function(s){return s.name;}).join(" + "));
-      });
-
-      /* timer */
-      function fmtTime(sec){ var m=Math.floor(sec/60), s=sec%60; return (m<10?"0":"")+m+":"+(s<10?"0":"")+s; }
-      function startTimerIfNeeded(){
-        stopTimer(true);
-        if(!timerMin || !playing) return;
-        timerLeft=timerMin*60;
-        $("timerReadWrap").style.display="flex";
-        $("timerRead").textContent=fmtTime(timerLeft);
-        timerInt=setInterval(function(){
-          timerLeft--;
-          $("timerRead").textContent=fmtTime(Math.max(0,timerLeft));
-          if(timerLeft<=0){
-            stopTimer();
-            toast("定时到了，这一杯用 5 秒慢慢淡出 · 晚安");
-            if(playing) setPlaying(false);
+      function setPlaying(on, fillEmpty){
+        if(on && !openListeningWindow()) return false;
+        if(on===playing) return true;
+        clearTimeout(stopVoicesTimer);
+        playing=on;
+        var t=AC.currentTime, envelope=transport.gain;
+        updateMasterGain();
+        if(envelope.cancelAndHoldAtTime) envelope.cancelAndHoldAtTime(t);
+        else {
+          var value=envelope.value;
+          envelope.cancelScheduledValues(t);
+          envelope.setValueAtTime(value,t);
+        }
+        envelope.linearRampToValueAtTime(on ? 1 : 0,t+(on ? 3 : 5));
+        if(on){
+          AC.resume().catch(function(){ toast("浏览器暂时无法播放声音"); });
+          if(fillEmpty!==false){
+            if(!SOUNDS.some(function(s){ return levels[s.id]>.02; })) tweenTo({rain:.45,fire:.25,piano:.22});
+            SOUNDS.forEach(function(s){ applyGain(s.id); });
           }
-        },1000);
+        }else{
+          stopVoicesTimer=setTimeout(function(){
+            SOUNDS.forEach(function(s){ stopGen(s.id); });
+          },5100);
+        }
+        document.body.classList.toggle("is-playing",playing);
+        $("playIcon").innerHTML=playing ? ICON_PAUSE : ICON_PLAY;
+        $("playBtn").setAttribute("aria-label",playing ? "暂停" : "播放");
+        $("ctaPlay").textContent=playing ? "⏸ 暂停这一杯" : "▶ 自己调一杯";
+        $("immPlay").textContent=playing ? "暂停" : "继续播放";
+        return true;
       }
-      function stopTimer(keepRead){
-        if(timerInt){ clearInterval(timerInt); timerInt=null; }
-        if(!keepRead) $("timerReadWrap").style.display="none";
+      function playMix(mix,scene){
+        var starting=!playing;
+        if(!setPlaying(true,false)) return false;
+        if(starting) SOUNDS.forEach(function(sound){ levels[sound.id]=0; applyGain(sound.id); });
+        activeScene=scene||null;
+        tweenTo(mix);
+        return true;
       }
-      $("timerChips").addEventListener("click", function(e){
-        var b=e.target.closest(".chip"); if(!b) return;
-        this.querySelectorAll(".chip").forEach(function(c){ c.classList.remove("on"); });
-        b.classList.add("on");
-        timerMin=parseInt(b.getAttribute("data-min"),10)||0;
-        if(playing) startTimerIfNeeded(); else stopTimer();
+      $("playBtn").addEventListener("click",function(){ setPlaying(!playing); });
+      $("ctaPlay").addEventListener("click",function(){
+        if(setPlaying(!playing)) $("mixer").scrollIntoView({behavior:"smooth"});
+      });
+      $("masterVol").addEventListener("input",function(){
+        masterVol=Math.min(MASTER_CAP,this.value/100);
+        updateMasterGain();
+      });
+      $("clearBtn").addEventListener("click",function(){
+        activeScene=null;
+        tweenTo({});
+        toast("全部归零，安静了");
+      });
+      $("randomBtn").addEventListener("click",function(){
+        var pool=SOUNDS.filter(function(sound){ return sessionTools.isFreeSound(sound.id); });
+        var picks=[], n=2+Math.floor(Math.random()*3);
+        for(var i=0;i<n;i++){ picks.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]); }
+        var mix={};
+        picks.forEach(function(sound){ mix[sound.id]=.3+Math.random()*.6; });
+        if(playMix(mix)) toast("随机一杯："+picks.map(function(sound){ return sound.name; }).join(" + "));
       });
 
       /* ============================== recipes ============================== */
@@ -2903,77 +2884,49 @@
         var wrap=$("recipeCards");
         RECIPES.forEach(function(r){
           var card=document.createElement("div"); card.className="card recipe-card";
-          var locked = !r.free && !unlocked[r.pack];
-          card.innerHTML='<h3>'+r.name+'<span class="tag'+(r.free?" free":"")+'">'+r.tag+'</span></h3>'+
+          card.innerHTML='<h3>'+r.name+'<span class="tag'+(r.premium?' premium':'')+'">'+(r.premium?'进阶 · ':'')+r.tag+'</span></h3>'+
             "<p>"+r.desc+"</p>"+ mixBarHTML(r.mix) +
-            '<div class="row">'+
-              (locked
-                ? '<button class="btn btn-ember btn-sm">演示解锁 '+PACKS[r.pack].name+' ¥{{价格}}</button>'
-                : '<button class="btn btn-primary btn-sm">就调这杯</button>')+
-            "</div>";
-          var btn=card.querySelector("button");
-          btn.addEventListener("click", function(){
-            if(locked){ openSheet(r.pack); return; }
-            tweenTo(r.mix);
-            if(!playing) setPlaying(true);
-            document.getElementById("mixer").scrollIntoView({behavior:"smooth"});
-            toast("已调出「"+r.name+"」，可以再按自己的口味改");
+            '<div class="row"><button class="btn '+(r.premium?'btn-ghost':'btn-primary')+' btn-sm">'+(r.premium?'了解进阶':'进入场景')+'</button></div>';
+          card.querySelector("button").addEventListener("click",function(){
+            if(r.premium) showPremium(r.name);
+            else chooseScene(r);
           });
           wrap.appendChild(card);
-        });
-      }
-
-      /* ============================== packs ============================== */
-      function buildPacks(){
-        var wrap=$("packCards");
-        Object.keys(PACKS).forEach(function(pid){
-          var p=PACKS[pid];
-          var card=document.createElement("div"); card.className="card pack-card"; card.id="pack-"+pid;
-          card.innerHTML='<h3>'+p.name+'<span class="tag">'+p.tag+'</span></h3><p>'+p.desc+'</p>'+
-            '<div class="sounds">'+p.sounds.map(function(id){ var s=soundById(id); return '<span><i style="background:'+s.color+'"></i>'+s.name+'</span>'; }).join("")+
-            '<span>配方「'+p.recipe+'」</span></div>'+
-            '<div class="row pack-row"><span class="price">¥{{价格}} <small>一次买断</small></span><span style="flex:1"></span>'+
-            '<button class="btn btn-ember btn-sm">演示解锁</button></div>';
-          card.querySelector("button").addEventListener("click", function(){ openSheet(pid); });
-          wrap.appendChild(card);
-        });
-      }
-      function refreshPackUI(){
-        Object.keys(PACKS).forEach(function(pid){
-          var card=$("pack-"+pid); if(!card) return;
-          var row=card.querySelector(".pack-row");
-          if(unlocked[pid]){
-            row.innerHTML='<span class="owned">✓ 已解锁，原料和配方都能用了</span>';
+          if(r.featured){
+            var scene=document.createElement("button");
+            scene.type="button";
+            scene.className="scene-option";
+            scene.innerHTML='<span class="scene-intent">'+r.intent+'</span><span class="scene-name">'+r.name+'</span>';
+            scene.addEventListener("click",function(){ chooseScene(r); });
+            $("featuredScenes").appendChild(scene);
           }
         });
       }
 
-      /* ============================== unlock sheet ============================== */
-      function openSheet(pid){
-        currentSheetPack=pid;
-        var p=PACKS[pid];
-        $("sheetTitle").textContent=p.name+" · "+p.tag;
-        $("sheetDesc").textContent=p.desc;
-        $("sheetSounds").innerHTML=p.sounds.map(function(id){ var s=soundById(id); return '<span><i style="background:'+s.color+'"></i>'+s.name+'</span>'; }).join("")+'<span>配方「'+p.recipe+'」</span>';
-        $("sheetPrice").innerHTML="¥{{价格}}";
-        $("sheetBuy").textContent="演示解锁 · ¥{{价格}}";
-        $("overlay").classList.add("open");
+      function chooseScene(scene){
+        if(!playMix(scene.mix,scene)){
+          pendingScene=scene;
+          return;
+        }
+        pendingScene=null;
+        enterImmersive();
       }
-      function closeSheet(){ $("overlay").classList.remove("open"); currentSheetPack=null; }
-      $("sheetCancel").addEventListener("click", closeSheet);
-      $("overlay").addEventListener("click", function(e){ if(e.target===this) closeSheet(); });
-      $("sheetBuy").addEventListener("click", function(){
-        var pid=currentSheetPack; if(!pid) return;
-        unlocked[pid]=true;
-        closeSheet();
-        // rebuild faders + recipes to reflect unlock
-        $("faders").innerHTML=""; faderEls={}; buildFaders();
-        SOUNDS.forEach(function(s){ paintFader(s.id); });
-        $("recipeCards").innerHTML=""; buildRecipes();
-        refreshPackUI();
-        if(playing){ PACKS[pid].sounds.forEach(function(id){ applyGain(id); }); }
-        toast("已解锁「"+PACKS[pid].name+"」，新原料已经摆上调音台");
-      });
+
+      function playSavedMix(recipe){
+        var mix=sessionTools.freeMix(recipe.mix);
+        if(!Object.values(mix).some(function(level){ return level>.02; })){
+          showPremium(recipe.name);
+          return false;
+        }
+        if(!playMix(mix)) return false;
+        if(recipe.params) applyParamsMap(recipe.params);
+        var hasPremium=Object.keys(recipe.mix).some(function(id){
+          return recipe.mix[id]>.02 && !sessionTools.isFreeSound(id);
+        });
+        $("mixer").scrollIntoView({behavior:"smooth"});
+        toast(hasPremium ? "已调出基础音效，配方中的进阶音效已保留" : "已调出「"+recipe.name+"」");
+        return true;
+      }
 
       /* ============================== my recipes ============================== */
       function encodeRecipe(name, mix, prm){
@@ -2996,7 +2949,9 @@
         var json=decodeURIComponent(escape(atob(code)));
         var payload=JSON.parse(json);
         var mix={};
-        Object.keys(payload.m||{}).forEach(function(k){ if(soundById(k)) mix[k]=clamp01(payload.m[k]/100); });
+        Object.keys(payload.m||{}).forEach(function(k){
+          if(soundById(k) && Number.isFinite(payload.m[k])) mix[k]=clamp01(payload.m[k]/100);
+        });
         var prm=null;
         if(payload.p){
           prm={};
@@ -3006,7 +2961,7 @@
             prm[id]=o;
           });
         }
-        return { name:payload.n||"朋友的配方", mix:mix, params:prm };
+        return { name:typeof payload.n==="string" ? (payload.n.trim().slice(0,32)||"朋友的配方") : "朋友的配方", mix:mix, params:prm };
       }
       function copyText(text, okMsg){
         function done(){ toast(okMsg); }
@@ -3036,7 +2991,7 @@
         myRecipes.unshift({ name:name, mix:mix, params:prm, at:new Date() });
         $("recipeName").value="";
         renderMine();
-        toast("已保存「"+name+"」");
+        toast(persistRecipes() ? "已保存「"+name+"」" : "已保存到当前页面，浏览器存储不可用");
       });
       function renderMine(){
         var list=$("mineList");
@@ -3047,8 +3002,9 @@
         list.innerHTML="";
         myRecipes.forEach(function(r, idx){
           var item=document.createElement("div"); item.className="mine-item";
-          var timeStr=r.at.getHours()+":"+("0"+r.at.getMinutes()).slice(-2);
-          item.innerHTML='<div class="top"><h4>'+escapeHtml(r.name)+'</h4><time>今天 '+timeStr+' 调的</time></div>'+
+          var timeStr=r.at.toLocaleDateString("zh-CN",{month:"short",day:"numeric"})+" "+
+            r.at.toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit",hour12:false});
+          item.innerHTML='<div class="top"><h4>'+escapeHtml(r.name)+'</h4><time>'+timeStr+'</time></div>'+
             mixBarHTML(r.mix)+
             '<div class="ops">'+
               '<button class="op-btn solid" data-op="apply">调出这杯</button>'+
@@ -3059,17 +3015,10 @@
           item.querySelectorAll("[data-op]").forEach(function(b){
             b.addEventListener("click", function(){
               var op=b.getAttribute("data-op");
-              if(op==="apply"){
-                var lockedIds=Object.keys(r.mix).filter(function(id){ return isLocked(soundById(id)); });
-                if(r.params) applyParamsMap(r.params);
-                tweenTo(r.mix);
-                if(!playing) setPlaying(true);
-                document.getElementById("mixer").scrollIntoView({behavior:"smooth"});
-                toast(lockedIds.length? "已调出这杯（其中 "+lockedIds.length+" 种原料还没解锁，已跳过）" : "已调出「"+r.name+"」");
-              }
+              if(op==="apply") playSavedMix(r);
               if(op==="code"){ copyText(encodeRecipe(r.name, r.mix, r.params), "配方码已复制，发给朋友就能调出同款（连每味原料的参数一起）"); }
               if(op==="card"){ drawShareCard(r); }
-              if(op==="del"){ myRecipes.splice(idx,1); renderMine(); toast("已删除「"+r.name+"」"); }
+              if(op==="del"){ myRecipes.splice(idx,1); persistRecipes(); renderMine(); toast("已删除「"+r.name+"」"); }
             });
           });
           list.appendChild(item);
@@ -3082,17 +3031,11 @@
         try{
           var r=decodeRecipe(code);
           if(!Object.keys(r.mix).length) throw new Error("empty");
-          var lockedIds=Object.keys(r.mix).filter(function(id){ return isLocked(soundById(id)); });
-          var playableMix={};
-          Object.keys(r.mix).forEach(function(id){ if(!isLocked(soundById(id))) playableMix[id]=r.mix[id]; });
           myRecipes.unshift({ name:r.name, mix:r.mix, params:r.params, at:new Date() });
+          persistRecipes();
           renderMine();
-          if(r.params) applyParamsMap(r.params);
-          tweenTo(playableMix);
-          if(!playing) setPlaying(true);
           $("importCode").value="";
-          document.getElementById("mixer").scrollIntoView({behavior:"smooth"});
-          toast(lockedIds.length? "导入了「"+r.name+"」，有 "+lockedIds.length+" 种原料待解锁" : "导入成功，正在调出「"+r.name+"」");
+          playSavedMix(r);
         }catch(e){
           toast("这个配方码读不出来，检查一下有没有复制完整");
         }
@@ -3102,22 +3045,19 @@
       function drawShareCard(r){
         var c=document.createElement("canvas"); c.width=900; c.height=1160;
         var x=c.getContext("2d");
-        var dark = true; /* v4: the page is Dark UI only, share card matches */
         var grd=x.createLinearGradient(0,0,0,1160);
-        grd.addColorStop(0, dark? "#18211a":"#f2f0e4"); grd.addColorStop(1, dark? "#0c110d":"#e4e2d0");
+        grd.addColorStop(0, "#fff6e7"); grd.addColorStop(1, "#f3e5e1");
         x.fillStyle=grd; x.fillRect(0,0,900,1160);
-        x.fillStyle= dark? "#ecead9":"#20261f";
+        x.fillStyle= "#352a28";
         x.font="600 30px Manrope,sans-serif"; x.fillText("声 音 实 验 室", 70, 105);
-        x.font="500 24px Manrope,sans-serif"; x.fillStyle= dark? "#a9b09d":"#5c665a";
+        x.font="500 24px Manrope,sans-serif"; x.fillStyle= "#705e56";
         x.fillText("mix your own cup of sound", 70, 148);
-        x.font="600 72px Manrope,sans-serif"; x.fillStyle= dark? "#ecead9":"#20261f";
+        x.font="600 72px Manrope,sans-serif"; x.fillStyle= "#352a28";
         wrapText(x, r.name, 70, 280, 760, 92, 2);
-        /* coupe glass: bowl, gradient layers, bubbles, stem, foot */
         var gx=270, gy=420, gw=360, bowlBot=gy+218;
-        var active=Object.keys(r.mix).filter(function(id){ return r.mix[id]>0.02; })
-          .sort(function(a,b){ return r.mix[b]-r.mix[a]; });
-        var total=active.reduce(function(a,id){ return a+r.mix[id]; },0)||1;
-        var fillFrac=Math.min(1,total/2.6), liqH=196*fillFrac, y=bowlBot-8;
+        var look=cupMix(r.mix), colors=CUP_TINTS[look.tint].colors;
+        var liqH=196*look.fill, y=bowlBot-5-liqH;
+        var half=gw*.5*cupHalfWidth(CUP_BOWL_BOTTOM-look.fill*(CUP_BOWL_BOTTOM-CUP_BOWL_TOP))/111;
         function bowlPath(){
           x.beginPath();
           x.moveTo(gx, gy);
@@ -3126,41 +3066,35 @@
           x.closePath();
         }
         x.save(); bowlPath(); x.clip();
-        active.forEach(function(id){
-          var h=Math.max(10, liqH*(r.mix[id]/total));
-          y-=h;
-          var L=liqOf(soundById(id));
-          var grd2=x.createLinearGradient(0,y,0,y+h);
-          grd2.addColorStop(0,L.top); grd2.addColorStop(.55,L.mid); grd2.addColorStop(1,L.bot);
-          x.globalAlpha=L.a; x.fillStyle=grd2; x.fillRect(gx-6, y, gw+12, h+2);
+        if(liqH>0){
+          var grd2=x.createLinearGradient(0,y,0,bowlBot);
+          grd2.addColorStop(0,colors[0]); grd2.addColorStop(.53,colors[1]); grd2.addColorStop(1,colors[2]);
+          x.globalAlpha=.86; x.fillStyle=grd2; x.fillRect(gx,y,gw,bowlBot-y);
+          x.globalAlpha=.86; x.fillStyle=colors[3]; x.strokeStyle="rgba(255,250,222,.85)"; x.lineWidth=2.1;
+          x.beginPath(); x.ellipse(gx+gw*.5,y,half,half*.1,0,0,Math.PI*2); x.fill(); x.stroke();
           x.globalAlpha=1;
-        });
-        x.fillStyle="rgba(255,255,255,.4)";
-        for(var bi=0; bi<26; bi++){
-          var bx=gx+30+((bi*67)%(gw-60)), by=bowlBot-14-((bi*41)%Math.max(20,liqH));
-          x.beginPath(); x.arc(bx, by, 2+(bi%3), 0, 7); x.fill();
         }
         var sh=x.createLinearGradient(gx,gy,gx+gw,bowlBot);
-        sh.addColorStop(0,"rgba(255,255,255,.20)"); sh.addColorStop(.4,"rgba(255,255,255,0)");
+        sh.addColorStop(0,"rgba(255,255,255,.26)"); sh.addColorStop(.4,"rgba(255,255,255,0)");
         x.fillStyle=sh; x.fillRect(gx,gy,gw,bowlBot-gy);
         x.restore();
-        x.strokeStyle="rgba(236,234,217,.8)"; x.lineWidth=6;
+        x.strokeStyle="#66878b"; x.lineWidth=4;
         bowlPath(); x.stroke();
-        x.beginPath(); x.moveTo(gx,gy); x.lineTo(gx+gw,gy); x.stroke();
+        x.beginPath(); x.ellipse(gx+gw/2,gy,gw/2,16,0,0,Math.PI*2); x.stroke();
         x.lineWidth=10;
         x.beginPath(); x.moveTo(gx+gw/2-4, bowlBot+4); x.lineTo(gx+gw/2-3, bowlBot+96); x.stroke();
         x.beginPath(); x.moveTo(gx+gw/2-70, bowlBot+108); x.lineTo(gx+gw/2+70, bowlBot+108); x.stroke();
         /* ingredient list */
         x.font="500 32px 'Noto Sans SC',sans-serif";
         var ly=900;
-        active.slice(0,5).forEach(function(id){
-          var s=soundById(id);
+        look.active.slice(0,4).forEach(function(s){
+          var id=s.id;
           x.fillStyle=s.color; x.fillRect(70, ly-26, 26, 26);
-          x.fillStyle= dark? "#ecead9":"#20261f";
+          x.fillStyle= "#352a28";
           x.fillText(s.name+"  "+Math.round(r.mix[id]*100), 116, ly);
           ly+=52;
         });
-        x.font="700 30px 'Noto Serif SC',serif"; x.fillStyle= dark? "#e59a58":"#9d5225";
+        x.font="700 30px 'Noto Serif SC',serif"; x.fillStyle= "#9d5225";
         x.fillText("自己调一杯声音", 70, 1090);
         var a=document.createElement("a");
         a.download="声音实验室-"+r.name+".png";
@@ -3190,166 +3124,218 @@
 
       /* ============================== v2 focus (25 min pomodoro) ============================== */
       /* CountUp-style rolling digits: only the digit that changed rolls */
-      function rollText(el, text){
-        if(!el) return;
-        var prev=el.getAttribute("data-v")||"";
-        if(prev===text) return;
-        el.setAttribute("data-v", text);
-        el.innerHTML="";
-        for(var i=0;i<text.length;i++){
-          var sp=document.createElement("span");
-          sp.textContent=text[i];
-          if(/\d/.test(text[i]) && prev[i]!==text[i]) sp.className="roll-digit";
-          el.appendChild(sp);
+      var replayBeds=[], replayMix=true;
+      function showSessionDone(){
+        var dialog=$("sessionDone");
+        if(!dialog.open) dialog.showModal();
+      }
+      function showPremium(name){
+        $("premiumMessage").textContent="「"+name+"」属于进阶内容。进阶版正在筹备中。";
+        var dialog=$("premiumDialog");
+        if(!dialog.open) dialog.showModal();
+      }
+      $("sdClose").addEventListener("click",function(){ $("sessionDone").close(); });
+      $("sdAgain").addEventListener("click",function(){
+        if(!session.restart()) return;
+        var scene=pendingScene;
+        $("sessionDone").close();
+        if(scene) chooseScene(scene);
+        else {
+          if(replayMix) setPlaying(true);
+          replayBeds.forEach(startBed);
         }
-      }
-      function paintFocus(){
-        var t=focusOn? fmtTime(focusLeft) : "";
-        rollText($("focusRead"), t);
-        rollText($("immFocus"), focusOn? t : "");
-        var fb=$("focusBtn"); if(fb) fb.textContent= focusOn? "结束专注":"开始专注";
-        var ib=$("immFocusBtn"); if(ib) ib.textContent= focusOn? "结束专注":"专注 25 分钟";
-      }
-      function stopFocus(silent){
-        if(focusInt){ clearInterval(focusInt); focusInt=null; }
-        focusOn=false; focusLeft=0; paintFocus();
-      }
-      function startFocus(){
-        if(focusOn){ stopFocus(); toast("专注已结束，声音继续轻轻放着"); return; }
-        if(!playing) setPlaying(true);
-        focusOn=true; focusLeft=25*60; paintFocus();
-        toast("专注 25 分钟开始，结束时会用 5 秒柔和淡出，不突然断音");
-        focusInt=setInterval(function(){
-          focusLeft--; paintFocus();
-          if(focusLeft<=0){
-            stopFocus(true);
-            toast("25 分钟到了，这一杯用 5 秒慢慢淡出 · 休息一下");
-            if(playing) setPlaying(false);
-            showSessionDone();
-          }
-        },1000);
-      }
-      $("focusBtn").addEventListener("click", startFocus);
-      $("immFocusBtn").addEventListener("click", startFocus);
-
-      /* ============================== v9 focus completion state ============================== */
-      var sdEl=$("sessionDone");
-      function showSessionDone(){ if(sdEl) sdEl.hidden=false; }
-      function hideSessionDone(){ if(sdEl) sdEl.hidden=true; }
-      if(sdEl){
-        $("sdClose").addEventListener("click", hideSessionDone);
-        $("sdAgain").addEventListener("click", function(){ hideSessionDone(); startFocus(); });
-        $("sdSave").addEventListener("click", function(){
-          hideSessionDone();
-          var m=document.getElementById("mine"); if(m) m.scrollIntoView({behavior:"smooth"});
-          var nm=$("recipeName"); if(nm && !nm.value.trim()){ var dn=defaultName(); if(dn) nm.value=dn; }
-          setTimeout(function(){ if(nm) nm.focus({preventScroll:true}); }, 650);
+        replayBeds=[];
+        replayMix=true;
+      });
+      $("sessionDone").addEventListener("close",function(){ pendingScene=null; });
+      $("sdSave").addEventListener("click",function(){
+        $("sessionDone").close();
+        exitImmersive();
+        $("mine").scrollIntoView({behavior:"smooth"});
+        $("recipeName").focus({preventScroll:true});
+      });
+      document.querySelectorAll("[data-see-plus]").forEach(function(button){
+        button.addEventListener("click",function(){
+          button.closest("dialog").close();
+          exitImmersive();
+          $("plus").scrollIntoView({behavior:"smooth"});
         });
-        sdEl.addEventListener("click", function(e){ if(e.target===sdEl) hideSessionDone(); });
-      }
+      });
 
-      /* ============================== v2 immersive ============================== */
-      var stageHome=null;
+      var stageHome=null, immersiveTrigger=null;
+      function setBackgroundInert(inert){
+        document.querySelectorAll("main,.topbar").forEach(function(section){
+          section.inert=inert;
+          if(inert) section.setAttribute("aria-hidden","true");
+          else section.removeAttribute("aria-hidden");
+        });
+      }
       function renderImmersive(){
-        var holder=$("immScene"); if(!holder) return;
-        var stageEl=document.getElementById("cupStage");
-        if(stageEl){ if(!stageHome) stageHome={p:stageEl.parentNode, n:stageEl.nextSibling}; if(stageEl.parentNode!==holder) holder.appendChild(stageEl); }
-        var active=SOUNDS.filter(function(s){ return levels[s.id]>0.02; }).sort(function(a,b){return levels[b.id]-levels[a.id];});
-        if(active[0]) $("immFlow").style.setProperty("--c1", active[0].color);
-        if(active[1]) $("immFlow").style.setProperty("--c2", active[1].color);
-        if(active[2]) $("immFlow").style.setProperty("--c3", active[2].color);
-        $("immTitle").textContent= active.length? active.slice(0,3).map(function(s){return s.name;}).join(" + ") : "今晚这一杯";
+        var holder=$("immScene"), stage=$("cupStage");
+        if(!stageHome) stageHome={parent:stage.parentNode,next:stage.nextSibling};
+        if(stage.parentNode!==holder) holder.appendChild(stage);
+        var active=SOUNDS.filter(function(s){ return levels[s.id]>.02; })
+          .sort(function(a,b){ return levels[b.id]-levels[a.id]; });
+        for(var i=0;i<3;i++){
+          var color="--c"+(i+1);
+          if(active[i]) $("immFlow").style.setProperty(color,active[i].color);
+          else $("immFlow").style.removeProperty(color);
+        }
+        $("immTitle").textContent=activeScene ? activeScene.name :
+          active.length ? active.slice(0,3).map(function(s){ return s.name; }).join(" + ") : "今晚这一杯";
+        $("immSub").textContent=activeScene ? activeScene.desc : "留一点时间给手上的事。";
       }
       function enterImmersive(){
-        renderImmersive(); paintFocus();
-        var el=$("immersive"); el.classList.add("open"); el.setAttribute("aria-hidden","false");
-        if(el.requestFullscreen){ try{ el.requestFullscreen(); }catch(e){} }
-        if(!playing) setPlaying(true);
-        toast("已进入沉浸模式，只剩这一杯和呼吸");
+        if(!setPlaying(true)) return;
+        var el=$("immersive");
+        if(el.classList.contains("open")) return;
+        immersiveTrigger=document.activeElement;
+        renderImmersive();
+        el.classList.add("open");
+        el.setAttribute("aria-hidden","false");
+        document.body.classList.add("is-immersive");
+        $("immPlay").focus({preventScroll:true});
+        setBackgroundInert(true);
       }
       function exitImmersive(){
-        if(stageHome && stageHome.p){ var st=document.getElementById("cupStage"); if(st && st.parentNode!==stageHome.p) stageHome.p.insertBefore(st, stageHome.n); }
-        var el=$("immersive"); el.classList.remove("open"); el.setAttribute("aria-hidden","true");
-        if(document.fullscreenElement){ try{ document.exitFullscreen(); }catch(e){} }
+        var el=$("immersive");
+        if(!el.classList.contains("open")) return;
+        var stage=$("cupStage");
+        if(stageHome && stage.parentNode!==stageHome.parent) stageHome.parent.insertBefore(stage,stageHome.next);
+        el.classList.remove("open");
+        el.setAttribute("aria-hidden","true");
+        document.body.classList.remove("is-immersive");
+        setBackgroundInert(false);
+        if(immersiveTrigger) immersiveTrigger.focus({preventScroll:true});
       }
-      $("immersiveBtn").addEventListener("click", enterImmersive);
-      $("ctaImmersive").addEventListener("click", enterImmersive);
-      $("immExit").addEventListener("click", exitImmersive);
-      $("immPlay").addEventListener("click", function(){ setPlaying(!playing); });
-      setInterval(function(){ if($("immersive").classList.contains("open")) renderImmersive(); },1800);
-      /* breathing label sync */
-      setInterval(function(){
-        var bc=$("breathCircle"); if(!bc) return;
-        bc.textContent = (Math.floor(Date.now()/4000)%2===0)? "吸气":"呼气";
-      },800);
+      $("immersiveBtn").addEventListener("click",enterImmersive);
+      $("ctaImmersive").addEventListener("click",enterImmersive);
+      $("immExit").addEventListener("click",function(){
+        exitImmersive();
+        $("mixer").scrollIntoView({behavior:"smooth"});
+        $("playBtn").focus({preventScroll:true});
+      });
+      $("immPlay").addEventListener("click",function(){ setPlaying(!playing); });
+      setInterval(function(){ if($("immersive").classList.contains("open")) renderImmersive(); },1000);
 
-      /* ============================== v2 sources list ============================== */
-      function buildSources(){
-        var wrap=$("srcList"); if(!wrap) return;
-        SOUNDS.forEach(function(s){
-          var item=document.createElement("div"); item.className="src-item";
-          item.innerHTML='<div><h4><i style="background:'+s.color+'"></i>'+s.name+' <span class="badge wait">授权待逐条核对</span> <span class="badge" data-srcbadge="'+s.id+'">合成 · 待放入真实录音</span></h4>'+
-            '<p>来源候选：'+s.src+'<br>授权：'+s.lic+' · 文件：<code>'+s.file+'</code> · 当前由合成引擎生成（参数可调）；放置核对通过的无缝循环录音后自动改播真实录音，通道与此处徽标都会变为「真实录音播放中」。</p></div>'+
-            '<label class="replace-btn">替换录音<input type="file" accept="audio/*" style="display:none" data-replace="'+s.id+'"></label>';
-          wrap.appendChild(item);
+      function updateSourceUI(id){
+        var meta=SOUND_AUDIO[id], entry=recordings[id];
+        var label="实时合成";
+        if(entry && entry.custom) label="本地录音";
+        else if(entry && entry.loading) label="载入音源中";
+        else if(meta && location.protocol!=="file:" && !(entry && entry.failed)) label=meta.roots ? "乐器采样" : "现场录音";
+        document.querySelectorAll('[data-srcbadge="'+id+'"],[data-cardbadge="'+id+'"]').forEach(function(badge){
+          badge.textContent=label;
+          badge.classList.toggle("real",label==="现场录音" || label==="乐器采样" || label==="本地录音");
         });
-        wrap.querySelectorAll("[data-replace]").forEach(function(inp){
-          inp.addEventListener("change", function(){
-            var f=this.files && this.files[0]; if(!f) return;
-            var id=this.getAttribute("data-replace");
-            initDecks();
-            var url=URL.createObjectURL(f);
-            var d=decks[id]; d.custom=true; d.ok=true;
-            [d.a,d.b].forEach(function(el){ el.src=url; });
-            var badge=this.closest(".src-item").querySelector(".badge.wait");
-            if(badge){ badge.textContent="已替换为本地录音（本次打开内有效）"; badge.classList.remove("wait"); badge.classList.add("ok"); }
-            var sb=this.closest(".src-item").querySelector("[data-srcbadge]");
-            if(sb){ sb.textContent="真实录音播放中"; sb.classList.add("ok"); }
-            document.querySelectorAll('[data-cardbadge="'+id+'"]').forEach(function(it){ it.textContent="真实录音播放中"; it.classList.add("real"); });
-            applyGain(id);
-            toast("「"+soundById(id).name+"」已换成你选的录音，正在用真实文件播放");
+        var usesLoop=label==="现场录音" || label==="本地录音" || (label==="载入音源中" && meta && !meta.roots);
+        ["density","rand"].forEach(function(key){
+          var input=$("prm-"+id+"-"+key);
+          if(input) input.parentElement.hidden=usesLoop;
+        });
+      }
+
+      function buildSources(){
+        var wrap=$("srcList");
+        wrap.textContent="";
+        SOUNDS.forEach(function(s){
+          var meta=SOUND_AUDIO[s.id];
+          var item=document.createElement("div"); item.className="src-item";
+          var details=meta ? '<a href="'+meta.source+'" target="_blank" rel="noopener">'+meta.title+'</a> · '+meta.author+
+            (meta.editor ? ' · '+meta.editor+' 编辑或提供' : '')+
+            ' · <a href="'+AUDIO_LICENSES[meta.license]+'" target="_blank" rel="noopener">'+meta.license+'</a>' :
+            '由 Sound Lab 实时合成';
+          if(meta && meta.related){
+            var original=meta.related;
+            details+='<br>原始录音：<a href="'+original.source+'" target="_blank" rel="noopener">'+original.title+'</a> · '+original.author+
+              ' · <a href="'+AUDIO_LICENSES[original.license]+'" target="_blank" rel="noopener">'+original.license+'</a>';
+          }
+          var free=sessionTools.isFreeSound(s.id);
+          var action=free ? '<label class="replace-btn">替换录音<input type="file" accept="audio/*" data-replace="'+s.id+'" hidden></label>' :
+            '<button class="replace-btn" type="button">进阶音效</button>';
+          item.innerHTML='<div><h4><i style="background:'+s.color+'"></i>'+s.name+' <span class="badge" data-srcbadge="'+s.id+'"></span></h4>'+
+            '<p>'+details+'</p></div>'+action;
+          wrap.appendChild(item);
+          updateSourceUI(s.id);
+          if(!free){
+            item.querySelector("button").addEventListener("click",function(){ showPremium(s.name); });
+            return;
+          }
+          var input=item.querySelector("input");
+          var request=0;
+          input.addEventListener("change",async function(){
+            var file=input.files && input.files[0];
+            if(!file) return;
+            input.value="";
+            var current=++request;
+            try{
+              ensureCtx();
+              var buffer=await AC.decodeAudioData(await file.arrayBuffer());
+              if(current!==request) return;
+              recordings[s.id]={custom:true,loop:prepareRecording(AC,buffer,true)};
+              if(playing){ stopGen(s.id); applyGain(s.id); }
+              updateSourceUI(s.id);
+              toast("已替换「"+s.name+"」");
+            }catch(error){
+              if(current===request) toast("无法载入这段录音，请选择可播放的音频文件");
+            }
           });
         });
       }
 
-      /* ===== bed noises: white / pink / brown, synth only, kept quiet ===== */
       var bedNodes={};
+      function startBed(kind){
+        if(bedNodes[kind] || !openListeningWindow()) return;
+        if(AC.state!=="running") AC.resume().catch(function(){ toast("浏览器暂时无法播放声音"); });
+        var src=AC.createBufferSource(); src.buffer=noiseBuffer(kind); src.loop=true;
+        var f=filt("lowpass",kind==="brown"?420:kind==="pink"?2400:3200);
+        var g=AC.createGain(); g.gain.value=0;
+        src.connect(f); f.connect(g); g.connect(sessionGain); src.start();
+        g.gain.setTargetAtTime(.14,AC.currentTime,.25);
+        src.onended=function(){ src.disconnect(); f.disconnect(); g.disconnect(); };
+        bedNodes[kind]={src:src,g:g};
+        var button=document.querySelector('[data-bed="'+kind+'"]');
+        button.classList.add("on");
+        button.setAttribute("aria-pressed","true");
+      }
+      function stopBed(kind){
+        var node=bedNodes[kind];
+        if(!node) return;
+        node.g.gain.setTargetAtTime(0,AC.currentTime,.13);
+        node.src.stop(AC.currentTime+.7);
+        delete bedNodes[kind];
+        var button=document.querySelector('[data-bed="'+kind+'"]');
+        button.classList.remove("on");
+        button.setAttribute("aria-pressed","false");
+      }
       document.querySelectorAll("[data-bed]").forEach(function(btn){
-        btn.addEventListener("click", function(){
-          ensureCtx(); if(AC.state==="suspended") AC.resume();
-          var kind=btn.getAttribute("data-bed");
-          if(bedNodes[kind]){
-            var n=bedNodes[kind]; n.g.gain.setTargetAtTime(0.0001, AC.currentTime, .4);
-            setTimeout(function(){ try{n.src.stop();}catch(e){} try{n.g.disconnect();}catch(e){} },1200);
-            delete bedNodes[kind]; btn.classList.remove("on"); return;
-          }
-          var src=AC.createBufferSource(); src.buffer=noiseBuffer(kind); src.loop=true;
-          var f=filt("lowpass", kind==="brown"?420: kind==="pink"?2400:3200);
-          var g=AC.createGain(); g.gain.value=0.0001;
-          src.connect(f); f.connect(g); g.connect(master); src.start();
-          g.gain.setTargetAtTime(0.14, AC.currentTime, .6);
-          bedNodes[kind]={src:src,g:g};
-          btn.classList.add("on");
-          toast(kind==="white"?"白噪音床声已开（很轻）": kind==="pink"?"粉红噪音床声已开（很轻）":"褐色噪音床声已开（很轻）");
+        btn.setAttribute("aria-pressed","false");
+        btn.addEventListener("click",function(){
+          var kind=btn.dataset.bed;
+          if(bedNodes[kind]) stopBed(kind);
+          else startBed(kind);
         });
       });
 
       /* ============================== init ============================== */
       buildFaders();
       buildRecipes();
-      buildPacks();
       buildSources();
-      initDecks();
-      /* first screen opens with a poured default cup (rain base, fire
-         warmth, piano finish) so the layered liquids, ice, garnish and
-         condensation are visible immediately instead of an empty mix;
-         pressing play simply starts this cup playing */
+      renderMine();
+      // The first cup is ready to play when the user chooses Start.
       levels.rain=0.80; levels.fire=0.52; levels.piano=0.40;
       SOUNDS.forEach(function(s){ paintFader(s.id); });
       renderGlass();
       paintCurrentMix();
+      paintSession();
+      setInterval(tickSession,250);
+      document.addEventListener("visibilitychange",function(){
+        if(!document.hidden){ tickSession(); armSessionGain(); }
+      });
       meterLoop();
-      document.addEventListener("keydown", function(e){ if(e.key==="Escape"){ closeSheet(); exitImmersive(); } });
+      document.addEventListener("keydown",function(event){
+        if(event.key==="Escape" && !$("sessionDone").open && !$("premiumDialog").open) exitImmersive();
+      });
     })();
     </script>
     <script>
