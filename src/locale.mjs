@@ -1,13 +1,16 @@
 /**
- * 语言（海外版 EN / 中文 ZH）切换。
+ * 界面语言（海外版 EN / 中文 ZH）切换。
  *
- * - 语言存在 localStorage（键 sc-locale），默认中文；切换后发
- *   window 事件 soundcocktail:locale-changed，各组件用 useLocale()
- *   订阅，同步刷新。
- * - SSR 时读不到 localStorage，默认中文；水合后按本地存储纠正。
+ * - 语言只决定文案，不决定货币和支付渠道（2026-11-12 用户明确规则：
+ *   手动切换语言只改文案，支付方式和价格跟支付地区走，见 region.mjs）。
+ * - 首次访问没有手动选择时，按浏览器语言自动判断：zh 开头（zh-CN、
+ *   zh-TW、zh-HK 等）→ 中文，其他 → 英文。
+ * - 手动切换存在 localStorage（键 sc-locale），优先于自动判断；
+ *   切换后发 window 事件 soundcocktail:locale-changed，各组件用
+ *   useLocale() 订阅，同步刷新。
+ * - SSR 时读不到 localStorage 和 navigator，默认中文；水合后按本地
+ *   存储或浏览器语言纠正。
  * - t(locale, key)：按点路径取字符串，缺失时回落到中文，再缺失返回 key 本身。
- * - 语言决定三件事：界面文案、货币展示、支付渠道（中文→支付宝 CNY，
- *   英文→Waffo USD）。包 ID 不变，权益跨渠道共用。
  */
 import { useEffect, useState } from 'react';
 
@@ -18,13 +21,40 @@ export function normalizeLocale(value) {
   return value === 'en' ? 'en' : 'zh';
 }
 
+/**
+ * 按浏览器语言自动判断界面语言：zh 开头 → 中文，其他 → 英文。
+ * languages 优先取 navigator.languages 的第一项。
+ */
+export function detectUiLocale(languages) {
+  const list = Array.isArray(languages)
+    ? languages
+    : languages
+      ? [languages]
+      : [];
+  const first = list.find((lang) => lang !== undefined && lang !== null && String(lang).trim() !== '');
+  if (first === undefined) return 'en';
+  return String(first).trim().toLowerCase().startsWith('zh') ? 'zh' : 'en';
+}
+
+/**
+ * 当前界面语言：手动选择（localStorage）优先；没有时按浏览器语言
+ * 自动判断；SSR（无 window）时默认中文。
+ */
 export function getLocale() {
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
-      return normalizeLocale(window.localStorage.getItem(LOCALE_KEY));
+      const stored = window.localStorage.getItem(LOCALE_KEY);
+      if (stored === 'zh' || stored === 'en') return stored;
     }
   } catch {
-    // localStorage 不可用时默认中文。
+    // localStorage 不可用时按浏览器语言判断。
+  }
+  try {
+    if (typeof navigator !== 'undefined') {
+      return detectUiLocale(navigator.languages || (navigator.language ? [navigator.language] : []));
+    }
+  } catch {
+    // navigator 不可用时默认中文。
   }
   return 'zh';
 }

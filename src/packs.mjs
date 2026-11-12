@@ -57,24 +57,24 @@ export const PACKS = [
   },
 ];
 
-/** 按语言取包的展示文案与价格（locale 不是 'en' 时一律中文 CNY）。 */
-export function packDisplay(pack, locale) {
+/**
+ * 按语言取包的展示文案、按币种取价格——两者独立（2026-11-12 解耦规则）。
+ * locale 只决定 name/desc 用中文还是英文；currency 只决定金额。
+ * currency 省略时按旧行为从 locale 推导（en → USD，其他 → CNY），
+ * 保持向后兼容；调用方应显式传支付地区的币种。
+ */
+export function packDisplay(pack, locale, currency) {
   if (!pack) return null;
-  if (locale === 'en') {
-    return {
-      name: pack.nameEn || pack.name,
-      desc: pack.descEn || pack.desc,
-      price: pack.priceUsd,
-      priceLabel: pack.priceLabelUsd,
-      currency: 'USD',
-    };
-  }
+  const useEn = locale === 'en';
+  const usd = currency === undefined || currency === null
+    ? useEn
+    : String(currency).trim().toUpperCase() === 'USD';
   return {
-    name: pack.name,
-    desc: pack.desc,
-    price: pack.price,
-    priceLabel: pack.priceLabel,
-    currency: 'CNY',
+    name: useEn ? (pack.nameEn || pack.name) : pack.name,
+    desc: useEn ? (pack.descEn || pack.desc) : pack.desc,
+    price: usd ? pack.priceUsd : pack.price,
+    priceLabel: usd ? pack.priceLabelUsd : pack.priceLabel,
+    currency: usd ? 'USD' : 'CNY',
   };
 }
 
