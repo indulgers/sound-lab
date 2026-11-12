@@ -7,6 +7,8 @@
  * 浏览器从本站跨源请求会被拦截，改走同源才能读到 503 等响应。
  */
 
+import { apiErrorMessage, getLocale, t } from './locale.mjs'
+
 export const PAY_API_BASE = (import.meta.env.VITE_PAY_API_URL ?? '').replace(/\/+$/, '');
 
 export function payApiUrl(path) {
@@ -14,10 +16,14 @@ export function payApiUrl(path) {
 }
 
 function payApiHint() {
-  return PAY_API_BASE ? `支付后端 ${PAY_API_BASE}` : '支付后端（同源 /api，由本站服务器路由提供）';
+  return PAY_API_BASE
+    ? t(getLocale(), 'api.payHintRemote', { base: PAY_API_BASE })
+    : t(getLocale(), 'api.payHintLocal');
 }
 
-/** 解析后端返回的 JSON 错误体；解析失败时退回 HTTP 状态。 */
+/** 解析后端返回的 JSON 错误体；解析失败时退回 HTTP 状态。
+ * 有已知错误码时按码取本地文案（服务端 message 只有中文），
+ * 否则用服务端原消息或本地兜底文案。 */
 async function readError(response, fallbackMessage) {
   let body = null;
   try {
@@ -25,10 +31,22 @@ async function readError(response, fallbackMessage) {
   } catch {
     body = null;
   }
-  const err = new Error((body && body.message) || fallbackMessage || `请求失败（HTTP ${response.status}）`);
+  const message =
+    apiErrorMessage(body && body.code, getLocale()) ||
+    (body && body.message) ||
+    fallbackMessage ||
+    t(getLocale(), 'api.requestFailedHttp', { status: response.status });
+  const err = new Error(message);
   err.status = response.status;
   err.code = (body && body.code) || null;
   return err;
+}
+
+/** 无法连接支付服务时的错误（网络层，服务端没机会回错误码）。 */
+function payConnectError(cause) {
+  const error = new Error(t(getLocale(), 'api.payConnectFailed', { hint: payApiHint() }));
+  error.cause = cause;
+  return error;
 }
 
 /** GET /api/products：服务端商品目录（价格的唯一可信来源）。
@@ -44,11 +62,9 @@ export async function fetchProducts(locale, currency) {
   try {
     response = await fetch(payApiUrl(`/api/products${query}`));
   } catch (err) {
-    const error = new Error(`无法连接支付服务：${payApiHint()}。请确认支付后端已启动。`);
-    error.cause = err;
-    throw error;
+    throw payConnectError(err);
   }
-  if (!response.ok) throw await readError(response, '商品目录读取失败。');
+  if (!response.ok) throw await readError(response, t(getLocale(), 'api.productsFailed'));
   const data = await response.json();
   return Array.isArray(data.products) ? data.products : [];
 }
@@ -68,11 +84,9 @@ export async function createPayment(productId) {
       body: JSON.stringify({ productId }),
     });
   } catch (err) {
-    const error = new Error(`无法连接支付服务：${payApiHint()}。请确认支付后端已启动。`);
-    error.cause = err;
-    throw error;
+    throw payConnectError(err);
   }
-  if (!response.ok) throw await readError(response, '下单失败。');
+  if (!response.ok) throw await readError(response, t(getLocale(), 'api.createFailed'));
   return response.json();
 }
 
@@ -93,11 +107,9 @@ export async function createWaffoPayment(productId) {
       body: JSON.stringify({ productId }),
     });
   } catch (err) {
-    const error = new Error(`无法连接支付服务：${payApiHint()}。请确认支付后端已启动。`);
-    error.cause = err;
-    throw error;
+    throw payConnectError(err);
   }
-  if (!response.ok) throw await readError(response, '下单失败。');
+  if (!response.ok) throw await readError(response, t(getLocale(), 'api.createFailed'));
   return response.json();
 }
 
@@ -111,11 +123,9 @@ export async function fetchWaffoPending() {
   try {
     response = await fetch(payApiUrl('/api/waffo/pending'), { credentials: 'same-origin' });
   } catch (err) {
-    const error = new Error(`无法连接支付服务：${payApiHint()}。请确认支付后端已启动。`);
-    error.cause = err;
-    throw error;
+    throw payConnectError(err);
   }
-  if (!response.ok) throw await readError(response, '进行中订单读取失败。');
+  if (!response.ok) throw await readError(response, t(getLocale(), 'api.pendingFailed'));
   const data = await response.json();
   return Array.isArray(data.orders) ? data.orders : [];
 }
@@ -130,10 +140,8 @@ export async function fetchWaffoOrderStatus(outTradeNo) {
   try {
     response = await fetch(payApiUrl(`/api/waffo/order-status?order=${encodeURIComponent(outTradeNo)}`), { credentials: 'same-origin' });
   } catch (err) {
-    const error = new Error(`无法连接支付服务：${payApiHint()}。请确认支付后端已启动。`);
-    error.cause = err;
-    throw error;
+    throw payConnectError(err);
   }
-  if (!response.ok) throw await readError(response, '订单状态查询失败。');
+  if (!response.ok) throw await readError(response, t(getLocale(), 'api.orderStatusFailed'));
   return response.json();
 }

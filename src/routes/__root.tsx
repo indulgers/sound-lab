@@ -24,6 +24,12 @@ export const Route = createRootRoute({
    * shell 的 <html lang>，避免首屏语言属性闪烁。
    * 客户端导航时 loader 也会跑，但那时没有入站请求，country 为 null，
    * shell 改按界面语言回落。loader 本身不读任何密钥或个人信息。
+   *
+   * 注意：实测 TanStack Start 传给 loader 的 request 不带任何请求头
+   * （Accept-Language、cf-ipcountry 都读不到，本地 workerd 与 vite dev
+   * 一致），所以首屏 <title>/meta 无法按语言本地化，只能保持中文；
+   * 水合后由 SoundLabView 的 locale effect 按界面语言同步
+   * document.title 与 meta description。语言切换本身不受影响。
    */
   loader: async ({ request }: { request?: Request }) => {
     return { country: countryFromRequest(request) }

@@ -4,7 +4,11 @@
  * 登录态靠 HttpOnly Cookie（SameSite=Lax），所以这里的请求都带
  * credentials: 'same-origin'；登录/注册的响应体里也带 token，
  * 供小程序等 Bearer 客户端使用，网页端不需要保存它。
+ *
+ * 错误文案按界面语言取（locale.mjs）：服务端只回中文 message，
+ * 有已知错误码时按码换成本地文案。
  */
+import { apiErrorMessage, getLocale, t } from './locale.mjs'
 
 async function readError(response, fallbackMessage) {
   let body = null;
@@ -13,7 +17,12 @@ async function readError(response, fallbackMessage) {
   } catch {
     body = null;
   }
-  const err = new Error((body && body.message) || fallbackMessage || `请求失败（HTTP ${response.status}）`);
+  const message =
+    apiErrorMessage(body && body.code, getLocale()) ||
+    (body && body.message) ||
+    fallbackMessage ||
+    t(getLocale(), 'api.requestFailedHttp', { status: response.status });
+  const err = new Error(message);
   err.status = response.status;
   err.code = (body && body.code) || null;
   return err;
@@ -29,11 +38,11 @@ async function authJson(path, { method = 'GET', body } = {}) {
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch (err) {
-    const error = new Error('无法连接服务器，请检查网络后重试。');
+    const error = new Error(t(getLocale(), 'api.connectFailed'));
     error.cause = err;
     throw error;
   }
-  if (!response.ok) throw await readError(response, '请求失败。');
+  if (!response.ok) throw await readError(response, t(getLocale(), 'api.requestFailed'));
   return response.json();
 }
 

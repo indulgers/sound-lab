@@ -1,3 +1,4 @@
+import { getLocale, t } from './locale.mjs'
 import { createRuntimeScope } from './runtime-scope.mjs'
 
 export function mountVisualEffects() {
@@ -259,8 +260,9 @@ export function mountVisualEffects() {
       if(ta && ibtn){
         var field=ta.closest(".field");
         var msg=document.createElement("p"); msg.className="err-msg";
-        msg.textContent="配方码无法识别，请检查后重新粘贴完整的配方码。";
+        msg.textContent=t(getLocale(),'mine.importBadCode');
         field.appendChild(msg);
+        listen(window,"soundcocktail:locale-changed",function(){ msg.textContent=t(getLocale(),'mine.importBadCode'); });
         ibtn.addEventListener("click", function(){
           var v=ta.value.trim();
           if(!v || v.indexOf("SYL-")!==0){ field.classList.add("err"); }

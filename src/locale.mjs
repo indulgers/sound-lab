@@ -91,6 +91,19 @@ export function useLocale() {
 export const STRINGS = {
   zh: {
     skipLink: '跳到调音台',
+    meta: {
+      title: '调一杯声音',
+      description: '混合 22 种声音，听雨落在车窗上，听咖啡馆里的轻声谈话。调成一杯保存，留给专注或放空的时间。',
+      ogDescription: '现场录音、乐器采样与实时合成。选几种声音，调一杯自己的声景。',
+    },
+    cup: {
+      svgAria: '随配比变化的手绘涂鸦鸡尾酒杯',
+      empty: '拉一格推子，开始调配',
+      hint: '轻拖杯子，晃一晃',
+      emptyCap: '这杯还空着',
+      more: ' 等 {total} 种',
+    },
+    audio: { cantPlay: '浏览器暂时无法播放声音' },
     nav: { mixer: '调音台', recipes: '配方', plus: '进阶', mine: '我的配方', sources: '音源清单' },
     hero: {
       title: '调一杯声音',
@@ -105,7 +118,7 @@ export const STRINGS = {
       title: '调音台',
       en: 'the mixing board',
       sub: '拉动推子叠加声音，打开「调音参数」调亮度、距离和节奏。乐器采样还能调音符的疏密与随机度。',
-      master: '总音量 MASTER',
+      master: '总音量',
       remaining: '本次剩余 · 免费体验',
       immersive: '进入沉浸模式',
       random: '随机一杯',
@@ -117,6 +130,22 @@ export const STRINGS = {
       filterCity: '场所',
       filterInst: '乐器',
       emptyFilter: '当前杯子为空。切到「全部」添加声音。',
+      group: { nature: '自然', city: '场所', inst: '乐器' },
+      groupCount: '{n} 种 · 点「调音参数」细调每种音色',
+      tuning: '调音参数',
+      tuningPlus: '了解进阶音效',
+      faderPlus: '进阶',
+      faderMuted: '静音',
+      faderVolume: '音量',
+      playPauseAria: '播放或暂停',
+      playAria: '播放',
+      pauseAria: '暂停',
+      masterAria: '总音量（舒适上限 85）',
+      filtersAria: '筛选音源',
+      playingCta: '⏸ 暂停这一杯',
+      cleared: '全部归零，安静了',
+      randomToast: '随机一杯：{names}',
+      param: { density: '密度', bright: '明亮度', dist: '远近', rand: '随机度', tempo: '节奏' },
     },
     recipes: {
       title: '配方',
@@ -146,6 +175,26 @@ export const STRINGS = {
       saveTitle: '存下这一杯',
       saveDesc: '保存的是当前推子的配比，随时回来一键复现。',
       saveEmpty: '当前配比：还没有拉动任何推子。',
+      currentMixPrefix: '当前配比：',
+      nightSuffix: ' 之夜',
+      apply: '调出这杯',
+      shareCard: '分享卡',
+      copyCode: '复制配方码',
+      delete: '删除',
+      saveFirst: '先拉几格推子，再保存这一杯',
+      saved: '已保存「{name}」',
+      savedNoStorage: '已保存到当前页面，浏览器存储不可用',
+      deleted: '已删除「{name}」',
+      codeCopied: '配方码已复制，发给朋友就能调出同款（连每味原料的参数一起）',
+      copyFailed: '复制失败，请长按手动复制',
+      pasteFirst: '先粘贴配方码',
+      badCode: '这个配方码读不出来，检查一下有没有复制完整',
+      friendRecipe: '朋友的配方',
+      applied: '已调出「{name}」',
+      appliedPlus: '已调出基础音效，配方中的进阶音效已保留',
+      cardDone: '分享卡已生成，正在下载',
+      shareTagline: '自己调一杯声音',
+      importBadCode: '配方码无法识别，请检查后重新粘贴完整的配方码。',
       nameLabel: '配方名字',
       namePlaceholder: '例如：加班到深夜的那杯',
       saveBtn: '保存配方',
@@ -163,6 +212,17 @@ export const STRINGS = {
       open: '查看音源与授权',
       close: '收起音源清单',
       bedNote: '底噪 · 可单独开关',
+      badge: { synth: '实时合成', local: '本地录音', loading: '载入音源中', instrument: '乐器采样', live: '现场录音' },
+      replace: '替换录音',
+      plusSound: '进阶音效',
+      editedBy: '编辑或提供',
+      synthBy: '由 Sound Cocktail 实时合成',
+      original: '原始录音：',
+      replaced: '已替换「{name}」',
+      loadFailed: '无法载入这段录音，请选择可播放的音频文件',
+      bedWhite: '白噪音 床声',
+      bedPink: '粉红噪音 床声',
+      bedBrown: '褐色噪音 床声',
     },
     footer: { tagline: '自己调一杯声音 · 睡前、工作、雨夜' },
     overlays: {
@@ -179,6 +239,8 @@ export const STRINGS = {
       immPause: '暂停',
       immResume: '继续播放',
       immExit: '回调音台',
+      premiumMsg: '「{name}」属于进阶内容。进阶版正在筹备中。',
+      immRemainingAria: '本次体验剩余时间',
     },
     auth: {
       login: '登录',
@@ -225,6 +287,8 @@ export const STRINGS = {
       notConfiguredTitle: '支付尚未开通配置',
       failedTitle: '下单失败',
       errorCode: '错误码：',
+      formMissing: '支付表单返回异常，未找到可提交的表单。',
+      httpStatus: '（HTTP {status}）',
       orderNo: '订单号：',
       payAlipay: '去支付宝付款',
       payWaffo: '去付款',
@@ -238,9 +302,34 @@ export const STRINGS = {
       priceNoteMissing: '服务端商品目录里没有这个包，以下为页面标价。',
       priceNoteUnverified: '未能从服务端校验价格，以下为页面标价；付款前请确认支付后端已启动。',
     },
+    api: {
+      connectFailed: '无法连接服务器，请检查网络后重试。',
+      requestFailed: '请求失败。',
+      requestFailedHttp: '请求失败（HTTP {status}）',
+      productsFailed: '商品目录读取失败。',
+      createFailed: '下单失败。',
+      pendingFailed: '进行中订单读取失败。',
+      orderStatusFailed: '订单状态查询失败。',
+      payConnectFailed: '无法连接支付服务：{hint}。请确认支付后端已启动。',
+      payHintLocal: '支付后端（同源 /api，由本站服务器路由提供）',
+      payHintRemote: '支付后端 {base}',
+    },
   },
   en: {
     skipLink: 'Skip to the mixer',
+    meta: {
+      title: 'Mix a cup of sound',
+      description: 'Mix 22 sounds — rain on the car window, low talk in a café. Save your cup for focused or empty time.',
+      ogDescription: 'Live recordings, instrument samples and live synthesis. Pick a few sounds and mix a soundscape of your own.',
+    },
+    cup: {
+      svgAria: 'Hand-drawn doodle cocktail glass that changes with the mix',
+      empty: 'Move a fader to start mixing',
+      hint: 'Drag the cup gently, give it a swirl',
+      emptyCap: 'This cup is still empty',
+      more: ' + {extra} more',
+    },
+    audio: { cantPlay: 'Your browser can’t play audio right now' },
     nav: { mixer: 'Mixer', recipes: 'Recipes', plus: 'Plus', mine: 'My recipes', sources: 'Sources' },
     hero: {
       title: 'Mix a cup of sound',
@@ -267,6 +356,22 @@ export const STRINGS = {
       filterCity: 'Places',
       filterInst: 'Instruments',
       emptyFilter: 'This cup is empty. Switch to “All” to add sounds.',
+      group: { nature: 'Nature', city: 'Places', inst: 'Instruments' },
+      groupCount: '{n} sounds · open “Tuning” to fine-tune each one',
+      tuning: 'Tuning',
+      tuningPlus: 'About Plus sounds',
+      faderPlus: 'Plus',
+      faderMuted: 'Muted',
+      faderVolume: 'Volume',
+      playPauseAria: 'Play or pause',
+      playAria: 'Play',
+      pauseAria: 'Pause',
+      masterAria: 'Master volume (comfortable limit 85)',
+      filtersAria: 'Filter sounds',
+      playingCta: '⏸ Pause this cup',
+      cleared: 'All reset — quiet now',
+      randomToast: 'Surprise cup: {names}',
+      param: { density: 'Density', bright: 'Brightness', dist: 'Distance', rand: 'Randomness', tempo: 'Tempo' },
     },
     recipes: {
       title: 'Recipes',
@@ -296,6 +401,26 @@ export const STRINGS = {
       saveTitle: 'Save this cup',
       saveDesc: 'Saves the current fader mix, ready to recall with one click.',
       saveEmpty: 'Current mix: no fader moved yet.',
+      currentMixPrefix: 'Current mix: ',
+      nightSuffix: ' Night',
+      apply: 'Mix this cup',
+      shareCard: 'Share card',
+      copyCode: 'Copy recipe code',
+      delete: 'Delete',
+      saveFirst: 'Move a few faders first, then save this cup',
+      saved: 'Saved “{name}”',
+      savedNoStorage: 'Saved on this page — browser storage is unavailable',
+      deleted: 'Deleted “{name}”',
+      codeCopied: 'Recipe code copied — send it to a friend and they can mix the exact same cup, tuning included',
+      copyFailed: 'Copy failed — long-press to copy manually',
+      pasteFirst: 'Paste a recipe code first',
+      badCode: 'That recipe code doesn’t read — check it was copied in full',
+      friendRecipe: 'A friend’s recipe',
+      applied: 'Mixed “{name}”',
+      appliedPlus: 'Mixed the free sounds — the Plus sounds in this recipe are kept',
+      cardDone: 'Share card made — downloading now',
+      shareTagline: 'Mix your own cup of sound',
+      importBadCode: 'That recipe code doesn’t read — check it and paste the full code again.',
       nameLabel: 'Recipe name',
       namePlaceholder: 'e.g. The one for late-night overtime',
       saveBtn: 'Save recipe',
@@ -313,6 +438,17 @@ export const STRINGS = {
       open: 'View sources & licences',
       close: 'Hide sources',
       bedNote: 'Noise beds · toggle individually',
+      badge: { synth: 'Synthesized live', local: 'Local recording', loading: 'Loading audio…', instrument: 'Instrument sample', live: 'Live recording' },
+      replace: 'Replace recording',
+      plusSound: 'Plus sound',
+      editedBy: 'edited or provided',
+      synthBy: 'Synthesized live by Sound Cocktail',
+      original: 'Original recording: ',
+      replaced: 'Replaced “{name}”',
+      loadFailed: 'Couldn’t load that recording — pick a playable audio file',
+      bedWhite: 'White noise bed',
+      bedPink: 'Pink noise bed',
+      bedBrown: 'Brown noise bed',
     },
     footer: { tagline: 'Mix your own cup of sound · bedtime, work, rainy nights' },
     overlays: {
@@ -329,6 +465,8 @@ export const STRINGS = {
       immPause: 'Pause',
       immResume: 'Resume',
       immExit: 'Back to mixer',
+      premiumMsg: '“{name}” is Plus content. Plus is still being prepared.',
+      immRemainingAria: 'Time left in this session',
     },
     auth: {
       login: 'Sign in',
@@ -375,6 +513,8 @@ export const STRINGS = {
       notConfiguredTitle: 'Payment is not configured yet',
       failedTitle: 'Could not create the order',
       errorCode: 'Error code: ',
+      formMissing: 'The payment form came back wrong — no submittable form was found.',
+      httpStatus: '(HTTP {status})',
       orderNo: 'Order: ',
       payAlipay: 'Pay with Alipay',
       payWaffo: 'Continue to payment',
@@ -388,11 +528,24 @@ export const STRINGS = {
       priceNoteMissing: 'This pack is not in the server catalog; showing the page price.',
       priceNoteUnverified: 'Could not verify the price with the server; showing the page price. Please make sure the payment backend is running before paying.',
     },
+    api: {
+      connectFailed: 'Can’t reach the server. Check your connection and try again.',
+      requestFailed: 'Request failed.',
+      requestFailedHttp: 'Request failed (HTTP {status})',
+      productsFailed: 'Couldn’t load the product list.',
+      createFailed: 'Couldn’t create the order.',
+      pendingFailed: 'Couldn’t load the in-progress order.',
+      orderStatusFailed: 'Couldn’t check the order status.',
+      payConnectFailed: 'Can’t reach the payment service: {hint}. Make sure the payment backend is running.',
+      payHintLocal: 'payment backend (same-origin /api, served by this site’s server routes)',
+      payHintRemote: 'payment backend {base}',
+    },
   },
 };
 
-/** 按点路径取文案：t('en', 'nav.mixer')。缺失时回落中文，再缺失返回 key。 */
-export function t(locale, key) {
+/** 按点路径取文案：t('en', 'nav.mixer')。缺失时回落中文，再缺失返回 key。
+ * replacements：把 {name} 这类占位换成实际值，如 t(locale, 'mine.saved', { name })。 */
+export function t(locale, key, replacements) {
   const lang = normalizeLocale(locale);
   const parts = String(key).split('.');
   let node = STRINGS[lang];
@@ -400,11 +553,56 @@ export function t(locale, key) {
     if (node && typeof node === 'object' && part in node) node = node[part];
     else { node = undefined; break; }
   }
-  if (typeof node === 'string') return node;
-  let fallback = STRINGS.zh;
-  for (const part of parts) {
-    if (fallback && typeof fallback === 'object' && part in fallback) fallback = fallback[part];
-    else { fallback = undefined; break; }
+  let result = typeof node === 'string' ? node : undefined;
+  if (result === undefined) {
+    let fallback = STRINGS.zh;
+    for (const part of parts) {
+      if (fallback && typeof fallback === 'object' && part in fallback) fallback = fallback[part];
+      else { fallback = undefined; break; }
+    }
+    result = typeof fallback === 'string' ? fallback : key;
   }
-  return typeof fallback === 'string' ? fallback : key;
+  if (replacements) {
+    for (const [name, value] of Object.entries(replacements)) {
+      result = result.split(`{${name}}`).join(String(value));
+    }
+  }
+  return result;
+}
+
+/**
+ * 服务端按错误码返回的中文 message，在英文界面按码换成本地文案
+ * （码是接口契约，文案不是）。没有对应码时 apiErrorMessage 返回 null，
+ * 调用方保留服务端原消息。
+ */
+export const API_ERROR_MESSAGES = {
+  zh: {
+    INVALID_EMAIL: '邮箱格式不正确。',
+    WEAK_PASSWORD: '密码至少 8 位。',
+    EMAIL_TAKEN: '这个邮箱已经注册过了，请直接登录。',
+    TOO_MANY_ATTEMPTS: '尝试次数太多，请 1 小时后再试。',
+    INVALID_CREDENTIALS: '邮箱或密码不对，请再试一次。',
+    PAYMENT_NOT_CONFIGURED: '支付未配置：缺少支付宝沙箱/生产配置，请先完成沙箱配置。',
+    PAYMENT_CONFIG_INVALID: '支付配置有误，请检查配置后重试。',
+    STORE_NOT_CONFIGURED: '订单存储未配置：缺少 ORDERS_KV 绑定。',
+    WAFFO_NOT_CONFIGURED: '海外支付未配置。',
+  },
+  en: {
+    INVALID_EMAIL: 'That email address doesn’t look right.',
+    WEAK_PASSWORD: 'Your password needs at least 8 characters.',
+    EMAIL_TAKEN: 'This email is already registered — please sign in.',
+    TOO_MANY_ATTEMPTS: 'Too many attempts. Please try again in an hour.',
+    INVALID_CREDENTIALS: 'Wrong email or password. Please try again.',
+    PAYMENT_NOT_CONFIGURED: 'Payment is not configured: the Alipay sandbox/production setup is missing.',
+    PAYMENT_CONFIG_INVALID: 'The payment configuration is invalid. Please check it and try again.',
+    STORE_NOT_CONFIGURED: 'Order storage is not configured: the ORDERS_KV binding is missing.',
+    WAFFO_NOT_CONFIGURED: 'Overseas payment is not configured.',
+  },
+};
+
+/** 按服务端错误码取本地文案；没有对应码时返回 null。 */
+export function apiErrorMessage(code, locale) {
+  if (!code) return null;
+  const table = API_ERROR_MESSAGES[normalizeLocale(locale)] || API_ERROR_MESSAGES.en;
+  return typeof table[code] === 'string' ? table[code] : null;
 }

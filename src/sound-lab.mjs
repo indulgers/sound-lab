@@ -1,7 +1,8 @@
 import { AUDIO_LICENSES, SOUND_AUDIO } from './audio/catalog.mjs'
 import { prepareRecording, playInstrumentNote } from './audio/playback.mjs'
-import { SOUNDS } from './catalog.mjs'
+import { SOUNDS, autoRecipeName, formatRecipeDate, mixSummaryText, recipeDisplay, soundDisplayName } from './catalog.mjs'
 import { createSession, freeMix, isFreeSound } from './listening-session.mjs'
+import { getLocale, t } from './locale.mjs'
 import { PACKS } from './packs.mjs'
 import { createRuntimeScope } from './runtime-scope.mjs'
 
@@ -36,9 +37,9 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   };
 
   var GROUPS = [
-    { id:"nature", name:"自然", en:"NATURE" },
-    { id:"city",   name:"场所", en:"PLACES" },
-    { id:"inst",   name:"乐器", en:"INSTRUMENTS" }
+    { id:"nature" },
+    { id:"city" },
+    { id:"inst" }
   ];
   /* cat: nature 自然 / city 城市·乡村 / inst 乐器。p 为出厂参数（密度 density / 明亮度 bright / 远近 dist / 随机度 rand / 节奏 tempo） */
   /* Ingredients choose a clear drink tint together. Source colors stay on the faders. */
@@ -77,10 +78,11 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
 
   /* ============================== state ============================== */
   var levels = {}; SOUNDS.forEach(function(s){ levels[s.id]=0; });
-  /* per-sound synth params: density 密度 / bright 明亮度 / dist 远近 / rand 随机度 / tempo 节奏 */
+  /* per-sound synth params: density / bright / dist / rand / tempo
+     （展示名在 locale.mjs 的 mixer.param 里，按界面语言取） */
   var PARAM_DEFS = [
-    { k:"density", name:"密度" }, { k:"bright", name:"明亮度" }, { k:"dist", name:"远近" },
-    { k:"rand", name:"随机度" }, { k:"tempo", name:"节奏" }
+    { k:"density" }, { k:"bright" }, { k:"dist" },
+    { k:"rand" }, { k:"tempo" }
   ];
   var PARAM_DEFAULT = { density:.55, bright:.5, dist:.35, rand:.5, tempo:.5 };
   var params = {};
@@ -128,6 +130,17 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   function $(id){ return document.getElementById(id); }
   function soundById(id){ for(var i=0;i<SOUNDS.length;i++) if(SOUNDS[i].id===id) return SOUNDS[i]; return null; }
   function clamp01(v){ return Math.max(0, Math.min(1, v)); }
+
+  /* 界面语言：所有引擎文案都按当前 uiLocale 取（locale.mjs 的字典），
+     中文界面只显示中文名、英文界面只显示英文名，绝不同时出现两种语言。
+     语言切换只改文案，不改支付方式和价格（2026-11-12 解耦规则）。 */
+  function L(){ return getLocale(); }
+  function groupLabel(g){ return t(L(), 'mixer.group.' + g.id); }
+  function paramLabel(pd){ return t(L(), 'mixer.param.' + pd.k); }
+  function activeSounds(){
+    return SOUNDS.filter(function(s){ return levels[s.id]>0.02; })
+      .map(function(s){ return { sound: s, level: levels[s.id] }; });
+  }
   function toast(msg){
     var t=$("toast"); t.textContent=msg; t.classList.add("show");
     clearTimeout(t._h); t._h=setTimeout(function(){ t.classList.remove("show"); },2600);
@@ -695,7 +708,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     GROUPS.forEach(function(g){
       var groupSounds=SOUNDS.filter(function(s){ return s.cat===g.id; });
       var sec=document.createElement("div"); sec.className="chan-group";
-      sec.innerHTML='<div class="chan-group-head"><h3>'+g.name+'</h3><span class="en">'+g.en+'</span><span class="cnt">'+groupSounds.length+' 种 · 点「调音参数」细调每种音色</span></div>';
+      sec.innerHTML='<div class="chan-group-head"><h3>'+groupLabel(g)+'</h3><span class="cnt">'+t(L(),'mixer.groupCount',{n:groupSounds.length})+'</span></div>';
       var grid=document.createElement("div"); grid.className="faders";
       sec.appendChild(grid); wrap.appendChild(sec);
       groupSounds.forEach(function(s){
@@ -705,21 +718,21 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
         el.style.setProperty("--cc", s.color);
         var paramsHTML="";
         PARAM_DEFS.forEach(function(pd){
-          paramsHTML+='<div class="param-row"><label for="prm-'+s.id+'-'+pd.k+'">'+pd.name+'</label>'+
-            '<input type="range" id="prm-'+s.id+'-'+pd.k+'" min="0" max="100" value="'+Math.round(params[s.id][pd.k]*100)+'" data-param="'+pd.k+'" aria-label="'+s.name+pd.name+'">'+
+          paramsHTML+='<div class="param-row"><label for="prm-'+s.id+'-'+pd.k+'">'+paramLabel(pd)+'</label>'+
+            '<input type="range" id="prm-'+s.id+'-'+pd.k+'" min="0" max="100" value="'+Math.round(params[s.id][pd.k]*100)+'" data-param="'+pd.k+'" aria-label="'+soundDisplayName(s,L())+' '+paramLabel(pd)+'">'+
             '<span class="pv" data-pv="'+pd.k+'">'+Math.round(params[s.id][pd.k]*100)+'</span></div>';
         });
         el.innerHTML =
           '<div class="c-icon">'+ICONS[s.id]+'</div>'+
-          '<div><div class="c-name">'+s.name+'</div><div class="c-en">'+s.en+'</div></div>'+
+          '<div><div class="c-name">'+soundDisplayName(s,L())+'</div></div>'+
           '<span class="src-badge" data-cardbadge="'+s.id+'"></span>'+
-          '<div class="fader-zone"><div class="fader" role="slider" tabindex="0" aria-label="'+s.name+'音量" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">'+
+          '<div class="fader-zone"><div class="fader" role="slider" tabindex="0" aria-label="'+soundDisplayName(s,L())+' '+t(L(),'mixer.faderVolume')+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">'+
             '<div class="ticks"><i></i><i></i><i></i><i></i><i></i><i class="r" style="top:0"></i><i class="r" style="top:25%"></i><i class="r" style="top:50%"></i><i class="r" style="top:75%"></i><i class="r" style="bottom:0;top:auto"></i></div>'+
             '<div class="slot"><div class="fill"></div></div>'+
             '<div class="handle"></div>'+
           '</div><div class="meter"><i></i></div></div>'+
-          '<div class="c-pct">静音</div>'+
-          '<button class="tune-toggle" data-tune="'+s.id+'" aria-expanded="false">调音参数 ▾</button>'+
+          '<div class="c-pct">'+t(L(),'mixer.faderMuted')+'</div>'+
+          '<button class="tune-toggle" data-tune="'+s.id+'" aria-expanded="false">'+t(L(),'mixer.tuning')+' ▾</button>'+
           '<div class="params" data-params="'+s.id+'">'+paramsHTML+'</div>';
         grid.appendChild(el);
         var fader=el.querySelector(".fader");
@@ -730,16 +743,16 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
           fader.tabIndex=-1;
           fader.setAttribute("aria-disabled","true");
           panel.remove();
-          toggle.textContent="了解进阶音效";
+          toggle.textContent=t(L(),'mixer.tuningPlus');
           toggle.removeAttribute("aria-expanded");
-          toggle.addEventListener("click",function(){ showPremium(s.name); });
+          toggle.addEventListener("click",function(){ showPremium(soundDisplayName(s,L())); });
           return;
         }
         bindFader(s.id, fader);
         toggle.addEventListener("click", function(){
           var open=panel.classList.toggle("open");
           toggle.setAttribute("aria-expanded",String(open));
-          toggle.textContent=open ? "调音参数 ▴" : "调音参数 ▾";
+          toggle.textContent=open ? t(L(),'mixer.tuning')+" ▴" : t(L(),'mixer.tuning')+" ▾";
         });
         panel.querySelectorAll("[data-param]").forEach(function(inp){
           inp.addEventListener("input",function(){
@@ -835,7 +848,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     ui.fill.style.height=(v*100)+"%";
     ui.handle.style.bottom=(v*100)+"%";
     ui.fader.setAttribute("aria-valuenow", pct);
-    ui.pct.innerHTML = !sessionTools.isFreeSound(id) ? "进阶" : v<=0.001 ? "静音" : ("音量 <b>"+pct+"</b>");
+    ui.pct.innerHTML = !sessionTools.isFreeSound(id) ? t(L(),'mixer.faderPlus') : v<=0.001 ? t(L(),'mixer.faderMuted') : (t(L(),'mixer.faderVolume')+" <b>"+pct+"</b>");
   }
   function tweenTo(mix){
     cancelAnimationFrame(mixFrame);
@@ -894,8 +907,8 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       return rgb.map(function(channel){return channel+(255-channel)*white;});
     });
     $("glassEmpty").hidden=Boolean(cupState.active.length);
-    var names=cupState.active.slice(0,3).map(function(sound){ return sound.name; });
-    var caption=names.length ? names.join(" · ")+(cupState.active.length>3?" 等 "+cupState.active.length+" 种":"") : "这杯还空着";
+    var names=cupState.active.slice(0,3).map(function(sound){ return soundDisplayName(sound,L()); });
+    var caption=names.length ? names.join(" · ")+(cupState.active.length>3 ? t(L(),'cup.more',{total:cupState.active.length,extra:cupState.active.length-3}) : "") : t(L(),'cup.emptyCap');
     $("glassCap").textContent=caption;
     $("mixerCupName").textContent=caption;
     $("ckScene").style.setProperty("--ck-glow",tint.colors[1]);
@@ -1023,10 +1036,10 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   })();
 
   function paintCurrentMix(){
-    var active=SOUNDS.filter(function(s){ return levels[s.id]>0.02; });
     var box=$("currentMix");
-    if(!active.length){ box.textContent="当前配比：还没有拉动任何推子。"; return; }
-    box.innerHTML="当前配比："+active.map(function(s){ return s.name+" "+Math.round(levels[s.id]*100); }).join(" · ");
+    var active=activeSounds();
+    if(!active.length){ box.textContent=t(L(),'mine.saveEmpty'); return; }
+    box.textContent=mixSummaryText(active, L());
     /* save name pre-filled from the dominant sounds (Noisli model:
        one tap to save, never a blank form) */
     var nm=$("recipeName"); if(nm && !nm.value.trim()){ var dn=defaultName(); if(dn) nm.value=dn; }
@@ -1088,7 +1101,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   function openListeningWindow(){
     if(session.remaining()!==0){
       try{ ensureCtx(); }
-      catch(error){ toast("浏览器暂时无法播放声音"); return false; }
+      catch(error){ toast(t(L(),'audio.cantPlay')); return false; }
     }
     if(!session.begin()){
       tickSession();
@@ -1114,7 +1127,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     }
     envelope.linearRampToValueAtTime(on ? 1 : 0,t+(on ? 3 : 5));
     if(on){
-      AC.resume().catch(function(){ toast("浏览器暂时无法播放声音"); });
+      AC.resume().catch(function(){ toast(t(L(),'audio.cantPlay')); });
       if(fillEmpty!==false){
         if(!SOUNDS.some(function(s){ return levels[s.id]>.02; })) tweenTo({rain:.45,fire:.25,piano:.22});
         SOUNDS.forEach(function(s){ applyGain(s.id); });
@@ -1126,9 +1139,9 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     }
     document.body.classList.toggle("is-playing",playing);
     $("playIcon").innerHTML=playing ? ICON_PAUSE : ICON_PLAY;
-    $("playBtn").setAttribute("aria-label",playing ? "暂停" : "播放");
-    $("ctaPlay").textContent=playing ? "⏸ 暂停这一杯" : "▶ 自己调一杯";
-    $("immPlay").textContent=playing ? "暂停" : "继续播放";
+    $("playBtn").setAttribute("aria-label",playing ? t(L(),'mixer.pauseAria') : t(L(),'mixer.playAria'));
+    $("ctaPlay").textContent=playing ? t(L(),'mixer.playingCta') : t(L(),'hero.ctaPlay');
+    $("immPlay").textContent=playing ? t(L(),'overlays.immPause') : t(L(),'overlays.immResume');
     return true;
   }
   function playMix(mix,scene){
@@ -1150,7 +1163,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   $("clearBtn").addEventListener("click",function(){
     activeScene=null;
     tweenTo({});
-    toast("全部归零，安静了");
+    toast(t(L(),'mixer.cleared'));
   });
   $("randomBtn").addEventListener("click",function(){
     var pool=SOUNDS.filter(function(sound){ return sessionTools.isFreeSound(sound.id); });
@@ -1158,7 +1171,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     for(var i=0;i<n;i++){ picks.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]); }
     var mix={};
     picks.forEach(function(sound){ mix[sound.id]=.3+Math.random()*.6; });
-    if(playMix(mix)) toast("随机一杯："+picks.map(function(sound){ return sound.name; }).join(" + "));
+    if(playMix(mix)) toast(t(L(),'mixer.randomToast',{names:picks.map(function(sound){ return soundDisplayName(sound,L()); }).join(" + ")}));
   });
 
   /* ============================== recipes ============================== */
@@ -1168,7 +1181,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     Object.keys(mix).forEach(function(id){
       var s=soundById(id); if(!s) return;
       bars+='<i style="background:'+s.color+';width:'+(mix[id]/total*100)+'%"></i>';
-      legend+='<span><i style="background:'+s.color+'"></i>'+s.name+" "+Math.round(mix[id]*100)+"</span>";
+      legend+='<span><i style="background:'+s.color+'"></i>'+soundDisplayName(s,L())+" "+Math.round(mix[id]*100)+"</span>";
     });
     return '<div class="mixbar">'+bars+'</div><div class="mix-legend">'+legend+'</div>';
   }
@@ -1193,7 +1206,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       return recipe.mix[id]>.02 && !sessionTools.isFreeSound(id);
     });
     $("mixer").scrollIntoView({behavior:"smooth"});
-    toast(hasPremium ? "已调出基础音效，配方中的进阶音效已保留" : "已调出「"+recipe.name+"」");
+    toast(hasPremium ? t(L(),'mine.appliedPlus') : t(L(),'mine.applied',{name:recipe.name}));
     return true;
   }
 
@@ -1230,7 +1243,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
         prm[id]=o;
       });
     }
-    return { name:typeof payload.n==="string" ? (payload.n.trim().slice(0,32)||"朋友的配方") : "朋友的配方", mix:mix, params:prm };
+    return { name:typeof payload.n==="string" ? (payload.n.trim().slice(0,32)||t(L(),'mine.friendRecipe')) : t(L(),'mine.friendRecipe'), mix:mix, params:prm };
   }
   function copyText(text, okMsg){
     function done(){ toast(okMsg); }
@@ -1241,53 +1254,56 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       var ta=document.createElement("textarea");
       ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
       document.body.appendChild(ta); ta.select();
-      try{ document.execCommand("copy"); done(); }catch(e){ toast("复制失败，请长按手动复制"); }
+      try{ document.execCommand("copy"); done(); }catch(e){ toast(t(L(),'mine.copyFailed')); }
       document.body.removeChild(ta);
     }
   }
   function defaultName(){
-    var active=SOUNDS.filter(function(s){ return levels[s.id]>0.02; })
-      .sort(function(a,b){ return levels[b.id]-levels[a.id]; }).slice(0,2);
+    var active=topActive();
     if(!active.length) return "";
-    return active.map(function(s){ return s.name; }).join(" + ")+" 之夜";
+    return autoRecipeName(active.map(function(s){ return { sound: s, level: levels[s.id] }; }), L());
+  }
+  /* 音量最大的两个通道（自动配方名的来源）。 */
+  function topActive(){
+    return SOUNDS.filter(function(s){ return levels[s.id]>0.02; })
+      .sort(function(a,b){ return levels[b.id]-levels[a.id]; }).slice(0,2);
   }
   $("saveBtn").addEventListener("click", function(){
     var active=SOUNDS.filter(function(s){ return levels[s.id]>0.02; });
-    if(!active.length){ toast("先拉几格推子，再保存这一杯"); return; }
+    if(!active.length){ toast(t(L(),'mine.saveFirst')); return; }
     var name=$("recipeName").value.trim() || defaultName();
     var mix={}; active.forEach(function(s){ mix[s.id]=levels[s.id]; });
     var prm={}; active.forEach(function(s){ var o={}; PARAM_DEFS.forEach(function(d){ o[d.k]=params[s.id][d.k]; }); prm[s.id]=o; });
     myRecipes.unshift({ name:name, mix:mix, params:prm, at:new Date() });
     $("recipeName").value="";
     renderMine();
-    toast(persistRecipes() ? "已保存「"+name+"」" : "已保存到当前页面，浏览器存储不可用");
+    toast(persistRecipes() ? t(L(),'mine.saved',{name:name}) : t(L(),'mine.savedNoStorage'));
   });
   function renderMine(){
     var list=$("mineList");
     if(!myRecipes.length){
-      list.innerHTML='<div class="empty-note-2">还没有存过配方。<br />去调音台拉几格推子，调到「就是这个感觉」，再回来存下它。</div>';
+      list.innerHTML='<div class="empty-note-2">'+t(L(),'mine.empty')+'</div>';
       return;
     }
     list.innerHTML="";
     myRecipes.forEach(function(r, idx){
       var item=document.createElement("div"); item.className="mine-item";
-      var timeStr=r.at.toLocaleDateString("zh-CN",{month:"short",day:"numeric"})+" "+
-        r.at.toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit",hour12:false});
+      var timeStr=formatRecipeDate(r.at, L());
       item.innerHTML='<div class="top"><h4>'+escapeHtml(r.name)+'</h4><time>'+timeStr+'</time></div>'+
         mixBarHTML(r.mix)+
         '<div class="ops">'+
-          '<button class="op-btn solid" data-op="apply">调出这杯</button>'+
-          '<button class="op-btn" data-op="card">分享卡</button>'+
-          '<button class="op-btn" data-op="code">复制配方码</button>'+
-          '<button class="op-btn danger" data-op="del">删除</button>'+
+          '<button class="op-btn solid" data-op="apply">'+t(L(),'mine.apply')+'</button>'+
+          '<button class="op-btn" data-op="card">'+t(L(),'mine.shareCard')+'</button>'+
+          '<button class="op-btn" data-op="code">'+t(L(),'mine.copyCode')+'</button>'+
+          '<button class="op-btn danger" data-op="del">'+t(L(),'mine.delete')+'</button>'+
         "</div>";
       item.querySelectorAll("[data-op]").forEach(function(b){
         b.addEventListener("click", function(){
           var op=b.getAttribute("data-op");
           if(op==="apply") playSavedMix(r);
-          if(op==="code"){ copyText(encodeRecipe(r.name, r.mix, r.params), "配方码已复制，发给朋友就能调出同款（连每味原料的参数一起）"); }
+          if(op==="code"){ copyText(encodeRecipe(r.name, r.mix, r.params), t(L(),'mine.codeCopied')); }
           if(op==="card"){ drawShareCard(r); }
-          if(op==="del"){ myRecipes.splice(idx,1); persistRecipes(); renderMine(); toast("已删除「"+r.name+"」"); }
+          if(op==="del"){ myRecipes.splice(idx,1); persistRecipes(); renderMine(); toast(t(L(),'mine.deleted',{name:r.name})); }
         });
       });
       list.appendChild(item);
@@ -1296,7 +1312,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   function escapeHtml(s){ return s.replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
   $("importBtn").addEventListener("click", function(){
     var code=$("importCode").value.trim();
-    if(!code){ toast("先粘贴配方码"); return; }
+    if(!code){ toast(t(L(),'mine.pasteFirst')); return; }
     try{
       var r=decodeRecipe(code);
       if(!Object.keys(r.mix).length) throw new Error("empty");
@@ -1306,7 +1322,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       $("importCode").value="";
       playSavedMix(r);
     }catch(e){
-      toast("这个配方码读不出来，检查一下有没有复制完整");
+      toast(t(L(),'mine.badCode'));
     }
   });
 
@@ -1318,9 +1334,9 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     grd.addColorStop(0, "#fff6e7"); grd.addColorStop(1, "#f3e5e1");
     x.fillStyle=grd; x.fillRect(0,0,900,1160);
     x.fillStyle= "#352a28";
-    x.font="600 30px Manrope,sans-serif"; x.fillText("声 音 实 验 室", 70, 105);
+    x.font="600 30px Manrope,sans-serif"; x.fillText("SOUND COCKTAIL", 70, 105);
     x.font="500 24px Manrope,sans-serif"; x.fillStyle= "#705e56";
-    x.fillText("mix your own cup of sound", 70, 148);
+    x.fillText(t(L(),'mine.shareTagline'), 70, 148);
     x.font="600 72px Manrope,sans-serif"; x.fillStyle= "#352a28";
     wrapText(x, r.name, 70, 280, 760, 92, 2);
     var gx=270, gy=420, gw=360, bowlBot=gy+218;
@@ -1353,23 +1369,25 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     x.lineWidth=10;
     x.beginPath(); x.moveTo(gx+gw/2-4, bowlBot+4); x.lineTo(gx+gw/2-3, bowlBot+96); x.stroke();
     x.beginPath(); x.moveTo(gx+gw/2-70, bowlBot+108); x.lineTo(gx+gw/2+70, bowlBot+108); x.stroke();
-    /* ingredient list */
-    x.font="500 32px 'Noto Sans SC',sans-serif";
+    /* ingredient list （字体按界面语言：英文用 Manrope，中文用思源字体） */
+    var fontSans=L()==="en" ? "500 32px Manrope,sans-serif" : "500 32px 'Noto Sans SC',sans-serif";
+    var fontSerif=L()==="en" ? "700 30px 'Cormorant Garamond',serif" : "700 30px 'Noto Serif SC',serif";
+    x.font=fontSans;
     var ly=900;
     look.active.slice(0,4).forEach(function(s){
       var id=s.id;
       x.fillStyle=s.color; x.fillRect(70, ly-26, 26, 26);
       x.fillStyle= "#352a28";
-      x.fillText(s.name+"  "+Math.round(r.mix[id]*100), 116, ly);
+      x.fillText(soundDisplayName(s,L())+"  "+Math.round(r.mix[id]*100), 116, ly);
       ly+=52;
     });
-    x.font="700 30px 'Noto Serif SC',serif"; x.fillStyle= "#9d5225";
-    x.fillText("自己调一杯声音", 70, 1090);
+    x.font=fontSerif; x.fillStyle= "#9d5225";
+    x.fillText(t(L(),'mine.shareTagline'), 70, 1090);
     var a=document.createElement("a");
     a.download="Sound-Cocktail-"+r.name+".png";
     a.href=c.toDataURL("image/png");
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    toast("分享卡已生成，正在下载");
+    toast(t(L(),'mine.cardDone'));
   }
   function roundRectStroke(x, px, py, w, h, rad){
     x.beginPath();
@@ -1399,7 +1417,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     if(!dialog.open) dialog.showModal();
   }
   function showPremium(name){
-    $("premiumMessage").textContent="「"+name+"」属于进阶内容。进阶版正在筹备中。";
+    $("premiumMessage").textContent=t(L(),'overlays.premiumMsg',{name:name});
     var dialog=$("premiumDialog");
     if(!dialog.open) dialog.showModal();
   }
@@ -1450,9 +1468,9 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       if(active[i]) $("immFlow").style.setProperty(color,active[i].color);
       else $("immFlow").style.removeProperty(color);
     }
-    $("immTitle").textContent=activeScene ? activeScene.name :
-      active.length ? active.slice(0,3).map(function(s){ return s.name; }).join(" + ") : "今晚这一杯";
-    $("immSub").textContent=activeScene ? activeScene.desc : "留一点时间给手上的事。";
+    $("immTitle").textContent=activeScene ? recipeDisplay(activeScene,L()).name :
+      active.length ? active.slice(0,3).map(function(s){ return soundDisplayName(s,L()); }).join(" + ") : t(L(),'overlays.immTitle');
+    $("immSub").textContent=activeScene ? recipeDisplay(activeScene,L()).desc : t(L(),'overlays.immSub');
   }
   function enterImmersive(){
     if(!setPlaying(true)) return;
@@ -1467,7 +1485,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     el.classList.add("open");
     el.setAttribute("aria-hidden","false");
     document.body.classList.add("is-immersive");
-    $("immPlay").textContent=playing ? "暂停" : "继续播放";
+    $("immPlay").textContent=playing ? t(L(),'overlays.immPause') : t(L(),'overlays.immResume');
     $("immPlay").focus({preventScroll:true});
     setBackgroundInert(true);
   }
@@ -1495,15 +1513,16 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
 
   function updateSourceUI(id){
     var meta=SOUND_AUDIO[id], entry=recordings[id];
-    var label="实时合成";
-    if(entry && entry.custom) label="本地录音";
-    else if(entry && entry.loading) label="载入音源中";
-    else if(meta && location.protocol!=="file:" && !(entry && entry.failed)) label=meta.roots ? "乐器采样" : "现场录音";
+    var kind="synth";
+    if(entry && entry.custom) kind="local";
+    else if(entry && entry.loading) kind="loading";
+    else if(meta && location.protocol!=="file:" && !(entry && entry.failed)) kind=meta.roots ? "instrument" : "live";
+    var label=t(L(),'sources.badge.'+kind);
     document.querySelectorAll('[data-srcbadge="'+id+'"],[data-cardbadge="'+id+'"]').forEach(function(badge){
       badge.textContent=label;
-      badge.classList.toggle("real",label==="现场录音" || label==="乐器采样" || label==="本地录音");
+      badge.classList.toggle("real",kind==="live" || kind==="instrument" || kind==="local");
     });
-    var usesLoop=label==="现场录音" || label==="本地录音" || (label==="载入音源中" && meta && !meta.roots);
+    var usesLoop=kind==="live" || kind==="local" || (kind==="loading" && meta && !meta.roots);
     ["density","rand"].forEach(function(key){
       var input=$("prm-"+id+"-"+key);
       if(input) input.parentElement.hidden=usesLoop;
@@ -1517,23 +1536,23 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       var meta=SOUND_AUDIO[s.id];
       var item=document.createElement("div"); item.className="src-item";
       var details=meta ? '<a href="'+meta.source+'" target="_blank" rel="noopener">'+meta.title+'</a> · '+meta.author+
-        (meta.editor ? ' · '+meta.editor+' 编辑或提供' : '')+
+        (meta.editor ? ' · '+meta.editor+' '+t(L(),'sources.editedBy') : '')+
         ' · <a href="'+AUDIO_LICENSES[meta.license]+'" target="_blank" rel="noopener">'+meta.license+'</a>' :
-        '由 Sound Cocktail 实时合成';
+        t(L(),'sources.synthBy');
       if(meta && meta.related){
         var original=meta.related;
-        details+='<br>原始录音：<a href="'+original.source+'" target="_blank" rel="noopener">'+original.title+'</a> · '+original.author+
+        details+='<br>'+t(L(),'sources.original')+'<a href="'+original.source+'" target="_blank" rel="noopener">'+original.title+'</a> · '+original.author+
           ' · <a href="'+AUDIO_LICENSES[original.license]+'" target="_blank" rel="noopener">'+original.license+'</a>';
       }
       var free=sessionTools.isFreeSound(s.id);
-      var action=free ? '<label class="replace-btn">替换录音<input type="file" accept="audio/*" data-replace="'+s.id+'" hidden></label>' :
-        '<button class="replace-btn" type="button">进阶音效</button>';
-      item.innerHTML='<div><h4><i style="background:'+s.color+'"></i>'+s.name+' <span class="badge" data-srcbadge="'+s.id+'"></span></h4>'+
+      var action=free ? '<label class="replace-btn">'+t(L(),'sources.replace')+'<input type="file" accept="audio/*" data-replace="'+s.id+'" hidden></label>' :
+        '<button class="replace-btn" type="button">'+t(L(),'sources.plusSound')+'</button>';
+      item.innerHTML='<div><h4><i style="background:'+s.color+'"></i>'+soundDisplayName(s,L())+' <span class="badge" data-srcbadge="'+s.id+'"></span></h4>'+
         '<p>'+details+'</p></div>'+action;
       wrap.appendChild(item);
       updateSourceUI(s.id);
       if(!free){
-        item.querySelector("button").addEventListener("click",function(){ showPremium(s.name); });
+        item.querySelector("button").addEventListener("click",function(){ showPremium(soundDisplayName(s,L())); });
         return;
       }
       var input=item.querySelector("input");
@@ -1550,9 +1569,9 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
           recordings[s.id]={custom:true,loop:prepareRecording(AC,buffer,true)};
           if(playing){ stopGen(s.id); applyGain(s.id); }
           updateSourceUI(s.id);
-          toast("已替换「"+s.name+"」");
+          toast(t(L(),'sources.replaced',{name:soundDisplayName(s,L())}));
         }catch(error){
-          if(!disposed && current===request) toast("无法载入这段录音，请选择可播放的音频文件");
+          if(!disposed && current===request) toast(t(L(),'sources.loadFailed'));
         }
       });
     });
@@ -1561,7 +1580,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   var bedNodes={};
   function startBed(kind){
     if(bedNodes[kind] || !openListeningWindow()) return;
-    if(AC.state!=="running") AC.resume().catch(function(){ toast("浏览器暂时无法播放声音"); });
+    if(AC.state!=="running") AC.resume().catch(function(){ toast(t(L(),'audio.cantPlay')); });
     var src=AC.createBufferSource(); src.buffer=noiseBuffer(kind); src.loop=true;
     var f=filt("lowpass",kind==="brown"?420:kind==="pink"?2400:3200);
     var g=AC.createGain(); g.gain.value=0;
@@ -1596,6 +1615,8 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   buildFaders();
   buildSources();
   renderMine();
+  // 语言切换（导航栏按钮）只改文案：引擎重绘自己负责的部分。
+  listen(window,"soundcocktail:locale-changed",repaintLocale);
   // The first cup is ready to play when the user chooses Start.
   levels.rain=0.80; levels.fire=0.52; levels.piano=0.40;
   SOUNDS.forEach(function(s){ paintFader(s.id); });
@@ -1627,6 +1648,40 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     SOUNDS.forEach(function(s){ paintFader(s.id); });
     buildSources();
     paintCurrentMix();
+  }
+
+  /** 播放/暂停按钮的文案随播放状态和语言走（语言切换时也要刷新）。 */
+  function refreshTransportLabels(){
+    $("playBtn").setAttribute("aria-label",playing ? t(L(),'mixer.pauseAria') : t(L(),'mixer.playAria'));
+    $("ctaPlay").textContent=playing ? t(L(),'mixer.playingCta') : t(L(),'hero.ctaPlay');
+    $("immPlay").textContent=playing ? t(L(),'overlays.immPause') : t(L(),'overlays.immResume');
+  }
+
+  /**
+   * 语言切换时重绘引擎负责的全部文案：推子（含分组名、参数名、
+   * 徽章、音量读数）、杯身标题、当前配比、我的配方、音源清单、
+   * 播放按钮。React 负责的静态文案由 useLocale 自行重渲染。
+   * 只改文案，不碰 levels/params/音频节点和支付状态。
+   * 配方名输入框：只有值还是上一个语言的自动建议时才跟随重生成；
+   * 用户自己输入过的内容原样保留，绝不翻译。
+   */
+  var lastLocale=L();
+  function repaintLocale(){
+    var nm=$("recipeName");
+    var oldAuto="";
+    if(nm && nm.value){
+      var top=topActive();
+      if(top.length) oldAuto=autoRecipeName(top.map(function(s){ return { sound: s, level: levels[s.id] }; }), lastLocale);
+    }
+    buildFaders();
+    SOUNDS.forEach(function(s){ paintFader(s.id); });
+    renderGlass();
+    paintCurrentMix();
+    renderMine();
+    buildSources();
+    refreshTransportLabels();
+    if(nm && oldAuto && nm.value===oldAuto){ var dn=defaultName(); if(dn) nm.value=dn; }
+    lastLocale=L();
   }
 
   return {
