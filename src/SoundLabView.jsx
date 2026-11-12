@@ -1,5 +1,15 @@
+import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { PACKS } from './packs.mjs';
+
+function BrandMark() {
+  return (
+    <svg className="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M6 7h20c0 6-4.2 10.2-9 11.2V25h4v2.6H11V25h4v-6.8C10.2 17.2 6 13 6 7z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M10.5 11h11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  )
+}
 
 function Background() {
   return (
@@ -31,7 +41,7 @@ function Background() {
 function Navigation() {
   return (
     <nav className="topbar">
-      <span className="mark"><span className="dot"></span>声音实验室</span>
+      <span className="mark brand"><BrandMark /><span className="brand-word">Sound Cocktail</span></span>
       <a href="#mixer">调音台</a>
       <a href="#recipes">配方</a>
       <a href="#plus">进阶</a>
@@ -194,7 +204,7 @@ function Hero({ recipes, onChooseScene }) {
   return (
     <div className="hero">
       <div>
-        <span className="kicker">SOUND LAB</span>
+        <span className="kicker">SOUND COCKTAIL</span>
         <h1 id="heroTitle">调一杯声音</h1>
         <p className="lead">选个场景，留十分钟给手上的事。隔壁桌低声聊天，雨落在窗上，想听哪种声音多一点，随时回来调。</p>
         <div className="featured-scenes" id="featuredScenes" role="group" aria-label="选择一个免费场景">
@@ -314,7 +324,7 @@ function Recipes({ recipes, sounds, onChooseScene, onShowPremium }) {
 function Plus() {
   return (
     <section className="blk" id="plus">
-      <div className="sec-head"><h2>声音实验室进阶</h2><span className="en">PLUS</span></div>
+      <div className="sec-head"><h2>Sound Cocktail 进阶</h2><span className="en">PLUS</span></div>
       <p className="sec-sub">想把一杯声音留得久一些，或去更远的地方听一听。一次购买，长期使用。</p>
       <div className="cards access-cards">
         <article className="card"><h3>免费</h3><p>4 款场景配方、12 种基础音效、3 种底噪。每次播放最多 10 分钟。</p></article>
@@ -370,16 +380,22 @@ function SavedRecipes() {
 }
 
 function Sources() {
+  const [open, setOpen] = useState(false);
   return (
     <section className="blk" id="sources">
       <div className="sec-head"><h2>音源清单</h2><span className="en">real recordings · sources &amp; licences</span></div>
       <p className="sec-sub">查看录音和采样的作者与授权。可用本地文件替换基础通道，文件只在当前页面使用。</p>
-      <div className="src-list" id="srcList"><div className="skl skl-row" aria-hidden="true"></div><div className="skl skl-row" aria-hidden="true"></div><div className="skl skl-row" aria-hidden="true"></div></div>
-      <p className="comfort-note" style={{ marginTop: '14px' }}>底噪 · 可单独开关</p>
-      <div className="chips" style={{ marginTop: '8px' }}>
-        <button className="chip" data-bed="white">白噪音 床声</button>
-        <button className="chip" data-bed="pink">粉红噪音 床声</button>
-        <button className="chip" data-bed="brown">褐色噪音 床声</button>
+      <button type="button" className="btn btn-ghost btn-sm src-toggle" aria-expanded={open} onClick={() => setOpen(v => !v)}>
+        {open ? '收起音源清单' : '查看音源与授权'}
+      </button>
+      <div hidden={!open}>
+        <div className="src-list" id="srcList"><div className="skl skl-row" aria-hidden="true"></div><div className="skl skl-row" aria-hidden="true"></div><div className="skl skl-row" aria-hidden="true"></div></div>
+        <p className="comfort-note" style={{ marginTop: '14px' }}>底噪 · 可单独开关</p>
+        <div className="chips" style={{ marginTop: '8px' }}>
+          <button className="chip" data-bed="white">白噪音 床声</button>
+          <button className="chip" data-bed="pink">粉红噪音 床声</button>
+          <button className="chip" data-bed="brown">褐色噪音 床声</button>
+        </div>
       </div>
     </section>
   )
@@ -388,7 +404,7 @@ function Sources() {
 function Footer() {
   return (
     <footer>
-      <span className="serif">声音实验室</span>
+      <span className="brand brand-foot"><BrandMark /><span className="brand-word">Sound Cocktail</span></span>
       <span>自己调一杯声音 · 睡前、工作、雨夜</span>
       <a href="#sources">音源清单</a>
     </footer>

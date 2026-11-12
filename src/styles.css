@@ -1343,3 +1343,15 @@ body.is-immersive{overflow:hidden}
 .err-box{border:2px dashed var(--danger);border-radius:14px 6px 16px 8px/8px 16px 6px 14px;background:#FDECEA;padding:14px 16px}
 .err-box h4{margin:0 0 6px;font-family:var(--hand);font-weight:400;font-size:19px;color:var(--danger)}
 .err-box p{margin:0;font-size:13.5px;line-height:1.7;color:var(--ink-2)}
+
+/* ---- Sound Cocktail brand lockup: premium serif wordmark + line coupe ---- */
+.brand{display:inline-flex;align-items:center;gap:10px;color:var(--ink)}
+.brand-mark{width:26px;height:26px;flex:none}
+.brand-word{
+  font-family:"Cormorant Garamond","Noto Serif SC",serif;
+  font-weight:600;font-size:19px;letter-spacing:.14em;text-transform:uppercase;
+  line-height:1;white-space:nowrap;color:var(--ink);
+}
+.brand-foot .brand-mark{width:22px;height:22px}
+.brand-foot .brand-word{font-size:17px}
+.src-toggle{margin-bottom:16px}

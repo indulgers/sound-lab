@@ -1351,7 +1351,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     x.font="700 30px 'Noto Serif SC',serif"; x.fillStyle= "#9d5225";
     x.fillText("自己调一杯声音", 70, 1090);
     var a=document.createElement("a");
-    a.download="声音实验室-"+r.name+".png";
+    a.download="Sound-Cocktail-"+r.name+".png";
     a.href=c.toDataURL("image/png");
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     toast("分享卡已生成，正在下载");
@@ -1504,7 +1504,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       var details=meta ? '<a href="'+meta.source+'" target="_blank" rel="noopener">'+meta.title+'</a> · '+meta.author+
         (meta.editor ? ' · '+meta.editor+' 编辑或提供' : '')+
         ' · <a href="'+AUDIO_LICENSES[meta.license]+'" target="_blank" rel="noopener">'+meta.license+'</a>' :
-        '由 Sound Lab 实时合成';
+        '由 Sound Cocktail 实时合成';
       if(meta && meta.related){
         var original=meta.related;
         details+='<br>原始录音：<a href="'+original.source+'" target="_blank" rel="noopener">'+original.title+'</a> · '+original.author+
