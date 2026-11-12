@@ -14,17 +14,82 @@
 
 ```sh
 npm ci
+npm run dev        # http://localhost:3000（TanStack Start 开发服务器，跑在 workerd 里）
+```
+
+首页 `/` 和沉浸页 `/focus` 由 TanStack Start（文件路由）管理，共用一个 Web Audio 控制器。直接访问沉浸页时可按「继续播放」开始。首页 SSR：初始 HTML 已包含标题、描述和三个进阶包。
+
+用 `npm test` 运行计时与配方权限测试。用 `npm run build` 构建，再用 `npm run preview` 预览生产包（同样跑在 workerd 里）。
+
+### 支付（本地沙箱）
+
+支付 API 与网站跑在同一个 Worker 里（`src/routes/api/*`，同源 `/api`，不需要开发代理）。本地开发用支付宝沙箱配置：
+
+```sh
+npm run sync-dev-vars   # 从 .alipay-sandbox.json 生成 .dev.vars（沙箱密钥，绝不提交）
 npm run dev
 ```
 
-首页 `/` 和沉浸页 `/focus` 由 TanStack Router 管理，共用一个 Web Audio 控制器。直接访问沉浸页时可按「继续播放」开始。
+`.dev.vars` 只在本地生效；生产密钥用 `wrangler secret put` 设置（见部署一节）。订单存在 Cloudflare KV（`ORDERS_KV` 绑定），本地开发用 `wrangler.jsonc` 里 `preview_id` 对应的本地命名空间，数据存在 `.wrangler/` 下。
 
-用 `npm test` 运行计时与配方权限测试。用 `npm run build` 构建，再用 `npm run preview` 预览生产包。
+沙箱下单验证：`POST /api/pay/create {"productId":"focus-pack"}` 应返回 200 和一张 ¥6.00 的支付宝沙箱支付表单。注意：本机出站代理会破坏 workerd 的 TLS 握手，workerd 无法直接连到支付宝沙箱网关做查询/退款——服务端 API 调用（query/refund/close）用的是 `src/server/alipay-fetch.ts` 的 fetch 传输（与 SDK 相同的 RSA2 签名/验签算法），已用本地假网关端到端验证通过（见该文件头注释），上线前请在已部署的 Worker 上再跑一次真实沙箱查询确认。
 
 ## 音频素材
 
 作者、原始链接及逐条许可见 [音源目录](src/audio/catalog.mjs) 和页面内的「音源清单」。详见 [素材整理说明](public/assets/audio/README.txt)。
 
-## 部署
+## 部署（Cloudflare Workers）
 
-[生产站点](https://sound-lab-97n.pages.dev/) 由 Cloudflare Pages 从 `main` 部署。构建命令为 `npm run build`，输出目录为 `dist`，运行环境为 Node.js 22 或更高。构建会把音源复制到 `dist`。Cloudflare Pages 的单页应用回退会把 `/focus` 交给 TanStack Router。
+本站已从 Cloudflare Pages（静态站）迁移到 Cloudflare Workers（TanStack Start 全栈：SSR + 支付 API 同一个 Worker）。**当前生产站仍在 Pages（soundcocktail.app / sound-lab-97n.pages.dev），切流量之前先在 Worker 上验证通过。**
+
+### 首次部署（需要 Cloudflare 登录）
+
+```sh
+npx wrangler login
+npx wrangler whoami
+
+# 1. 创建订单 KV 命名空间，把返回的 id 填进 wrangler.jsonc（替换现在的占位 UUID）
+npx wrangler kv namespace create ORDERS_KV
+npx wrangler kv namespace create ORDERS_KV --preview
+
+# 2. 设置生产支付宝密钥（生产密钥目前还不存在：需先完成白名单 → 签约 → 建应用，
+#    再把应用公钥对应的私钥等填进来；不要用沙箱密钥部署生产）
+npx wrangler secret put ALIPAY_APP_ID
+npx wrangler secret put ALIPAY_APP_PRIVATE_KEY_PKCS1
+npx wrangler secret put ALIPAY_PUBLIC_KEY
+# 生产网关（默认是沙箱网关；生产用 https://openapi.alipay.com/gateway.do）：
+npx wrangler secret put ALIPAY_GATEWAY
+# 可选：异步通知地址（需公网可达）
+npx wrangler secret put ALIPAY_NOTIFY_URL
+
+# 3. 部署（会自动先构建；不要加 --config 参数，部署用插件生成的配置）
+npm run deploy
+# 成功后会得到 https://sound-cocktail.<子域名>.workers.dev
+```
+
+部署包约 2.8 MiB（gzip 约 0.6 MiB），在免费版 3 MiB 限制内。
+
+### 绑定自定义域名（验证通过之后再做）
+
+```sh
+# 先确认 workers.dev 上的站和支付都正常，再把域名从 Pages 项目解绑、绑到 Worker：
+npx wrangler deploy   # 确认 Worker 已上线
+# Cloudflare Dashboard → Workers & Pages → sound-cocktail → Settings → Domains → Add → Custom Domain → soundcocktail.app
+# 或：npx wrangler custom-domains add soundcocktail.app
+```
+
+绑定后 `soundcocktail.app` 即由 Worker 提供服务，Pages 项目可保留作回滚（不要同时让两个项目绑同一个域名）。
+
+### 部署后检查
+
+```sh
+curl https://<workers.dev 域名>/            # 初始 HTML 应含标题和三个包名
+curl https://<workers.dev 域名>/api/products
+curl -X POST https://<workers.dev 域名>/api/pay/create \
+  -H 'Content-Type: application/json' -d '{"productId":"focus-pack"}'
+# 生产密钥就绪前，下单会返回 503 PAYMENT_NOT_CONFIGURED（预期行为）
+# 沙箱密钥部署到预览环境时，应返回 ¥6.00 的支付宝沙箱支付表单；
+# 再用返回的 outTradeNo 调 /api/pay/query/:outTradeNo 确认查询链路
+```
+
+旧的 Pages 部署说明：生产站目前仍由 Cloudflare Pages 从 `indulgers/sound-lab` 的 `main` 分支部署（https://sound-lab-97n.pages.dev/）。本目录（TanStack Start 版）尚未推送到 GitHub、尚未部署，待验证通过后再决定推送与切换方式。
