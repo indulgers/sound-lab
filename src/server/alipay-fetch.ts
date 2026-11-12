@@ -33,7 +33,8 @@ import type { PayConfig } from './config'
 import { formatAlipayTimestamp } from './amounts'
 
 const ALGORITHM = 'RSA-SHA256'
-const EXEC_TIMEOUT_MS = 5000
+const EXEC_TIMEOUT_MS = 20000
+const EXEC_MAX_ATTEMPTS = 2
 
 // SDK formatKey() 的翻版：去掉已有的 BEGIN/END 行，重新包上。
 function formatKey(key: string, type: string): string {
@@ -116,16 +117,29 @@ export async function alipayApiCall(
 ): Promise<Record<string, unknown>> {
   const { url, execParams } = buildSignedParams(method, bizContent, cfg)
 
-  let httpResponse: Response
-  try {
-    httpResponse = await fetch(url, {
-      method: 'POST',
-      body: new URLSearchParams(execParams),
-      headers: { accept: 'application/json' },
-      signal: AbortSignal.timeout(EXEC_TIMEOUT_MS),
-    })
-  } catch (err) {
-    throw new Error(`HttpClient Request error: ${err instanceof Error ? err.message : String(err)}`)
+  // 沙箱网关单次调用常要 2–5 秒，5 秒超时约一半请求会断；放宽到 20 秒，
+  // 网络/超时失败再重试一次（query/refund/close 都是幂等调用）。
+  let httpResponse: Response | undefined
+  let lastErr: unknown
+  for (let attempt = 1; attempt <= EXEC_MAX_ATTEMPTS; attempt++) {
+    try {
+      httpResponse = await fetch(url, {
+        method: 'POST',
+        body: new URLSearchParams(execParams),
+        headers: { accept: 'application/json' },
+        signal: AbortSignal.timeout(EXEC_TIMEOUT_MS),
+      })
+      break
+    } catch (err) {
+      lastErr = err
+      if (attempt === EXEC_MAX_ATTEMPTS) {
+        throw new Error(`HttpClient Request error: ${err instanceof Error ? err.message : String(err)}`)
+      }
+      await new Promise((r) => setTimeout(r, 500))
+    }
+  }
+  if (!httpResponse) {
+    throw new Error(`HttpClient Request error: ${lastErr instanceof Error ? lastErr.message : String(lastErr)}`)
   }
 
   const rawText = await httpResponse.text()
