@@ -118,9 +118,16 @@ export const Route = createFileRoute('/api/auth/google/callback')({
             name: typeof profile.name === 'string' ? profile.name : null,
           })
           const session = await createSession(kv, user.userId)
-          const response = Response.redirect(new URL('/', request.url).toString(), 302)
-          response.headers.set('Set-Cookie', sessionCookie(session.token))
-          return response
+          // 注意：Response.redirect() 返回的响应头是不可变的，
+          // 再 set('Set-Cookie') 会抛 "Can't modify immutable headers"。
+          // 直接用 new Response 构造 302，并在构造时把 Location 和 Cookie 一起带上。
+          return new Response(null, {
+            status: 302,
+            headers: {
+              Location: new URL('/', request.url).toString(),
+              'Set-Cookie': sessionCookie(session.token),
+            },
+          })
         } catch (err) {
           // eslint-disable-next-line no-console
           console.warn('[google oauth] callback failed', err instanceof Error ? err.message : String(err))
