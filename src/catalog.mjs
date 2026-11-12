@@ -24,14 +24,14 @@ export const SOUNDS = [
 ];
 
 export const RECIPES = [
-  { name:"咖啡馆靠窗", tag:"写作", featured:true, intent:"写作", desc:"隔桌的谈话、键盘轻敲，偶尔有一两下吉他拨弦。", mix:{cafe:.62,keyboard:.38,guitar:.18} },
-  { name:"雨夜独处", tag:"深度专注", featured:true, intent:"深度专注", desc:"窗外下着雨，远处的钢琴只留一点，适合埋头做一件事。", mix:{rain:.76,piano:.24,wind:.18} },
-  { name:"篝火边", tag:"放松", featured:true, intent:"短暂放松", desc:"坐在火堆边。风很轻，木柴偶尔响一下。", mix:{fire:.75,wind:.24,piano:.16} },
-  { name:"海边清晨", tag:"阅读", desc:"鸟刚醒，浪一层一层推上来，留几页书的时间。", mix:{waves:.70,birds:.35,wind:.24} },
-  { name:"林间小屋", tag:"阅读", premium:true, desc:"雨落在树叶上，溪水从屋后流过。", mix:{rain:.32,forest:.65,stream:.24} },
-  { name:"乡村夜晚", tag:"入夜", premium:true, desc:"虫鸣细碎，远处一班火车从田野边经过。", mix:{rural:.6,insects:.38,train:.29,rain:.26} },
-  { name:"市井专注", tag:"写作", premium:true, desc:"市场人声在前，木鱼和手鼓轻轻打着拍子。", mix:{market:.53,muyu:.25,cafe:.32,rain:.22} },
-  { name:"午夜雷雨", tag:"雨夜", premium:true, desc:"雨下得密，远处有雷，偶尔一辆车驶过积水。", mix:{thunder:.34,rain:.75,rainstreet:.43} },
-  { name:"末班车窗边", tag:"放空", premium:true, desc:"车厢轻轻震动，雨从窗边经过，竖琴留在远处。", mix:{train:.72,rain:.42,harp:.26} },
-  { name:"港湾来信", tag:"放空", premium:true, desc:"船舱随浪微晃，海风从身边吹过。", mix:{boat:.62,waves:.38,wind:.28} }
+  { name:"咖啡馆靠窗", nameEn:"Window Seat Café", tag:"写作", tagEn:"Writing", featured:true, intent:"写作", intentEn:"Writing", desc:"隔桌的谈话、键盘轻敲，偶尔有一两下吉他拨弦。", descEn:"Low talk at the next table, soft keyboard taps, a guitar now and then.", mix:{cafe:.62,keyboard:.38,guitar:.18} },
+  { name:"雨夜独处", nameEn:"Rainy Night Alone", tag:"深度专注", tagEn:"Deep focus", featured:true, intent:"深度专注", intentEn:"Deep focus", desc:"窗外下着雨，远处的钢琴只留一点，适合埋头做一件事。", descEn:"Rain outside the window, a little piano far away — for burying yourself in one thing.", mix:{rain:.76,piano:.24,wind:.18} },
+  { name:"篝火边", nameEn:"By the Campfire", tag:"放松", tagEn:"Relax", featured:true, intent:"短暂放松", intentEn:"A short break", desc:"坐在火堆边。风很轻，木柴偶尔响一下。", descEn:"Sitting by the fire. The wind is light, the wood pops now and then.", mix:{fire:.75,wind:.24,piano:.16} },
+  { name:"海边清晨", nameEn:"Seaside Morning", tag:"阅读", tagEn:"Reading", desc:"鸟刚醒，浪一层一层推上来，留几页书的时间。", descEn:"The birds just woke, waves rolling in one after another, time for a few pages.", mix:{waves:.70,birds:.35,wind:.24} },
+  { name:"林间小屋", nameEn:"Cabin in the Woods", tag:"阅读", tagEn:"Reading", premium:true, desc:"雨落在树叶上，溪水从屋后流过。", descEn:"Rain on the leaves, a stream running behind the house.", mix:{rain:.32,forest:.65,stream:.24} },
+  { name:"乡村夜晚", nameEn:"Countryside Night", tag:"入夜", tagEn:"Nightfall", premium:true, desc:"虫鸣细碎，远处一班火车从田野边经过。", descEn:"Crickets in the dark, a train passing the fields far away.", mix:{rural:.6,insects:.38,train:.29,rain:.26} },
+  { name:"市井专注", nameEn:"Street Focus", tag:"写作", tagEn:"Writing", premium:true, desc:"市场人声在前，木鱼和手鼓轻轻打着拍子。", descEn:"Market voices up front, wooden fish and hand drum keeping a soft beat.", mix:{market:.53,muyu:.25,cafe:.32,rain:.22} },
+  { name:"午夜雷雨", nameEn:"Midnight Thunder", tag:"雨夜", tagEn:"Rainy night", premium:true, desc:"雨下得密，远处有雷，偶尔一辆车驶过积水。", descEn:"Rain falling thick, thunder far off, a car now and then through the puddles.", mix:{thunder:.34,rain:.75,rainstreet:.43} },
+  { name:"末班车窗边", nameEn:"Last Train Window", tag:"放空", tagEn:"Unwind", premium:true, desc:"车厢轻轻震动，雨从窗边经过，竖琴留在远处。", descEn:"The carriage sways gently, rain passes the window, a harp far away.", mix:{train:.72,rain:.42,harp:.26} },
+  { name:"港湾来信", nameEn:"Letters from the Harbour", tag:"放空", tagEn:"Unwind", premium:true, desc:"船舱随浪微晃，海风从身边吹过。", descEn:"The cabin rocks with the waves, sea wind brushing past.", mix:{boat:.62,waves:.38,wind:.28} }
 ];

@@ -10,3 +10,16 @@ ALIPAY_GATEWAY=https://openapi-sandbox.dl.alipaydev.com/gateway.do
 # 可选：卖家校验（沙箱配置里有 pid 时 sync-dev-vars 会自动填）
 # ALIPAY_SELLER_ID=
 # ALIPAY_SELLER_EMAIL=
+
+# 海外版 Waffo Pancake（test 环境）。私钥填单行 raw base64
+# （去掉 PEM 头尾行和换行）；SDK 也接受 PEM 或字面 \n。
+# 产品 ID 是公开标识，不是密钥；生产切换前不要 publish 产品，
+# 也不要把 WAFFO_ENV 改成 prod。
+WAFFO_MERCHANT_ID=
+WAFFO_STORE_ID=
+WAFFO_PRIVATE_KEY=
+WAFFO_ENV=test
+WAFFO_PRODUCT_FOCUS_PACK=
+WAFFO_PRODUCT_SLEEP_PACK=
+WAFFO_PRODUCT_RAIN_NIGHT_PACK=
+

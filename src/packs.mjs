@@ -5,6 +5,10 @@
  * 结账页会先向后端校验价格，下单只传 productId，金额由服务端决定。
  * 文案对应站内已有的进阶配方：市井专注（写作）、乡村夜晚（入夜）、午夜雷雨（雨夜）。
  *
+ * 双币种：price / priceLabel 是 CNY（支付宝），priceUsd / priceLabelUsd
+ * 是 USD（Waffo 海外版，2026-11-12 用户确认：$1.99 / $2.99 / $3.99）。
+ * nameEn / descEn 是英文展示文案。包 ID 不变，权益跨支付渠道共用。
+ *
  * sounds：这个包解锁的进阶通道（调音台里原来锁着的通道）。
  * 10 个进阶通道全部分配到了包里，一个配方能听，当且仅当它用到的
  * 每个进阶通道都被已拥有的包解锁：
@@ -18,28 +22,61 @@ export const PACKS = [
   {
     id: 'focus-pack',
     name: '专注包',
+    nameEn: 'Focus Pack',
     price: '6.00',
     priceLabel: '¥6',
+    priceUsd: '1.99',
+    priceLabelUsd: '$1.99',
     desc: '解锁「市井专注」等进阶配方，专注时间更长。',
+    descEn: 'Unlocks Plus recipes like “Street Focus” — stay focused for longer.',
     sounds: ['market', 'muyu', 'chimes'],
   },
   {
     id: 'sleep-pack',
     name: '助眠包',
+    nameEn: 'Sleep Pack',
     price: '9.00',
     priceLabel: '¥9',
+    priceUsd: '2.99',
+    priceLabelUsd: '$2.99',
     desc: '解锁「乡村夜晚」等入夜配方，睡前慢慢听。',
+    descEn: 'Unlocks night recipes like “Countryside Night” — drift off slowly.',
     sounds: ['insects', 'train', 'harp', 'forest', 'boat'],
   },
   {
     id: 'rain-night-pack',
     name: '雨夜包',
+    nameEn: 'Rain Night Pack',
     price: '12.00',
     priceLabel: '¥12',
+    priceUsd: '3.99',
+    priceLabelUsd: '$3.99',
     desc: '解锁「午夜雷雨」等雨夜配方，雨、雷、街道声全开。',
+    descEn: 'Unlocks rainy-night recipes like “Midnight Thunder” — rain, thunder and wet streets, all on.',
     sounds: ['thunder', 'rainstreet'],
   },
 ];
+
+/** 按语言取包的展示文案与价格（locale 不是 'en' 时一律中文 CNY）。 */
+export function packDisplay(pack, locale) {
+  if (!pack) return null;
+  if (locale === 'en') {
+    return {
+      name: pack.nameEn || pack.name,
+      desc: pack.descEn || pack.desc,
+      price: pack.priceUsd,
+      priceLabel: pack.priceLabelUsd,
+      currency: 'USD',
+    };
+  }
+  return {
+    name: pack.name,
+    desc: pack.desc,
+    price: pack.price,
+    priceLabel: pack.priceLabel,
+    currency: 'CNY',
+  };
+}
 
 export function findPack(id) {
   return PACKS.find((pack) => pack.id === id) || null;

@@ -1,7 +1,7 @@
 /**
  * 支付路由共用小工具（与 Express 版 src/routes/pay.js 的同名逻辑一致）。
  */
-import { createKvOrderStore, type OrderStore } from './store'
+import { createKvOrderStore, type OrderStore } from './store.ts'
 
 export function newOutTradeNo(): string {
   const ts = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14)

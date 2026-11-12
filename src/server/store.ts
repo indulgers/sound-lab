@@ -19,9 +19,13 @@
 // 订单字段：outTradeNo, productId, subject, totalAmount, status
 //   (CREATED | PAID | CLOSED | REFUNDING | REFUNDED),
 //   tradeNo, paidAt, refundedCents, createdAt, updatedAt,
-//   userId（下单用户的 userId；登录后下单才有，缺失表示未归属订单）
+//   userId（下单用户的 userId；登录后下单才有，缺失表示未归属订单）,
+//   provider（'alipay' | 'waffo'；老订单缺失表示 alipay）,
+//   waffoSessionId / waffoOrderId（Waffo 订单才有）
 
 export type OrderStatus = 'CREATED' | 'PAID' | 'CLOSED' | 'REFUNDING' | 'REFUNDED'
+
+export type OrderProvider = 'alipay' | 'waffo'
 
 export interface OrderRecord {
   outTradeNo: string
@@ -36,6 +40,9 @@ export interface OrderRecord {
   createdAt?: string
   updatedAt?: string
   userId?: string | null
+  provider?: OrderProvider
+  waffoSessionId?: string | null
+  waffoOrderId?: string | null
 }
 
 export interface NotifyEventRecord {
@@ -57,6 +64,8 @@ export interface OrderStore {
     subject: string
     totalAmount: string
     userId?: string | null
+    provider?: OrderProvider
+    waffoSessionId?: string | null
   }): Promise<OrderRecord>
   /** 幂等标记已支付：只有首次从 CREATED 变为 PAID 返回 true。 */
   markPaidIdempotently(outTradeNo: string, tradeNo: string): Promise<boolean>
@@ -69,10 +78,16 @@ export interface OrderStore {
     tradeStatus?: string
     rawParams?: Record<string, unknown>
   }): Promise<boolean>
+  /**
+   * Waffo webhook 事件幂等：同一 delivery id（event.id）只处理一次。
+   * 首次插入返回 true；已存在返回 false（调用方直接回 200，不重复发权益）。
+   */
+  insertWaffoEventOnce(eventId: string): Promise<boolean>
 }
 
 const ORDER_PREFIX = 'order:'
 const NOTIFY_PREFIX = 'notify:'
+const WAFFO_EVENT_PREFIX = 'waffoevt:'
 
 export function createKvOrderStore(kv: KVNamespace): OrderStore {
   const orderKey = (outTradeNo: string) => `${ORDER_PREFIX}${outTradeNo}`
@@ -107,6 +122,8 @@ export function createKvOrderStore(kv: KVNamespace): OrderStore {
     subject: string
     totalAmount: string
     userId?: string | null
+    provider?: OrderProvider
+    waffoSessionId?: string | null
   }): Promise<OrderRecord> {
     return saveOrder({
       outTradeNo: input.outTradeNo,
@@ -118,6 +135,9 @@ export function createKvOrderStore(kv: KVNamespace): OrderStore {
       paidAt: null,
       refundedCents: '0',
       userId: input.userId ?? null,
+      provider: input.provider ?? 'alipay',
+      waffoSessionId: input.waffoSessionId ?? null,
+      waffoOrderId: null,
     })
   }
 
@@ -166,6 +186,15 @@ export function createKvOrderStore(kv: KVNamespace): OrderStore {
     return true
   }
 
+  async function insertWaffoEventOnce(eventId: string): Promise<boolean> {
+    if (!eventId || typeof eventId !== 'string') return false
+    const key = `${WAFFO_EVENT_PREFIX}${eventId}`
+    const existing = await kv.get(key)
+    if (existing !== null) return false
+    await kv.put(key, JSON.stringify({ eventId, receivedAt: new Date().toISOString() }))
+    return true
+  }
+
   return {
     listOrders,
     findOrder,
@@ -175,5 +204,6 @@ export function createKvOrderStore(kv: KVNamespace): OrderStore {
     recordNonPaidTradeEvent,
     addRefundedCents,
     insertNotifyEventOnce,
+    insertWaffoEventOnce,
   }
 }
