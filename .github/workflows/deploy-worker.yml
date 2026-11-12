@@ -67,13 +67,11 @@ jobs:
           PREVIEW_ID=$(ensure_ns "ORDERS_KV_preview" "ORDERS_KV" --preview)
           echo "KV prod=$PROD_ID preview=$PREVIEW_ID"
           test -n "$PROD_ID" && test -n "$PREVIEW_ID"
-          node -e "
-            const fs = require('fs');
-            const c = JSON.parse(fs.readFileSync('wrangler.jsonc', 'utf8'));
-            c.kv_namespaces[0].id = process.argv[1];
-            c.kv_namespaces[0].preview_id = process.argv[2];
-            fs.writeFileSync('wrangler.jsonc', JSON.stringify(c, null, 2) + '\n');
-          " "$PROD_ID" "$PREVIEW_ID"
+          # wrangler.jsonc has comments (JSONC), so patch the ids with
+          # sed instead of parsing it as JSON.
+          sed -i "s/4519ca13-85c1-4751-b0e9-5c714be17964/$PROD_ID/; s/9da35d08-bad2-4f32-9278-e1952b020496/$PREVIEW_ID/" wrangler.jsonc
+          grep "$PROD_ID" wrangler.jsonc
+          grep "$PREVIEW_ID" wrangler.jsonc
 
       - name: Build and deploy
         env:
