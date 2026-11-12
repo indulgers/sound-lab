@@ -9,6 +9,8 @@ name: Switch soundcocktail.app to Worker
 
 on:
   workflow_dispatch:
+  push:
+    branches: [tanstack-start]
 
 jobs:
   switch:
