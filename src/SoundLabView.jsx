@@ -1,21 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import AuthButton from './AuthButton.jsx';
+import { recipeDisplay } from './catalog.mjs';
 import { isFreeSound } from './listening-session.mjs';
 import { PACKS, isMixUnlocked, packDisplay, soundsForPacks } from './packs.mjs';
 import { currencyForRegion, useRegion } from './region.mjs';
 import { setLocale, t, useLocale } from './locale.mjs';
-
-/** 按语言取配方展示字段（英文缺失时回落中文）。 */
-function recipeDisplay(recipe, locale) {
-  if (locale !== 'en') return { name: recipe.name, tag: recipe.tag, intent: recipe.intent, desc: recipe.desc };
-  return {
-    name: recipe.nameEn || recipe.name,
-    tag: recipe.tagEn || recipe.tag,
-    intent: recipe.intentEn || recipe.intent,
-    desc: recipe.descEn || recipe.desc,
-  };
-}
 
 function BrandMark() {
   return (
@@ -77,12 +67,13 @@ function Navigation({ user, onAuthChange }) {
 }
 
 function SoundCup() {
+  const [locale] = useLocale();
   return (
     <div className="glass-wrap">
       <div className="ck-scene" id="ckScene" aria-hidden="true">
         <div className="ck-glow"></div>
         <div className="cup-stage" id="cupStage">
-          <svg id="wcSvg" viewBox="0 0 320 340" role="img" aria-label="随配比变化的手绘涂鸦鸡尾酒杯">
+          <svg id="wcSvg" viewBox="0 0 320 340" role="img" aria-label={t(locale, 'cup.svgAria')}>
             <defs>
               <radialGradient id="wcHalo">
                 <stop stopColor="#FFE9B3" stopOpacity=".72" />
@@ -217,10 +208,12 @@ function SoundCup() {
             </g>
           </svg>
         </div>
-        <div className="ck-empty" id="glassEmpty" hidden>拉一格推子，开始调配</div>
-        <p className="cup-hint">轻拖杯子，晃一晃</p>
+        <div className="ck-empty" id="glassEmpty" hidden>{t(locale, 'cup.empty')}</div>
+        <p className="cup-hint">{t(locale, 'cup.hint')}</p>
       </div>
-      <div className="glass-cap" id="glassCap">这杯还空着</div>
+      {/* 杯身标题由音频引擎的 renderGlass 拥有：这里不放文案，
+          否则语言切换时 React 重渲染会把正在调的配比标题冲回空态。 */}
+      <div className="glass-cap" id="glassCap"></div>
     </div>
   )
 }
@@ -260,16 +253,16 @@ function Mixer() {
   const [locale] = useLocale();
   return (
     <section className="blk" id="mixer">
-      <div className="sec-head"><h2>{t(locale, 'mixer.title')}</h2><span className="en">{t(locale, 'mixer.en')}</span></div>
+      <div className="sec-head"><h2>{t(locale, 'mixer.title')}</h2>{locale === 'en' ? <span className="en">{t(locale, 'mixer.en')}</span> : null}</div>
       <p className="sec-sub">{t(locale, 'mixer.sub')}</p>
       <div className="mixer">
         <div className="mixer-bar">
-          <button className="play-btn" id="playBtn" aria-label="播放或暂停">
+          <button className="play-btn" id="playBtn" aria-label={t(locale, 'mixer.playPauseAria')}>
             <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg>
           </button>
           <div className="mb-group">
             <span className="mb-label">{t(locale, 'mixer.master')}</span>
-            <input type="range" className="master-vol" id="masterVol" min="0" max="85" defaultValue={55} aria-label="总音量（舒适上限 85）" />
+            <input type="range" className="master-vol" id="masterVol" min="0" max="85" defaultValue={55} aria-label={t(locale, 'mixer.masterAria')} />
           </div>
           <div className="mb-group">
             <span className="mb-label">{t(locale, 'mixer.remaining')}</span>
@@ -286,7 +279,7 @@ function Mixer() {
             <svg viewBox="42 38 241 286"><use href="#wcSway" /></svg>
             <span id="mixerCupName"></span>
           </div>
-          <div className="sound-filters" id="soundFilters" aria-label="筛选音源">
+          <div className="sound-filters" id="soundFilters" aria-label={t(locale, 'mixer.filtersAria')}>
             <button className="chip on" data-filter="all" aria-pressed="true">{t(locale, 'mixer.filterAll')}</button>
             <button className="chip" data-filter="active" aria-pressed="false">{t(locale, 'mixer.filterActive')}</button>
             <button className="chip" data-filter="nature" aria-pressed="false">{t(locale, 'mixer.filterNature')}</button>
@@ -328,7 +321,7 @@ function Recipes({ recipes, sounds, onChooseScene, onShowPremium, unlockedSounds
   const soundsById = new Map(sounds.map(sound => [sound.id, sound]))
   return (
     <section className="blk" id="recipes">
-      <div className="sec-head"><h2>{t(locale, 'recipes.title')}</h2><span className="en">{t(locale, 'recipes.en')}</span></div>
+      <div className="sec-head"><h2>{t(locale, 'recipes.title')}</h2>{locale === 'en' ? <span className="en">{t(locale, 'recipes.en')}</span> : null}</div>
       <p className="sec-sub">{t(locale, 'recipes.sub')}</p>
       <div className="cards" id="recipeCards">
         {recipes.map(recipe => {
@@ -376,7 +369,7 @@ function Plus({ ownedPacks, pendingWaffoOrders }) {
   });
   return (
     <section className="blk" id="plus">
-      <div className="sec-head"><h2>{t(locale, 'plus.title')}</h2><span className="en">{t(locale, 'plus.en')}</span></div>
+      <div className="sec-head"><h2>{t(locale, 'plus.title')}</h2>{locale === 'en' ? <span className="en">{t(locale, 'plus.en')}</span> : null}</div>
       <p className="sec-sub">{t(locale, 'plus.sub')}</p>
       <div className="cards access-cards">
         <article className="card"><h3>{t(locale, 'plus.freeTitle')}</h3><p>{t(locale, 'plus.freeDesc')}</p></article>
@@ -411,14 +404,16 @@ function SavedRecipes() {
   const [locale] = useLocale();
   return (
     <section className="blk" id="mine">
-      <div className="sec-head"><h2>{t(locale, 'mine.title')}</h2><span className="en">{t(locale, 'mine.en')}</span></div>
+      <div className="sec-head"><h2>{t(locale, 'mine.title')}</h2>{locale === 'en' ? <span className="en">{t(locale, 'mine.en')}</span> : null}</div>
       <p className="sec-sub">{t(locale, 'mine.sub')}</p>
       <div className="mine-grid">
         <div>
           <div className="save-box">
             <h3>{t(locale, 'mine.saveTitle')}</h3>
             <p>{t(locale, 'mine.saveDesc')}</p>
-            <div className="current-mix" id="currentMix">{t(locale, 'mine.saveEmpty')}</div>
+            {/* 当前配比行由音频引擎的 paintCurrentMix 拥有：这里不放文案，
+                否则语言切换时 React 重渲染会把配比汇总冲回空态。 */}
+            <div className="current-mix" id="currentMix"></div>
             <div className="field">
               <label htmlFor="recipeName">{t(locale, 'mine.nameLabel')}</label>
               <input type="text" id="recipeName" maxLength={16} placeholder={t(locale, 'mine.namePlaceholder')} />
@@ -448,7 +443,7 @@ function Sources() {
   const [open, setOpen] = useState(false);
   return (
     <section className="blk" id="sources">
-      <div className="sec-head"><h2>{t(locale, 'sources.title')}</h2><span className="en">{t(locale, 'sources.en')}</span></div>
+      <div className="sec-head"><h2>{t(locale, 'sources.title')}</h2>{locale === 'en' ? <span className="en">{t(locale, 'sources.en')}</span> : null}</div>
       <p className="sec-sub">{t(locale, 'sources.sub')}</p>
       <button type="button" className="btn btn-ghost btn-sm src-toggle" aria-expanded={open} onClick={() => setOpen(v => !v)}>
         {open ? t(locale, 'sources.close') : t(locale, 'sources.open')}
@@ -457,9 +452,9 @@ function Sources() {
         <div className="src-list" id="srcList"><div className="skl skl-row" aria-hidden="true"></div><div className="skl skl-row" aria-hidden="true"></div><div className="skl skl-row" aria-hidden="true"></div></div>
         <p className="comfort-note" style={{ marginTop: '14px' }}>{t(locale, 'sources.bedNote')}</p>
         <div className="chips" style={{ marginTop: '8px' }}>
-          <button className="chip" data-bed="white">白噪音 床声</button>
-          <button className="chip" data-bed="pink">粉红噪音 床声</button>
-          <button className="chip" data-bed="brown">褐色噪音 床声</button>
+          <button className="chip" data-bed="white">{t(locale, 'sources.bedWhite')}</button>
+          <button className="chip" data-bed="pink">{t(locale, 'sources.bedPink')}</button>
+          <button className="chip" data-bed="brown">{t(locale, 'sources.bedBrown')}</button>
         </div>
       </div>
     </section>
@@ -486,7 +481,7 @@ function Overlays() {
         <div className="ck-scene ck-imm" id="immScene" aria-hidden="true"></div>
         <h2 id="immTitle">{t(locale, 'overlays.immTitle')}</h2>
         <p className="sub2" id="immSub">{t(locale, 'overlays.immSub')}</p>
-        <div className="focus-read" id="immFocus" role="timer" aria-label="本次体验剩余时间"></div>
+        <div className="focus-read" id="immFocus" role="timer" aria-label={t(locale, 'overlays.immRemainingAria')}></div>
         <div className="row2">
           <button className="ibtn" id="immPlay">{t(locale, 'overlays.immPause')}</button>
           <button className="ibtn" id="immExit">{t(locale, 'overlays.immExit')}</button>
@@ -527,10 +522,15 @@ export default function SoundLabView({ recipes = [], sounds = [], onChooseScene,
   // 能用的通道 = 免费通道 + 已拥有包的通道；进阶配方按这个集合判定是否可听。
   const unlockedSounds = new Set(sounds.filter((sound) => isFreeSound(sound.id)).map((sound) => sound.id));
   soundsForPacks(ownedPacks).forEach((id) => unlockedSounds.add(id));
-  // 语言切换时同步 <html lang>（无障碍与浏览器翻译提示用）。
+  // 语言切换时同步 <html lang>（无障碍与浏览器翻译提示用），
+  // 同时同步 <title> 和 meta description（首屏由服务端 head 按
+  // Accept-Language 定，手动切换后由这里接管；支付地区不受影响）。
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = locale === 'en' ? 'en' : 'zh-CN';
+      document.title = `Sound Cocktail · ${t(locale, 'meta.title')}`;
+      const description = document.querySelector('meta[name="description"]');
+      if (description) description.setAttribute('content', t(locale, 'meta.description'));
     }
   }, [locale]);
   return (

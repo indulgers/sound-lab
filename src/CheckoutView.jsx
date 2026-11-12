@@ -88,7 +88,7 @@ export default function CheckoutView() {
     if (form) {
       form.submit();
     } else {
-      setError({ code: 'PAYMENT_FORM_MISSING', message: '支付表单返回异常，未找到可提交的表单。' });
+      setError({ code: 'PAYMENT_FORM_MISSING', message: t(locale, 'checkout.formMissing') });
       setStatus('error');
     }
   }, [status, order]);
@@ -174,7 +174,7 @@ export default function CheckoutView() {
   return (
     <div className="checkout">
       <div className="checkout-inner">
-        <div className="sec-head"><h2>{t(locale, 'checkout.title')}</h2><span className="en">{t(locale, 'checkout.en')}</span></div>
+        <div className="sec-head"><h2>{t(locale, 'checkout.title')}</h2>{locale === 'en' ? <span className="en">{t(locale, 'checkout.en')}</span> : null}</div>
 
         {!pack ? (
           <div className="card">
@@ -213,7 +213,7 @@ export default function CheckoutView() {
                 <div className="err-box" role="alert">
                   <h4>{error.code === 'PAYMENT_NOT_CONFIGURED' || error.code === 'WAFFO_NOT_CONFIGURED' ? t(locale, 'checkout.notConfiguredTitle') : t(locale, 'checkout.failedTitle')}</h4>
                   <p>{error.message}</p>
-                  {error.code ? <p>{t(locale, 'checkout.errorCode')}{error.code}{error.status ? `（HTTP ${error.status}）` : ''}</p> : null}
+                  {error.code ? <p>{t(locale, 'checkout.errorCode')}{error.code}{error.status ? t(locale, 'checkout.httpStatus', { status: error.status }) : ''}</p> : null}
                 </div>
               )
             ) : null}

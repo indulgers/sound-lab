@@ -25,10 +25,10 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
 </style></head>
 <body style="font-family:sans-serif;max-width:560px;margin:64px auto;padding:0 16px;">
 <h1 id="title">支付结果</h1>
-${safeNo
-    ? `<p id="status">正在确认支付结果……</p>
+<p id="status">正在确认支付结果……</p>
 <p id="unlocked" hidden></p>
 <div id="actions" hidden><a href="/" class="go" id="goMixer">去调音台</a></div>
+<p><a href="/" id="backHome">返回 Sound Cocktail</a></p>
 <script>
 (function () {
   var locale = 'zh';
@@ -37,6 +37,7 @@ ${safeNo
     en: {
       title: 'Payment result',
       checking: 'Confirming the payment result…',
+      noOrder: 'No order information found.',
       paid: function (no) { return 'Payment confirmed: order ' + no + '.'; },
       unlocked: function (name) { return 'Unlocked: ' + name + '. Sign in with the same account to use it in the mixer.'; },
       pending: 'Waiting for payment: this order has not been paid yet.',
@@ -49,6 +50,7 @@ ${safeNo
     zh: {
       title: '支付结果',
       checking: '正在确认支付结果……',
+      noOrder: '未找到订单信息。',
       paid: function (no) { return '支付成功：订单 ' + no + ' 已确认。'; },
       unlocked: function (name) { return '已解锁：' + name + '。登录同一账号即可在调音台使用。'; },
       pending: '等待付款：订单尚未完成支付。',
@@ -64,6 +66,9 @@ ${safeNo
   document.getElementById('title').textContent = T.title;
   document.getElementById('goMixer').textContent = T.goMixer;
   document.getElementById('backHome').textContent = T.backHome;
+  var status = document.getElementById('status');
+  if (!${safeNo ? 'true' : 'false'}) { status.textContent = T.noOrder; return; }
+  status.textContent = T.checking;
   var PACK_NAMES = {
     'focus-pack': { zh: '专注包', en: 'Focus Pack' },
     'sleep-pack': { zh: '助眠包', en: 'Sleep Pack' },
@@ -91,9 +96,7 @@ ${safeNo
     })
     .catch(() => { document.getElementById('status').textContent = T.failed; });
 })();
-</script>`
-    : '<p id="status">未找到订单信息。</p>'}
-<p><a href="/" id="backHome">返回 Sound Cocktail</a></p>
+</script>
 </body></html>`
         return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
       },

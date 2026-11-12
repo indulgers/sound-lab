@@ -71,6 +71,8 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
       backHome: '返回 Sound Cocktail'
     }
   }[locale];
+  document.documentElement.lang = locale === 'en' ? 'en' : 'zh-CN';
+  document.title = T.title + ' · Sound Cocktail';
   document.getElementById('title').textContent = T.title;
   document.getElementById('goMixer').textContent = T.goMixer;
   document.getElementById('backHome').textContent = T.backHome;
