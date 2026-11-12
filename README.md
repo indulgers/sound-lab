@@ -34,6 +34,38 @@ npm run dev
 
 沙箱下单验证：`POST /api/pay/create {"productId":"focus-pack"}` 应返回 200 和一张 ¥6.00 的支付宝沙箱支付表单。注意：本机出站代理会破坏 workerd 的 TLS 握手，workerd 无法直接连到支付宝沙箱网关做查询/退款——服务端 API 调用（query/refund/close）用的是 `src/server/alipay-fetch.ts` 的 fetch 传输（与 SDK 相同的 RSA2 签名/验签算法），已用本地假网关端到端验证通过（见该文件头注释），上线前请在已部署的 Worker 上再跑一次真实沙箱查询确认。
 
+### 海外版（英文 + Waffo Pancake）
+
+导航栏右上角有 EN / 中文切换（存在 `localStorage` 的 `sc-locale` 里）。语言决定界面文案、货币和支付通道：中文 → 支付宝（人民币 ¥6/¥9/¥12），英文 → Waffo Pancake（美元 $1.99/$2.99/$3.99）。包 ID 不变（`focus-pack` / `sleep-pack` / `rain-night-pack`），两条通道共用同一份权益（`GET /api/entitlements`）。
+
+- 语言相关的商品接口：`GET /api/products?locale=en` 返回 USD 价格，`?locale=zh`（或不带参数）返回 CNY 价格。
+- Waffo 下单：`POST /api/waffo/create {"productId":"focus-pack"}`（需登录，未登录返回 401；未配置返回 503 `WAFFO_NOT_CONFIGURED`）。成功返回 `{checkoutUrl, sessionId, outTradeNo, productId, totalAmount, currency}`，前端在新标签页打开 `checkoutUrl`。
+- Waffo 回调：`POST /api/waffo/webhook`（原始 body 验签，事件 `order.completed` → 标记已支付并授予权益；已处理的 `event.id` 会跳过）。付款完成后 Waffo 跳回 `/waffo-return?order=<outTradeNo>&pack=<id>`，页面轮询权益接口确认解锁。
+- 本地开发配置（`.dev.vars`，绝不提交；示例见 `.dev.vars.example`）：
+
+```sh
+WAFFO_MERCHANT_ID=
+WAFFO_STORE_ID=
+WAFFO_PRIVATE_KEY=
+WAFFO_ENV=test
+WAFFO_PRODUCT_FOCUS_PACK=
+WAFFO_PRODUCT_SLEEP_PACK=
+WAFFO_PRODUCT_RAIN_NIGHT_PACK=
+```
+
+私钥填法：用**单行 raw base64**（去掉 `-----BEGIN PRIVATE KEY-----` / `-----END PRIVATE KEY-----` 和所有换行，只留 base64 本身）；SDK 也接受 PEM（含头尾行）或字面 `\n` 转义，但单行 base64 是最稳妥的格式。部署到 Worker 时同样贴单行 base64：`npx wrangler secret put WAFFO_PRIVATE_KEY` 后直接粘贴（或把 PEM 文件重定向进 stdin：`npx wrangler secret put WAFFO_PRIVATE_KEY < waffo-private-key.pem`）。
+
+测试环境产品已在 Waffo 后台建好（test 模式，**不要点 publish**，发布是单向的、等上线决定再做）。测试卡：成功 `4576750000000110`，拒付 `4576750000000220`。
+
+本地验证脚本（都在 `scripts/`，读 `.dev.vars`，不打印任何密钥）：
+
+```sh
+node scripts/waffo-create-products.mjs   # 在 test 环境创建三个一次性产品，打印 productId
+node scripts/waffo-checkout-smoke.mjs    # 用真实 test 密钥建一个 checkout 会话，确认返回 checkoutUrl（token 不打印）
+```
+
+注意：和支付宝沙箱一样，本机 workerd 的 TLS 握手会被出站代理破坏，所以**本地 `vite preview` 里的 `/api/waffo/create` 调不通 api.waffo.ai（502）**——这是本机环境的限制，不是代码问题；上面两个 Node 脚本（走 Node 的 fetch）可以验证 SDK 与真实 test 环境，部署到 Worker 后再在已部署的 Worker 上验证整条链路（下单 → 测试卡支付 → webhook 授予 → 回跳页解锁）。
+
 ## 音频素材
 
 作者、原始链接及逐条许可见 [音源目录](src/audio/catalog.mjs) 和页面内的「音源清单」。详见 [素材整理说明](public/assets/audio/README.txt)。
@@ -62,7 +94,16 @@ npx wrangler secret put ALIPAY_GATEWAY
 # 可选：异步通知地址（需公网可达）
 npx wrangler secret put ALIPAY_NOTIFY_URL
 
-# 3. 部署（会自动先构建；不要加 --config 参数，部署用插件生成的配置）
+# 3. 设置 Waffo Pancake 密钥（海外版，test 环境；生产切换前不要改 WAFFO_ENV）
+npx wrangler secret put WAFFO_MERCHANT_ID
+npx wrangler secret put WAFFO_PRIVATE_KEY   # 粘贴单行 raw base64（见上文「海外版」一节）
+npx wrangler secret put WAFFO_PRODUCT_FOCUS_PACK
+npx wrangler secret put WAFFO_PRODUCT_SLEEP_PACK
+npx wrangler secret put WAFFO_PRODUCT_RAIN_NIGHT_PACK
+npx wrangler secret put WAFFO_ENV           # test（生产切换时再改为 prod）
+# 4. 在 Waffo 后台注册 webhook：https://soundcocktail.app/api/waffo/webhook，订阅 order.completed 事件
+
+# 5. 部署（会自动先构建；不要加 --config 参数，部署用插件生成的配置）
 npm run deploy
 # 成功后会得到 https://sound-cocktail.<子域名>.workers.dev
 ```

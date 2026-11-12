@@ -1,8 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import AuthButton from './AuthButton.jsx';
 import { isFreeSound } from './listening-session.mjs';
-import { PACKS, isMixUnlocked, soundsForPacks } from './packs.mjs';
+import { PACKS, isMixUnlocked, packDisplay, soundsForPacks } from './packs.mjs';
+import { setLocale, t, useLocale } from './locale.mjs';
+
+/** 按语言取配方展示字段（英文缺失时回落中文）。 */
+function recipeDisplay(recipe, locale) {
+  if (locale !== 'en') return { name: recipe.name, tag: recipe.tag, intent: recipe.intent, desc: recipe.desc };
+  return {
+    name: recipe.nameEn || recipe.name,
+    tag: recipe.tagEn || recipe.tag,
+    intent: recipe.intentEn || recipe.intent,
+    desc: recipe.descEn || recipe.desc,
+  };
+}
 
 function BrandMark() {
   return (
@@ -41,14 +53,23 @@ function Background() {
 }
 
 function Navigation({ user, onAuthChange }) {
+  const [locale] = useLocale();
   return (
     <nav className="topbar">
       <span className="mark brand"><BrandMark /><span className="brand-word">Sound Cocktail</span></span>
-      <a href="#mixer">调音台</a>
-      <a href="#recipes">配方</a>
-      <a href="#plus">进阶</a>
-      <a href="#mine">我的配方</a>
-      <a href="#sources">音源清单</a>
+      <a href="#mixer">{t(locale, 'nav.mixer')}</a>
+      <a href="#recipes">{t(locale, 'nav.recipes')}</a>
+      <a href="#plus">{t(locale, 'nav.plus')}</a>
+      <a href="#mine">{t(locale, 'nav.mine')}</a>
+      <a href="#sources">{t(locale, 'nav.sources')}</a>
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm"
+        onClick={() => setLocale(locale === 'en' ? 'zh' : 'en')}
+        aria-label={locale === 'en' ? 'Switch to Chinese' : '切换到英文'}
+      >
+        {locale === 'en' ? '中文' : 'EN'}
+      </button>
       <AuthButton user={user} onAuthChange={onAuthChange} />
     </nav>
   )
@@ -204,25 +225,29 @@ function SoundCup() {
 }
 
 function Hero({ recipes, onChooseScene }) {
+  const [locale] = useLocale();
   return (
     <div className="hero">
       <div>
         <span className="kicker">SOUND COCKTAIL</span>
-        <h1 id="heroTitle">调一杯声音</h1>
-        <p className="lead">选个场景，留十分钟给手上的事。隔壁桌低声聊天，雨落在窗上，想听哪种声音多一点，随时回来调。</p>
-        <div className="featured-scenes" id="featuredScenes" role="group" aria-label="选择一个免费场景">
-          {recipes.filter(recipe => recipe.featured).map(recipe => (
-            <button className="scene-option" type="button" key={recipe.name} onClick={() => onChooseScene(recipe)}>
-              <span className="scene-intent">{recipe.intent}</span>
-              <span className="scene-name">{recipe.name}</span>
-            </button>
-          ))}
+        <h1 id="heroTitle">{t(locale, 'hero.title')}</h1>
+        <p className="lead">{t(locale, 'hero.lead')}</p>
+        <div className="featured-scenes" id="featuredScenes" role="group" aria-label={t(locale, 'hero.featuredLabel')}>
+          {recipes.filter(recipe => recipe.featured).map(recipe => {
+            const display = recipeDisplay(recipe, locale);
+            return (
+              <button className="scene-option" type="button" key={recipe.name} onClick={() => onChooseScene(recipe)}>
+                <span className="scene-intent">{display.intent}</span>
+                <span className="scene-name">{display.name}</span>
+              </button>
+            );
+          })}
         </div>
-        <p className="hint scene-limit">免费场景 · 每次最多 10 分钟</p>
+        <p className="hint scene-limit">{t(locale, 'hero.freeNote')}</p>
         <div className="cta-row">
-          <button className="btn btn-primary" id="ctaPlay">▶ 自己调一杯</button>
-          <button className="btn btn-ember" id="ctaImmersive">沉浸模式</button>
-          <a href="#recipes" className="btn btn-ghost" style={{ textDecoration: 'none' }}>查看全部配方</a>
+          <button className="btn btn-primary" id="ctaPlay">{t(locale, 'hero.ctaPlay')}</button>
+          <button className="btn btn-ember" id="ctaImmersive">{t(locale, 'hero.ctaImmersive')}</button>
+          <a href="#recipes" className="btn btn-ghost" style={{ textDecoration: 'none' }}>{t(locale, 'hero.ctaAll')}</a>
         </div>
       </div>
       <SoundCup />
@@ -231,50 +256,51 @@ function Hero({ recipes, onChooseScene }) {
 }
 
 function Mixer() {
+  const [locale] = useLocale();
   return (
     <section className="blk" id="mixer">
-      <div className="sec-head"><h2>调音台</h2><span className="en">the mixing board</span></div>
-      <p className="sec-sub">拉动推子叠加声音，打开「调音参数」调亮度、距离和节奏。乐器采样还能调音符的疏密与随机度。</p>
+      <div className="sec-head"><h2>{t(locale, 'mixer.title')}</h2><span className="en">{t(locale, 'mixer.en')}</span></div>
+      <p className="sec-sub">{t(locale, 'mixer.sub')}</p>
       <div className="mixer">
         <div className="mixer-bar">
           <button className="play-btn" id="playBtn" aria-label="播放或暂停">
             <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg>
           </button>
           <div className="mb-group">
-            <span className="mb-label">总音量 MASTER</span>
+            <span className="mb-label">{t(locale, 'mixer.master')}</span>
             <input type="range" className="master-vol" id="masterVol" min="0" max="85" defaultValue={55} aria-label="总音量（舒适上限 85）" />
           </div>
           <div className="mb-group">
-            <span className="mb-label">本次剩余 · 免费体验</span>
+            <span className="mb-label">{t(locale, 'mixer.remaining')}</span>
             <span className="timer-read" id="focusRead" role="timer">10:00</span>
           </div>
           <div className="spacer"></div>
-          <button className="text-btn" id="immersiveBtn">进入沉浸模式</button>
-          <button className="text-btn" id="randomBtn">随机一杯</button>
-          <button className="text-btn" id="clearBtn">全部归零</button>
+          <button className="text-btn" id="immersiveBtn">{t(locale, 'mixer.immersive')}</button>
+          <button className="text-btn" id="randomBtn">{t(locale, 'mixer.random')}</button>
+          <button className="text-btn" id="clearBtn">{t(locale, 'mixer.clear')}</button>
         </div>
-        <p className="comfort-note" style={{ margin: '0 0 18px' }}>首次播放开始计时。暂停或切换配方后，倒计时继续。</p>
+        <p className="comfort-note" style={{ margin: '0 0 18px' }}>{t(locale, 'mixer.comfort')}</p>
         <div className="mixer-controls">
           <div className="mixer-cup" aria-hidden="true">
             <svg viewBox="42 38 241 286"><use href="#wcSway" /></svg>
             <span id="mixerCupName"></span>
           </div>
           <div className="sound-filters" id="soundFilters" aria-label="筛选音源">
-            <button className="chip on" data-filter="all" aria-pressed="true">全部</button>
-            <button className="chip" data-filter="active" aria-pressed="false">正在调配</button>
-            <button className="chip" data-filter="nature" aria-pressed="false">自然</button>
-            <button className="chip" data-filter="city" aria-pressed="false">场所</button>
-            <button className="chip" data-filter="inst" aria-pressed="false">乐器</button>
+            <button className="chip on" data-filter="all" aria-pressed="true">{t(locale, 'mixer.filterAll')}</button>
+            <button className="chip" data-filter="active" aria-pressed="false">{t(locale, 'mixer.filterActive')}</button>
+            <button className="chip" data-filter="nature" aria-pressed="false">{t(locale, 'mixer.filterNature')}</button>
+            <button className="chip" data-filter="city" aria-pressed="false">{t(locale, 'mixer.filterCity')}</button>
+            <button className="chip" data-filter="inst" aria-pressed="false">{t(locale, 'mixer.filterInst')}</button>
           </div>
         </div>
-        <p className="empty-filter" id="emptyFilter" hidden>当前杯子为空。切到「全部」添加声音。</p>
+        <p className="empty-filter" id="emptyFilter" hidden>{t(locale, 'mixer.emptyFilter')}</p>
         <div id="faders"></div>
       </div>
     </section>
   )
 }
 
-function RecipeMix({ mix, soundsById }) {
+function RecipeMix({ mix, soundsById, locale }) {
   const ingredients = Object.entries(mix).flatMap(([id, level]) => {
     const sound = soundsById.get(id)
     return sound ? [{ sound, level }] : []
@@ -289,7 +315,7 @@ function RecipeMix({ mix, soundsById }) {
       </div>
       <div className="mix-legend">
         {ingredients.map(({ sound, level }) => (
-          <span key={sound.id}><i style={{ background: sound.color }} />{sound.name} {Math.round(level * 100)}</span>
+          <span key={sound.id}><i style={{ background: sound.color }} />{locale === 'en' ? (sound.en || sound.name) : sound.name} {Math.round(level * 100)}</span>
         ))}
       </div>
     </>
@@ -297,27 +323,29 @@ function RecipeMix({ mix, soundsById }) {
 }
 
 function Recipes({ recipes, sounds, onChooseScene, onShowPremium, unlockedSounds }) {
+  const [locale] = useLocale();
   const soundsById = new Map(sounds.map(sound => [sound.id, sound]))
   return (
     <section className="blk" id="recipes">
-      <div className="sec-head"><h2>配方</h2><span className="en">recipes</span></div>
-      <p className="sec-sub">按想做的事选一杯。免费配方可以直接听，也可以继续调整。</p>
+      <div className="sec-head"><h2>{t(locale, 'recipes.title')}</h2><span className="en">{t(locale, 'recipes.en')}</span></div>
+      <p className="sec-sub">{t(locale, 'recipes.sub')}</p>
       <div className="cards" id="recipeCards">
         {recipes.map(recipe => {
           // 进阶配方：用到每个进阶通道都已解锁时才能直接听，否则还是进介绍页。
           const unlocked = !recipe.premium || isMixUnlocked(recipe.mix, unlockedSounds);
+          const display = recipeDisplay(recipe, locale);
           return (
             <div className="card recipe-card" key={recipe.name}>
-              <h3>{recipe.name}<span className={recipe.premium ? 'tag premium' : 'tag'}>{recipe.premium ? '进阶 · ' : ''}{recipe.tag}</span></h3>
-              <p>{recipe.desc}</p>
-              <RecipeMix mix={recipe.mix} soundsById={soundsById} />
+              <h3>{display.name}<span className={recipe.premium ? 'tag premium' : 'tag'}>{recipe.premium ? t(locale, 'recipes.premiumTag') : ''}{display.tag}</span></h3>
+              <p>{display.desc}</p>
+              <RecipeMix mix={recipe.mix} soundsById={soundsById} locale={locale} />
               <div className="row">
                 <button
                   type="button"
                   className={unlocked ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'}
                   onClick={() => unlocked ? onChooseScene(recipe) : onShowPremium(recipe.name)}
                 >
-                  {unlocked ? '进入场景' : '了解进阶'}
+                  {unlocked ? t(locale, 'recipes.enter') : t(locale, 'recipes.learnMore')}
                 </button>
               </div>
             </div>
@@ -329,26 +357,28 @@ function Recipes({ recipes, sounds, onChooseScene, onShowPremium, unlockedSounds
 }
 
 function Plus({ ownedPacks }) {
+  const [locale] = useLocale();
   const owned = new Set(ownedPacks || []);
   return (
     <section className="blk" id="plus">
-      <div className="sec-head"><h2>Sound Cocktail 进阶</h2><span className="en">PLUS</span></div>
-      <p className="sec-sub">想把一杯声音留得久一些，或去更远的地方听一听。一次购买，长期使用。</p>
+      <div className="sec-head"><h2>{t(locale, 'plus.title')}</h2><span className="en">{t(locale, 'plus.en')}</span></div>
+      <p className="sec-sub">{t(locale, 'plus.sub')}</p>
       <div className="cards access-cards">
-        <article className="card"><h3>免费</h3><p>4 款场景配方、12 种基础音效、3 种底噪。每次播放最多 10 分钟。</p></article>
+        <article className="card"><h3>{t(locale, 'plus.freeTitle')}</h3><p>{t(locale, 'plus.freeDesc')}</p></article>
         {PACKS.map(pack => {
           const isOwned = owned.has(pack.id);
+          const display = packDisplay(pack, locale);
           return (
             <article className="card" key={pack.id}>
-              <h3>{pack.name} <span className="tag">{isOwned ? '已拥有' : pack.priceLabel}</span></h3>
-              <p>{pack.desc}</p>
+              <h3>{display.name} <span className="tag">{isOwned ? t(locale, 'plus.owned') : display.priceLabel}</span></h3>
+              <p>{display.desc}</p>
               <div className="row">
-                <span className="price">{pack.priceLabel}<small> / 一次性</small></span>
+                <span className="price">{display.priceLabel}<small>{t(locale, 'plus.once')}</small></span>
                 <span style={{ flex: 1 }}></span>
                 {isOwned ? (
-                  <a href="#mixer" className="btn btn-ghost btn-sm" style={{ textDecoration: 'none' }}>去调音</a>
+                  <a href="#mixer" className="btn btn-ghost btn-sm" style={{ textDecoration: 'none' }}>{t(locale, 'plus.goMixer')}</a>
                 ) : (
-                  <Link to="/checkout" search={{ pack: pack.id }} className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>购买</Link>
+                  <Link to="/checkout" search={{ pack: pack.id }} className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>{t(locale, 'plus.buy')}</Link>
                 )}
               </div>
             </article>
@@ -360,34 +390,35 @@ function Plus({ ownedPacks }) {
 }
 
 function SavedRecipes() {
+  const [locale] = useLocale();
   return (
     <section className="blk" id="mine">
-      <div className="sec-head"><h2>我的配方</h2><span className="en">my recipes</span></div>
-      <p className="sec-sub">调到满意，给它起个名字存下来。还能生成一张配方卡发给朋友，或者把配方码发过去——对方粘贴进来，就能调出和你一模一样的一杯。</p>
+      <div className="sec-head"><h2>{t(locale, 'mine.title')}</h2><span className="en">{t(locale, 'mine.en')}</span></div>
+      <p className="sec-sub">{t(locale, 'mine.sub')}</p>
       <div className="mine-grid">
         <div>
           <div className="save-box">
-            <h3>存下这一杯</h3>
-            <p>保存的是当前推子的配比，随时回来一键复现。</p>
-            <div className="current-mix" id="currentMix">当前配比：还没有拉动任何推子。</div>
+            <h3>{t(locale, 'mine.saveTitle')}</h3>
+            <p>{t(locale, 'mine.saveDesc')}</p>
+            <div className="current-mix" id="currentMix">{t(locale, 'mine.saveEmpty')}</div>
             <div className="field">
-              <label htmlFor="recipeName">配方名字</label>
-              <input type="text" id="recipeName" maxLength={16} placeholder="例如：加班到深夜的那杯" />
+              <label htmlFor="recipeName">{t(locale, 'mine.nameLabel')}</label>
+              <input type="text" id="recipeName" maxLength={16} placeholder={t(locale, 'mine.namePlaceholder')} />
             </div>
-            <button className="btn btn-ember" id="saveBtn" style={{ width: '100%', justifyContent: 'center' }}>保存配方</button>
+            <button className="btn btn-ember" id="saveBtn" style={{ width: '100%', justifyContent: 'center' }}>{t(locale, 'mine.saveBtn')}</button>
           </div>
           <div className="save-box" style={{ marginTop: '14px' }}>
-            <h3>导入朋友的配方</h3>
-            <p>把朋友发你的配方码粘贴到这里。</p>
+            <h3>{t(locale, 'mine.importTitle')}</h3>
+            <p>{t(locale, 'mine.importDesc')}</p>
             <div className="field">
-              <label htmlFor="importCode">配方码</label>
-              <textarea id="importCode" placeholder="粘贴以 SYL- 开头的配方码…"></textarea>
+              <label htmlFor="importCode">{t(locale, 'mine.importLabel')}</label>
+              <textarea id="importCode" placeholder={t(locale, 'mine.importPlaceholder')}></textarea>
             </div>
-            <button className="btn btn-ghost" id="importBtn" style={{ width: '100%', justifyContent: 'center' }}>导入并调出这杯</button>
+            <button className="btn btn-ghost" id="importBtn" style={{ width: '100%', justifyContent: 'center' }}>{t(locale, 'mine.importBtn')}</button>
           </div>
         </div>
         <div className="mine-list" id="mineList">
-          <div className="empty-note-2">还没有存过配方。<br />去调音台拉几格推子，调到「就是这个感觉」，再回来存下它。</div>
+          <div className="empty-note-2">{t(locale, 'mine.empty')}</div>
         </div>
       </div>
     </section>
@@ -395,17 +426,18 @@ function SavedRecipes() {
 }
 
 function Sources() {
+  const [locale] = useLocale();
   const [open, setOpen] = useState(false);
   return (
     <section className="blk" id="sources">
-      <div className="sec-head"><h2>音源清单</h2><span className="en">real recordings · sources &amp; licences</span></div>
-      <p className="sec-sub">查看录音和采样的作者与授权。可用本地文件替换基础通道，文件只在当前页面使用。</p>
+      <div className="sec-head"><h2>{t(locale, 'sources.title')}</h2><span className="en">{t(locale, 'sources.en')}</span></div>
+      <p className="sec-sub">{t(locale, 'sources.sub')}</p>
       <button type="button" className="btn btn-ghost btn-sm src-toggle" aria-expanded={open} onClick={() => setOpen(v => !v)}>
-        {open ? '收起音源清单' : '查看音源与授权'}
+        {open ? t(locale, 'sources.close') : t(locale, 'sources.open')}
       </button>
       <div hidden={!open}>
         <div className="src-list" id="srcList"><div className="skl skl-row" aria-hidden="true"></div><div className="skl skl-row" aria-hidden="true"></div><div className="skl skl-row" aria-hidden="true"></div></div>
-        <p className="comfort-note" style={{ marginTop: '14px' }}>底噪 · 可单独开关</p>
+        <p className="comfort-note" style={{ marginTop: '14px' }}>{t(locale, 'sources.bedNote')}</p>
         <div className="chips" style={{ marginTop: '8px' }}>
           <button className="chip" data-bed="white">白噪音 床声</button>
           <button className="chip" data-bed="pink">粉红噪音 床声</button>
@@ -417,50 +449,52 @@ function Sources() {
 }
 
 function Footer() {
+  const [locale] = useLocale();
   return (
     <footer>
       <span className="brand brand-foot"><BrandMark /><span className="brand-word">Sound Cocktail</span></span>
-      <span>自己调一杯声音 · 睡前、工作、雨夜</span>
-      <a href="#sources">音源清单</a>
+      <span>{t(locale, 'footer.tagline')}</span>
+      <a href="#sources">{t(locale, 'nav.sources')}</a>
     </footer>
   )
 }
 
 function Overlays() {
+  const [locale] = useLocale();
   return (
     <>
       <div className="immersive" id="immersive" role="dialog" aria-modal="true" aria-labelledby="immTitle" aria-hidden="true">
         <div className="flow" id="immFlow"></div>
         <div className="ck-scene ck-imm" id="immScene" aria-hidden="true"></div>
-        <h2 id="immTitle">今晚这一杯</h2>
-        <p className="sub2" id="immSub">留一点时间给手上的事。</p>
+        <h2 id="immTitle">{t(locale, 'overlays.immTitle')}</h2>
+        <p className="sub2" id="immSub">{t(locale, 'overlays.immSub')}</p>
         <div className="focus-read" id="immFocus" role="timer" aria-label="本次体验剩余时间"></div>
         <div className="row2">
-          <button className="ibtn" id="immPlay">暂停</button>
-          <button className="ibtn" id="immExit">回调音台</button>
+          <button className="ibtn" id="immPlay">{t(locale, 'overlays.immPause')}</button>
+          <button className="ibtn" id="immExit">{t(locale, 'overlays.immExit')}</button>
         </div>
       </div>
 
       <dialog className="access-dialog" id="sessionDone" aria-labelledby="sdTitle">
         <div className="sd-card">
-          <h3 id="sdTitle">这 10 分钟结束了</h3>
-          <p className="sd-sub">这杯还在。可以存下来，或再开一段体验。</p>
+          <h3 id="sdTitle">{t(locale, 'overlays.sessionDoneTitle')}</h3>
+          <p className="sd-sub">{t(locale, 'overlays.sessionDoneSub')}</p>
           <div className="sd-row">
-            <button className="btn btn-primary" id="sdAgain">再听 10 分钟</button>
-            <button className="btn btn-ghost" id="sdSave">保存这杯</button>
-            <button className="btn btn-ghost" data-see-plus="">了解进阶</button>
-            <button className="btn btn-ghost" id="sdClose">关闭</button>
+            <button className="btn btn-primary" id="sdAgain">{t(locale, 'overlays.again')}</button>
+            <button className="btn btn-ghost" id="sdSave">{t(locale, 'overlays.save')}</button>
+            <button className="btn btn-ghost" data-see-plus="">{t(locale, 'overlays.learnPlus')}</button>
+            <button className="btn btn-ghost" id="sdClose">{t(locale, 'overlays.close')}</button>
           </div>
         </div>
       </dialog>
 
       <dialog className="access-dialog" id="premiumDialog" aria-labelledby="premiumTitle">
         <div className="sd-card">
-          <h3 id="premiumTitle">进阶内容</h3>
+          <h3 id="premiumTitle">{t(locale, 'overlays.premiumTitle')}</h3>
           <p className="sd-sub" id="premiumMessage"></p>
           <div className="sd-row">
-            <button className="btn btn-primary" data-see-plus="">了解进阶</button>
-            <form method="dialog"><button className="btn btn-ghost">继续调音</button></form>
+            <button className="btn btn-primary" data-see-plus="">{t(locale, 'overlays.learnPlus')}</button>
+            <form method="dialog"><button className="btn btn-ghost">{t(locale, 'overlays.backToMixer')}</button></form>
           </div>
         </div>
       </dialog>
@@ -471,12 +505,19 @@ function Overlays() {
 }
 
 export default function SoundLabView({ recipes = [], sounds = [], onChooseScene, onShowPremium, user = null, ownedPacks = [], onAuthChange }) {
+  const [locale] = useLocale();
   // 能用的通道 = 免费通道 + 已拥有包的通道；进阶配方按这个集合判定是否可听。
   const unlockedSounds = new Set(sounds.filter((sound) => isFreeSound(sound.id)).map((sound) => sound.id));
   soundsForPacks(ownedPacks).forEach((id) => unlockedSounds.add(id));
+  // 语言切换时同步 <html lang>（无障碍与浏览器翻译提示用）。
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = locale === 'en' ? 'en' : 'zh-CN';
+    }
+  }, [locale]);
   return (
     <>
-      <a className="skip-link" href="#mixer">跳到调音台</a>
+      <a className="skip-link" href="#mixer">{t(locale, 'skipLink')}</a>
       <Background />
       <Navigation user={user} onAuthChange={onAuthChange} />
       <main>

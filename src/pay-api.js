@@ -31,11 +31,12 @@ async function readError(response, fallbackMessage) {
   return err;
 }
 
-/** GET /api/products：服务端商品目录（价格的唯一可信来源）。 */
-export async function fetchProducts() {
+/** GET /api/products：服务端商品目录（价格的唯一可信来源）。locale=en 时返回美元价。 */
+export async function fetchProducts(locale) {
+  const query = locale === 'en' ? '?locale=en' : '';
   let response;
   try {
-    response = await fetch(payApiUrl('/api/products'));
+    response = await fetch(payApiUrl(`/api/products${query}`));
   } catch (err) {
     const error = new Error(`无法连接支付服务：${payApiHint()}。请确认支付后端已启动。`);
     error.cause = err;
@@ -56,6 +57,29 @@ export async function createPayment(productId) {
   let response;
   try {
     response = await fetch(payApiUrl('/api/pay/create'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId }),
+    });
+  } catch (err) {
+    const error = new Error(`无法连接支付服务：${payApiHint()}。请确认支付后端已启动。`);
+    error.cause = err;
+    throw error;
+  }
+  if (!response.ok) throw await readError(response, '下单失败。');
+  return response.json();
+}
+
+/**
+ * POST /api/waffo/create：海外版下单（Waffo Pancake），只传 productId。
+ * 成功返回 { outTradeNo, productId, totalAmount, currency: 'USD',
+ * checkoutUrl, sessionId, expiresAt }；checkoutUrl 是 Waffo 托管的
+ * 收银台地址。未配置时后端返回 503 WAFFO_NOT_CONFIGURED。
+ */
+export async function createWaffoPayment(productId) {
+  let response;
+  try {
+    response = await fetch(payApiUrl('/api/waffo/create'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productId }),

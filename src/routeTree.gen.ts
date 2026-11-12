@@ -14,6 +14,7 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as FocusRouteImport } from './routes/focus'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as ReturnRouteImport } from './routes/return'
+import { Route as WaffoReturnRouteImport } from './routes/waffo-return'
 import { Route as ApiEntitlementsRouteImport } from './routes/api/entitlements'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
@@ -26,6 +27,8 @@ import { Route as ApiPayCreateRouteImport } from './routes/api/pay/create'
 import { Route as ApiPayNotifyRouteImport } from './routes/api/pay/notify'
 import { Route as ApiPayRefundRouteImport } from './routes/api/pay/refund'
 import { Route as ApiPayRefundQueryRouteImport } from './routes/api/pay/refund-query'
+import { Route as ApiWaffoCreateRouteImport } from './routes/api/waffo/create'
+import { Route as ApiWaffoWebhookRouteImport } from './routes/api/waffo/webhook'
 import { Route as ApiAuthGoogleIndexRouteImport } from './routes/api/auth/google/index'
 import { Route as ApiAuthGoogleCallbackRouteImport } from './routes/api/auth/google/callback'
 import { Route as ApiPayQueryOutTradeNoRouteImport } from './routes/api/pay/query.$outTradeNo'
@@ -53,6 +56,11 @@ const HealthRoute = HealthRouteImport.update({
 const ReturnRoute = ReturnRouteImport.update({
   id: '/return',
   path: '/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WaffoReturnRoute = WaffoReturnRouteImport.update({
+  id: '/waffo-return',
+  path: '/waffo-return',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiEntitlementsRoute = ApiEntitlementsRouteImport.update({
@@ -115,6 +123,16 @@ const ApiPayRefundQueryRoute = ApiPayRefundQueryRouteImport.update({
   path: '/api/pay/refund-query',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWaffoCreateRoute = ApiWaffoCreateRouteImport.update({
+  id: '/api/waffo/create',
+  path: '/api/waffo/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWaffoWebhookRoute = ApiWaffoWebhookRouteImport.update({
+  id: '/api/waffo/webhook',
+  path: '/api/waffo/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthGoogleIndexRoute = ApiAuthGoogleIndexRouteImport.update({
   id: '/api/auth/google/',
   path: '/api/auth/google/',
@@ -137,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/return': typeof ReturnRoute
+  '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
@@ -149,6 +168,8 @@ export interface FileRoutesByFullPath {
   '/api/pay/notify': typeof ApiPayNotifyRoute
   '/api/pay/refund': typeof ApiPayRefundRoute
   '/api/pay/refund-query': typeof ApiPayRefundQueryRoute
+  '/api/waffo/create': typeof ApiWaffoCreateRoute
+  '/api/waffo/webhook': typeof ApiWaffoWebhookRoute
   '/api/auth/google/callback': typeof ApiAuthGoogleCallbackRoute
   '/api/pay/query/$outTradeNo': typeof ApiPayQueryOutTradeNoRoute
   '/api/auth/google/': typeof ApiAuthGoogleIndexRoute
@@ -159,6 +180,7 @@ export interface FileRoutesByTo {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/return': typeof ReturnRoute
+  '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
@@ -171,6 +193,8 @@ export interface FileRoutesByTo {
   '/api/pay/notify': typeof ApiPayNotifyRoute
   '/api/pay/refund': typeof ApiPayRefundRoute
   '/api/pay/refund-query': typeof ApiPayRefundQueryRoute
+  '/api/waffo/create': typeof ApiWaffoCreateRoute
+  '/api/waffo/webhook': typeof ApiWaffoWebhookRoute
   '/api/auth/google/callback': typeof ApiAuthGoogleCallbackRoute
   '/api/pay/query/$outTradeNo': typeof ApiPayQueryOutTradeNoRoute
   '/api/auth/google': typeof ApiAuthGoogleIndexRoute
@@ -182,6 +206,7 @@ export interface FileRoutesById {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/return': typeof ReturnRoute
+  '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
@@ -194,6 +219,8 @@ export interface FileRoutesById {
   '/api/pay/notify': typeof ApiPayNotifyRoute
   '/api/pay/refund': typeof ApiPayRefundRoute
   '/api/pay/refund-query': typeof ApiPayRefundQueryRoute
+  '/api/waffo/create': typeof ApiWaffoCreateRoute
+  '/api/waffo/webhook': typeof ApiWaffoWebhookRoute
   '/api/auth/google/callback': typeof ApiAuthGoogleCallbackRoute
   '/api/pay/query/$outTradeNo': typeof ApiPayQueryOutTradeNoRoute
   '/api/auth/google/': typeof ApiAuthGoogleIndexRoute
@@ -206,6 +233,7 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/return'
+    | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
     | '/api/auth/login'
@@ -218,6 +246,8 @@ export interface FileRouteTypes {
     | '/api/pay/notify'
     | '/api/pay/refund'
     | '/api/pay/refund-query'
+    | '/api/waffo/create'
+    | '/api/waffo/webhook'
     | '/api/auth/google/callback'
     | '/api/pay/query/$outTradeNo'
     | '/api/auth/google/'
@@ -228,6 +258,7 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/return'
+    | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
     | '/api/auth/login'
@@ -240,6 +271,8 @@ export interface FileRouteTypes {
     | '/api/pay/notify'
     | '/api/pay/refund'
     | '/api/pay/refund-query'
+    | '/api/waffo/create'
+    | '/api/waffo/webhook'
     | '/api/auth/google/callback'
     | '/api/pay/query/$outTradeNo'
     | '/api/auth/google'
@@ -250,6 +283,7 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/return'
+    | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
     | '/api/auth/login'
@@ -262,6 +296,8 @@ export interface FileRouteTypes {
     | '/api/pay/notify'
     | '/api/pay/refund'
     | '/api/pay/refund-query'
+    | '/api/waffo/create'
+    | '/api/waffo/webhook'
     | '/api/auth/google/callback'
     | '/api/pay/query/$outTradeNo'
     | '/api/auth/google/'
@@ -273,6 +309,7 @@ export interface RootRouteChildren {
   FocusRoute: typeof FocusRoute
   HealthRoute: typeof HealthRoute
   ReturnRoute: typeof ReturnRoute
+  WaffoReturnRoute: typeof WaffoReturnRoute
   ApiEntitlementsRoute: typeof ApiEntitlementsRoute
   ApiProductsRoute: typeof ApiProductsRoute
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
@@ -285,6 +322,8 @@ export interface RootRouteChildren {
   ApiPayNotifyRoute: typeof ApiPayNotifyRoute
   ApiPayRefundRoute: typeof ApiPayRefundRoute
   ApiPayRefundQueryRoute: typeof ApiPayRefundQueryRoute
+  ApiWaffoCreateRoute: typeof ApiWaffoCreateRoute
+  ApiWaffoWebhookRoute: typeof ApiWaffoWebhookRoute
   ApiAuthGoogleCallbackRoute: typeof ApiAuthGoogleCallbackRoute
   ApiPayQueryOutTradeNoRoute: typeof ApiPayQueryOutTradeNoRoute
   ApiAuthGoogleIndexRoute: typeof ApiAuthGoogleIndexRoute
@@ -325,6 +364,13 @@ declare module '@tanstack/react-router' {
       path: '/return'
       fullPath: '/return'
       preLoaderRoute: typeof ReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/waffo-return': {
+      id: '/waffo-return'
+      path: '/waffo-return'
+      fullPath: '/waffo-return'
+      preLoaderRoute: typeof WaffoReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/entitlements': {
@@ -411,6 +457,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPayRefundQueryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/waffo/create': {
+      id: '/api/waffo/create'
+      path: '/api/waffo/create'
+      fullPath: '/api/waffo/create'
+      preLoaderRoute: typeof ApiWaffoCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/waffo/webhook': {
+      id: '/api/waffo/webhook'
+      path: '/api/waffo/webhook'
+      fullPath: '/api/waffo/webhook'
+      preLoaderRoute: typeof ApiWaffoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/google/': {
       id: '/api/auth/google/'
       path: '/api/auth/google'
@@ -441,6 +501,7 @@ const rootRouteChildren: RootRouteChildren = {
   FocusRoute: FocusRoute,
   HealthRoute: HealthRoute,
   ReturnRoute: ReturnRoute,
+  WaffoReturnRoute: WaffoReturnRoute,
   ApiEntitlementsRoute: ApiEntitlementsRoute,
   ApiProductsRoute: ApiProductsRoute,
   ApiAuthLoginRoute: ApiAuthLoginRoute,
@@ -453,6 +514,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPayNotifyRoute: ApiPayNotifyRoute,
   ApiPayRefundRoute: ApiPayRefundRoute,
   ApiPayRefundQueryRoute: ApiPayRefundQueryRoute,
+  ApiWaffoCreateRoute: ApiWaffoCreateRoute,
+  ApiWaffoWebhookRoute: ApiWaffoWebhookRoute,
   ApiAuthGoogleCallbackRoute: ApiAuthGoogleCallbackRoute,
   ApiPayQueryOutTradeNoRoute: ApiPayQueryOutTradeNoRoute,
   ApiAuthGoogleIndexRoute: ApiAuthGoogleIndexRoute,

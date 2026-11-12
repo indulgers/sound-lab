@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { fetchProviders, login, logout, register } from './auth-api.js';
+import { t, useLocale } from './locale.mjs';
 
 /**
  * 导航栏的登录入口。
@@ -10,8 +11,10 @@ import { fetchProviders, login, logout, register } from './auth-api.js';
  *   登录/注册成功后发 `soundcocktail:auth-changed`，结账页收到后自动重试下单。
  * - 登录成功后调用父组件传来的 onAuthChange，让外壳重新拉取 /api/auth/me
  *   和 /api/entitlements，调音台随之解锁已拥有的包。
+ * - 文案跟随语言切换（useLocale），登录逻辑与语言无关。
  */
 export default function AuthButton({ user, onAuthChange }) {
+  const [locale] = useLocale();
   const dialogRef = useRef(null);
   const [mode, setMode] = useState('login'); // login | register
   const [email, setEmail] = useState('');
@@ -65,7 +68,7 @@ export default function AuthButton({ user, onAuthChange }) {
       window.dispatchEvent(new CustomEvent('soundcocktail:auth-changed'));
       if (onAuthChange) await onAuthChange();
     } catch (err) {
-      setError(err.message || '登录失败，请再试一次。');
+      setError(err.message || t(locale, 'auth.failed'));
     } finally {
       setBusy(false);
     }
@@ -85,25 +88,23 @@ export default function AuthButton({ user, onAuthChange }) {
     return (
       <>
         <span className="auth-email" title={user.email}>{user.email}</span>
-        <button type="button" className="btn btn-ghost btn-sm auth-btn" onClick={handleLogout}>退出</button>
+        <button type="button" className="btn btn-ghost btn-sm auth-btn" onClick={handleLogout}>{t(locale, 'auth.logout')}</button>
       </>
     );
   }
 
   return (
     <>
-      <button type="button" className="btn btn-ghost btn-sm auth-btn" onClick={() => openDialog('login')}>登录</button>
+      <button type="button" className="btn btn-ghost btn-sm auth-btn" onClick={() => openDialog('login')}>{t(locale, 'auth.login')}</button>
       <dialog ref={dialogRef} className="access-dialog auth-dialog" aria-labelledby="authTitle">
         <div className="sd-card">
-          <h3 id="authTitle">{mode === 'register' ? '注册账号' : '登录'}</h3>
+          <h3 id="authTitle">{mode === 'register' ? t(locale, 'auth.registerTitle') : t(locale, 'auth.loginTitle')}</h3>
           <p className="sd-sub">
-            {mode === 'register'
-              ? '注册后购买的包会记在这个账号上，换设备登录也能继续听。'
-              : '登录后，已购买的包会自动解锁。'}
+            {mode === 'register' ? t(locale, 'auth.registerSub') : t(locale, 'auth.loginSub')}
           </p>
           <form onSubmit={handleSubmit}>
             <div className="field">
-              <label htmlFor="authEmail">邮箱</label>
+              <label htmlFor="authEmail">{t(locale, 'auth.email')}</label>
               <input
                 id="authEmail" type="email" autoComplete="email" required
                 value={email} onChange={(event) => setEmail(event.target.value)}
@@ -111,35 +112,35 @@ export default function AuthButton({ user, onAuthChange }) {
               />
             </div>
             <div className="field">
-              <label htmlFor="authPassword">密码</label>
+              <label htmlFor="authPassword">{t(locale, 'auth.password')}</label>
               <input
                 id="authPassword" type="password" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} required
                 value={password} onChange={(event) => setPassword(event.target.value)}
-                placeholder={mode === 'register' ? '至少 8 位' : '你的密码'}
+                placeholder={mode === 'register' ? t(locale, 'auth.passwordRegisterPlaceholder') : t(locale, 'auth.passwordLoginPlaceholder')}
               />
             </div>
             {error ? <p className="auth-err" role="alert">{error}</p> : null}
             <div className="sd-row">
               <button type="submit" className="btn btn-primary" disabled={busy}>
-                {busy ? '请稍等…' : mode === 'register' ? '注册并登录' : '登录'}
+                {busy ? t(locale, 'auth.busy') : mode === 'register' ? t(locale, 'auth.submitRegister') : t(locale, 'auth.submitLogin')}
               </button>
-              <button type="button" className="btn btn-ghost" onClick={closeDialog}>取消</button>
+              <button type="button" className="btn btn-ghost" onClick={closeDialog}>{t(locale, 'auth.cancel')}</button>
             </div>
           </form>
           {googleAvailable ? (
             <>
-              <p className="auth-divider"><span>或</span></p>
+              <p className="auth-divider"><span>{t(locale, 'auth.or')}</span></p>
               <a className="btn btn-ghost auth-google" href="/api/auth/google" style={{ textDecoration: 'none' }}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.3h6.5c-.1 1.1-.8 2.7-2.4 3.8l3.7 2.9c2.3-2.1 3.7-5.2 3.7-8.8z" /><path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.7-2.9c-1 .7-2.3 1.1-4.2 1.1-3.2 0-5.9-2.1-6.8-5.1L1.3 17C3.3 21 7.3 24 12 24z" /><path fill="#FBBC05" d="M5.2 14.2c-.2-.7-.4-1.4-.4-2.2s.1-1.5.4-2.2L1.3 7C.5 8.6 0 10.2 0 12s.5 3.4 1.3 5l3.9-2.8z" /><path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 7.3 0 3.3 3 1.3 7l3.9 2.8c.9-3 3.6-5.1 6.8-5.1z" /></svg>
-                使用 Google 登录
+                {t(locale, 'auth.google')}
               </a>
             </>
           ) : null}
           <p className="auth-switch">
             {mode === 'register' ? (
-              <>已有账号？<button type="button" className="text-btn" onClick={() => { setMode('login'); setError(''); }}>直接登录</button></>
+              <>{t(locale, 'auth.hasAccount')}<button type="button" className="text-btn" onClick={() => { setMode('login'); setError(''); }}>{t(locale, 'auth.goLogin')}</button></>
             ) : (
-              <>还没有账号？<button type="button" className="text-btn" onClick={() => { setMode('register'); setError(''); }}>注册一个</button></>
+              <>{t(locale, 'auth.noAccount')}<button type="button" className="text-btn" onClick={() => { setMode('register'); setError(''); }}>{t(locale, 'auth.goRegister')}</button></>
             )}
           </p>
         </div>

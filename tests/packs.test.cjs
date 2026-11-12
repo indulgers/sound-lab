@@ -4,6 +4,15 @@ const { PACKS, findPack, isMixUnlocked, soundsForPacks } = require('../src/packs
 const { RECIPES, SOUNDS } = require('../src/catalog.mjs');
 const { isFreeSound } = require('../src/listening-session.mjs');
 
+test('packs: USD prices and English names/descs are present', () => {
+  assert.deepEqual(PACKS.map((p) => p.priceUsd), ['1.99', '2.99', '3.99']);
+  assert.deepEqual(PACKS.map((p) => p.priceLabelUsd), ['$1.99', '$2.99', '$3.99']);
+  for (const pack of PACKS) {
+    assert.ok(pack.nameEn && pack.nameEn.length > 0, `${pack.id} needs nameEn`);
+    assert.ok(pack.descEn && pack.descEn.length > 0, `${pack.id} needs descEn`);
+  }
+});
+
 test('three packs with server-side prices', () => {
   assert.deepEqual(
     PACKS.map((pack) => pack.id),
