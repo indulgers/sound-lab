@@ -10,6 +10,8 @@ import { createPayment, fetchProducts } from './pay-api.js';
  * 成功时把后端返回的 HTML 支付表单渲染出来并提交，浏览器跳转到支付宝；
  * 失败（例如沙箱未配置的 503）如实展示，不伪装成功。
  * 支付成功只认后端异步通知或交易查询，本页不判定支付结果。
+ * 下单需要登录：后端返回 401 时展示「请先登录」，点登录打开导航栏的
+ * 登录框；登录成功后（soundcocktail:auth-changed 事件）自动重试下单。
  */
 export default function CheckoutView() {
   const { pack: packId } = useSearch({ from: '/checkout' });
@@ -21,6 +23,7 @@ export default function CheckoutView() {
   const [status, setStatus] = useState('idle'); // idle | creating | redirecting | error
   const [error, setError] = useState(null);
   const [order, setOrder] = useState(null);
+  const [needsLogin, setNeedsLogin] = useState(false);
 
   // 先向后端校验服务端价格；校验失败时用页面标价，并如实注明。
   useEffect(() => {
@@ -57,14 +60,39 @@ export default function CheckoutView() {
     if (!pack || status === 'creating' || status === 'redirecting') return;
     setStatus('creating');
     setError(null);
+    setNeedsLogin(false);
     try {
       const data = await createPayment(pack.id);
       setOrder(data);
       setStatus('redirecting');
     } catch (err) {
+      // 401 = 未登录：打开登录框，等登录成功后自动重试（见下方的事件监听）。
+      if (err.status === 401) {
+        setError(err);
+        setStatus('error');
+        setNeedsLogin(true);
+        return;
+      }
       setError(err);
       setStatus('error');
     }
+  }
+
+  // 登录成功后自动重试下单（登录框在导航栏，由 AuthButton 发事件）。
+  useEffect(() => {
+    if (!needsLogin) return;
+    function onAuthChanged() {
+      setNeedsLogin(false);
+      void handlePay();
+    }
+    window.addEventListener('soundcocktail:auth-changed', onAuthChanged);
+    return () => window.removeEventListener('soundcocktail:auth-changed', onAuthChanged);
+    // handlePay 每次渲染都会变，这里只在 needsLogin 变化时重绑，避免重复重试。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needsLogin]);
+
+  function openLogin() {
+    window.dispatchEvent(new CustomEvent('soundcocktail:open-login'));
   }
 
   const price = serverPrice ?? pack?.price ?? '';
@@ -100,11 +128,21 @@ export default function CheckoutView() {
             <p className="fine">虚拟商品，一次购买。付款后按订单开通；支付结果以支付宝回跳后的服务端确认为准。</p>
 
             {status === 'error' && error ? (
-              <div className="err-box" role="alert">
-                <h4>{error.code === 'PAYMENT_NOT_CONFIGURED' ? '支付尚未开通配置' : '下单失败'}</h4>
-                <p>{error.message}</p>
-                {error.code ? <p>错误码：{error.code}{error.status ? `（HTTP ${error.status}）` : ''}</p> : null}
-              </div>
+              needsLogin ? (
+                <div className="err-box" role="alert">
+                  <h4>请先登录</h4>
+                  <p>购买需要登录账号，付款成功后包会记在你的账号上。</p>
+                  <div className="row" style={{ marginTop: '10px' }}>
+                    <button type="button" className="btn btn-primary btn-sm" onClick={openLogin}>登录 / 注册</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="err-box" role="alert">
+                  <h4>{error.code === 'PAYMENT_NOT_CONFIGURED' ? '支付尚未开通配置' : '下单失败'}</h4>
+                  <p>{error.message}</p>
+                  {error.code ? <p>错误码：{error.code}{error.status ? `（HTTP ${error.status}）` : ''}</p> : null}
+                </div>
+              )
             ) : null}
 
             {order ? <p className="fine">订单号：{order.outTradeNo}</p> : null}

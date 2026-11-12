@@ -18,7 +18,8 @@
 // ---- 订单 ----
 // 订单字段：outTradeNo, productId, subject, totalAmount, status
 //   (CREATED | PAID | CLOSED | REFUNDING | REFUNDED),
-//   tradeNo, paidAt, refundedCents, createdAt, updatedAt
+//   tradeNo, paidAt, refundedCents, createdAt, updatedAt,
+//   userId（下单用户的 userId；登录后下单才有，缺失表示未归属订单）
 
 export type OrderStatus = 'CREATED' | 'PAID' | 'CLOSED' | 'REFUNDING' | 'REFUNDED'
 
@@ -34,6 +35,7 @@ export interface OrderRecord {
   refunds?: Array<{ outRequestNo: string; amount: string; createdAt: string }>
   createdAt?: string
   updatedAt?: string
+  userId?: string | null
 }
 
 export interface NotifyEventRecord {
@@ -54,6 +56,7 @@ export interface OrderStore {
     productId: string
     subject: string
     totalAmount: string
+    userId?: string | null
   }): Promise<OrderRecord>
   /** 幂等标记已支付：只有首次从 CREATED 变为 PAID 返回 true。 */
   markPaidIdempotently(outTradeNo: string, tradeNo: string): Promise<boolean>
@@ -103,6 +106,7 @@ export function createKvOrderStore(kv: KVNamespace): OrderStore {
     productId: string
     subject: string
     totalAmount: string
+    userId?: string | null
   }): Promise<OrderRecord> {
     return saveOrder({
       outTradeNo: input.outTradeNo,
@@ -113,6 +117,7 @@ export function createKvOrderStore(kv: KVNamespace): OrderStore {
       tradeNo: null,
       paidAt: null,
       refundedCents: '0',
+      userId: input.userId ?? null,
     })
   }
 

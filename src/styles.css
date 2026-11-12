@@ -1355,3 +1355,21 @@ body.is-immersive{overflow:hidden}
 .brand-foot .brand-mark{width:22px;height:22px}
 .brand-foot .brand-word{font-size:17px}
 .src-toggle{margin-bottom:16px}
+
+/* ---- 账号登录（复用 .btn / .field / .access-dialog / .sd-card） ---- */
+.auth-btn{margin-left:2px}
+.auth-email{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2);font-size:13px;font-weight:500}
+.auth-dialog .field input[type="email"],.auth-dialog .field input[type="password"]{
+  border:1.5px solid var(--line-strong);background:var(--bg);color:var(--ink);
+  border-radius:12px;padding:11px 13px;font-size:14.5px;outline:none;width:100%;
+}
+.auth-dialog .field input[type="email"]:focus,.auth-dialog .field input[type="password"]:focus{border-color:var(--ember)}
+.auth-err{color:var(--danger);font-size:13px;line-height:1.6;margin:0 0 12px}
+.auth-switch{font-size:13px;color:var(--ink-2);text-align:center;margin:14px 0 0}
+.auth-switch .text-btn{padding:0}
+@media (max-width:560px){.auth-email{max-width:110px}}
+.auth-divider{display:flex;align-items:center;gap:10px;color:var(--ink-3);font-size:12.5px;margin:16px 0 12px}
+.auth-divider::before,.auth-divider::after{content:"";flex:1;border-top:1px solid var(--line-strong)}
+.auth-divider span{white-space:nowrap}
+.auth-google{width:100%;justify-content:center}
+.auth-google svg{width:18px;height:18px;flex:none}

@@ -10,6 +10,7 @@ import { env } from 'cloudflare:workers'
 import { getProduct } from '../../../server/products'
 import { getNotifyUrl, resolvePayConfig } from '../../../server/config'
 import { createSdk } from '../../../server/alipay'
+import { getSessionUser } from '../../../server/auth'
 import { getStore, isStore, jsonError, newOutTradeNo, paymentNotConfiguredResponse } from '../../../server/pay-shared'
 
 export const Route = createFileRoute('/api/pay/create')({
@@ -28,11 +29,17 @@ export const Route = createFileRoute('/api/pay/create')({
           return jsonError(400, 'INVALID_PRODUCT', `未知商品：${String(body.productId)}`)
         }
 
-        const cfg = resolvePayConfig(env)
-        if (!cfg.configured) return paymentNotConfiguredResponse()
-
         const store = getStore(env)
         if (!isStore(store)) return store
+
+        // 下单必须登录：订单要归属到用户，支付成功后才能把权益发给这个用户。
+        const session = await getSessionUser(env.ORDERS_KV, request)
+        if (!session) {
+          return jsonError(401, 'UNAUTHORIZED', '请先登录再购买。')
+        }
+
+        const cfg = resolvePayConfig(env)
+        if (!cfg.configured) return paymentNotConfiguredResponse()
 
         const outTradeNo = newOutTradeNo()
         await store.createOrder({
@@ -40,6 +47,7 @@ export const Route = createFileRoute('/api/pay/create')({
           productId: product.productId,
           subject: product.subject,
           totalAmount: product.totalAmount,
+          userId: session.userId,
         })
 
         const origin = new URL(request.url).origin
