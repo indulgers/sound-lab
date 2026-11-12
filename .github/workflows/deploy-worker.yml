@@ -1,0 +1,89 @@
+name: Deploy Sound Cocktail Worker
+
+# Deploys the TanStack Start build to Cloudflare Workers.
+# Runs only on pushes to the tanstack-start branch; the live site on main
+# (Cloudflare Pages) is untouched.
+# Payment secrets are NOT set here: until they exist the Worker returns
+# 503 PAYMENT_NOT_CONFIGURED on payment endpoints, which the checkout
+# already handles. Add them later via `wrangler secret put` once the
+# Alipay signing is done (or via the sandbox values for a sandbox test).
+
+on:
+  push:
+    branches: [tanstack-start]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # The branch inherits main's Vite-SPA files; the Start build must
+      # not see the old config/entry. (Snapshot pushes cannot delete.)
+      - name: Remove stale Vite-SPA files
+        run: rm -f vite.config.mjs index.html src/main.jsx
+
+      - run: npm ci
+
+      - name: Ensure KV namespaces
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -e
+          get_id() {
+            npx wrangler kv namespace list | jq -r --arg t "$1" '.[] | select(.title==$t) | .id' | head -n1
+          }
+          parse_create_id() {
+            # wrangler prints { binding = "X", id = "..." } (or JSON); try both.
+            grep -oE 'id = "[^"]+"' | head -n1 | sed 's/id = "//; s/"//' || true
+          }
+          PROD_ID=$(get_id "ORDERS_KV")
+          if [ -z "$PROD_ID" ] || [ "$PROD_ID" = "null" ]; then
+            OUT=$(npx wrangler kv namespace create ORDERS_KV)
+            echo "$OUT"
+            PROD_ID=$(echo "$OUT" | parse_create_id)
+            if [ -z "$PROD_ID" ]; then PROD_ID=$(echo "$OUT" | grep -oE '"id": *"[^"]+"' | head -n1 | cut -d'"' -f4); fi
+          fi
+          PREVIEW_ID=$(get_id "ORDERS_KV_preview")
+          if [ -z "$PREVIEW_ID" ] || [ "$PREVIEW_ID" = "null" ]; then
+            OUT=$(npx wrangler kv namespace create ORDERS_KV --preview)
+            echo "$OUT"
+            PREVIEW_ID=$(echo "$OUT" | parse_create_id)
+            if [ -z "$PREVIEW_ID" ]; then PREVIEW_ID=$(echo "$OUT" | grep -oE '"id": *"[^"]+"' | head -n1 | cut -d'"' -f4); fi
+          fi
+          echo "KV prod=$PROD_ID preview=$PREVIEW_ID"
+          test -n "$PROD_ID" && test -n "$PREVIEW_ID"
+          node -e "
+            const fs = require('fs');
+            const c = JSON.parse(fs.readFileSync('wrangler.jsonc', 'utf8'));
+            c.kv_namespaces[0].id = process.argv[1];
+            c.kv_namespaces[0].preview_id = process.argv[2];
+            fs.writeFileSync('wrangler.jsonc', JSON.stringify(c, null, 2) + '\n');
+          " "$PROD_ID" "$PREVIEW_ID"
+
+      - name: Build and deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npm run deploy 2>&1 | tee /tmp/deploy.log
+          grep -oE 'https://[a-z0-9.-]+\.workers\.dev' /tmp/deploy.log | head -n1 | tee /tmp/worker-url.txt
+
+      - name: Smoke test
+        run: |
+          URL=$(cat /tmp/worker-url.txt)
+          echo "Worker URL: $URL"
+          test -n "$URL"
+          curl -sf "$URL/" -o /tmp/home.html
+          grep -o "<title>[^<]*</title>" /tmp/home.html
+          curl -sf "$URL/api/products"
+          echo
+          curl -sf "$URL/health"
+          echo
