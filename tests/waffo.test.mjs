@@ -3,7 +3,9 @@ import test from 'node:test';
 import { generateKeyPairSync, createSign } from 'node:crypto';
 import { WaffoPancake, verifyWebhook } from '@waffo/pancake-ts';
 import {
+  confirmWaffoOrderPaid,
   createWaffoClient,
+  findSucceededWaffoPayment,
   getWaffoProductId,
   normalizeWaffoEnv,
   resolveWaffoConfig,
@@ -264,4 +266,162 @@ test('store: waffo event dedup and waffo order fields round-trip', async () => {
     userId: 'u_test',
   });
   assert.equal(alipayOrder.provider, 'alipay');
+});
+
+test('store: findPendingWaffoOrder only returns a live unexpired session for the same user+pack', async () => {
+  const kv = new FakeKV();
+  const store = createKvOrderStore(kv);
+  const now = Date.parse('2026-11-12T10:00:00.000Z');
+  const future = new Date(now + 60 * 60 * 1000).toISOString();
+  const past = new Date(now - 1000).toISOString();
+
+  // 未过期的进行中订单：同用户同包能找到。
+  await store.createOrder({
+    outTradeNo: 'SC1001',
+    productId: 'focus-pack',
+    subject: 's',
+    totalAmount: '1.99',
+    userId: 'u1',
+    provider: 'waffo',
+    waffoSessionId: 'cs_1',
+    waffoCheckoutUrl: 'https://checkout.example/cs_1',
+    waffoSessionExpiresAt: future,
+  });
+  assert.equal((await store.findPendingWaffoOrder('u1', 'focus-pack', now)).outTradeNo, 'SC1001');
+
+  // 会话已过期：不算进行中，允许重新下单。
+  await store.createOrder({
+    outTradeNo: 'SC1002',
+    productId: 'sleep-pack',
+    subject: 's',
+    totalAmount: '2.99',
+    userId: 'u1',
+    provider: 'waffo',
+    waffoSessionId: 'cs_2',
+    waffoCheckoutUrl: 'https://checkout.example/cs_2',
+    waffoSessionExpiresAt: past,
+  });
+  assert.equal(await store.findPendingWaffoOrder('u1', 'sleep-pack', now), null);
+
+  // 换用户、换包都找不到。
+  assert.equal(await store.findPendingWaffoOrder('u2', 'focus-pack', now), null);
+  assert.equal(await store.findPendingWaffoOrder('u1', 'rain-night-pack', now), null);
+
+  // 没有收银台地址（会话创建失败留下的孤儿单）：不算进行中。
+  await store.createOrder({
+    outTradeNo: 'SC1003',
+    productId: 'rain-night-pack',
+    subject: 's',
+    totalAmount: '3.99',
+    userId: 'u1',
+    provider: 'waffo',
+    waffoSessionId: 'cs_3',
+  });
+  assert.equal(await store.findPendingWaffoOrder('u1', 'rain-night-pack', now), null);
+
+  // 已支付的订单：不算进行中。
+  await store.markPaidIdempotently('SC1001', 'ORD_1');
+  assert.equal(await store.findPendingWaffoOrder('u1', 'focus-pack', now), null);
+
+  // 老订单（没有 waffoSessionExpiresAt）：按 createdAt + 24h 推算。
+  const legacy = await store.createOrder({
+    outTradeNo: 'SC1004',
+    productId: 'focus-pack',
+    subject: 's',
+    totalAmount: '1.99',
+    userId: 'u1',
+    provider: 'waffo',
+    waffoSessionId: 'cs_4',
+    waffoCheckoutUrl: 'https://checkout.example/cs_4',
+  });
+  await store.saveOrder({ ...legacy, createdAt: new Date(now - 60 * 60 * 1000).toISOString() });
+  assert.equal((await store.findPendingWaffoOrder('u1', 'focus-pack', now)).outTradeNo, 'SC1004');
+  await store.saveOrder({ ...legacy, createdAt: new Date(now - 25 * 60 * 60 * 1000).toISOString() });
+  assert.equal(await store.findPendingWaffoOrder('u1', 'focus-pack', now), null);
+});
+
+test('store: listPendingWaffoOrders is scoped to the owner and only lists live ones', async () => {
+  const kv = new FakeKV();
+  const store = createKvOrderStore(kv);
+  const now = Date.parse('2026-11-12T10:00:00.000Z');
+  const future = new Date(now + 60 * 60 * 1000).toISOString();
+  const mk = (outTradeNo, productId, userId, expiresAt) =>
+    store.createOrder({
+      outTradeNo,
+      productId,
+      subject: 's',
+      totalAmount: '1.99',
+      userId,
+      provider: 'waffo',
+      waffoSessionId: `cs_${outTradeNo}`,
+      waffoCheckoutUrl: `https://checkout.example/${outTradeNo}`,
+      waffoSessionExpiresAt: expiresAt,
+    });
+  await mk('SC2001', 'focus-pack', 'u1', future);
+  await mk('SC2002', 'sleep-pack', 'u1', future);
+  await mk('SC2003', 'focus-pack', 'u2', future);
+  await mk('SC2004', 'rain-night-pack', 'u1', new Date(now - 1000).toISOString());
+
+  const mine = await store.listPendingWaffoOrders('u1', now);
+  assert.deepEqual(mine.map((o) => o.outTradeNo).sort(), ['SC2001', 'SC2002']);
+  assert.deepEqual((await store.listPendingWaffoOrders('u2', now)).map((o) => o.outTradeNo), ['SC2003']);
+  assert.deepEqual(await store.listPendingWaffoOrders('nobody', now), []);
+});
+
+test('waffo confirm: shared mark-paid + grant is idempotent', async () => {
+  const kv = new FakeKV();
+  const store = createKvOrderStore(kv);
+  await store.createOrder({
+    outTradeNo: 'SC2010',
+    productId: 'sleep-pack',
+    subject: 's',
+    totalAmount: '2.99',
+    userId: 'u9',
+    provider: 'waffo',
+    waffoSessionId: 'cs_9',
+  });
+
+  const first = await confirmWaffoOrderPaid(store, kv, 'SC2010', 'ORD_9');
+  assert.equal(first.newlyPaid, true);
+  assert.deepEqual(await getPacks(kv, 'u9'), ['sleep-pack']);
+  const afterFirst = await store.findOrder('SC2010');
+  assert.equal(afterFirst.status, 'PAID');
+  assert.equal(afterFirst.waffoOrderId, 'ORD_9');
+
+  // 第二次确认（webhook 重复投递或快查与 webhook 同时到）：什么都不再做。
+  const second = await confirmWaffoOrderPaid(store, kv, 'SC2010', 'ORD_9');
+  assert.equal(second.newlyPaid, false);
+  assert.deepEqual(await getPacks(kv, 'u9'), ['sleep-pack']);
+});
+
+/** 假 GraphQL 客户端：只实现 query，返回预设的 payments。 */
+function fakeGraphqlClient(payments, errors) {
+  return {
+    graphql: {
+      query: async ({ variables }) => {
+        assert.equal(typeof variables.ref, 'string');
+        if (errors) return { data: null, errors };
+        return { data: { payments } };
+      },
+    },
+  };
+}
+
+test('waffo order lookup: succeeded payment found, pending/empty not, errors throw', async () => {
+  const pendingOnly = fakeGraphqlClient([
+    { id: 'PAY_1', orderId: 'ORD_a', status: 'pending', orderMerchantExternalId: 'SC3000' },
+  ]);
+  assert.equal(await findSucceededWaffoPayment(pendingOnly, 'SC3000'), null);
+
+  const succeeded = fakeGraphqlClient([
+    { id: 'PAY_1', orderId: 'ORD_a', status: 'pending', orderMerchantExternalId: 'SC3000' },
+    { id: 'PAY_2', orderId: 'ORD_b', status: 'succeeded', orderMerchantExternalId: 'SC3000' },
+  ]);
+  assert.deepEqual(await findSucceededWaffoPayment(succeeded, 'SC3000'), { orderId: 'ORD_b' });
+
+  const empty = fakeGraphqlClient([]);
+  assert.equal(await findSucceededWaffoPayment(empty, 'SC3000'), null);
+
+  const failing = fakeGraphqlClient([], [{ message: 'field does not exist' }]);
+  await assert.rejects(() => findSucceededWaffoPayment(failing, 'SC3000'), /Waffo order lookup failed/);
 });

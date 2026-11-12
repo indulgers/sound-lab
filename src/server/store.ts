@@ -21,7 +21,15 @@
 //   tradeNo, paidAt, refundedCents, createdAt, updatedAt,
 //   userId（下单用户的 userId；登录后下单才有，缺失表示未归属订单）,
 //   provider（'alipay' | 'waffo'；老订单缺失表示 alipay）,
-//   waffoSessionId / waffoOrderId（Waffo 订单才有）
+//   waffoSessionId / waffoOrderId（Waffo 订单才有）,
+//   waffoCheckoutUrl / waffoSessionExpiresAt（Waffo 订单才有：
+//   托管收银台地址和会话过期时间，用于“进行中订单”续付；
+//   会话创建失败的订单没有这两个字段，不算进行中）。
+//
+// 进行中（pending）判定：provider='waffo' 且 status='CREATED' 且
+// 有 checkoutUrl 且会话未过期。过期时间优先用 waffoSessionExpiresAt；
+// 老订单没有该字段时按 createdAt + 24h（Waffo 会话默认有效期）推算，
+// 两者都没有时按已过期处理。
 
 export type OrderStatus = 'CREATED' | 'PAID' | 'CLOSED' | 'REFUNDING' | 'REFUNDED'
 
@@ -43,6 +51,9 @@ export interface OrderRecord {
   provider?: OrderProvider
   waffoSessionId?: string | null
   waffoOrderId?: string | null
+  waffoCheckoutUrl?: string | null
+  /** Waffo 结账会话过期时间（ISO 字符串，来自 session.expiresAt）。 */
+  waffoSessionExpiresAt?: string | null
 }
 
 export interface NotifyEventRecord {
@@ -66,7 +77,17 @@ export interface OrderStore {
     userId?: string | null
     provider?: OrderProvider
     waffoSessionId?: string | null
+    waffoCheckoutUrl?: string | null
+    waffoSessionExpiresAt?: string | null
   }): Promise<OrderRecord>
+  /**
+   * 找某个用户对某个包的进行中 Waffo 订单（CREATED、未过期、有收银台地址）。
+   * 有则返回（下单时应续付它而不是新建）；没有返回 null。
+   * nowMs 可注入（测试用），默认 Date.now()。
+   */
+  findPendingWaffoOrder(userId: string, productId: string, nowMs?: number): Promise<OrderRecord | null>
+  /** 列出某个用户全部进行中的 Waffo 订单（最新在前）。 */
+  listPendingWaffoOrders(userId: string, nowMs?: number): Promise<OrderRecord[]>
   /** 幂等标记已支付：只有首次从 CREATED 变为 PAID 返回 true。 */
   markPaidIdempotently(outTradeNo: string, tradeNo: string): Promise<boolean>
   recordNonPaidTradeEvent(outTradeNo: string, tradeStatus: string): Promise<void>
@@ -124,6 +145,8 @@ export function createKvOrderStore(kv: KVNamespace): OrderStore {
     userId?: string | null
     provider?: OrderProvider
     waffoSessionId?: string | null
+    waffoCheckoutUrl?: string | null
+    waffoSessionExpiresAt?: string | null
   }): Promise<OrderRecord> {
     return saveOrder({
       outTradeNo: input.outTradeNo,
@@ -138,7 +161,59 @@ export function createKvOrderStore(kv: KVNamespace): OrderStore {
       provider: input.provider ?? 'alipay',
       waffoSessionId: input.waffoSessionId ?? null,
       waffoOrderId: null,
+      waffoCheckoutUrl: input.waffoCheckoutUrl ?? null,
+      waffoSessionExpiresAt: input.waffoSessionExpiresAt ?? null,
     })
+  }
+
+  /**
+   * Waffo 会话是否还有效：优先用 waffoSessionExpiresAt；
+   * 老订单没有该字段时按 createdAt + 24h（Waffo 会话默认有效期）推算；
+   * 两者都没有按已过期处理。没有 checkoutUrl 的订单（会话创建失败
+   * 留下的孤儿单）永远不算进行中。
+   */
+  function waffoSessionNotExpired(order: OrderRecord, nowMs: number): boolean {
+    if (!order.waffoCheckoutUrl) return false
+    const explicit = order.waffoSessionExpiresAt ? Date.parse(order.waffoSessionExpiresAt) : NaN
+    if (!Number.isNaN(explicit)) return explicit > nowMs
+    const created = order.createdAt ? Date.parse(order.createdAt) : NaN
+    if (Number.isNaN(created)) return false
+    return created + 24 * 60 * 60 * 1000 > nowMs
+  }
+
+  function isPendingWaffoOrder(order: OrderRecord, userId: string, productId: string, nowMs: number): boolean {
+    return (
+      order.provider === 'waffo' &&
+      order.status === 'CREATED' &&
+      order.userId === userId &&
+      order.productId === productId &&
+      waffoSessionNotExpired(order, nowMs)
+    )
+  }
+
+  async function findPendingWaffoOrder(
+    userId: string,
+    productId: string,
+    nowMs: number = Date.now(),
+  ): Promise<OrderRecord | null> {
+    const orders = await listOrders()
+    const pending = orders
+      .filter((order) => isPendingWaffoOrder(order, userId, productId, nowMs))
+      .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+    return pending[0] ?? null
+  }
+
+  async function listPendingWaffoOrders(userId: string, nowMs: number = Date.now()): Promise<OrderRecord[]> {
+    const orders = await listOrders()
+    return orders
+      .filter(
+        (order) =>
+          order.provider === 'waffo' &&
+          order.status === 'CREATED' &&
+          order.userId === userId &&
+          waffoSessionNotExpired(order, nowMs),
+      )
+      .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
   }
 
   async function markPaidIdempotently(outTradeNo: string, tradeNo: string): Promise<boolean> {
@@ -200,6 +275,8 @@ export function createKvOrderStore(kv: KVNamespace): OrderStore {
     findOrder,
     saveOrder,
     createOrder,
+    findPendingWaffoOrder,
+    listPendingWaffoOrders,
     markPaidIdempotently,
     recordNonPaidTradeEvent,
     addRefundedCents,

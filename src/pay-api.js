@@ -75,6 +75,8 @@ export async function createPayment(productId) {
  * 成功返回 { outTradeNo, productId, totalAmount, currency: 'USD',
  * checkoutUrl, sessionId, expiresAt }；checkoutUrl 是 Waffo 托管的
  * 收银台地址。未配置时后端返回 503 WAFFO_NOT_CONFIGURED。
+ * 已有未过期的进行中订单时返回 { resumed: true, checkoutUrl }，
+ * 前端应续付原来的收银台，不要再建新单。
  */
 export async function createWaffoPayment(productId) {
   let response;
@@ -90,5 +92,42 @@ export async function createWaffoPayment(productId) {
     throw error;
   }
   if (!response.ok) throw await readError(response, '下单失败。');
+  return response.json();
+}
+
+/**
+ * GET /api/waffo/pending：当前登录用户进行中的 Waffo 订单。
+ * 返回 { orders: [{ outTradeNo, productId, totalAmount, currency,
+ * checkoutUrl, sessionId, expiresAt }] }；未登录时抛 401。
+ */
+export async function fetchWaffoPending() {
+  let response;
+  try {
+    response = await fetch(payApiUrl('/api/waffo/pending'), { credentials: 'same-origin' });
+  } catch (err) {
+    const error = new Error(`无法连接支付服务：${payApiHint()}。请确认支付后端已启动。`);
+    error.cause = err;
+    throw error;
+  }
+  if (!response.ok) throw await readError(response, '进行中订单读取失败。');
+  const data = await response.json();
+  return Array.isArray(data.orders) ? data.orders : [];
+}
+
+/**
+ * GET /api/waffo/order-status?order=<outTradeNo>：单个 Waffo 订单快查。
+ * 返回 { status: 'PAID' | 'PENDING', outTradeNo, productId, granted? }。
+ * Waffo 侧查不到成功付款时返回 PENDING；Waffo 接口出错时抛 502。
+ */
+export async function fetchWaffoOrderStatus(outTradeNo) {
+  let response;
+  try {
+    response = await fetch(payApiUrl(`/api/waffo/order-status?order=${encodeURIComponent(outTradeNo)}`), { credentials: 'same-origin' });
+  } catch (err) {
+    const error = new Error(`无法连接支付服务：${payApiHint()}。请确认支付后端已启动。`);
+    error.cause = err;
+    throw error;
+  }
+  if (!response.ok) throw await readError(response, '订单状态查询失败。');
   return response.json();
 }

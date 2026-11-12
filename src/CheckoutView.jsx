@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearch } from '@tanstack/react-router';
 import { findPack, packDisplay } from './packs.mjs';
-import { createPayment, createWaffoPayment, fetchProducts } from './pay-api.js';
+import { createPayment, createWaffoPayment, fetchProducts, fetchWaffoPending } from './pay-api.js';
 import { t, useLocale } from './locale.mjs';
 
 /**
@@ -13,6 +13,8 @@ import { t, useLocale } from './locale.mjs';
  * - 英文（海外版）：Waffo Pancake。点击后 POST /api/waffo/create，成功时
  *   在新标签页打开 Waffo 托管收银台；付完按 successUrl 回到
  *   /waffo-return 确认，webhook 到账后发放权益。
+ *   防重复付款：进页时先查进行中订单，有就展示“继续付款”续付
+ *   原来的收银台；点击时再查一次；服务端下单时也会查一次兜底。
  *   注意：window.open 必须在点击处理里同步调用（先开空白页，拿到
  *   checkoutUrl 后再跳转），否则 Safari/移动端会拦截异步回调里的弹窗。
  * 失败（例如支付未配置的 503）如实展示，不伪装成功。
@@ -34,6 +36,9 @@ export default function CheckoutView() {
   const [error, setError] = useState(null);
   const [order, setOrder] = useState(null);
   const [needsLogin, setNeedsLogin] = useState(false);
+  // 进行中的 Waffo 订单（英文模式）：有未付款订单时展示“继续付款”，
+  // 不再建新单（防重复付款）。服务端下单时也会再查一次，这里是前端的第一道防线。
+  const [pendingOrder, setPendingOrder] = useState(null);
 
   // 先向后端校验服务端价格；校验失败时用页面标价，并如实注明。
   useEffect(() => {
@@ -51,6 +56,21 @@ export default function CheckoutView() {
       });
     return () => { cancelled = true; };
   }, [pack, locale]);
+
+  // 英文模式：先查这个包有没有进行中的 Waffo 订单，有就展示“继续付款”。
+  // 未登录时接口回 401，忽略即可（登录流程会处理）。
+  useEffect(() => {
+    if (!pack || !isEn) return;
+    let cancelled = false;
+    fetchWaffoPending()
+      .then((orders) => {
+        if (cancelled) return;
+        const found = (orders || []).find((item) => item.productId === pack.id && item.checkoutUrl);
+        if (found) setPendingOrder(found);
+      })
+      .catch(() => { /* 未登录或网络问题：下单时再处理 */ });
+    return () => { cancelled = true; };
+  }, [pack, isEn]);
 
   // 订单创建成功后，把支付宝返回的 HTML 表单渲染出来并提交。
   // innerHTML 插入的 <script> 不会执行，所以这里手动提交表单。
@@ -75,6 +95,30 @@ export default function CheckoutView() {
     const tab = isEn ? window.open('', '_blank') : null;
     try {
       if (isEn) {
+        // 防重复付款：先用进行中的订单续付（页面加载时没登录、或订单是
+        // 之后才建的，这里再查一次；服务端下单时还会再查一次兜底）。
+        let pending = pendingOrder;
+        if (pending && pending.expiresAt && Date.parse(pending.expiresAt) <= Date.now()) {
+          pending = null;
+          setPendingOrder(null);
+        }
+        if (!pending) {
+          try {
+            const orders = await fetchWaffoPending();
+            pending = (orders || []).find((item) => item.productId === pack.id && item.checkoutUrl) || null;
+            if (pending) setPendingOrder(pending);
+          } catch (fetchErr) {
+            // 401 = 未登录：继续走正常下单，后端会回 401 触发登录流程。
+            if (!fetchErr || fetchErr.status !== 401) throw fetchErr;
+          }
+        }
+        if (pending) {
+          setOrder({ outTradeNo: pending.outTradeNo, checkoutUrl: pending.checkoutUrl });
+          setStatus('opened');
+          if (tab && !tab.closed) tab.location.href = pending.checkoutUrl;
+          else window.location.href = pending.checkoutUrl;
+          return;
+        }
         const data = await createWaffoPayment(pack.id);
         setOrder(data);
         setStatus('opened');
@@ -167,6 +211,14 @@ export default function CheckoutView() {
               )
             ) : null}
 
+            {isEn && pendingOrder && status !== 'opened' ? (
+              <div className="err-box" role="status" style={{ borderColor: '#7a9a52' }}>
+                <h4>{t(locale, 'checkout.pendingTitle')}</h4>
+                <p>{t(locale, 'checkout.pendingDesc')}</p>
+                <p>{t(locale, 'checkout.orderNo')}{pendingOrder.outTradeNo}</p>
+              </div>
+            ) : null}
+
             {status === 'opened' && order ? (
               <div className="err-box" role="status" style={{ borderColor: '#7a9a52' }}>
                 <p>{t(locale, 'checkout.openedNote')}</p>
@@ -178,7 +230,7 @@ export default function CheckoutView() {
 
             <div className="row">
               <button type="button" className="btn btn-primary" onClick={handlePay} disabled={busy || status === 'opened'}>
-                {status === 'creating' ? t(locale, 'checkout.creating') : status === 'redirecting' ? t(locale, 'checkout.redirecting') : status === 'opened' ? t(locale, 'checkout.openingCheckout') : isEn ? t(locale, 'checkout.payWaffo') : t(locale, 'checkout.payAlipay')}
+                {status === 'creating' ? t(locale, 'checkout.creating') : status === 'redirecting' ? t(locale, 'checkout.redirecting') : status === 'opened' ? t(locale, 'checkout.openingCheckout') : pendingOrder ? t(locale, 'checkout.continuePay') : isEn ? t(locale, 'checkout.payWaffo') : t(locale, 'checkout.payAlipay')}
               </button>
               <Link to="/" className="btn btn-ghost" style={{ textDecoration: 'none' }}>{t(locale, 'checkout.back')}</Link>
             </div>
