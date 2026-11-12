@@ -4,6 +4,8 @@ import SoundLabView from '../SoundLabView.jsx'
 import { RECIPES, SOUNDS } from '../catalog.mjs'
 import { fetchEntitlements, fetchMe } from '../auth-api.js'
 import { fetchWaffoPending } from '../pay-api.js'
+import { countryFromRequest, useRegion } from '../region.mjs'
+import { useLocale } from '../locale.mjs'
 import { mountSoundLab } from '../sound-lab.mjs'
 import { mountVisualEffects } from '../visual-effects.mjs'
 import appCss from '../styles.css?url'
@@ -17,6 +19,15 @@ const FONTS_URL =
   'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600;700&family=Ma+Shan+Zheng&family=ZCOOL+KuaiLe&family=Caveat:wght@500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap'
 
 export const Route = createRootRoute({
+  /**
+   * 根路由 loader（SSR 时在服务端跑）：只读请求的国家，用于
+   * shell 的 <html lang>，避免首屏语言属性闪烁。
+   * 客户端导航时 loader 也会跑，但那时没有入站请求，country 为 null，
+   * shell 改按界面语言回落。loader 本身不读任何密钥或个人信息。
+   */
+  loader: async ({ request }: { request?: Request }) => {
+    return { country: countryFromRequest(request) }
+  },
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -44,8 +55,21 @@ export const Route = createRootRoute({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  // <html lang> 优先用服务端 loader 的国家（SSR 首屏就有，不闪烁）；
+  // 拿不到国家时按客户端界面语言（水合后由下面的 effect 再同步一次）。
+  let serverLang: string | null = null
+  try {
+    const data = Route.useLoaderData() as { country?: string | null } | undefined
+    if (data && data.country) {
+      serverLang = String(data.country).trim().toUpperCase() === 'CN' ? 'zh-CN' : 'en'
+    }
+  } catch {
+    serverLang = null
+  }
+  const [locale] = useLocale()
+  const lang = serverLang ?? (locale === 'en' ? 'en' : 'zh-CN')
   return (
-    <html lang="zh-CN">
+    <html lang={lang}>
       <head>
         <HeadContent />
       </head>
@@ -82,23 +106,28 @@ function SoundLab() {
 
   // 登录态：外壳拉取 /api/auth/me 和 /api/entitlements；
   // 登录/注册/退出后由 AuthButton 调 refreshAuth 重新拉取。
-  // 同时拉取进行中的 Waffo 订单：PLUS 卡片上有未付款的订单时
-  // 展示“继续付款”而不是再下一个新单（防重复付款）。
+  // 进行中的 Waffo 订单只在海外地区拉取（中国地区走支付宝，没有
+  // Waffo 进行中订单；PLUS 卡片的“继续付款”也只在海外地区出现）。
   const [authUser, setAuthUser] = useState<{ userId: string; email: string } | null>(null)
   const [ownedPacks, setOwnedPacks] = useState<string[]>([])
   const [pendingWaffoOrders, setPendingWaffoOrders] = useState<
     Array<{ outTradeNo: string; productId: string; checkoutUrl: string; expiresAt: string | null }>
   >([])
+  const { region } = useRegion()
   const refreshAuth = useCallback(async () => {
     try {
       const me = await fetchMe()
       setAuthUser(me)
       const ent = await fetchEntitlements()
       setOwnedPacks(Array.isArray(ent.packs) ? ent.packs : [])
-      try {
-        const pending = await fetchWaffoPending()
-        setPendingWaffoOrders(Array.isArray(pending) ? pending : [])
-      } catch {
+      if (region === 'overseas') {
+        try {
+          const pending = await fetchWaffoPending()
+          setPendingWaffoOrders(Array.isArray(pending) ? pending : [])
+        } catch {
+          setPendingWaffoOrders([])
+        }
+      } else {
         setPendingWaffoOrders([])
       }
     } catch {
@@ -106,7 +135,18 @@ function SoundLab() {
       setOwnedPacks([])
       setPendingWaffoOrders([])
     }
-  }, [])
+  }, [region])
+
+  // 界面语言变化时同步 <html lang>（SSR 时由 loader 的国家决定，
+  // 水合后及手动切换语言时由这里接管；支付地区不受语言切换影响）。
+  const [uiLocale] = useLocale()
+  useEffect(() => {
+    try {
+      document.documentElement.lang = uiLocale === 'en' ? 'en' : 'zh-CN'
+    } catch {
+      // 非浏览器环境忽略。
+    }
+  }, [uiLocale])
 
   useEffect(() => {
     void refreshAuth()

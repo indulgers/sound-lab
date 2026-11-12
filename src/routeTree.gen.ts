@@ -17,6 +17,7 @@ import { Route as ReturnRouteImport } from './routes/return'
 import { Route as WaffoReturnRouteImport } from './routes/waffo-return'
 import { Route as ApiEntitlementsRouteImport } from './routes/api/entitlements'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
+import { Route as ApiRegionRouteImport } from './routes/api/region'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
@@ -73,6 +74,11 @@ const ApiEntitlementsRoute = ApiEntitlementsRouteImport.update({
 const ApiProductsRoute = ApiProductsRouteImport.update({
   id: '/api/products',
   path: '/api/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRegionRoute = ApiRegionRouteImport.update({
+  id: '/api/region',
+  path: '/api/region',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
+  '/api/region': typeof ApiRegionRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
+  '/api/region': typeof ApiRegionRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
+  '/api/region': typeof ApiRegionRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
@@ -254,6 +263,7 @@ export interface FileRouteTypes {
     | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
+    | '/api/region'
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/me'
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
+    | '/api/region'
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/me'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
+    | '/api/region'
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/me'
@@ -336,6 +348,7 @@ export interface RootRouteChildren {
   WaffoReturnRoute: typeof WaffoReturnRoute
   ApiEntitlementsRoute: typeof ApiEntitlementsRoute
   ApiProductsRoute: typeof ApiProductsRoute
+  ApiRegionRoute: typeof ApiRegionRoute
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
   ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
   ApiAuthMeRoute: typeof ApiAuthMeRoute
@@ -411,6 +424,13 @@ declare module '@tanstack/react-router' {
       path: '/api/products'
       fullPath: '/api/products'
       preLoaderRoute: typeof ApiProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/region': {
+      id: '/api/region'
+      path: '/api/region'
+      fullPath: '/api/region'
+      preLoaderRoute: typeof ApiRegionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/login': {
@@ -544,6 +564,7 @@ const rootRouteChildren: RootRouteChildren = {
   WaffoReturnRoute: WaffoReturnRoute,
   ApiEntitlementsRoute: ApiEntitlementsRoute,
   ApiProductsRoute: ApiProductsRoute,
+  ApiRegionRoute: ApiRegionRoute,
   ApiAuthLoginRoute: ApiAuthLoginRoute,
   ApiAuthLogoutRoute: ApiAuthLogoutRoute,
   ApiAuthMeRoute: ApiAuthMeRoute,

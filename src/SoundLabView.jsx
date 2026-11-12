@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import AuthButton from './AuthButton.jsx';
 import { isFreeSound } from './listening-session.mjs';
 import { PACKS, isMixUnlocked, packDisplay, soundsForPacks } from './packs.mjs';
+import { currencyForRegion, useRegion } from './region.mjs';
 import { setLocale, t, useLocale } from './locale.mjs';
 
 /** 按语言取配方展示字段（英文缺失时回落中文）。 */
@@ -358,9 +359,15 @@ function Recipes({ recipes, sounds, onChooseScene, onShowPremium, unlockedSounds
 
 function Plus({ ownedPacks, pendingWaffoOrders }) {
   const [locale] = useLocale();
+  // 价格跟支付地区走，不跟语言走（2026-11-12 解耦规则）：
+  // 文案按 locale，金额按 region——在国外的中文界面显示 $ 价，
+  // 在中国的英文界面显示 ¥ 价。
+  const { region } = useRegion();
+  const currency = currencyForRegion(region);
   const owned = new Set(ownedPacks || []);
   // 进行中的 Waffo 订单（按包 ID）：有未付款订单的包不展示购买按钮，
-  // 改展示“继续付款”，打开原来的收银台（防重复付款）。
+  // 改展示“继续付款”，打开原来的收银台（防重复付款）。进行中订单
+  // 只有海外地区才有；中国地区 pending 列表为空，这里自然不展示。
   const pendingByPack = {};
   (pendingWaffoOrders || []).forEach((order) => {
     if (order && order.productId && order.checkoutUrl && !pendingByPack[order.productId]) {
@@ -376,7 +383,7 @@ function Plus({ ownedPacks, pendingWaffoOrders }) {
         {PACKS.map(pack => {
           const isOwned = owned.has(pack.id);
           const pending = pendingByPack[pack.id];
-          const display = packDisplay(pack, locale);
+          const display = packDisplay(pack, locale, currency);
           return (
             <article className="card" key={pack.id}>
               <h3>{display.name} <span className="tag">{isOwned ? t(locale, 'plus.owned') : pending ? t(locale, 'plus.inProgress') : display.priceLabel}</span></h3>

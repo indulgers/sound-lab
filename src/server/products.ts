@@ -15,6 +15,7 @@ export type Currency = 'CNY' | 'USD'
 export interface Product {
   productId: string
   name: string
+  nameEn: string
   subject: string
   /** CNY 金额（支付宝用）。 */
   totalAmount: string
@@ -26,6 +27,7 @@ const PRODUCTS: Record<string, Product> = {
   'sleep-pack': {
     productId: 'sleep-pack',
     name: '助眠包',
+    nameEn: 'Sleep Pack',
     subject: 'Sound Cocktail · 助眠包',
     totalAmount: '9.00',
     totalAmountUsd: '2.99',
@@ -33,6 +35,7 @@ const PRODUCTS: Record<string, Product> = {
   'focus-pack': {
     productId: 'focus-pack',
     name: '专注包',
+    nameEn: 'Focus Pack',
     subject: 'Sound Cocktail · 专注包',
     totalAmount: '6.00',
     totalAmountUsd: '1.99',
@@ -40,6 +43,7 @@ const PRODUCTS: Record<string, Product> = {
   'rain-night-pack': {
     productId: 'rain-night-pack',
     name: '雨夜包',
+    nameEn: 'Rain Night Pack',
     subject: 'Sound Cocktail · 雨夜包',
     totalAmount: '12.00',
     totalAmountUsd: '3.99',
@@ -59,12 +63,20 @@ export function normalizeCurrency(value: unknown): Currency {
   return String(value || '').trim().toUpperCase() === 'USD' ? 'USD' : 'CNY'
 }
 
+/**
+ * 商品目录。文案语言（locale）和金额币种（currency）是两个独立参数：
+ * locale 只决定 name 用中文还是英文，currency 只决定金额。
+ * 保持向后兼容：name 永远是中文名，nameEn 另给英文名。
+ */
 export function listProducts(
   currency: Currency = 'CNY',
-): Array<{ productId: string; name: string; totalAmount: string; currency: Currency }> {
+  locale: string = 'zh',
+): Array<{ productId: string; name: string; nameEn: string; totalAmount: string; currency: Currency }> {
+  const useEn = String(locale || '').trim().toLowerCase() === 'en'
   return Object.values(PRODUCTS).map((p) => ({
     productId: p.productId,
-    name: p.name,
+    name: useEn ? p.nameEn : p.name,
+    nameEn: p.nameEn,
     totalAmount: productAmount(p, currency),
     currency,
   }))

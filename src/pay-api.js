@@ -31,9 +31,15 @@ async function readError(response, fallbackMessage) {
   return err;
 }
 
-/** GET /api/products：服务端商品目录（价格的唯一可信来源）。locale=en 时返回美元价。 */
-export async function fetchProducts(locale) {
-  const query = locale === 'en' ? '?locale=en' : '';
+/** GET /api/products：服务端商品目录（价格的唯一可信来源）。
+ * fetchProducts(locale, currency)：locale 只决定返回的 name 语言，
+ * currency（按检测到的支付地区传）决定金额；currency 省略时服务端
+ * 按旧规则从 locale 推导（en → USD，其他 → CNY）。 */
+export async function fetchProducts(locale, currency) {
+  const params = new URLSearchParams();
+  if (locale) params.set('locale', locale);
+  if (currency) params.set('currency', currency);
+  const query = params.toString() ? `?${params.toString()}` : '';
   let response;
   try {
     response = await fetch(payApiUrl(`/api/products${query}`));
