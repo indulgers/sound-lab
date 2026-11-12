@@ -1,0 +1,46 @@
+name: Switch soundcocktail.app to Worker
+
+# One-time: move soundcocktail.app from the Pages project (sound-lab)
+# to the Worker (sound-cocktail). Run manually via workflow_dispatch.
+# Downtime is a few seconds between the two API calls. The Workers
+# custom-domain endpoint creates the DNS record and certificate.
+# If the Pages delete fails (e.g. token scope), the run still tries the
+# attach and the failure shows in the log; no state is changed then.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  switch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove domain from Pages, attach to Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -e
+          API=https://api.cloudflare.com/client/v4
+          echo "--- remove from Pages project sound-lab ---"
+          curl -s -X DELETE "$API/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/sound-lab/domains/soundcocktail.app" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | tee /tmp/pages-delete.json || true
+          echo
+          echo "--- attach to Worker sound-cocktail ---"
+          curl -s -X PUT "$API/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/domains" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"hostname":"soundcocktail.app","service":"sound-cocktail"}' | tee /tmp/worker-domain.json
+          echo
+
+      - name: Verify soundcocktail.app serves the Worker
+        run: |
+          for i in 1 2 3 4 5 6; do
+            if curl -sf "https://soundcocktail.app/" -o /tmp/app-home.html; then break; fi
+            echo "not ready yet (attempt $i/6), waiting 20s..."
+            sleep 20
+          done
+          grep -o "<title>[^<]*</title>" /tmp/app-home.html
+          curl -sf "https://soundcocktail.app/api/products"
+          echo
+          curl -sf "https://soundcocktail.app/health"
+          echo
