@@ -2,6 +2,7 @@ import { AUDIO_LICENSES, SOUND_AUDIO } from './audio/catalog.mjs'
 import { prepareRecording, playInstrumentNote } from './audio/playback.mjs'
 import { SOUNDS } from './catalog.mjs'
 import { createSession, freeMix, isFreeSound } from './listening-session.mjs'
+import { PACKS } from './packs.mjs'
 import { createRuntimeScope } from './runtime-scope.mjs'
 
 export function mountSoundLab({onFocusChange, onMixChange}) {
@@ -106,7 +107,18 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   }
   var playing = false;
   var masterVol = .55;
-  var sessionTools={createSession,freeMix,isFreeSound};
+  // 已拥有的包解锁的通道（服务端权益，登录后由 setOwnedPacks 传入）。
+  // “能不能用” = 免费通道 或 已拥有包里的通道；引擎里所有
+  // sessionTools.isFreeSound / freeMix 的调用点都走这两个包装，
+  // 所以解锁后推子、配方、随机、音源替换全部自动放行。
+  var ownedSounds = new Set();
+  function isPlayable(id){ return isFreeSound(id) || ownedSounds.has(id); }
+  function playableMix(mix){
+    return Object.fromEntries(Object.entries(mix).filter(function(entry){
+      return isPlayable(entry[0]) && Number.isFinite(entry[1]) && entry[1] > 0;
+    }).map(function(entry){ return [entry[0], Math.min(1, entry[1])]; }));
+  }
+  var sessionTools={createSession,freeMix:playableMix,isFreeSound:isPlayable};
   var session=sessionTools.createSession({
     getItem:function(key){ return localStorage.getItem(key); },
     setItem:function(key,value){ localStorage.setItem(key,value); }
@@ -676,7 +688,10 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     updateSoundFilter();
   });
   function buildFaders(){
+    // 可重复调用：解锁/登出时重建推子，旧节点先清掉（levels/params 在模块状态里，不受影响）。
     var wrap=$("faders");
+    wrap.textContent="";
+    faderEls={};
     GROUPS.forEach(function(g){
       var groupSounds=SOUNDS.filter(function(s){ return s.cat===g.id; });
       var sec=document.createElement("div"); sec.className="chan-group";
@@ -1596,9 +1611,28 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     if(event.key==="Escape" && !$("sessionDone").open && !$("premiumDialog").open) exitImmersive();
   });
 
+  /**
+   * 登录/登出或权益变化后调用：按已拥有的包重算可玩通道，
+   * 重建推子与音源清单（levels/params/音频节点不受影响）。
+   * 未登录时传 []，进阶通道重新上锁。
+   */
+  function setOwnedPacks(packIds){
+    ownedSounds=new Set();
+    (packIds||[]).forEach(function(packId){
+      var pack=null;
+      PACKS.forEach(function(p){ if(p.id===packId) pack=p; });
+      (pack && pack.sounds || []).forEach(function(id){ ownedSounds.add(id); });
+    });
+    buildFaders();
+    SOUNDS.forEach(function(s){ paintFader(s.id); });
+    buildSources();
+    paintCurrentMix();
+  }
+
   return {
     chooseScene,
     showPremium,
+    setOwnedPacks,
     setFocus(open) {
       if(open) showImmersive();
       else exitImmersive(false);

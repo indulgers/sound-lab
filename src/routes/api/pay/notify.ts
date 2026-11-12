@@ -9,6 +9,7 @@ import { env } from 'cloudflare:workers'
 import { resolvePayConfig } from '../../../server/config'
 import { createSdk } from '../../../server/alipay'
 import { amountEquals } from '../../../server/amounts'
+import { grantPack } from '../../../server/auth'
 import { getStore, isStore, textResponse } from '../../../server/pay-shared'
 
 export const Route = createFileRoute('/api/pay/notify')({
@@ -62,6 +63,11 @@ export const Route = createFileRoute('/api/pay/notify')({
 
           if (isPaidTradeNotification(params)) {
             await store.markPaidIdempotently(order.outTradeNo, params.trade_no)
+            // 支付成功 → 给订单所属用户发放权益（集合语义，重复通知无副作用；
+            // 归属为空的老订单不发放）。
+            if (order.userId) {
+              await grantPack(env.ORDERS_KV, order.userId, order.productId)
+            }
           } else {
             await store.recordNonPaidTradeEvent(order.outTradeNo, params.trade_status)
           }

@@ -1,7 +1,8 @@
 import { HeadContent, Outlet, Scripts, createRootRoute, useRouter, useRouterState } from '@tanstack/react-router'
-import { memo, useCallback, useLayoutEffect, useRef } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import SoundLabView from '../SoundLabView.jsx'
 import { RECIPES, SOUNDS } from '../catalog.mjs'
+import { fetchEntitlements, fetchMe } from '../auth-api.js'
 import { mountSoundLab } from '../sound-lab.mjs'
 import { mountVisualEffects } from '../visual-effects.mjs'
 import appCss from '../styles.css?url'
@@ -58,6 +59,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 interface LabController {
   chooseScene: (recipe: unknown) => void
   showPremium: (name: string) => void
+  setOwnedPacks: (packIds: string[]) => void
   setFocus: (open: boolean) => void
   dispose: () => void
 }
@@ -76,6 +78,31 @@ function SoundLab() {
   const controller = useRef<LabController | null>(null)
   const chooseScene = useCallback((recipe: unknown) => controller.current?.chooseScene(recipe), [])
   const showPremium = useCallback((name: string) => controller.current?.showPremium(name), [])
+
+  // 登录态：外壳拉取 /api/auth/me 和 /api/entitlements；
+  // 登录/注册/退出后由 AuthButton 调 refreshAuth 重新拉取。
+  const [authUser, setAuthUser] = useState<{ userId: string; email: string } | null>(null)
+  const [ownedPacks, setOwnedPacks] = useState<string[]>([])
+  const refreshAuth = useCallback(async () => {
+    try {
+      const me = await fetchMe()
+      setAuthUser(me)
+      const ent = await fetchEntitlements()
+      setOwnedPacks(Array.isArray(ent.packs) ? ent.packs : [])
+    } catch {
+      setAuthUser(null)
+      setOwnedPacks([])
+    }
+  }, [])
+
+  useEffect(() => {
+    void refreshAuth()
+  }, [refreshAuth])
+
+  // 权益变化时告诉音频引擎：已拥有的包对应的通道变为可玩；退出时重新上锁。
+  useEffect(() => {
+    controller.current?.setOwnedPacks(ownedPacks)
+  }, [ownedPacks])
 
   useLayoutEffect(() => {
     const effects = mountVisualEffects()
@@ -103,7 +130,15 @@ function SoundLab() {
 
   return (
     <>
-      <View recipes={RECIPES} sounds={SOUNDS} onChooseScene={chooseScene} onShowPremium={showPremium} />
+      <View
+        recipes={RECIPES}
+        sounds={SOUNDS}
+        onChooseScene={chooseScene}
+        onShowPremium={showPremium}
+        user={authUser}
+        ownedPacks={ownedPacks}
+        onAuthChange={refreshAuth}
+      />
       <Outlet />
     </>
   )

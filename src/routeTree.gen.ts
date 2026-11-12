@@ -14,12 +14,20 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as FocusRouteImport } from './routes/focus'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as ReturnRouteImport } from './routes/return'
+import { Route as ApiEntitlementsRouteImport } from './routes/api/entitlements'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
+import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
+import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
+import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
+import { Route as ApiAuthProvidersRouteImport } from './routes/api/auth/providers'
+import { Route as ApiAuthRegisterRouteImport } from './routes/api/auth/register'
 import { Route as ApiPayCloseRouteImport } from './routes/api/pay/close'
 import { Route as ApiPayCreateRouteImport } from './routes/api/pay/create'
 import { Route as ApiPayNotifyRouteImport } from './routes/api/pay/notify'
 import { Route as ApiPayRefundRouteImport } from './routes/api/pay/refund'
 import { Route as ApiPayRefundQueryRouteImport } from './routes/api/pay/refund-query'
+import { Route as ApiAuthGoogleIndexRouteImport } from './routes/api/auth/google/index'
+import { Route as ApiAuthGoogleCallbackRouteImport } from './routes/api/auth/google/callback'
 import { Route as ApiPayQueryOutTradeNoRouteImport } from './routes/api/pay/query.$outTradeNo'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,9 +55,39 @@ const ReturnRoute = ReturnRouteImport.update({
   path: '/return',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiEntitlementsRoute = ApiEntitlementsRouteImport.update({
+  id: '/api/entitlements',
+  path: '/api/entitlements',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProductsRoute = ApiProductsRouteImport.update({
   id: '/api/products',
   path: '/api/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
+  id: '/api/auth/login',
+  path: '/api/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLogoutRoute = ApiAuthLogoutRouteImport.update({
+  id: '/api/auth/logout',
+  path: '/api/auth/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
+  id: '/api/auth/me',
+  path: '/api/auth/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthProvidersRoute = ApiAuthProvidersRouteImport.update({
+  id: '/api/auth/providers',
+  path: '/api/auth/providers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthRegisterRoute = ApiAuthRegisterRouteImport.update({
+  id: '/api/auth/register',
+  path: '/api/auth/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPayCloseRoute = ApiPayCloseRouteImport.update({
@@ -77,6 +115,16 @@ const ApiPayRefundQueryRoute = ApiPayRefundQueryRouteImport.update({
   path: '/api/pay/refund-query',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthGoogleIndexRoute = ApiAuthGoogleIndexRouteImport.update({
+  id: '/api/auth/google/',
+  path: '/api/auth/google/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthGoogleCallbackRoute = ApiAuthGoogleCallbackRouteImport.update({
+  id: '/api/auth/google/callback',
+  path: '/api/auth/google/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPayQueryOutTradeNoRoute = ApiPayQueryOutTradeNoRouteImport.update({
   id: '/api/pay/query/$outTradeNo',
   path: '/api/pay/query/$outTradeNo',
@@ -89,13 +137,21 @@ export interface FileRoutesByFullPath {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/return': typeof ReturnRoute
+  '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/auth/providers': typeof ApiAuthProvidersRoute
+  '/api/auth/register': typeof ApiAuthRegisterRoute
   '/api/pay/close': typeof ApiPayCloseRoute
   '/api/pay/create': typeof ApiPayCreateRoute
   '/api/pay/notify': typeof ApiPayNotifyRoute
   '/api/pay/refund': typeof ApiPayRefundRoute
   '/api/pay/refund-query': typeof ApiPayRefundQueryRoute
+  '/api/auth/google/callback': typeof ApiAuthGoogleCallbackRoute
   '/api/pay/query/$outTradeNo': typeof ApiPayQueryOutTradeNoRoute
+  '/api/auth/google/': typeof ApiAuthGoogleIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -103,13 +159,21 @@ export interface FileRoutesByTo {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/return': typeof ReturnRoute
+  '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/auth/providers': typeof ApiAuthProvidersRoute
+  '/api/auth/register': typeof ApiAuthRegisterRoute
   '/api/pay/close': typeof ApiPayCloseRoute
   '/api/pay/create': typeof ApiPayCreateRoute
   '/api/pay/notify': typeof ApiPayNotifyRoute
   '/api/pay/refund': typeof ApiPayRefundRoute
   '/api/pay/refund-query': typeof ApiPayRefundQueryRoute
+  '/api/auth/google/callback': typeof ApiAuthGoogleCallbackRoute
   '/api/pay/query/$outTradeNo': typeof ApiPayQueryOutTradeNoRoute
+  '/api/auth/google': typeof ApiAuthGoogleIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -118,13 +182,21 @@ export interface FileRoutesById {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/return': typeof ReturnRoute
+  '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/auth/providers': typeof ApiAuthProvidersRoute
+  '/api/auth/register': typeof ApiAuthRegisterRoute
   '/api/pay/close': typeof ApiPayCloseRoute
   '/api/pay/create': typeof ApiPayCreateRoute
   '/api/pay/notify': typeof ApiPayNotifyRoute
   '/api/pay/refund': typeof ApiPayRefundRoute
   '/api/pay/refund-query': typeof ApiPayRefundQueryRoute
+  '/api/auth/google/callback': typeof ApiAuthGoogleCallbackRoute
   '/api/pay/query/$outTradeNo': typeof ApiPayQueryOutTradeNoRoute
+  '/api/auth/google/': typeof ApiAuthGoogleIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -134,13 +206,21 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/return'
+    | '/api/entitlements'
     | '/api/products'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/me'
+    | '/api/auth/providers'
+    | '/api/auth/register'
     | '/api/pay/close'
     | '/api/pay/create'
     | '/api/pay/notify'
     | '/api/pay/refund'
     | '/api/pay/refund-query'
+    | '/api/auth/google/callback'
     | '/api/pay/query/$outTradeNo'
+    | '/api/auth/google/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -148,13 +228,21 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/return'
+    | '/api/entitlements'
     | '/api/products'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/me'
+    | '/api/auth/providers'
+    | '/api/auth/register'
     | '/api/pay/close'
     | '/api/pay/create'
     | '/api/pay/notify'
     | '/api/pay/refund'
     | '/api/pay/refund-query'
+    | '/api/auth/google/callback'
     | '/api/pay/query/$outTradeNo'
+    | '/api/auth/google'
   id:
     | '__root__'
     | '/'
@@ -162,13 +250,21 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/return'
+    | '/api/entitlements'
     | '/api/products'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/me'
+    | '/api/auth/providers'
+    | '/api/auth/register'
     | '/api/pay/close'
     | '/api/pay/create'
     | '/api/pay/notify'
     | '/api/pay/refund'
     | '/api/pay/refund-query'
+    | '/api/auth/google/callback'
     | '/api/pay/query/$outTradeNo'
+    | '/api/auth/google/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -177,13 +273,21 @@ export interface RootRouteChildren {
   FocusRoute: typeof FocusRoute
   HealthRoute: typeof HealthRoute
   ReturnRoute: typeof ReturnRoute
+  ApiEntitlementsRoute: typeof ApiEntitlementsRoute
   ApiProductsRoute: typeof ApiProductsRoute
+  ApiAuthLoginRoute: typeof ApiAuthLoginRoute
+  ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
+  ApiAuthMeRoute: typeof ApiAuthMeRoute
+  ApiAuthProvidersRoute: typeof ApiAuthProvidersRoute
+  ApiAuthRegisterRoute: typeof ApiAuthRegisterRoute
   ApiPayCloseRoute: typeof ApiPayCloseRoute
   ApiPayCreateRoute: typeof ApiPayCreateRoute
   ApiPayNotifyRoute: typeof ApiPayNotifyRoute
   ApiPayRefundRoute: typeof ApiPayRefundRoute
   ApiPayRefundQueryRoute: typeof ApiPayRefundQueryRoute
+  ApiAuthGoogleCallbackRoute: typeof ApiAuthGoogleCallbackRoute
   ApiPayQueryOutTradeNoRoute: typeof ApiPayQueryOutTradeNoRoute
+  ApiAuthGoogleIndexRoute: typeof ApiAuthGoogleIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -223,11 +327,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/entitlements': {
+      id: '/api/entitlements'
+      path: '/api/entitlements'
+      fullPath: '/api/entitlements'
+      preLoaderRoute: typeof ApiEntitlementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/products': {
       id: '/api/products'
       path: '/api/products'
       fullPath: '/api/products'
       preLoaderRoute: typeof ApiProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/login': {
+      id: '/api/auth/login'
+      path: '/api/auth/login'
+      fullPath: '/api/auth/login'
+      preLoaderRoute: typeof ApiAuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/logout': {
+      id: '/api/auth/logout'
+      path: '/api/auth/logout'
+      fullPath: '/api/auth/logout'
+      preLoaderRoute: typeof ApiAuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/me': {
+      id: '/api/auth/me'
+      path: '/api/auth/me'
+      fullPath: '/api/auth/me'
+      preLoaderRoute: typeof ApiAuthMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/providers': {
+      id: '/api/auth/providers'
+      path: '/api/auth/providers'
+      fullPath: '/api/auth/providers'
+      preLoaderRoute: typeof ApiAuthProvidersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/register': {
+      id: '/api/auth/register'
+      path: '/api/auth/register'
+      fullPath: '/api/auth/register'
+      preLoaderRoute: typeof ApiAuthRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/pay/close': {
@@ -265,6 +411,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPayRefundQueryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/google/': {
+      id: '/api/auth/google/'
+      path: '/api/auth/google'
+      fullPath: '/api/auth/google/'
+      preLoaderRoute: typeof ApiAuthGoogleIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/google/callback': {
+      id: '/api/auth/google/callback'
+      path: '/api/auth/google/callback'
+      fullPath: '/api/auth/google/callback'
+      preLoaderRoute: typeof ApiAuthGoogleCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/pay/query/$outTradeNo': {
       id: '/api/pay/query/$outTradeNo'
       path: '/api/pay/query/$outTradeNo'
@@ -281,13 +441,21 @@ const rootRouteChildren: RootRouteChildren = {
   FocusRoute: FocusRoute,
   HealthRoute: HealthRoute,
   ReturnRoute: ReturnRoute,
+  ApiEntitlementsRoute: ApiEntitlementsRoute,
   ApiProductsRoute: ApiProductsRoute,
+  ApiAuthLoginRoute: ApiAuthLoginRoute,
+  ApiAuthLogoutRoute: ApiAuthLogoutRoute,
+  ApiAuthMeRoute: ApiAuthMeRoute,
+  ApiAuthProvidersRoute: ApiAuthProvidersRoute,
+  ApiAuthRegisterRoute: ApiAuthRegisterRoute,
   ApiPayCloseRoute: ApiPayCloseRoute,
   ApiPayCreateRoute: ApiPayCreateRoute,
   ApiPayNotifyRoute: ApiPayNotifyRoute,
   ApiPayRefundRoute: ApiPayRefundRoute,
   ApiPayRefundQueryRoute: ApiPayRefundQueryRoute,
+  ApiAuthGoogleCallbackRoute: ApiAuthGoogleCallbackRoute,
   ApiPayQueryOutTradeNoRoute: ApiPayQueryOutTradeNoRoute,
+  ApiAuthGoogleIndexRoute: ApiAuthGoogleIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

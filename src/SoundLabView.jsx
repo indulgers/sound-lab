@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { PACKS } from './packs.mjs';
+import AuthButton from './AuthButton.jsx';
+import { isFreeSound } from './listening-session.mjs';
+import { PACKS, isMixUnlocked, soundsForPacks } from './packs.mjs';
 
 function BrandMark() {
   return (
@@ -38,7 +40,7 @@ function Background() {
   )
 }
 
-function Navigation() {
+function Navigation({ user, onAuthChange }) {
   return (
     <nav className="topbar">
       <span className="mark brand"><BrandMark /><span className="brand-word">Sound Cocktail</span></span>
@@ -47,6 +49,7 @@ function Navigation() {
       <a href="#plus">进阶</a>
       <a href="#mine">我的配方</a>
       <a href="#sources">音源清单</a>
+      <AuthButton user={user} onAuthChange={onAuthChange} />
     </nav>
   )
 }
@@ -293,52 +296,64 @@ function RecipeMix({ mix, soundsById }) {
   )
 }
 
-function Recipes({ recipes, sounds, onChooseScene, onShowPremium }) {
+function Recipes({ recipes, sounds, onChooseScene, onShowPremium, unlockedSounds }) {
   const soundsById = new Map(sounds.map(sound => [sound.id, sound]))
   return (
     <section className="blk" id="recipes">
       <div className="sec-head"><h2>配方</h2><span className="en">recipes</span></div>
       <p className="sec-sub">按想做的事选一杯。免费配方可以直接听，也可以继续调整。</p>
       <div className="cards" id="recipeCards">
-        {recipes.map(recipe => (
-          <div className="card recipe-card" key={recipe.name}>
-            <h3>{recipe.name}<span className={recipe.premium ? 'tag premium' : 'tag'}>{recipe.premium ? '进阶 · ' : ''}{recipe.tag}</span></h3>
-            <p>{recipe.desc}</p>
-            <RecipeMix mix={recipe.mix} soundsById={soundsById} />
-            <div className="row">
-              <button
-                type="button"
-                className={recipe.premium ? 'btn btn-ghost btn-sm' : 'btn btn-primary btn-sm'}
-                onClick={() => recipe.premium ? onShowPremium(recipe.name) : onChooseScene(recipe)}
-              >
-                {recipe.premium ? '了解进阶' : '进入场景'}
-              </button>
+        {recipes.map(recipe => {
+          // 进阶配方：用到每个进阶通道都已解锁时才能直接听，否则还是进介绍页。
+          const unlocked = !recipe.premium || isMixUnlocked(recipe.mix, unlockedSounds);
+          return (
+            <div className="card recipe-card" key={recipe.name}>
+              <h3>{recipe.name}<span className={recipe.premium ? 'tag premium' : 'tag'}>{recipe.premium ? '进阶 · ' : ''}{recipe.tag}</span></h3>
+              <p>{recipe.desc}</p>
+              <RecipeMix mix={recipe.mix} soundsById={soundsById} />
+              <div className="row">
+                <button
+                  type="button"
+                  className={unlocked ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'}
+                  onClick={() => unlocked ? onChooseScene(recipe) : onShowPremium(recipe.name)}
+                >
+                  {unlocked ? '进入场景' : '了解进阶'}
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   )
 }
 
-function Plus() {
+function Plus({ ownedPacks }) {
+  const owned = new Set(ownedPacks || []);
   return (
     <section className="blk" id="plus">
       <div className="sec-head"><h2>Sound Cocktail 进阶</h2><span className="en">PLUS</span></div>
       <p className="sec-sub">想把一杯声音留得久一些，或去更远的地方听一听。一次购买，长期使用。</p>
       <div className="cards access-cards">
         <article className="card"><h3>免费</h3><p>4 款场景配方、12 种基础音效、3 种底噪。每次播放最多 10 分钟。</p></article>
-        {PACKS.map(pack => (
-          <article className="card" key={pack.id}>
-            <h3>{pack.name} <span className="tag">{pack.priceLabel}</span></h3>
-            <p>{pack.desc}</p>
-            <div className="row">
-              <span className="price">{pack.priceLabel}<small> / 一次性</small></span>
-              <span style={{ flex: 1 }}></span>
-              <Link to="/checkout" search={{ pack: pack.id }} className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>购买</Link>
-            </div>
-          </article>
-        ))}
+        {PACKS.map(pack => {
+          const isOwned = owned.has(pack.id);
+          return (
+            <article className="card" key={pack.id}>
+              <h3>{pack.name} <span className="tag">{isOwned ? '已拥有' : pack.priceLabel}</span></h3>
+              <p>{pack.desc}</p>
+              <div className="row">
+                <span className="price">{pack.priceLabel}<small> / 一次性</small></span>
+                <span style={{ flex: 1 }}></span>
+                {isOwned ? (
+                  <a href="#mixer" className="btn btn-ghost btn-sm" style={{ textDecoration: 'none' }}>去调音</a>
+                ) : (
+                  <Link to="/checkout" search={{ pack: pack.id }} className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>购买</Link>
+                )}
+              </div>
+            </article>
+          );
+        })}
       </div>
     </section>
   )
@@ -455,17 +470,20 @@ function Overlays() {
   )
 }
 
-export default function SoundLabView({ recipes = [], sounds = [], onChooseScene, onShowPremium }) {
+export default function SoundLabView({ recipes = [], sounds = [], onChooseScene, onShowPremium, user = null, ownedPacks = [], onAuthChange }) {
+  // 能用的通道 = 免费通道 + 已拥有包的通道；进阶配方按这个集合判定是否可听。
+  const unlockedSounds = new Set(sounds.filter((sound) => isFreeSound(sound.id)).map((sound) => sound.id));
+  soundsForPacks(ownedPacks).forEach((id) => unlockedSounds.add(id));
   return (
     <>
       <a className="skip-link" href="#mixer">跳到调音台</a>
       <Background />
-      <Navigation />
+      <Navigation user={user} onAuthChange={onAuthChange} />
       <main>
         <Hero recipes={recipes} onChooseScene={onChooseScene} />
         <Mixer />
-        <Recipes recipes={recipes} sounds={sounds} onChooseScene={onChooseScene} onShowPremium={onShowPremium} />
-        <Plus />
+        <Recipes recipes={recipes} sounds={sounds} onChooseScene={onChooseScene} onShowPremium={onShowPremium} unlockedSounds={unlockedSounds} />
+        <Plus ownedPacks={ownedPacks} />
         <SavedRecipes />
         <Sources />
         <Footer />
