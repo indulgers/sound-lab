@@ -68,7 +68,24 @@ export const Route = createFileRoute('/api/auth/google/callback')({
             }),
           })
           if (!tokenRes.ok) {
-            return errorPage('与 Google 换 token 失败，请稍后重试。')
+            // Google 的错误体里有 error / error_description（如 invalid_client），
+            // 把它带回页面才能定位是密钥错、还是 redirect_uri 不一致。
+            let detail = ''
+            try {
+              const errBody = (await tokenRes.json()) as {
+                error?: unknown
+                error_description?: unknown
+              }
+              const code = typeof errBody.error === 'string' ? errBody.error : ''
+              const desc =
+                typeof errBody.error_description === 'string' ? errBody.error_description : ''
+              detail = [code, desc].filter(Boolean).join('：')
+            } catch {
+              detail = ''
+            }
+            return errorPage(
+              `与 Google 换 token 失败（HTTP ${tokenRes.status}）${detail ? `：${detail}` : ''}，请检查 Worker 上的 GOOGLE_CLIENT_SECRET 是否与 Google Cloud Console 里的 OAuth 客户端一致。`,
+            )
           }
           const tokens = (await tokenRes.json()) as { access_token?: unknown }
           if (typeof tokens.access_token !== 'string' || !tokens.access_token) {
@@ -107,7 +124,9 @@ export const Route = createFileRoute('/api/auth/google/callback')({
         } catch (err) {
           // eslint-disable-next-line no-console
           console.warn('[google oauth] callback failed', err instanceof Error ? err.message : String(err))
-          return errorPage('登录过程中出错，请稍后重试。')
+          // 把具体报错带回页面（已转义，不含密钥），否则失败原因没法定位。
+          const detail = err instanceof Error ? err.message : String(err)
+          return errorPage(`登录过程中出错：${detail}。请稍后重试。`)
         }
       },
     },
