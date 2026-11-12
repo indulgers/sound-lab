@@ -20,9 +20,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { env } from 'cloudflare:workers'
 import { verifyWebhook } from '@waffo/pancake-ts'
-import { grantPack } from '../../../server/auth'
-import { normalizeWaffoEnv } from '../../../server/waffo'
-import { getStore, isStore, textResponse } from '../../../server/pay-shared'
+import { confirmWaffoOrderPaid, normalizeWaffoEnv } from '../../../server/waffo.ts'
+import { getStore, isStore, textResponse } from '../../../server/pay-shared.ts'
 
 export const Route = createFileRoute('/api/waffo/webhook')({
   server: {
@@ -93,15 +92,8 @@ export const Route = createFileRoute('/api/waffo/webhook')({
           return textResponse('OK')
         }
 
-        const newlyPaid = await store.markPaidIdempotently(order.outTradeNo, data.orderId || '')
-        if (newlyPaid && order.userId) {
-          await grantPack(env.ORDERS_KV, order.userId, order.productId)
-        }
-        // 记下 Waffo 订单号，便于对账（已支付时也补记）。
-        if (data.orderId && order.waffoOrderId !== data.orderId) {
-          const latest = await store.findOrder(outTradeNo)
-          if (latest) await store.saveOrder({ ...latest, waffoOrderId: data.orderId })
-        }
+        // 标记已付 + 发权益（共享快查同一份逻辑，幂等）。
+        await confirmWaffoOrderPaid(store, env.ORDERS_KV, order.outTradeNo, data.orderId || '')
         return textResponse('OK')
       },
     },

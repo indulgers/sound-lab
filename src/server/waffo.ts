@@ -19,7 +19,9 @@
  * nodejs_compat 默认开启，实测可用，见 tests/waffo.test.mjs）。
  */
 import { WaffoPancake } from '@waffo/pancake-ts'
+import { grantPack } from './auth.ts'
 import { jsonError } from './pay-shared.ts'
+import type { OrderStore } from './store.ts'
 
 export type WaffoEnv = 'test' | 'prod'
 
@@ -122,4 +124,77 @@ export function waffoConfigInvalidResponse(): Response {
     'WAFFO_CONFIG_INVALID',
     'Waffo payment is misconfigured: the private key could not be parsed. Check WAFFO_PRIVATE_KEY.',
   )
+}
+
+/**
+ * 共享的“确认已付 + 发权益”步骤：webhook（order.completed）和
+ * 订单状态快查（order-status）都走这里，绝不各自另写一份发放逻辑。
+ *
+ * - markPaidIdempotently 只有首次 CREATED → PAID 返回 true，
+ *   所以重复调用只会发放一次权益（grantPack 本身也是集合语义）。
+ * - 返回 newlyPaid：true 表示本次刚标记为已付并（有用户时）发放了权益。
+ */
+export async function confirmWaffoOrderPaid(
+  store: OrderStore,
+  kv: KVNamespace,
+  outTradeNo: string,
+  waffoOrderId: string,
+): Promise<{ newlyPaid: boolean }> {
+  const newlyPaid = await store.markPaidIdempotently(outTradeNo, waffoOrderId)
+  const order = await store.findOrder(outTradeNo)
+  if (newlyPaid && order?.userId) {
+    await grantPack(kv, order.userId, order.productId)
+  }
+  // 记下 Waffo 订单号，便于对账（重复投递时也补记）。
+  if (order && waffoOrderId && order.waffoOrderId !== waffoOrderId) {
+    await store.saveOrder({ ...order, waffoOrderId })
+  }
+  return { newlyPaid }
+}
+
+/** GraphQL 客户端的最小形状（只用 query；便于测试时传假客户端）。 */
+export interface WaffoGraphqlClient {
+  graphql: {
+    query: (params: {
+      query: string
+      variables?: Record<string, unknown>
+    }) => Promise<{ data?: unknown; errors?: Array<{ message?: string }> | null }>
+  }
+}
+
+/**
+ * 快查：按我们自己的订单号（checkout 时传的 orderMerchantExternalId）
+ * 向 Waffo 查这笔订单有没有成功的付款。
+ *
+ * 用 GraphQL payments 查询（SDK README 与官方 Orders & Payments 文档
+ * 都有这个例子；字段只取文档确认过的 id / orderId / status /
+ * orderMerchantExternalId）。付款状态以 SDK 的 PaymentStatus 为准，
+ * 只有 'succeeded' 算已付。查到就返回 Waffo 订单号，否则返回 null
+ * （还没付，或查不到——调用方按“仍在处理”处理，不算失败）。
+ * GraphQL 返回 errors 或请求抛错时直接抛错（调用方转 502）。
+ */
+export async function findSucceededWaffoPayment(
+  client: WaffoGraphqlClient,
+  outTradeNo: string,
+): Promise<{ orderId: string } | null> {
+  const result = await client.graphql.query({
+    query: `query ($ref: String!) {
+      payments(filter: { orderMerchantExternalId: { eq: $ref } }) {
+        id
+        orderId
+        status
+        orderMerchantExternalId
+      }
+    }`,
+    variables: { ref: outTradeNo },
+  })
+  if (result.errors && result.errors.length > 0) {
+    throw new Error(`Waffo order lookup failed: ${result.errors[0]?.message || 'GraphQL error'}`)
+  }
+  const data = (result.data || {}) as {
+    payments?: Array<{ orderId?: unknown; status?: unknown }>
+  }
+  const payments = Array.isArray(data.payments) ? data.payments : []
+  const succeeded = payments.find((p) => p.status === 'succeeded' && typeof p.orderId === 'string' && p.orderId)
+  return succeeded ? { orderId: succeeded.orderId as string } : null
 }

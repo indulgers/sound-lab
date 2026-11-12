@@ -28,6 +28,8 @@ import { Route as ApiPayNotifyRouteImport } from './routes/api/pay/notify'
 import { Route as ApiPayRefundRouteImport } from './routes/api/pay/refund'
 import { Route as ApiPayRefundQueryRouteImport } from './routes/api/pay/refund-query'
 import { Route as ApiWaffoCreateRouteImport } from './routes/api/waffo/create'
+import { Route as ApiWaffoOrderStatusRouteImport } from './routes/api/waffo/order-status'
+import { Route as ApiWaffoPendingRouteImport } from './routes/api/waffo/pending'
 import { Route as ApiWaffoWebhookRouteImport } from './routes/api/waffo/webhook'
 import { Route as ApiAuthGoogleIndexRouteImport } from './routes/api/auth/google/index'
 import { Route as ApiAuthGoogleCallbackRouteImport } from './routes/api/auth/google/callback'
@@ -128,6 +130,16 @@ const ApiWaffoCreateRoute = ApiWaffoCreateRouteImport.update({
   path: '/api/waffo/create',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWaffoOrderStatusRoute = ApiWaffoOrderStatusRouteImport.update({
+  id: '/api/waffo/order-status',
+  path: '/api/waffo/order-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWaffoPendingRoute = ApiWaffoPendingRouteImport.update({
+  id: '/api/waffo/pending',
+  path: '/api/waffo/pending',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWaffoWebhookRoute = ApiWaffoWebhookRouteImport.update({
   id: '/api/waffo/webhook',
   path: '/api/waffo/webhook',
@@ -169,6 +181,8 @@ export interface FileRoutesByFullPath {
   '/api/pay/refund': typeof ApiPayRefundRoute
   '/api/pay/refund-query': typeof ApiPayRefundQueryRoute
   '/api/waffo/create': typeof ApiWaffoCreateRoute
+  '/api/waffo/order-status': typeof ApiWaffoOrderStatusRoute
+  '/api/waffo/pending': typeof ApiWaffoPendingRoute
   '/api/waffo/webhook': typeof ApiWaffoWebhookRoute
   '/api/auth/google/callback': typeof ApiAuthGoogleCallbackRoute
   '/api/pay/query/$outTradeNo': typeof ApiPayQueryOutTradeNoRoute
@@ -194,6 +208,8 @@ export interface FileRoutesByTo {
   '/api/pay/refund': typeof ApiPayRefundRoute
   '/api/pay/refund-query': typeof ApiPayRefundQueryRoute
   '/api/waffo/create': typeof ApiWaffoCreateRoute
+  '/api/waffo/order-status': typeof ApiWaffoOrderStatusRoute
+  '/api/waffo/pending': typeof ApiWaffoPendingRoute
   '/api/waffo/webhook': typeof ApiWaffoWebhookRoute
   '/api/auth/google/callback': typeof ApiAuthGoogleCallbackRoute
   '/api/pay/query/$outTradeNo': typeof ApiPayQueryOutTradeNoRoute
@@ -220,6 +236,8 @@ export interface FileRoutesById {
   '/api/pay/refund': typeof ApiPayRefundRoute
   '/api/pay/refund-query': typeof ApiPayRefundQueryRoute
   '/api/waffo/create': typeof ApiWaffoCreateRoute
+  '/api/waffo/order-status': typeof ApiWaffoOrderStatusRoute
+  '/api/waffo/pending': typeof ApiWaffoPendingRoute
   '/api/waffo/webhook': typeof ApiWaffoWebhookRoute
   '/api/auth/google/callback': typeof ApiAuthGoogleCallbackRoute
   '/api/pay/query/$outTradeNo': typeof ApiPayQueryOutTradeNoRoute
@@ -247,6 +265,8 @@ export interface FileRouteTypes {
     | '/api/pay/refund'
     | '/api/pay/refund-query'
     | '/api/waffo/create'
+    | '/api/waffo/order-status'
+    | '/api/waffo/pending'
     | '/api/waffo/webhook'
     | '/api/auth/google/callback'
     | '/api/pay/query/$outTradeNo'
@@ -272,6 +292,8 @@ export interface FileRouteTypes {
     | '/api/pay/refund'
     | '/api/pay/refund-query'
     | '/api/waffo/create'
+    | '/api/waffo/order-status'
+    | '/api/waffo/pending'
     | '/api/waffo/webhook'
     | '/api/auth/google/callback'
     | '/api/pay/query/$outTradeNo'
@@ -297,6 +319,8 @@ export interface FileRouteTypes {
     | '/api/pay/refund'
     | '/api/pay/refund-query'
     | '/api/waffo/create'
+    | '/api/waffo/order-status'
+    | '/api/waffo/pending'
     | '/api/waffo/webhook'
     | '/api/auth/google/callback'
     | '/api/pay/query/$outTradeNo'
@@ -323,6 +347,8 @@ export interface RootRouteChildren {
   ApiPayRefundRoute: typeof ApiPayRefundRoute
   ApiPayRefundQueryRoute: typeof ApiPayRefundQueryRoute
   ApiWaffoCreateRoute: typeof ApiWaffoCreateRoute
+  ApiWaffoOrderStatusRoute: typeof ApiWaffoOrderStatusRoute
+  ApiWaffoPendingRoute: typeof ApiWaffoPendingRoute
   ApiWaffoWebhookRoute: typeof ApiWaffoWebhookRoute
   ApiAuthGoogleCallbackRoute: typeof ApiAuthGoogleCallbackRoute
   ApiPayQueryOutTradeNoRoute: typeof ApiPayQueryOutTradeNoRoute
@@ -464,6 +490,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWaffoCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/waffo/order-status': {
+      id: '/api/waffo/order-status'
+      path: '/api/waffo/order-status'
+      fullPath: '/api/waffo/order-status'
+      preLoaderRoute: typeof ApiWaffoOrderStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/waffo/pending': {
+      id: '/api/waffo/pending'
+      path: '/api/waffo/pending'
+      fullPath: '/api/waffo/pending'
+      preLoaderRoute: typeof ApiWaffoPendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/waffo/webhook': {
       id: '/api/waffo/webhook'
       path: '/api/waffo/webhook'
@@ -515,6 +555,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPayRefundRoute: ApiPayRefundRoute,
   ApiPayRefundQueryRoute: ApiPayRefundQueryRoute,
   ApiWaffoCreateRoute: ApiWaffoCreateRoute,
+  ApiWaffoOrderStatusRoute: ApiWaffoOrderStatusRoute,
+  ApiWaffoPendingRoute: ApiWaffoPendingRoute,
   ApiWaffoWebhookRoute: ApiWaffoWebhookRoute,
   ApiAuthGoogleCallbackRoute: ApiAuthGoogleCallbackRoute,
   ApiPayQueryOutTradeNoRoute: ApiPayQueryOutTradeNoRoute,

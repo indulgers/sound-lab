@@ -8,6 +8,10 @@
  *   不用 priceSnapshot 覆盖商品价（商品价就是定价）。
  * - 成功返回 { checkoutUrl }：前端在新标签页打开（点击处理里同步
  *   window.open 空白页再跳转，避免 Safari/移动端拦截弹窗）。
+ * - 防重复付款：同一用户对同一个包已有未过期的进行中订单时，
+ *   不建新订单、不建新会话，返回 { resumed: true, checkoutUrl } 续付
+ *   原来的收银台；会话过期后才允许重新下单。会话创建失败的订单
+ *   会直接关掉，不会留下“进行中”的孤儿单挡住重新下单。
  * - 未配置时返回 503 WAFFO_NOT_CONFIGURED，不伪装成功。
  *
  * 参考：https://docs.waffo.ai/zh/integrate/skill
@@ -15,10 +19,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { env } from 'cloudflare:workers'
 import { WaffoPancakeError } from '@waffo/pancake-ts'
-import { getProduct, productAmount } from '../../../server/products'
-import { getSessionUserRecord } from '../../../server/auth'
-import { createWaffoClient, getWaffoProductId, resolveWaffoConfig, waffoConfigInvalidResponse, waffoNotConfiguredResponse } from '../../../server/waffo'
-import { getStore, isStore, jsonError, newOutTradeNo } from '../../../server/pay-shared'
+import { getProduct, productAmount } from '../../../server/products.ts'
+import { getSessionUserRecord } from '../../../server/auth.ts'
+import { createWaffoClient, getWaffoProductId, resolveWaffoConfig, waffoConfigInvalidResponse, waffoNotConfiguredResponse } from '../../../server/waffo.ts'
+import { getStore, isStore, jsonError, newOutTradeNo } from '../../../server/pay-shared.ts'
 
 export const Route = createFileRoute('/api/waffo/create')({
   server: {
@@ -54,6 +58,23 @@ export const Route = createFileRoute('/api/waffo/create')({
         }
 
         const totalAmountUsd = productAmount(product, 'USD')
+
+        // 防重复付款：同一用户对同一个包已有未过期的进行中订单时，
+        // 不建新订单、不建新会话，直接返回原来的收银台地址续付。
+        const pending = await store.findPendingWaffoOrder(sessionUser.userId, product.productId)
+        if (pending && pending.waffoCheckoutUrl) {
+          return Response.json({
+            resumed: true,
+            outTradeNo: pending.outTradeNo,
+            productId: product.productId,
+            totalAmount: pending.totalAmount,
+            currency: 'USD',
+            checkoutUrl: pending.waffoCheckoutUrl,
+            sessionId: pending.waffoSessionId,
+            expiresAt: pending.waffoSessionExpiresAt,
+          })
+        }
+
         const outTradeNo = newOutTradeNo()
         await store.createOrder({
           outTradeNo,
@@ -86,10 +107,19 @@ export const Route = createFileRoute('/api/waffo/create')({
             },
             { idempotencyKey: outTradeNo },
           )
-          // 记下 Waffo 会话 ID，便于对账；订单本身已先建好。
+          // 记下 Waffo 会话 ID、收银台地址和过期时间：订单本身已先建好。
+          // checkoutUrl + expiresAt 是“进行中订单”续付的依据。
           const order = await store.findOrder(outTradeNo)
-          if (order) await store.saveOrder({ ...order, waffoSessionId: session.sessionId })
+          if (order) {
+            await store.saveOrder({
+              ...order,
+              waffoSessionId: session.sessionId,
+              waffoCheckoutUrl: session.checkoutUrl,
+              waffoSessionExpiresAt: session.expiresAt,
+            })
+          }
           return Response.json({
+            resumed: false,
             outTradeNo,
             productId: product.productId,
             totalAmount: totalAmountUsd,
@@ -111,6 +141,12 @@ export const Route = createFileRoute('/api/waffo/create')({
             status: err instanceof WaffoPancakeError ? err.status : undefined,
             message,
           })
+          // 会话没建出来：用户拿不到收银台地址，这笔订单永远付不了，
+          // 直接关掉，避免它被当成“进行中订单”挡住用户重新下单。
+          const orphan = await store.findOrder(outTradeNo)
+          if (orphan && orphan.status === 'CREATED') {
+            await store.saveOrder({ ...orphan, status: 'CLOSED' })
+          }
           return jsonError(502, 'WAFFO_API_ERROR', message)
         }
       },

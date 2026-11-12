@@ -356,9 +356,17 @@ function Recipes({ recipes, sounds, onChooseScene, onShowPremium, unlockedSounds
   )
 }
 
-function Plus({ ownedPacks }) {
+function Plus({ ownedPacks, pendingWaffoOrders }) {
   const [locale] = useLocale();
   const owned = new Set(ownedPacks || []);
+  // 进行中的 Waffo 订单（按包 ID）：有未付款订单的包不展示购买按钮，
+  // 改展示“继续付款”，打开原来的收银台（防重复付款）。
+  const pendingByPack = {};
+  (pendingWaffoOrders || []).forEach((order) => {
+    if (order && order.productId && order.checkoutUrl && !pendingByPack[order.productId]) {
+      pendingByPack[order.productId] = order;
+    }
+  });
   return (
     <section className="blk" id="plus">
       <div className="sec-head"><h2>{t(locale, 'plus.title')}</h2><span className="en">{t(locale, 'plus.en')}</span></div>
@@ -367,16 +375,19 @@ function Plus({ ownedPacks }) {
         <article className="card"><h3>{t(locale, 'plus.freeTitle')}</h3><p>{t(locale, 'plus.freeDesc')}</p></article>
         {PACKS.map(pack => {
           const isOwned = owned.has(pack.id);
+          const pending = pendingByPack[pack.id];
           const display = packDisplay(pack, locale);
           return (
             <article className="card" key={pack.id}>
-              <h3>{display.name} <span className="tag">{isOwned ? t(locale, 'plus.owned') : display.priceLabel}</span></h3>
+              <h3>{display.name} <span className="tag">{isOwned ? t(locale, 'plus.owned') : pending ? t(locale, 'plus.inProgress') : display.priceLabel}</span></h3>
               <p>{display.desc}</p>
               <div className="row">
                 <span className="price">{display.priceLabel}<small>{t(locale, 'plus.once')}</small></span>
                 <span style={{ flex: 1 }}></span>
                 {isOwned ? (
                   <a href="#mixer" className="btn btn-ghost btn-sm" style={{ textDecoration: 'none' }}>{t(locale, 'plus.goMixer')}</a>
+                ) : pending ? (
+                  <a href={pending.checkoutUrl} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>{t(locale, 'plus.continuePay')}</a>
                 ) : (
                   <Link to="/checkout" search={{ pack: pack.id }} className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>{t(locale, 'plus.buy')}</Link>
                 )}
@@ -504,7 +515,7 @@ function Overlays() {
   )
 }
 
-export default function SoundLabView({ recipes = [], sounds = [], onChooseScene, onShowPremium, user = null, ownedPacks = [], onAuthChange }) {
+export default function SoundLabView({ recipes = [], sounds = [], onChooseScene, onShowPremium, user = null, ownedPacks = [], pendingWaffoOrders = [], onAuthChange }) {
   const [locale] = useLocale();
   // 能用的通道 = 免费通道 + 已拥有包的通道；进阶配方按这个集合判定是否可听。
   const unlockedSounds = new Set(sounds.filter((sound) => isFreeSound(sound.id)).map((sound) => sound.id));
@@ -524,7 +535,7 @@ export default function SoundLabView({ recipes = [], sounds = [], onChooseScene,
         <Hero recipes={recipes} onChooseScene={onChooseScene} />
         <Mixer />
         <Recipes recipes={recipes} sounds={sounds} onChooseScene={onChooseScene} onShowPremium={onShowPremium} unlockedSounds={unlockedSounds} />
-        <Plus ownedPacks={ownedPacks} />
+        <Plus ownedPacks={ownedPacks} pendingWaffoOrders={pendingWaffoOrders} />
         <SavedRecipes />
         <Sources />
         <Footer />

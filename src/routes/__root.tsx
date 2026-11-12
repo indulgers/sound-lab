@@ -3,6 +3,7 @@ import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 
 import SoundLabView from '../SoundLabView.jsx'
 import { RECIPES, SOUNDS } from '../catalog.mjs'
 import { fetchEntitlements, fetchMe } from '../auth-api.js'
+import { fetchWaffoPending } from '../pay-api.js'
 import { mountSoundLab } from '../sound-lab.mjs'
 import { mountVisualEffects } from '../visual-effects.mjs'
 import appCss from '../styles.css?url'
@@ -81,17 +82,29 @@ function SoundLab() {
 
   // 登录态：外壳拉取 /api/auth/me 和 /api/entitlements；
   // 登录/注册/退出后由 AuthButton 调 refreshAuth 重新拉取。
+  // 同时拉取进行中的 Waffo 订单：PLUS 卡片上有未付款的订单时
+  // 展示“继续付款”而不是再下一个新单（防重复付款）。
   const [authUser, setAuthUser] = useState<{ userId: string; email: string } | null>(null)
   const [ownedPacks, setOwnedPacks] = useState<string[]>([])
+  const [pendingWaffoOrders, setPendingWaffoOrders] = useState<
+    Array<{ outTradeNo: string; productId: string; checkoutUrl: string; expiresAt: string | null }>
+  >([])
   const refreshAuth = useCallback(async () => {
     try {
       const me = await fetchMe()
       setAuthUser(me)
       const ent = await fetchEntitlements()
       setOwnedPacks(Array.isArray(ent.packs) ? ent.packs : [])
+      try {
+        const pending = await fetchWaffoPending()
+        setPendingWaffoOrders(Array.isArray(pending) ? pending : [])
+      } catch {
+        setPendingWaffoOrders([])
+      }
     } catch {
       setAuthUser(null)
       setOwnedPacks([])
+      setPendingWaffoOrders([])
     }
   }, [])
 
@@ -137,6 +150,7 @@ function SoundLab() {
         onShowPremium={showPremium}
         user={authUser}
         ownedPacks={ownedPacks}
+        pendingWaffoOrders={pendingWaffoOrders}
         onAuthChange={refreshAuth}
       />
       <Outlet />
