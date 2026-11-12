@@ -1,3 +1,14 @@
 node_modules/
 dist/
+dist-ssr/
 .DS_Store
+.tanstack/
+.wrangler/
+.output/
+*.local
+.env
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+# 支付宝沙箱配置（本地开发专用，含私钥，绝不提交）
+.alipay-sandbox.json

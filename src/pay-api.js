@@ -2,9 +2,9 @@
  * 支付后端调用。
  *
  * 地址：VITE_PAY_API_URL 指向已部署的支付后端；未设置时走同源 /api，
- * 本地开发由 Vite 开发服务器代理到 http://localhost:3000（见 vite.config.mjs）。
+ * 由 TanStack Start 服务器路由（src/routes/api/*）在同一个 Worker 里提供。
  * 不直接默认 http://localhost:3000：支付后端不发 CORS 头，
- * 浏览器从本站跨源请求会被拦截，改走同源代理才能读到 503 等响应。
+ * 浏览器从本站跨源请求会被拦截，改走同源才能读到 503 等响应。
  */
 
 export const PAY_API_BASE = (import.meta.env.VITE_PAY_API_URL ?? '').replace(/\/+$/, '');
@@ -14,7 +14,7 @@ export function payApiUrl(path) {
 }
 
 function payApiHint() {
-  return PAY_API_BASE ? `支付后端 ${PAY_API_BASE}` : '支付后端（同源 /api，开发代理 → http://localhost:3000）';
+  return PAY_API_BASE ? `支付后端 ${PAY_API_BASE}` : '支付后端（同源 /api，由本站服务器路由提供）';
 }
 
 /** 解析后端返回的 JSON 错误体；解析失败时退回 HTTP 状态。 */

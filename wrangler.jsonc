@@ -1,0 +1,26 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "sound-cocktail",
+	// 2026-08-04 及以后的 compatibility_date 默认启用 nodejs_compat，
+	// 不需要再写 compatibility_flags。
+	"compatibility_date": "2026-11-12",
+	"main": "@tanstack/react-start/server-entry",
+	"observability": {
+		"enabled": true
+	},
+	"kv_namespaces": [
+		{
+			"binding": "ORDERS_KV",
+			// 本地开发占位 ID：部署前用真实命名空间替换。
+			//   npx wrangler kv namespace create ORDERS_KV
+			//   npx wrangler kv namespace create ORDERS_KV --preview
+			// 把返回的 id 填到这里（id）和 preview_id。
+			"id": "4519ca13-85c1-4751-b0e9-5c714be17964",
+			"preview_id": "9da35d08-bad2-4f32-9278-e1952b020496"
+		}
+	]
+}
