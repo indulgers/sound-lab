@@ -40,24 +40,31 @@ jobs:
           get_id() {
             npx wrangler kv namespace list | jq -r --arg t "$1" '.[] | select(.title==$t) | .id' | head -n1
           }
-          parse_create_id() {
-            # wrangler prints { binding = "X", id = "..." } (or JSON); try both.
-            grep -oE 'id = "[^"]+"' | head -n1 | sed 's/id = "//; s/"//' || true
+          ensure_ns() {
+            # $1 = namespace title to find; remaining args = create args.
+            # Re-queries the list after creating, because the create
+            # output format varies; parsing the output is only a fallback.
+            local title="$1"; shift
+            local id out
+            id=$(get_id "$title")
+            if [ -z "$id" ] || [ "$id" = "null" ]; then
+              out=$(npx wrangler kv namespace create "$@" 2>&1)
+              echo "$out" >&2
+              id=$(get_id "$title")
+              if [ -z "$id" ] || [ "$id" = "null" ]; then
+                id=$(echo "$out" | grep -oE '"preview_id": *"[^"]+"' | head -n1 | cut -d'"' -f4)
+              fi
+              if [ -z "$id" ] || [ "$id" = "null" ]; then
+                id=$(echo "$out" | grep -oE '"id": *"[^"]+"' | head -n1 | cut -d'"' -f4)
+              fi
+              if [ -z "$id" ] || [ "$id" = "null" ]; then
+                id=$(echo "$out" | grep -oE 'id = "[^"]+"' | head -n1 | sed 's/id = "//; s/"//')
+              fi
+            fi
+            echo "$id"
           }
-          PROD_ID=$(get_id "ORDERS_KV")
-          if [ -z "$PROD_ID" ] || [ "$PROD_ID" = "null" ]; then
-            OUT=$(npx wrangler kv namespace create ORDERS_KV)
-            echo "$OUT"
-            PROD_ID=$(echo "$OUT" | parse_create_id)
-            if [ -z "$PROD_ID" ]; then PROD_ID=$(echo "$OUT" | grep -oE '"id": *"[^"]+"' | head -n1 | cut -d'"' -f4); fi
-          fi
-          PREVIEW_ID=$(get_id "ORDERS_KV_preview")
-          if [ -z "$PREVIEW_ID" ] || [ "$PREVIEW_ID" = "null" ]; then
-            OUT=$(npx wrangler kv namespace create ORDERS_KV --preview)
-            echo "$OUT"
-            PREVIEW_ID=$(echo "$OUT" | parse_create_id)
-            if [ -z "$PREVIEW_ID" ]; then PREVIEW_ID=$(echo "$OUT" | grep -oE '"id": *"[^"]+"' | head -n1 | cut -d'"' -f4); fi
-          fi
+          PROD_ID=$(ensure_ns "ORDERS_KV" "ORDERS_KV")
+          PREVIEW_ID=$(ensure_ns "ORDERS_KV_preview" "ORDERS_KV" --preview)
           echo "KV prod=$PROD_ID preview=$PREVIEW_ID"
           test -n "$PROD_ID" && test -n "$PREVIEW_ID"
           node -e "
