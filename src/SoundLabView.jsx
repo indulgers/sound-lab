@@ -1,3 +1,6 @@
+import { Link } from '@tanstack/react-router';
+import { PACKS } from './packs.mjs';
+
 function Background() {
   return (
     <>
@@ -312,10 +315,20 @@ function Plus() {
   return (
     <section className="blk" id="plus">
       <div className="sec-head"><h2>声音实验室进阶</h2><span className="en">PLUS</span></div>
-      <p className="sec-sub">想把一杯声音留得久一些，或去更远的地方听一听。</p>
+      <p className="sec-sub">想把一杯声音留得久一些，或去更远的地方听一听。一次购买，长期使用。</p>
       <div className="cards access-cards">
         <article className="card"><h3>免费</h3><p>4 款场景配方、12 种基础音效、3 种底噪。每次播放最多 10 分钟。</p></article>
-        <article className="card"><h3>进阶 <span className="tag">筹备中</span></h3><p>解锁全部配方和音效，延长专注与沉浸时间。</p></article>
+        {PACKS.map(pack => (
+          <article className="card" key={pack.id}>
+            <h3>{pack.name} <span className="tag">{pack.priceLabel}</span></h3>
+            <p>{pack.desc}</p>
+            <div className="row">
+              <span className="price">{pack.priceLabel}<small> / 一次性</small></span>
+              <span style={{ flex: 1 }}></span>
+              <Link to="/checkout" search={{ pack: pack.id }} className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>购买</Link>
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   )

@@ -2,6 +2,7 @@ import { memo, useCallback, useLayoutEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Outlet, RouterProvider, createRootRoute, createRoute, createRouter, useRouter, useRouterState } from '@tanstack/react-router';
 import SoundLabView from './SoundLabView.jsx';
+import CheckoutView from './CheckoutView.jsx';
 import { RECIPES, SOUNDS } from './catalog.mjs';
 import { mountSoundLab } from './sound-lab.mjs';
 import { mountVisualEffects } from './visual-effects.mjs';
@@ -46,6 +47,12 @@ function SoundLab() {
 const rootRoute = createRootRoute({ component: SoundLab });
 const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/' });
 const focusRoute = createRoute({ getParentRoute: () => rootRoute, path: '/focus' });
-const router = createRouter({ routeTree: rootRoute.addChildren([indexRoute, focusRoute]) });
+const checkoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/checkout',
+  validateSearch: (search) => ({ pack: typeof search.pack === 'string' ? search.pack : '' }),
+  component: CheckoutView,
+});
+const router = createRouter({ routeTree: rootRoute.addChildren([indexRoute, focusRoute, checkoutRoute]) });
 
 createRoot(document.getElementById('root')).render(<RouterProvider router={router} />);

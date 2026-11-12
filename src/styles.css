@@ -1328,3 +1328,18 @@ body.is-immersive{overflow:hidden}
   .hero .cta-row .btn{padding-inline:8px;font-size:13px}
   .glass-wrap .ck-scene{width:min(292px,80vw)}
 }
+
+/* ---- checkout ---- */
+.checkout{position:fixed;inset:0;z-index:120;overflow:auto;background:#FFF6E3;padding:28px 16px 72px}
+.checkout-inner{max-width:560px;margin:0 auto}
+.checkout .card{padding:24px}
+.checkout .card p{flex:none}
+.checkout .sum{margin:2px 0 4px}
+.sum-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1.5px dashed var(--line);font-size:14px}
+.sum-row:last-child{border-bottom:0}
+.sum-row.total{font-size:16px;font-weight:700}
+.sum-row .k{color:var(--ink-2)}
+.checkout .fine{font-size:12.5px;color:var(--ink-3);line-height:1.7;margin:0}
+.err-box{border:2px dashed var(--danger);border-radius:14px 6px 16px 8px/8px 16px 6px 14px;background:#FDECEA;padding:14px 16px}
+.err-box h4{margin:0 0 6px;font-family:var(--hand);font-weight:400;font-size:19px;color:var(--danger)}
+.err-box p{margin:0;font-size:13.5px;line-height:1.7;color:var(--ink-2)}
