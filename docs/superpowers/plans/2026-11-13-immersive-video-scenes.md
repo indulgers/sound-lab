@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-11-13-immersive-video-scenes.md`
 
-**Status (2026-11-13):** Implementation and code review fixes are complete. The test suite passes 136/136, and the full TanStack/Cloudflare production build succeeded during private Site publication. The private preview deployed successfully, but browser QA and screenshots are blocked at ChatGPT sign-in. Branch/PR delivery remains in progress. See `docs/immersive-video-review.md` for evidence and the remaining checks.
+**Status (2026-11-13):** Implementation and code review fixes are complete. The test suite passes 136/136, and the full TanStack/Cloudflare production build succeeded during private Site publication. The private preview deployed successfully, but browser QA and screenshots are blocked at ChatGPT sign-in. The isolated branch is published as [draft PR #5](https://github.com/indulgers/sound-lab/pull/5). See `docs/immersive-video-review.md` for evidence and the remaining checks.
 
 ## Global Constraints
 
@@ -69,4 +69,4 @@
 - [x] Publish the private review Site and verify successful deployment; access currently stops at ChatGPT sign-in.
 - [x] Verify all 14 MP4/JPG/MP3 GitHub blobs against local hashes and preserve all six V3.1 stems bit-for-bit.
 - [ ] Complete authenticated browser QA and capture desktop/mobile screenshots.
-- [ ] Finish pushing the tested isolated branch, create a reviewable PR and provide final delivery links and verification limits.
+- [x] Push the tested isolated branch and create a reviewable draft PR with the preview link and verification limits.

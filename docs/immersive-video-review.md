@@ -1,6 +1,8 @@
 # Immersive video scenes: review and verification
 
-Updated 2026-11-13. Implementation and code review fixes are complete; final branch/PR delivery and browser acceptance remain in progress.
+Updated 2026-11-13. Implementation, code review fixes and isolated draft PR delivery are complete. Browser acceptance remains pending.
+
+Code review: [PR #5 — immersive video listening scenes](https://github.com/indulgers/sound-lab/pull/5), branch `codex/immersive-video-scenes`. The production branch has not been merged or deployed.
 
 ## Private review preview
 
@@ -71,4 +73,4 @@ Complete these checks in an authorized preview session or a working local browse
 - [ ] Check keyboard focus containment, Escape, return focus, immersive exit and accessible control names in both languages.
 - [ ] Select, change and cancel a sleep timer; check expiry and background-tab behavior. Confirm unrestricted listening when no timer is selected.
 - [ ] Listen across audio seams and video loop boundaries, then capture desktop/mobile screenshots and record the actual browser/device and duration tested.
-- [ ] Complete branch/PR delivery and attach the preview link together with the remaining verification limits.
+- [x] Publish the isolated branch and draft PR with the preview link and the remaining verification limits.
