@@ -38,3 +38,12 @@ The official license allows free use and modification, including use in a websit
 - Frame-to-frame motion and seam differences were measured; metadata and measurements are in [video-validation.json](../../../docs/video-validation.json).
 - A ten-iteration accelerated decode check exercises encoded loop boundaries. It is not a claim of ten real-time browser loops or audio synchronization; the app must verify those separately.
 - The cafeteria clip is a short 6.8-second scene loop. It is suitable for a working first version; a custom longer Chiang Mai composition is still a future visual-content improvement.
+
+## Four new destinations — original concept artwork (not video or photographs)
+
+- `da-lat-concept.svg`: original vector illustration evoking mist, pines and a small café cabin.
+- `kyoto-concept.svg`: original stylized illustration of rain and a quiet tea room.
+- `lisbon-concept.svg`: original illustration of warm hillside façades in afternoon light.
+- `hoi-an-concept.svg`: original illustration of riverfront lanterns at night.
+
+These assets are designed for the prototype and drawn in-code; they **do not depict verified photography or documentary video of the named cities**. Their optional animation is a slow CSS pan and can be paused. Do not market them as local films. Real location footage (and associated licensing/location verification) remains a separate future content deliverable.
