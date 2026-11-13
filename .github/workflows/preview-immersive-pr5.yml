@@ -6,6 +6,10 @@ on:
       - codex/immersive-video-scenes
   workflow_dispatch:
 
+concurrency:
+  group: sound-cocktail-pr5-preview
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
