@@ -14,7 +14,11 @@ export function readScenePreferences(storage) {
   }
   // Journey mixes are saved independently, even when journeys share a place.
   for (const journey of JOURNEYS) {
-    if (data.mixes?.[journey.id] && typeof data.mixes[journey.id] === 'object') mixes[journey.id] = { ...levelsForJourney(journey, data.mixes[journey.id]), ...controlsForJourney(journey, data.mixes[journey.id]) };
+    if (data.mixes?.[journey.id] && typeof data.mixes[journey.id] === 'object') {
+      const saved = data.mixes[journey.id];
+      mixes[journey.id] = { ...levelsForJourney(journey, saved), ...controlsForJourney(journey, saved) };
+      if (journey.id==='focus-chiang-mai') mixes[journey.id].cafeVoicesOptIn = saved.cafeVoicesOptIn === true;
+    }
   }
   return {
     sceneId: sceneById(data.sceneId).id,
