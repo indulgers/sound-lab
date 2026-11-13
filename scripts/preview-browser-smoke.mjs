@@ -33,7 +33,7 @@ try {
   await page.locator('.sc-copy .sc-enter').click();
   await page.waitForFunction(() => document.querySelector('.scene-experience')?.dataset.audioState === 'playing', null, { timeout: 60000 });
   console.log('PASS: Focus selected, music playing');
-  await page.locator('.sc-player-actions button').first().click();
+  await page.locator('.sc-player-actions button[aria-label="调音"]').click();
   const dialog = page.locator('.sc-dialog[open]');
   await dialog.waitFor({ state: 'visible' });
   assert.equal(await dialog.locator('.sc-emotion-control').count(), 4, 'simple emotional mixer must have real sliders');
