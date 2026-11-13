@@ -231,3 +231,51 @@ html[lang="zh-CN"] .sc-gallery-card h3 { font-family:Manrope,system-ui,sans-seri
 }
 @media (max-height:750px) and (min-width:681px) { .scene-experience { min-height:620px; } .sc-copy { bottom:25%; } .sc-copy h1 { font-size:76px; } .sc-copy > p { margin:17px 0; } .sc-hand-note { margin-top:12px; } .sc-scene-top { top:118px; } .sc-place-preview { bottom:25%; } .sc-bottom { bottom:20px; } .sc-dialog-inner { padding-top:20px; padding-bottom:20px; } .sc-layers { gap:20px; margin:24px 0; } .sc-panel-foot { padding-top:17px; } }
 @media (prefers-reduced-motion:reduce) { .scene-experience *, .scene-experience *::before, .scene-experience *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
+
+/* Intent-first entry: choose a state before seeing the recommended Journey. */
+.sc-intent-entry { position:absolute; z-index:2; left:8.8%; bottom:23%; width:min(680px,80%); color:#fff9ed; animation:sc-arrive .7s ease both; }
+.sc-intent-entry > .sc-kicker { display:block; margin-bottom:19px; color:#e2dbc0; font-size:10px; letter-spacing:2.4px; }
+.sc-intent-entry h1 { margin:0; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(48px,6vw,88px); font-weight:500; line-height:1.02; letter-spacing:-1.8px; text-shadow:0 4px 25px #16251b55; }
+.sc-intent-entry > p { font-size:13px; line-height:1.85; color:#eee6d9; margin:19px 0 23px; max-width:510px; }
+.sc-intent-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:11px; width:min(640px,100%); }
+.scene-experience .sc-intent-options button { flex-direction:column; align-items:flex-start; justify-content:center; min-height:102px; padding:15px 17px; gap:8px; position:relative; border:1px solid #f9f0de7a; border-radius:13px; background:#1e372cb8; text-align:left; backdrop-filter:blur(14px); transition:border-color .2s,background .2s,transform .2s; }
+.scene-experience .sc-intent-options button:hover { background:#38503ebd; border-color:#fff9e4; transform:translateY(-2px); }
+.sc-intent-options button > span { font-family:'Cormorant Garamond',Georgia,serif; font-size:26px; line-height:1; }
+.sc-intent-options button > small { font-size:10px; line-height:1.4; color:#e3e5d0; padding-right:16px; }
+.sc-intent-options button > svg { position:absolute; right:12px; bottom:15px; width:13px; height:13px; }
+.sc-intent-hint { display:block; font-size:10px; color:#d9dfc9; margin-top:19px; line-height:1.65; }
+.sc-journey-context { display:flex; flex-direction:column; align-items:flex-start; gap:9px; margin-bottom:18px; font-size:10px; color:#efe7d4; }
+.sc-journey-context > span { font-size:10px; letter-spacing:.4px; color:#d9e3cf; }
+.scene-experience .sc-change-goal { border:1px solid #f0e9d68a; border-radius:30px; padding:7px 12px; background:#203b2e80; font-size:10px; letter-spacing:.3px; backdrop-filter:blur(8px); }
+.scene-experience .sc-change-goal:hover { background:#42664eaa; }
+html[lang="zh-CN"] .sc-intent-entry h1 { font-family:'Noto Serif SC','Songti SC',serif; font-size:clamp(39px,5.4vw,72px); line-height:1.35; letter-spacing:1px; }
+html[lang="zh-CN"] .sc-intent-options button > span { font-family:Manrope,system-ui,sans-serif; font-size:19px; }
+@media (max-width:760px) {
+  .sc-intent-entry { left:6%; width:88%; bottom:25%; }
+  .sc-intent-entry h1 { font-size:clamp(45px,7vw,62px); }
+  .sc-intent-options button > span { font-size:23px; }
+}
+@media (max-width:680px) {
+  .sc-intent-entry { left:25px; right:25px; top:28%; bottom:auto; width:auto; }
+  .sc-intent-entry > .sc-kicker { font-size:8px; margin-bottom:14px; letter-spacing:1.3px; }
+  .sc-intent-entry h1 { font-size:clamp(44px,10vw,58px); }
+  .sc-intent-entry > p { font-size:11px; margin:17px 0 20px; }
+  .sc-intent-options { gap:7px; }
+  .scene-experience .sc-intent-options button { padding:12px 10px; min-height:87px; border-radius:10px; }
+  .sc-intent-options button > span { font-size:22px; }
+  .sc-intent-options button > small { font-size:9px; padding-right:0; }
+  .sc-intent-options button > svg { right:8px; bottom:7px; width:11px; height:11px; }
+  .sc-intent-hint { margin-top:14px; font-size:9px; }
+  .sc-journey-context { margin-bottom:12px; gap:6px; font-size:9px; }
+  .sc-journey-context > span { font-size:8px; }
+  html[lang="zh-CN"] .sc-intent-entry h1 { font-size:clamp(36px,9vw,47px); }
+  html[lang="zh-CN"] .sc-intent-options button > span { font-size:17px; }
+  .sc-intent-entry .sc-intent-options button { min-height:90px; }
+  .sc-copy .sc-journey-context + .sc-eyebrow { margin-bottom:13px; }
+}
+@media (max-height:700px) and (min-width:681px) {
+  .sc-intent-entry { bottom:18%; }
+  .sc-intent-entry h1 { font-size:clamp(46px,5vw,71px); }
+  .scene-experience .sc-intent-options button { min-height:83px; }
+  .sc-copy .sc-journey-context { margin-bottom:11px; }
+}
