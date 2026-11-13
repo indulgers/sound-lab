@@ -1,7 +1,8 @@
 /**
  * 配方页（/en/recipes、/zh/recipes）：配方卡片列表。
  *
- * 选场景 / 看进阶直接走引擎控制器（外壳常驻，音频不重启）；
+ * 点配方直接播那一杯：走引擎的 playRecipe（播该配方的配比、跳回调音台、
+ * 提示已应用），绝不进沉浸模式——沉浸只由调音台/ Hero 的沉浸按钮主动进。
  * 进阶配方按已解锁通道判定能不能直接听。
  */
 import { useLab } from './lab-context.jsx';
@@ -33,7 +34,7 @@ function RecipeMix({ mix, soundsById, locale }) {
 }
 
 export default function RecipesPage() {
-  const { recipes, sounds, chooseScene, showPremium, ownedPacks } = useLab();
+  const { recipes, sounds, playRecipe, showPremium, ownedPacks } = useLab();
   const [locale] = useLocale();
   const soundsById = new Map(sounds.map((sound) => [sound.id, sound]));
   // 能用的通道 = 免费通道 + 已拥有包的通道；进阶配方按这个集合判定是否可听。
@@ -57,7 +58,7 @@ export default function RecipesPage() {
                 <button
                   type="button"
                   className={unlocked ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'}
-                  onClick={() => (unlocked ? chooseScene(recipe) : showPremium(recipe.name))}
+                  onClick={() => (unlocked ? playRecipe(recipe) : showPremium(recipe.name))}
                 >
                   {unlocked ? t(locale, 'recipes.enter') : t(locale, 'recipes.learnMore')}
                 </button>

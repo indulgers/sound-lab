@@ -179,7 +179,7 @@ function SoundCup() {
   );
 }
 
-function Hero({ recipes, onChooseScene }) {
+function Hero({ recipes, onPlayRecipe }) {
   const [locale] = useLocale();
   return (
     <div className="hero">
@@ -191,7 +191,7 @@ function Hero({ recipes, onChooseScene }) {
           {recipes.filter(recipe => recipe.featured).map(recipe => {
             const display = recipeDisplay(recipe, locale);
             return (
-              <button className="scene-option" type="button" key={recipe.name} onClick={() => onChooseScene(recipe)}>
+              <button className="scene-option" type="button" key={recipe.name} onClick={() => onPlayRecipe(recipe)}>
                 <span className="scene-intent">{display.intent}</span>
                 <span className="scene-name">{display.name}</span>
               </button>
@@ -256,7 +256,7 @@ function Mixer() {
 }
 
 export default function MixerSection() {
-  const { recipes, chooseScene } = useLab();
+  const { recipes, playRecipe } = useLab();
   // 接到常驻引擎：挂载时绑 Hero + 调音台，卸载时撤掉。useEffect
   // 在外壳的 useLayoutEffect（mountSoundLab）之后跑，控制器已就绪。
   useEffect(() => {
@@ -278,7 +278,7 @@ export default function MixerSection() {
   }, []);
   return (
     <>
-      <Hero recipes={recipes} onChooseScene={chooseScene} />
+      <Hero recipes={recipes} onPlayRecipe={playRecipe} />
       <Mixer />
     </>
   );

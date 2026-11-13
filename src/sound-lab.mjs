@@ -1228,13 +1228,18 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     });
     return '<div class="mixbar">'+bars+'</div><div class="mix-legend">'+legend+'</div>';
   }
+  /* 选一个配方并播放：只调配比、不进沉浸模式。沉浸模式是用户
+     主动选的（调音台 #immersiveBtn / Hero #ctaImmersive 两个按钮，
+     或直接打开 /focus 专注页），配方点击绝不能顺带把它打开——
+     否则外壳的 onFocusChange 会跳到 /focus，落地页挂载时又把
+     focus 预设（咖啡馆靠窗）摆到推子上，盖掉刚点的配方。
+     （2026-11-13 实报 bug：点哪个配方都变成咖啡馆靠窗 + 沉浸模式。） */
   function chooseScene(scene){
     if(!playMix(scene.mix,scene)){
       pendingScene=scene;
       return;
     }
     pendingScene=null;
-    enterImmersive();
   }
 
   /**
@@ -1242,7 +1247,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
    * 不进沉浸模式。tweenTo 本身会过滤进阶通道；applyGain 在音频未
    * 初始化（AC 为空）时直接返回，所以页面首次打开（无用户手势）
    * 调用也是安全的。不要用 chooseScene 做预设：它会调 playMix
-   * （手势前静默失败）再进沉浸模式。
+   * （手势前静默失败）。
    */
   function setMix(mix){
     activeScene=null;
@@ -1882,7 +1887,6 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   }
 
   const api = {
-    chooseScene,
     setMix,
     playRecipe,
     showPremium,

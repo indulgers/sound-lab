@@ -144,7 +144,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 interface LabController {
-  chooseScene: (recipe: unknown) => void
   showPremium: (name: string) => void
   setMix: (mix: Record<string, number>) => boolean
   playRecipe: (recipe: { name: string; mix: Record<string, number>; params?: unknown }) => boolean
@@ -183,7 +182,11 @@ function SoundLab() {
   const pathLocale = localeFromPath(pathname)
   const focusRoute = stripLocalePrefix(pathname).replace(/\/$/, '') === '/focus'
   const controller = useRef<LabController | null>(null)
-  const chooseScene = useCallback((recipe: unknown) => controller.current?.chooseScene(recipe), [])
+  const playRecipe = useCallback(
+    (recipe: { name: string; mix: Record<string, number>; params?: unknown }) =>
+      controller.current?.playRecipe(recipe) ?? false,
+    [],
+  )
   const showPremium = useCallback((name: string) => controller.current?.showPremium(name), [])
 
   // 登录态：外壳拉取 /api/auth/me 和 /api/entitlements；
@@ -328,7 +331,7 @@ function SoundLab() {
         value={{
           recipes: RECIPES,
           sounds: SOUNDS,
-          chooseScene,
+          playRecipe,
           showPremium,
           user: authUser,
           ownedPacks,
