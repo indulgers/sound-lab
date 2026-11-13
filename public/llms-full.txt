@@ -1,0 +1,32 @@
+# Sound Cocktail — full details
+
+> Sound Cocktail is a free ambient sound mixer. Mix 22 white noise and ambient sounds — rain, fire, café voices, night train, piano — and save your cup for sleep, focus or unwinding. No app to install, no account needed to start mixing. Optional one-time sound packs unlock extra channels.
+
+## What it is
+
+Sound Cocktail is a web app for mixing ambient sounds the way you mix a cocktail: pick a few sounds, set each one's level with a fader, and save the mix as a recipe. Sounds come from three sources: live field recordings, instrument samples, and a live synthesis engine with per-sound tuning (brightness, distance, density). The interface is hand-drawn and cute — a watercolor cocktail glass that fills as you mix.
+
+## Pages
+
+- [Sound Cocktail](https://soundcocktail.app/): the mixer. 22 sounds across nature, places and instruments. Save mixes as recipes, share a recipe card or a recipe code (SYL-...) with a friend.
+- [Focus mode](https://soundcocktail.app/focus): immersive mode for deep work and studying. One timer, one cup of sound, nothing else on screen.
+
+## Sounds (22)
+
+Nature: rain, wind, waves, stream, thunder, birds, insects, fire, forest.
+Places: café voices, traffic, night train, rural night, market, rainy street, boat cabin, keyboard taps.
+Instruments: piano, guitar, wind chimes, wooden fish & drum, harp notes.
+
+## Sound packs (one-time purchase, no subscription)
+
+- Focus Pack ($1.99 / ¥6): market voices, wooden fish & drum, wind chimes.
+- Sleep Pack ($2.99 / ¥9): insects, night train, harp notes, forest, boat cabin.
+- Rain Night Pack ($3.99 / ¥12): thunder, rainy street.
+
+Payment follows the visitor's region: China pays in CNY via Alipay; elsewhere pays in USD via Waffo. The interface language (English / 中文) is independent of payment — switching language never changes the price or payment method.
+
+## Facts
+
+- Free mixing works without an account. Accounts (email or Google) are only needed to buy packs and keep entitlements.
+- Sound Cocktail is made by an independent developer. It is not a medical product and does not treat insomnia, anxiety or tinnitus — it is for winding down, focusing and relaxing.
+- Real field recordings on the site are listed with their source and license on the site's sources section.

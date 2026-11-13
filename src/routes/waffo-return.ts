@@ -33,7 +33,7 @@ export const Route = createFileRoute('/waffo-return')({
         const safePack = escapeHtml(packId)
         const safeOrder = escapeHtml(orderNo)
         const html = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Payment result · Sound Cocktail</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Payment result · Sound Cocktail</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body{font-family:sans-serif;max-width:560px;margin:64px auto;padding:0 16px;}

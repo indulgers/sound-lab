@@ -18,7 +18,7 @@ export const Route = createFileRoute('/return')({
         const outTradeNo = url.searchParams.get('out_trade_no') || ''
         const safeNo = escapeHtml(outTradeNo)
         const html = `<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><title>支付结果 · Sound Cocktail</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>支付结果 · Sound Cocktail</title>
 <style>
 body{font-family:sans-serif;max-width:560px;margin:64px auto;padding:0 16px;}
 a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;background:#16130c;color:#faf8f3;text-decoration:none;font-weight:600}

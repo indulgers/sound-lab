@@ -1,0 +1,18 @@
+# Sound Cocktail
+
+> Sound Cocktail is a free ambient sound mixer. Mix 22 white noise and ambient sounds — rain, fire, café voices, night train, piano — and save your cup for sleep, focus or unwinding. No app to install, no account needed to start mixing.
+
+## Pages
+
+- [Sound Cocktail](https://soundcocktail.app/): Mix ambient sounds like a cocktail. 22 sounds, live recordings, instrument samples and live synthesis. Save mixes as recipes and share them.
+- [Focus mode](https://soundcocktail.app/focus): Immersive focus mode — rain, brown noise and café ambience for deep work and studying. One timer, one cup of sound, nothing else on screen.
+
+## Sound packs (one-time purchase)
+
+- Focus Pack ($1.99 / ¥6): unlocks market voices, wooden fish & drum, wind chimes.
+- Sleep Pack ($2.99 / ¥9): unlocks insects, night train, harp, forest, boat cabin.
+- Rain Night Pack ($3.99 / ¥12): unlocks thunder and rainy street.
+
+## Optional
+
+- [Sound Cocktail — full details](https://soundcocktail.app/llms-full.txt): sounds list, packs, how mixing works.

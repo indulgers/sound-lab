@@ -6,53 +6,80 @@ import { fetchEntitlements, fetchMe } from '../auth-api.js'
 import { fetchWaffoPending } from '../pay-api.js'
 import { countryFromRequest, useRegion } from '../region.mjs'
 import { useLocale } from '../locale.mjs'
+import { OG_IMAGE_URL, ROUTE_SEO, headForRoute, verificationFromContext, verificationMeta } from '../seo.mjs'
 import { mountSoundLab } from '../sound-lab.mjs'
 import { mountVisualEffects } from '../visual-effects.mjs'
 import appCss from '../styles.css?url'
+
+// 字体自托管（P0）：不再请求 Google Fonts。Fontsource 包随构建
+// 打包进 dist，浏览器只下载 unicode-range 命中的子集。
+import '@fontsource/manrope/400.css'
+import '@fontsource/manrope/500.css'
+import '@fontsource/manrope/600.css'
+import '@fontsource/manrope/700.css'
+import '@fontsource/geist-mono/400.css'
+import '@fontsource/geist-mono/500.css'
+import '@fontsource/geist-mono/600.css'
+import '@fontsource/geist-mono/700.css'
+import '@fontsource/ma-shan-zheng/400.css'
+import '@fontsource/zcool-kuaile/400.css'
+import '@fontsource/caveat/500.css'
+import '@fontsource/caveat/600.css'
+import '@fontsource/caveat/700.css'
+import '@fontsource/cormorant-garamond/500.css'
+import '@fontsource/cormorant-garamond/600.css'
+import '@fontsource/cormorant-garamond/700.css'
 
 const View = memo(SoundLabView)
 
 const FAVICON =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FFF3D6'/%3E%3Cpath d='M7 8h18c0 5.4-3.6 9.2-7.8 10.1V24h3.6v2.6H11.2V24h3.6v-5.9C10.6 17.2 7 13.4 7 8z' fill='none' stroke='%2343301E' stroke-width='1.7' stroke-linejoin='round'/%3E%3Cpath d='M11.5 11.5h9' stroke='%23C08A4E' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E"
 
-const FONTS_URL =
-  'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600;700&family=Ma+Shan+Zheng&family=ZCOOL+KuaiLe&family=Caveat:wght@500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap'
-
 export const Route = createRootRoute({
   /**
    * 根路由 loader（SSR 时在服务端跑）：只读请求的国家，用于
-   * shell 的 <html lang>，避免首屏语言属性闪烁。
-   * 客户端导航时 loader 也会跑，但那时没有入站请求，country 为 null，
-   * shell 改按界面语言回落。loader 本身不读任何密钥或个人信息。
+   * shell 的 <html lang>，避免首屏语言属性闪烁；同时从 Cloudflare
+   * env 读三组可选的站长验证代码（Google / Bing / 百度），供 head
+   * 输出 verification meta。客户端导航时 loader 也会跑，但那时没有
+   * 入站请求，country 为 null，shell 改按界面语言回落。loader 本身
+   * 不读任何密钥或个人信息。
    *
    * 注意：实测 TanStack Start 传给 loader 的 request 不带任何请求头
    * （Accept-Language、cf-ipcountry 都读不到，本地 workerd 与 vite dev
-   * 一致），所以首屏 <title>/meta 无法按语言本地化，只能保持中文；
-   * 水合后由 SoundLabView 的 locale effect 按界面语言同步
-   * document.title 与 meta description。语言切换本身不受影响。
+   * 一致），所以首屏 <title>/meta 无法按语言本地化；P0 的 SSR head
+   * 固定英文（爬虫从美国来、不带 Accept-Language，看到的就是海外/
+   * 英文版），水合后由 SoundLabView 的 locale effect 按界面语言同步
+   * document.title 与 meta description。中文版 head 随 P1 的 /zh
+   * URL 一起来。语言切换本身不受影响。
    */
-  loader: async ({ request }: { request?: Request }) => {
-    return { country: countryFromRequest(request) }
+  loader: async ({ request, context }: { request?: Request; context?: unknown }) => {
+    return {
+      country: countryFromRequest(request),
+      verification: verificationFromContext(context),
+    }
   },
-  head: () => ({
+  head: ({ loaderData }: { loaderData?: { verification?: { google: string | null; bing: string | null; baidu: string | null } } }) => ({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
       { name: 'color-scheme', content: 'light' },
-      {
-        name: 'description',
-        content: '混合 22 种声音，听雨落在车窗上，听咖啡馆里的轻声谈话。调成一杯保存，留给专注或放空的时间。',
-      },
-      { property: 'og:title', content: 'Sound Cocktail · 自己调一杯属于今晚的声音' },
-      { property: 'og:description', content: '现场录音、乐器采样与实时合成。选几种声音，调一杯自己的声景。' },
+      // 首页默认英文 head（/focus 由子路由 head 覆盖；中文版在 P1 的 /zh）。
+      { title: ROUTE_SEO.home.title },
+      { name: 'description', content: ROUTE_SEO.home.description },
+      { property: 'og:title', content: ROUTE_SEO.home.ogTitle },
+      { property: 'og:description', content: ROUTE_SEO.home.ogDescription },
       { property: 'og:type', content: 'website' },
-      { title: 'Sound Cocktail · 调一杯声音' },
+      { property: 'og:image', content: OG_IMAGE_URL },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      // 站长验证 meta：三个变量都没设置时不输出任何东西。
+      ...verificationMeta({
+        GOOGLE_SITE_VERIFICATION: loaderData?.verification?.google ?? null,
+        BING_SITE_VERIFICATION: loaderData?.verification?.bing ?? null,
+        BAIDU_SITE_VERIFICATION: loaderData?.verification?.baidu ?? null,
+      }),
     ],
     links: [
       { rel: 'icon', href: FAVICON },
-      { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-      { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
-      { rel: 'stylesheet', href: FONTS_URL },
       { rel: 'stylesheet', href: appCss },
     ],
   }),
