@@ -36,7 +36,13 @@ try {
   await page.locator('.sc-player-actions button').first().click();
   const dialog = page.locator('.sc-dialog[open]');
   await dialog.waitFor({ state: 'visible' });
-  assert.equal(await dialog.locator('.sc-layer').count(), 4);
+  assert.equal(await dialog.locator('.sc-emotion-control').count(), 4, 'simple emotional mixer must have real sliders');
+  const warm = dialog.locator('#sc-mix-warmth');
+  const warmBefore = await warm.inputValue();
+  await warm.focus(); await warm.press('ArrowLeft');
+  assert.notEqual(await warm.inputValue(), warmBefore, 'warmth must change in simple mode');
+  await dialog.locator('.sc-advanced-toggle').click();
+  assert.equal(await dialog.locator('.sc-layer').count(), 4, 'advanced mixer must expose real synced stems');
   const slider = dialog.locator('.sc-layers input[type=range]').first();
   const before = await slider.inputValue();
   await slider.focus();
@@ -64,7 +70,7 @@ try {
   await mobile.screenshot({ path: 'preview-qa/mobile-intent-zh.png', fullPage: true });
   await mobile.getByRole('button', { name: /放松/ }).first().click();
   await mobile.locator('[data-intent="relax"]').waitFor();
-  assert.match(await mobile.locator('.sc-copy h1').innerText(), /巴厘岛/);
+  assert.match(await mobile.locator('.sc-copy h1').innerText(), /大叻/);
   await mobile.screenshot({ path: 'preview-qa/mobile-relax-ready.png', fullPage: true });
   console.log('PASS: mobile layout and relaxing journey');
 
