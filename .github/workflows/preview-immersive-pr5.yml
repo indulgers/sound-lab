@@ -68,4 +68,21 @@ jobs:
           else
             printf "PR #5 isolated preview: %s\\n" "$URL" | tee -a "$GITHUB_STEP_SUMMARY"
             curl --max-time 20 -fsSL "$URL/zh" -o /tmp/preview-home.html
+            echo "PREVIEW_DEPLOYED=true" >> "$GITHUB_ENV"
+            echo "PREVIEW_URL=$URL" >> "$GITHUB_ENV"
           fi
+      - name: Install Chromium for end-to-end checks
+        if: env.PREVIEW_DEPLOYED == 'true'
+        run: |
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify live player and desktop/mobile journeys
+        if: env.PREVIEW_DEPLOYED == 'true'
+        run: node scripts/preview-browser-smoke.mjs
+      - name: Upload browser review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sound-cocktail-pr5-browser-qa
+          path: preview-qa/
+          if-no-files-found: ignore
