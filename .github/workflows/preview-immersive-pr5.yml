@@ -49,6 +49,8 @@ jobs:
         with:
           path: public/assets/audio/journeys
           key: pr5-journeys-v3-${{ hashFiles('scripts/render_journeys.py', 'public/assets/audio/scenes/manifest.json') }}
+      - name: Export editorial listening comparisons
+        run: bash scripts/export-listening-samples.sh
       - name: Run tests
         run: npm test
       - name: Build TanStack Start application
