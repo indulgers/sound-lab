@@ -37,6 +37,7 @@ try {
   await dialog.getByRole('button', { name: /保存这份配比/ }).click();
   await dialog.getByRole('button', { name: /关闭/ }).click();
   console.log('PASS: sound controls and saved mix');
+  await page.locator('.sc-leave').click();
   await page.locator('.sc-change-goal').click();
   await page.locator('[data-intent="choose"]').waitFor();
   await page.getByRole('button', { name: /冥想/ }).first().click();
