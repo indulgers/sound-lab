@@ -48,11 +48,12 @@ function Navigation({ user, onAuthChange }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const search = useRouterState({ select: (state) => state.location.search });
-  // 语言切换（P1）：跳到另一语言的 URL（同一页），手动选择仍存
-  // localStorage 持久化；支付地区不受影响（见 region.mjs 解耦规则）。
+  // 语言选择（select，显示当前语言）：选后跳到另一语言的 URL（同一页），
+  // 手动选择仍存 localStorage 持久化；支付地区不受影响（见 region.mjs 解耦规则）。
   // 不可本地化的路径（支付回跳页等）只换文案、不导航。
-  function toggleLocale() {
-    const next = locale === 'en' ? 'zh' : 'en';
+  function changeLocale(event) {
+    const next = event.target.value === 'zh' ? 'zh' : 'en';
+    if (next === locale) return;
     setLocale(next);
     if (isLocalizablePath(pathname)) {
       void navigate({ to: localizePath(pathname, next), search });
@@ -66,14 +67,15 @@ function Navigation({ user, onAuthChange }) {
       <a href="#plus">{t(locale, 'nav.plus')}</a>
       <a href="#mine">{t(locale, 'nav.mine')}</a>
       <a href="#sources">{t(locale, 'nav.sources')}</a>
-      <button
-        type="button"
-        className="btn btn-ghost btn-sm"
-        onClick={toggleLocale}
-        aria-label={locale === 'en' ? 'Switch to Chinese' : '切换到英文'}
+      <select
+        className="btn-ghost btn-sm lang-select"
+        value={locale}
+        onChange={changeLocale}
+        aria-label={locale === 'en' ? 'Language' : '语言'}
       >
-        {locale === 'en' ? '中文' : 'EN'}
-      </button>
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+      </select>
       <AuthButton user={user} onAuthChange={onAuthChange} />
     </nav>
   )

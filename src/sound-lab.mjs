@@ -133,8 +133,12 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
 
   /* 界面语言：所有引擎文案都按当前 uiLocale 取（locale.mjs 的字典），
      中文界面只显示中文名、英文界面只显示英文名，绝不同时出现两种语言。
-     语言切换只改文案，不改支付方式和价格（2026-11-12 解耦规则）。 */
-  function L(){ return getLocale(); }
+     语言切换只改文案，不改支付方式和价格（2026-11-12 解耦规则）。
+     切换竞态：setLocale() 先发事件、后导航，事件触发的同步重绘仍看到
+     旧 URL；重绘期间用事件带来的新语言覆盖 L()，重绘完立即清掉，
+     之后再按 URL 取语言。 */
+  var repaintingLocale = null;
+  function L(){ return repaintingLocale || getLocale(); }
   function groupLabel(g){ return t(L(), 'mixer.group.' + g.id); }
   function paramLabel(pd){ return t(L(), 'mixer.param.' + pd.k); }
   function activeSounds(){
@@ -1633,8 +1637,13 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   buildFaders();
   buildSources();
   renderMine();
-  // 语言切换（导航栏按钮）只改文案：引擎重绘自己负责的部分。
-  listen(window,"soundcocktail:locale-changed",repaintLocale);
+  // 语言切换（导航栏选择器）只改文案：引擎重绘自己负责的部分。
+  // 事件先于导航到达：重绘期间用事件的 locale 覆盖 L()，重绘完清掉。
+  listen(window,"soundcocktail:locale-changed",function(event){
+    var loc = event && event.detail && event.detail.locale;
+    repaintingLocale = (loc === 'en' || loc === 'zh') ? loc : null;
+    try { repaintLocale(); } finally { repaintingLocale = null; }
+  });
   // The first cup is ready to play when the user chooses Start.
   levels.rain=0.80; levels.fire=0.52; levels.piano=0.40;
   SOUNDS.forEach(function(s){ paintFader(s.id); });
