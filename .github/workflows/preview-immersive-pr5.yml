@@ -29,7 +29,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Restore long-form audio stems
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: public/assets/audio/journeys
           key: pr5-journeys-v3-${{ hashFiles('scripts/render_journeys.py', 'public/assets/audio/scenes/manifest.json') }}
@@ -44,6 +44,11 @@ jobs:
             python scripts/render_journeys.py
           fi
           python scripts/validate_journey_audio.py
+      - name: Cache verified audio immediately
+        uses: actions/cache/save@v4
+        with:
+          path: public/assets/audio/journeys
+          key: pr5-journeys-v3-${{ hashFiles('scripts/render_journeys.py', 'public/assets/audio/scenes/manifest.json') }}
       - name: Run tests
         run: npm test
       - name: Build TanStack Start application
