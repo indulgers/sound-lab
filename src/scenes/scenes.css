@@ -364,3 +364,12 @@ html[lang="zh-CN"] .sc-intent-options button > span { font-family:Manrope,system
   .scene-experience .sc-voices-options button { min-height:42px; font-size:9px; padding:6px; }
   .sc-explore-filters { margin-top:15px; }
 }
+
+/* Accessible studio headings and always-reachable mobile save action. */
+.scene-experience .sc-mixer-section { font-family:Manrope,system-ui,sans-serif; font-weight:600; font-size:12px; letter-spacing:0; line-height:1.6; }
+.sc-dialog-head-actions { display:flex; align-items:center; gap:9px; margin-left:auto; flex-shrink:0; }
+.scene-experience .sc-quick-save { display:none; }
+@media(max-width:680px) {
+  .scene-experience .sc-quick-save { display:inline-flex; border:1px solid #b7c8b4; border-radius:24px; padding:6px 10px; font-weight:600; font-size:10px; background:#e9f0e4; color:#48684d; }
+  .sc-quick-save svg { width:13px;height:13px; }
+}
