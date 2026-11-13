@@ -4,6 +4,7 @@ import { localizePath, setLocale, useLocale } from '../locale.mjs';
 import { getLabController } from '../sound-lab.mjs';
 import { SCENES, sceneById, sceneText } from './catalog.mjs';
 import { levelsForScene, readScenePreferences, writeScenePreferences } from './preferences.mjs';
+import { INTENTS, JOURNEYS, intentById, journeyForScene, recommendedJourneyForIntent, levelsForJourney, sceneForJourney } from './journeys.mjs';
 import { createScenePlayer } from './player.mjs';
 
 const iconPaths = {
@@ -33,8 +34,13 @@ function Brand() {
   return <span className="sc-brand"><svg viewBox="0 0 38 42" aria-hidden="true"><path d="M8 8c1 12 7 18 12 18S31 19 31 8ZM20 26v10m-6 1h12M12 13h15M21 9c1-5 4-7 8-6-1 4-4 6-8 6Z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg><span>Sound Cocktail<small>AN EVERYDAY ESCAPE</small></span></span>;
 }
 const copy = {
-  en: { places:'Places', studio:'Sound studio', saved:'Saved mixes', listen:'Enter & listen', pause:'Pause listening', resume:'Resume listening', loading:'Finding your rhythm…', sound:'Sound', timer:'Sleep timer', continuous:'No timer', immersive:'Immerse', leave:'Back to the room', motionOn:'Pause motion', motionOff:'Play motion', change:'Change place', foot:'A small escape. A little more you.', choose:'Where shall we go?', chooseSub:'Two little corners of the world. Stay as long as you like.', here:'You are here', go:'Stay here', soundTitle:'Make it yours.', soundSub:'A little more of what you need.', reset:'Reset', save:'Save this mix', savedToast:'Your mix is saved for this place.', storageError:'Your browser could not save this mix. You can keep listening.', resetToast:'Back to the original balance.', timerTitle:'Drift away, on your time.', timerSub:'Music gently stops when the timer ends. Leave it off to keep listening.', minutes:'min', timerDone:'Your listening timer has ended.', ready:'Ready when you are', listening:'A LITTLE ROOM TO EXHALE', paused:'Take your time', videoFallback:'Still view · music is available', retry:'Try listening again', error:'The sound could not load. Check your connection and try again.', info:'About this place', close:'Close', volume:'Master volume', savedTitle:'Your familiar places.', savedSub:'Your saved sound balance, ready for your next visit.', noneSaved:'Make a place yours. Open Sound, adjust the layers, and save your mix.', loadSaved:'Return to this mix', savedBadge:'Your saved mix', sources:'Sound sources', inspired:'A place-inspired listening room', inspiredText:'These scenes evoke Bali and Chiang Mai. The licensed films are mood references, not verified recordings from those destinations. Music comes from our original V3.1 compositions; each control adjusts a real, separate audio layer.', musicCredit:'Music · Sound Cocktail V3.1', continuousNote:'Original three-minute compositions, gently joined for continuous listening.', videoCredit:'Film credits', full:'Full screen', exitFull:'Exit full screen' },
-  zh: { places:'去往哪里', studio:'声音调制室', saved:'我的收藏', listen:'进入，慢慢听', pause:'暂停聆听', resume:'继续聆听', loading:'让声音慢慢到来…', sound:'调音', timer:'定时停止', continuous:'不限时', immersive:'沉浸', leave:'回到房间', motionOn:'暂停画面', motionOff:'播放画面', change:'换个地方', foot:'一场小小的逃离，找回自己的节奏。', choose:'这次，想去哪里？', chooseSub:'世界的两个小角落。想待多久，就待多久。', here:'你在这里', go:'在这里待一会儿', soundTitle:'调成你的样子。', soundSub:'多一点此刻需要的声音。', reset:'恢复默认', save:'保存这份配比', savedToast:'已为这个地方保存你的声音配比。', storageError:'浏览器暂时无法保存，你仍可以继续聆听。', resetToast:'已恢复这个场景的原始配比。', timerTitle:'按自己的时间，慢慢来。', timerSub:'时间到了，音乐会轻柔停止。选择不限时即可持续聆听。', minutes:'分钟', timerDone:'本次定时聆听已结束。', ready:'准备好了，就开始吧', listening:'给自己一点呼吸的空间', paused:'慢慢来，时间还在', videoFallback:'静态画面 · 仍可聆听音乐', retry:'重新加载声音', error:'声音加载失败，请检查网络后重试。', info:'关于这个地方', close:'关闭', volume:'总音量', savedTitle:'回到熟悉的地方。', savedSub:'带着你保存的声音配比，开始下一次小旅行。', noneSaved:'打开调音，调整声音层，再保存一份属于你的配比。', loadSaved:'回到这份配比', savedBadge:'已保存配比', sources:'声音来源', inspired:'以目的地为灵感的聆听空间', inspiredText:'场景以巴厘岛与清迈为灵感。授权视频用于营造氛围，并非经核实的当地实拍。音乐来自我们的 V3.1 原创作品，每个调音控件都对应真实独立音轨。', musicCredit:'音乐 · Sound Cocktail V3.1', continuousNote:'原创三分钟音乐，经过循环衔接处理，可长时间连续聆听。', videoCredit:'视频来源', full:'全屏显示', exitFull:'退出全屏' },
+  en: { places:'Places', studio:'Sound studio', saved:'Saved mixes', listen:'Enter & listen', pause:'Pause listening', resume:'Resume listening', loading:'Finding your rhythm…', sound:'Sound', timer:'Sleep timer', continuous:'No timer', immersive:'Immerse', leave:'Back to the room', motionOn:'Pause motion', motionOff:'Play motion', change:'Change place', foot:'A small escape. A little more you.', choose:'Where shall we go?', chooseSub:'Two little corners of the world. Stay as long as you like.', here:'You are here', go:'Stay here', soundTitle:'Make it yours.', soundSub:'A little more of what you need.', reset:'Reset', save:'Save this mix', savedToast:'Your mix is saved for this journey.', storageError:'Your browser could not save this mix. You can keep listening.', resetToast:'Back to the original balance.', timerTitle:'Drift away, on your time.', timerSub:'Music gently stops when the timer ends. Leave it off to keep listening.', minutes:'min', timerDone:'Your listening timer has ended.', ready:'Ready when you are', listening:'A LITTLE ROOM TO EXHALE', paused:'Take your time', videoFallback:'Still view · music is available', retry:'Try listening again', error:'The sound could not load. Check your connection and try again.', info:'About this place', close:'Close', volume:'Master volume', savedTitle:'Your familiar places.', savedSub:'Your saved sound balance, ready for your next visit.', noneSaved:'Make a place yours. Open Sound, adjust the layers, and save your mix.', loadSaved:'Return to this mix', savedBadge:'Your saved mix', sources:'Sound sources', inspired:'A place-inspired listening room', inspiredText:'These scenes evoke Bali and Chiang Mai. The licensed films are mood references, not verified recordings from those destinations. Music comes from our original V3.1 compositions; each control adjusts a real, separate audio layer.', musicCredit:'Music · Sound Cocktail V3.1', continuousNote:'Original three-minute compositions, gently joined for continuous listening.', videoCredit:'Film credits', full:'Full screen', exitFull:'Exit full screen' },
+  zh: { places:'去往哪里', studio:'声音调制室', saved:'我的收藏', listen:'进入，慢慢听', pause:'暂停聆听', resume:'继续聆听', loading:'让声音慢慢到来…', sound:'调音', timer:'定时停止', continuous:'不限时', immersive:'沉浸', leave:'回到房间', motionOn:'暂停画面', motionOff:'播放画面', change:'换个地方', foot:'一场小小的逃离，找回自己的节奏。', choose:'这次，想去哪里？', chooseSub:'世界的两个小角落。想待多久，就待多久。', here:'你在这里', go:'在这里待一会儿', soundTitle:'调成你的样子。', soundSub:'多一点此刻需要的声音。', reset:'恢复默认', save:'保存这份配比', savedToast:'已保存这段声音旅程的配比。', storageError:'浏览器暂时无法保存，你仍可以继续聆听。', resetToast:'已恢复这个场景的原始配比。', timerTitle:'按自己的时间，慢慢来。', timerSub:'时间到了，音乐会轻柔停止。选择不限时即可持续聆听。', minutes:'分钟', timerDone:'本次定时聆听已结束。', ready:'准备好了，就开始吧', listening:'给自己一点呼吸的空间', paused:'慢慢来，时间还在', videoFallback:'静态画面 · 仍可聆听音乐', retry:'重新加载声音', error:'声音加载失败，请检查网络后重试。', info:'关于这个地方', close:'关闭', volume:'总音量', savedTitle:'回到熟悉的地方。', savedSub:'带着你保存的声音配比，开始下一次小旅行。', noneSaved:'打开调音，调整声音层，再保存一份属于你的配比。', loadSaved:'回到这份配比', savedBadge:'已保存配比', sources:'声音来源', inspired:'以目的地为灵感的聆听空间', inspiredText:'场景以巴厘岛与清迈为灵感。授权视频用于营造氛围，并非经核实的当地实拍。音乐来自我们的 V3.1 原创作品，每个调音控件都对应真实独立音轨。', musicCredit:'音乐 · Sound Cocktail V3.1', continuousNote:'原创三分钟音乐，经过循环衔接处理，可长时间连续聆听。', videoCredit:'视频来源', full:'全屏显示', exitFull:'退出全屏' },
+};
+
+const goalCopy = {
+  en: { kicker:'SOUND COCKTAIL · YOUR NEXT ESCAPE', title:'How would you like to feel?', intro:'Start with a feeling. Find a place to stay for a while.', action:'Change intention', suggestion:'Recommended journey', minutes:'Suggested', hint:'Choose a state, then enter the music. No timer or paywall during this preview.' },
+  zh: { kicker:'SOUND COCKTAIL · 由此出发', title:'此刻，想进入什么状态？', intro:'先选择你需要的状态，再去世界某个角落待一会儿。', action:'换一种状态', suggestion:'为此刻推荐的声音旅程', minutes:'建议', hint:'选择状态后就能开始音乐旅行。体验期不限时、不设付费墙。' },
 };
 
 function SceneVideo({ scene, motion, onUnavailable }) {
@@ -63,11 +69,15 @@ function SceneVideo({ scene, motion, onUnavailable }) {
 export default function SceneExperience() {
   const [locale] = useLocale();
   const C = copy[locale] || copy.en;
+  const G = goalCopy[locale] || goalCopy.en;
   const T = value => sceneText(value, locale);
   const navigate = useNavigate();
   const [prefs, setPrefs] = useState(() => readScenePreferences(null));
+  const [intentId, setIntentId] = useState(null);
   const [sceneId, setSceneId] = useState('bali');
-  const scene = sceneById(sceneId);
+  const journey = intentId ? journeyForScene(sceneId, intentId) : null;
+  const intent = intentById(intentId);
+  const scene = journey ? sceneForJourney(journey) : sceneById(sceneId);
   const [levels, setLevels] = useState(() => levelsForScene(SCENES[0]));
   const [audio, setAudio] = useState({status:'idle', sceneId:'bali', error:null});
   const [entered, setEntered] = useState(false);
@@ -96,8 +106,8 @@ export default function SceneExperience() {
   useEffect(() => {
     let saved;
     try { saved = readScenePreferences(window.localStorage); } catch { saved = readScenePreferences(null); }
-    preferences.current = saved; setPrefs(saved); setSceneId(saved.sceneId);
-    const initial = sceneById(saved.sceneId);
+    preferences.current = saved; setPrefs(saved); setSceneId(SCENES[0].id);
+    const initial = SCENES[0];
     const initialLevels = levelsForScene(initial,saved.mixes[initial.id]);
     setLevels(initialLevels);
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -150,14 +160,23 @@ export default function SceneExperience() {
 
   function openPanel(name) { opener.current = document.activeElement; setPanel(name); }
   function closePanel() { setPanel(null); dialog.current?.close(); opener.current?.focus?.(); }
-  function choosePlace(next, savedOnly = false) {
-    const nextLevels = levelsForScene(next,preferences.current.mixes[next.id]);
-    if (next.id !== sceneId || savedOnly) {
-      setSceneId(next.id); setLevels(nextLevels);
-      persist({...preferences.current,sceneId:next.id});
-      void player.current?.setScene(next,nextLevels,{play:playing || loading});
-    }
+  function selectJourney(next) {
+    if (!next) return;
+    const place = sceneForJourney(next);
+    const nextLevels = levelsForJourney(next, preferences.current.mixes[next.id]);
+    setIntentId(next.intentId);
+    setSceneId(place.id);
+    setLevels(nextLevels);
+    persist({ ...preferences.current, sceneId: place.id });
+    void player.current?.setScene(place, nextLevels, { play: playing || loading });
     closePanel();
+  }
+  function chooseIntent(id) { selectJourney(recommendedJourneyForIntent(id)); }
+  function choosePlace(place) { selectJourney(journeyForScene(place.id, intentId)); }
+  function changeIntent() {
+    player.current?.pause();
+    setIntentId(null);
+    setImmersive(false);
   }
   function toggleListening() {
     if (playing || loading) { player.current?.pause(); return; }
@@ -171,12 +190,14 @@ export default function SceneExperience() {
   }
   function changeMaster(value) { const master=Number(value); player.current?.setMaster(master); persist({...preferences.current,master}); }
   function saveMix() {
-    const saved=persist({...preferences.current,mixes:{...preferences.current.mixes,[sceneId]:{...levels}}});
+    if (!journey) return;
+    const saved = persist({ ...preferences.current, mixes: { ...preferences.current.mixes, [journey.id]: { ...levels } } });
     setToast(saved ? C.savedToast : C.storageError);
   }
   function resetMix() {
-    const reset=levelsForScene(scene); setLevels(reset);
-    Object.entries(reset).forEach(([id,value]) => player.current?.setLevel(id,value));
+    const reset = journey ? levelsForJourney(journey) : levelsForScene(scene);
+    setLevels(reset);
+    Object.entries(reset).forEach(([id, value]) => player.current?.setLevel(id, value));
     setToast(C.resetToast);
   }
   function toggleMotion() {
@@ -196,7 +217,7 @@ export default function SceneExperience() {
   const timerLabel = deadline ? `${Math.ceil(remaining/60000)} ${C.minutes}` : C.continuous;
   const dialogTitle = panel==='mix' ? C.soundTitle : panel==='timer' ? C.timerTitle : panel==='saved' ? C.savedTitle : panel==='info' ? C.info : C.choose;
 
-  return <section ref={root} className={`scene-experience ${immersive?'sc-immersive':''} ${entered?'sc-entered':''}`} data-scene={sceneId} data-audio-state={audio.status}>
+  return <section ref={root} className={`scene-experience ${immersive?'sc-immersive':''} ${entered?'sc-entered':''}`} data-scene={sceneId} data-intent={intentId||'choose'} data-audio-state={audio.status}>
     <SceneVideo scene={scene} motion={motion} onUnavailable={setVideoUnavailable}/>
     <header className="sc-header">
       <a href={localizePath('/',locale)} className="sc-brand-link" aria-label="Sound Cocktail"><Brand/></a>
