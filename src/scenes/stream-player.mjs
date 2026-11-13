@@ -15,7 +15,11 @@ export function densityGate(positionSeconds, energy = .5, seed = 11) {
   // Low musical activity removes *whole passages* of the details stem,
   // rather than turning the entire track down. Changes fade over 2s.
   const slot = Math.max(0, Math.floor(positionSeconds / 23));
-  const hash = ((slot * 1664525 + seed * 1013904223) >>> 0) / 4294967296;
+  // Avalanche hash: adjacent 23s passages should not all get the same gate.
+  let x = (slot + 1) ^ Math.imul(seed, 374761393);
+  x = Math.imul(x ^ (x >>> 16), 0x7feb352d);
+  x = Math.imul(x ^ (x >>> 15), 0x846ca68b);
+  const hash = ((x ^ (x >>> 16)) >>> 0) / 4294967296;
   const threshold = .26 + .74 * density;
   return hash < threshold ? 1 : 0;
 }
