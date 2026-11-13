@@ -279,3 +279,7 @@ html[lang="zh-CN"] .sc-intent-options button > span { font-family:Manrope,system
   .scene-experience .sc-intent-options button { min-height:83px; }
   .sc-copy .sc-journey-context { margin-bottom:11px; }
 }
+
+/* Screenshot QA: keep state selection readable and preserve the poster when motion is off. */
+.scene-experience .sc-intent-entry h1 { color:#fff9ed; text-shadow:0 3px 26px #0e221a77; }
+.scene-experience .sc-video.is-paused { opacity:0; }
