@@ -255,7 +255,7 @@ export default function SceneExperience() {
 
     {intentId && <div className="sc-place-preview">
       <span className="sc-kicker">{C.change}</span>
-      <div className="sc-place-chips">{SCENES.map(place=><button key={place.id} className={`sc-place-chip ${sceneId===place.id?'is-current':''}`} onClick={()=>choosePlace(place)} aria-pressed={place.id===sceneId} aria-label={`${T(place.name)} · ${T(place.location)}`}><img src={place.poster} alt=""/><span><small>{place.number}</small>{T(place.name)}</span>{place.id===sceneId?<span className="sc-chip-dot"/>:<Icon name="arrow"/>}</button>)}</div>
+      <div className="sc-place-chips">{SCENES.map(place=>{const next=journeyForScene(place.id,intentId);return <button key={place.id} className={`sc-place-chip ${sceneId===place.id?'is-current':''}`} onClick={()=>choosePlace(place)} aria-pressed={sceneId===place.id} aria-label={`${T(place.name)} · ${T(intentById(next?.intentId)?.name)}`}><img src={place.poster} alt=""/><span><small>{T(intentById(next?.intentId)?.name)}</small>{T(place.name)}</span>{place.id===sceneId?<span className="sc-chip-dot"/>:<Icon name="arrow"/>}</button>;})}</div>
     </div>}
 
     {immersive && <button className="sc-leave sc-glass-button" onClick={()=>setImmersive(false)}><Icon name="back"/>{C.leave}</button>}
