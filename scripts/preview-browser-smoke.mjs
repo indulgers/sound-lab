@@ -18,6 +18,8 @@ async function verifyPage(page, locale = 'zh') {
   assert.equal(videoOpacity, '0', 'reduced-motion must reveal scene poster instead of blank video');
   const poster = await page.locator('.sc-landscape').evaluate(el => getComputedStyle(el).backgroundImage);
   assert.ok(poster.includes('/assets/scenes/'), 'paused scene must show a real poster');
+  const imageDimensions = await page.locator('.sc-poster').evaluate(async img => { await img.decode(); return { width: img.naturalWidth, height: img.naturalHeight }; });
+  assert.ok(imageDimensions.width > 100 && imageDimensions.height > 100, 'responsive poster must decode successfully');
 }
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
