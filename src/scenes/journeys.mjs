@@ -11,7 +11,7 @@ export const INTENTS = Object.freeze([
 // procedural compositions, not claimed as new live performances or therapies.
 export const JOURNEYS = Object.freeze([
   { id:'focus-chiang-mai',intentId:'focus',sceneId:'chiang-mai',name:label('Café Flow','花园咖啡馆心流'),description:label('Warm keys and slow returning motifs: a welcoming opening, an unobtrusive middle.','保留温暖的开场，中段主题自然回归，不抢走工作的注意力。'),suggestedMinutes:45,
-    mix:{harmony:.77,details:.49,atmosphere:.55,ambience:.1},
+    mix:{harmony:.78,details:.40,atmosphere:.54,ambience:0},
     controls:{warmth:.66,space:.3,energy:.33,nature:.22} },
   { id:'focus-da-lat',intentId:'focus',sceneId:'da-lat',name:label('Morning Pages','晨雾书页'),description:label('Soft wooden notes and misty harmony for reading.','雾气中的木质拨弦，适合阅读和轻创作。'),suggestedMinutes:45,
     mix:{harmony:.76,details:.40,atmosphere:.47},
