@@ -38,11 +38,12 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
   let master = null, softFilter = null, shelf = null, dry = null, wet = null, delay = null;
   let targetMaster = .7, warmth = .55, space = .35, energy = .4, nature = .35;
   let playing = false, disposed = false, generation = 0, ticker = null;
-  let timerDeadline = null, startedAt = 0, error = null, cycle = 0;
+  let timerDeadline = null, startedAt = 0, totalElapsed = 0, error = null, cycle = 0;
   const retired = new Set();
   const emit = (status, problem = null) => onState({
     status, sceneId: selected?.id ?? null, error: problem,
     positionSeconds: current?.parts[0]?.media?.currentTime ?? 0,
+    elapsedSeconds: totalElapsed + (playing ? Math.max(0, (now() - startedAt) / 1000) : 0),
     chapter: suggestedChapter(current?.parts[0]?.media?.currentTime || 0, selected?.durationSeconds || 900),
   });
 
@@ -169,6 +170,7 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
     }
   }
   function pause() {
+    if (playing) totalElapsed += Math.max(0, (now() - startedAt) / 1000);
     generation++; playing = false;
     for (const deck of [current, next]) {
       if (!deck) continue;
@@ -244,5 +246,6 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
   return { setScene, play, pause, setLevel, setMaster, setMixControls, setSleepTimer, dispose,
     getPosition: () => current?.parts[0]?.media?.currentTime || 0,
     getPlaying: () => playing,
+    getElapsedSeconds: () => totalElapsed + (playing ? Math.max(0, (now() - startedAt) / 1000) : 0),
   };
 }
