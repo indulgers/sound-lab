@@ -62,7 +62,7 @@ jobs:
           PY
           npm run build
           npx wrangler deploy 2>&1 | tee /tmp/review-deploy.log
-          URL=$(grep -oE 'https://[a-z0-9.-]+\\.workers\\.dev' /tmp/review-deploy.log | head -n 1 || true)
+          URL=$(grep -oE 'https://[a-z0-9.-]+[.]workers[.]dev' /tmp/review-deploy.log | head -n 1 || true)
           if [ -z "$URL" ]; then
             echo "Deploy completed without a workers.dev URL in logs; inspect Wrangler output." >> "$GITHUB_STEP_SUMMARY"
           else
