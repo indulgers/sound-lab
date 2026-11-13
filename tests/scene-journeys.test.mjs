@@ -62,7 +62,7 @@ test('per-journey sound levels and emotional controls persist independently', ()
   assert.equal(saved.mixes['meditate-bali'].details,.67);
   assert.equal(saved.mixes['relax-bali'].details,.35);
   assert.deepEqual(Object.keys(controlsForJourney(journeyById('meditate-bali'))),
-    ['warmth','space','energy','nature']);
+    ['warmth','space','energy','nature','bass','mid','treble','width','reverb']);
 });
 
 test('the original 3-minute stems remain available only as labeled A/B references', () => {
