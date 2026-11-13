@@ -44,8 +44,8 @@ const goalCopy = {
 };
 
 const moodCopy = {
-  en:{warmth:'Warmth',space:'Space',energy:'Musical activity',nature:'Nature & air',simple:'Feel the sound',advanced:'Advanced mixing',compare:'Compare original V3.1',newVersion:'Return to V3.2',focus:'Focus session',break:'Your work block is complete. Take a gentle break.',breathe:'Breathing guide',journey:'Switch journey',studio:'Open studio',chapter:'Now in the journey',noFilm:'Illustrated place concept · no local footage',save:'Save this journey'},
-  zh:{warmth:'温暖感',space:'空间深度',energy:'音乐活跃度',nature:'自然环境',simple:'调节你想要的感受',advanced:'高级混音',compare:'对比原版 V3.1',newVersion:'返回 V3.2',focus:'专注时段',break:'这段专注结束了，可以休息一下。',breathe:'呼吸引导',journey:'切换旅程',studio:'进入调音室',chapter:'此刻的旅程',noFilm:'原创概念插画 · 非当地实拍',save:'保存这段旅程'},
+  en:{warmth:'Warmth',space:'Space',energy:'Musical activity',nature:'Nature & air',simple:'Feel the sound',advanced:'Advanced mixing',compare:'Compare original V3.1',newVersion:'Return to V3.2',focus:'Focus session',break:'Your work block is complete. Take a gentle break.',breathe:'Breathing guide',journey:'Switch journey',studio:'Open studio',bass:'Bass EQ',mid:'Mid EQ',treble:'Treble EQ',width:'Stereo width',reverb:'Room reverb',chapter:'Now in the journey',noFilm:'Illustrated place concept · no local footage',save:'Save this journey'},
+  zh:{warmth:'温暖感',space:'空间深度',energy:'音乐活跃度',nature:'自然环境',simple:'调节你想要的感受',advanced:'高级混音',compare:'对比原版 V3.1',newVersion:'返回 V3.2',focus:'专注时段',break:'这段专注结束了，可以休息一下。',breathe:'呼吸引导',journey:'切换旅程',studio:'进入调音室',bass:'低频',mid:'中频',treble:'高频',width:'立体声宽度',reverb:'空间混响',chapter:'此刻的旅程',noFilm:'原创概念插画 · 非当地实拍',save:'保存这段旅程'},
 };
 
 function SceneVideo({ scene, motion, onUnavailable }) {
@@ -340,6 +340,10 @@ export default function SceneExperience() {
           </div>)}</div>
           <button className="sc-advanced-toggle" onClick={()=>setAdvanced(v=>!v)} aria-expanded={advanced}>{M.advanced} <Icon name="tune"/></button>
           {advanced && <div className="sc-advanced-mixer">
+            <div className="sc-eq-controls">{['bass','mid','treble','width','reverb'].map(key=><div className="sc-emotion-control" key={key}>
+              <label htmlFor={`sc-advanced-${key}`}><span>{M[key]}</span><output>{Math.round((controls[key]??.5)*100)}%</output></label>
+              <input id={`sc-advanced-${key}`} type="range" min="0" max="1" step=".01" value={controls[key]??.5} onChange={event=>changeControl(key,event.target.value)} style={{'--range-value':`${(controls[key]??.5)*100}%`}}/>
+            </div>)}</div>
             <div className="sc-layers">{scene.layers.map(layer=><div className="sc-layer" key={layer.id}>
               <div className="sc-layer-title"><span><Icon name={layer.icon}/>{T(layer.label)}</span><output>{Math.round((levels[layer.id] ?? layer.defaultLevel)*100)}<small>%</small></output></div>
               <input type="range" min="0" max="1" step=".01" value={levels[layer.id] ?? layer.defaultLevel} aria-label={T(layer.label)} onChange={event=>changeLevel(layer.id,event.target.value)} style={{'--range-value':`${(levels[layer.id]??layer.defaultLevel)*100}%`}}/><small>{T(layer.detail)}</small>
