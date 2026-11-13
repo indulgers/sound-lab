@@ -12,7 +12,7 @@ permissions:
 jobs:
   verify-and-preview:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -21,6 +21,21 @@ jobs:
           cache: "npm"
       - name: Install dependencies
         run: npm ci
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Restore long-form audio stems
+        uses: actions/cache@v4
+        with:
+          path: public/assets/audio/journeys
+          key: pr5-journeys-v3-${{ hashFiles('scripts/render_journeys.py', 'public/assets/audio/scenes/manifest.json') }}
+      - name: Render original 15-minute stems (only when cache is missing)
+        run: |
+          if [ ! -s public/assets/audio/journeys/manifest.json ]; then
+            python -m pip install --disable-pip-version-check --quiet 'numpy==2.0.2' 'scipy==1.14.1'
+            python scripts/render_journeys.py
+          fi
+          python scripts/validate_journey_audio.py
       - name: Run tests
         run: npm test
       - name: Build TanStack Start application
