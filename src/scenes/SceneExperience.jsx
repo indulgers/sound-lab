@@ -4,8 +4,8 @@ import { localizePath, setLocale, useLocale } from '../locale.mjs';
 import { getLabController } from '../sound-lab.mjs';
 import { SCENES, sceneById, sceneText } from './catalog.mjs';
 import { levelsForScene, readScenePreferences, writeScenePreferences } from './preferences.mjs';
-import { INTENTS, JOURNEYS, intentById, journeyForScene, recommendedJourneyForIntent, levelsForJourney, sceneForJourney } from './journeys.mjs';
-import { createScenePlayer } from './player.mjs';
+import { INTENTS, JOURNEYS, intentById, journeyById, journeyForScene, recommendedJourneyForIntent, levelsForJourney, controlsForJourney, sceneForJourney } from './journeys.mjs';
+import { createStreamingJourneyPlayer } from './stream-player.mjs';
 
 const iconPaths = {
   play: <path d="m9 5 11 7-11 7Z" fill="currentColor" stroke="none" />,
@@ -43,6 +43,11 @@ const goalCopy = {
   zh: { kicker:'SOUND COCKTAIL · 由此出发', title:'此刻，想进入什么状态？', intro:'先选择你需要的状态，再去世界某个角落待一会儿。', action:'换一种状态', suggestion:'为此刻推荐的声音旅程', minutes:'建议', hint:'选择状态后就能开始音乐旅行。体验期不限时、不设付费墙。' },
 };
 
+const moodCopy = {
+  en:{warmth:'Warmth',space:'Space',energy:'Musical activity',nature:'Nature & air',simple:'Feel the sound',advanced:'Advanced mixing',compare:'Compare original V3.1',newVersion:'Return to V3.2',focus:'Focus session',break:'Your work block is complete. Take a gentle break.',breathe:'Breathing guide',journey:'Switch journey',studio:'Open studio',chapter:'Now in the journey',noFilm:'Illustrated place concept · no local footage',save:'Save this journey'},
+  zh:{warmth:'温暖感',space:'空间深度',energy:'音乐活跃度',nature:'自然环境',simple:'调节你想要的感受',advanced:'高级混音',compare:'对比原版 V3.1',newVersion:'返回 V3.2',focus:'专注时段',break:'这段专注结束了，可以休息一下。',breathe:'呼吸引导',journey:'切换旅程',studio:'进入调音室',chapter:'此刻的旅程',noFilm:'原创概念插画 · 非当地实拍',save:'保存这段旅程'},
+};
+
 function SceneVideo({ scene, motion, onUnavailable }) {
   const video = useRef(null);
   const [mobile, setMobile] = useState(false);
@@ -55,14 +60,14 @@ function SceneVideo({ scene, motion, onUnavailable }) {
   const src = mobile && scene.mobileVideo ? scene.mobileVideo : scene.video;
   const poster = mobile && scene.mobilePoster ? scene.mobilePoster : scene.poster;
   useEffect(() => {
-    onUnavailable(false);
-    if (!video.current) return;
+    onUnavailable(!src);
+    if (!src || !video.current) return;
     if (motion) video.current.play().catch(() => onUnavailable(true));
     else video.current.pause();
   }, [motion, src]);
   return <div className="sc-landscape" style={{ '--scene-position':scene.position, '--scene-mobile-position':scene.mobilePosition, backgroundImage:`url(${poster})` }}>
     <img className="sc-poster" src={poster} alt="" loading="eager" fetchPriority="high" aria-hidden="true" />
-    <video ref={video} key={src} className={`sc-video ${motion ? 'is-moving' : 'is-paused'}`} src={src} poster={poster} muted loop playsInline autoPlay={motion} preload="metadata" aria-hidden="true" onError={() => onUnavailable(true)} onPlaying={() => onUnavailable(false)} />
+    {src && <video ref={video} key={src} className={`sc-video ${motion ? 'is-moving' : 'is-paused'}`} src={src} poster={poster} muted loop playsInline autoPlay={motion} preload="metadata" aria-hidden="true" onError={() => onUnavailable(true)} onPlaying={() => onUnavailable(false)} />}
     <div className="sc-shade" />
   </div>;
 }
@@ -71,15 +76,22 @@ export default function SceneExperience() {
   const [locale] = useLocale();
   const C = copy[locale] || copy.en;
   const G = goalCopy[locale] || goalCopy.en;
+  const M = moodCopy[locale] || moodCopy.en;
   const T = value => sceneText(value, locale);
   const navigate = useNavigate();
   const [prefs, setPrefs] = useState(() => readScenePreferences(null));
   const [intentId, setIntentId] = useState(null);
   const [sceneId, setSceneId] = useState('bali');
-  const journey = intentId ? journeyForScene(sceneId, intentId) : null;
+  const [journeyId, setJourneyId] = useState(null);
+  const [audioVersion, setAudioVersion] = useState('3.2');
+  const journey = journeyById(journeyId);
   const intent = intentById(intentId);
-  const scene = journey ? sceneForJourney(journey) : sceneById(sceneId);
+  const scene = journey ? sceneForJourney(journey, audioVersion) : sceneById(sceneId);
   const [levels, setLevels] = useState(() => levelsForScene(SCENES[0]));
+  const [controls, setControls] = useState({warmth:.55,space:.35,energy:.40,nature:.35});
+  const [advanced, setAdvanced] = useState(false);
+  const [breath, setBreath] = useState(false);
+  const [focusSession, setFocusSession] = useState(null);
   const [audio, setAudio] = useState({status:'idle', sceneId:'bali', error:null});
   const [entered, setEntered] = useState(false);
   const [immersive, setImmersive] = useState(false);
@@ -115,7 +127,7 @@ export default function SceneExperience() {
     setMotion(saved.motion && !reduced.matches);
     const onReduced = () => { if (reduced.matches) setMotion(false); };
     reduced.addEventListener('change',onReduced);
-    const engine = createScenePlayer({ onState:setAudio, claimAudio:() => getLabController()?.pauseForScene?.() });
+    const engine = createStreamingJourneyPlayer({ onState:setAudio, claimAudio:() => getLabController()?.pauseForScene?.() });
     player.current = engine;
     engine.setMaster(saved.master);
     engine.setScene(initial,initialLevels,{play:false});
@@ -164,11 +176,18 @@ export default function SceneExperience() {
   function selectJourney(next) {
     if (!next) return;
     const place = sceneForJourney(next);
-    const nextLevels = levelsForJourney(next, preferences.current.mixes[next.id]);
+    const saved = preferences.current.mixes[next.id];
+    const nextLevels = levelsForJourney(next, saved);
+    const nextControls = controlsForJourney(next, saved);
+    setJourneyId(next.id);
+    setAudioVersion('3.2');
     setIntentId(next.intentId);
     setSceneId(place.id);
     setLevels(nextLevels);
+    setControls(nextControls);
+    setBreath(false);
     persist({ ...preferences.current, sceneId: place.id });
+    player.current?.setMixControls(nextControls);
     void player.current?.setScene(place, nextLevels, { play: playing || loading });
     closePanel();
   }
@@ -192,15 +211,36 @@ export default function SceneExperience() {
   function changeMaster(value) { const master=Number(value); player.current?.setMaster(master); persist({...preferences.current,master}); }
   function saveMix() {
     if (!journey) return;
-    const saved = persist({ ...preferences.current, mixes: { ...preferences.current.mixes, [journey.id]: { ...levels } } });
+    const saved = persist({ ...preferences.current, mixes: { ...preferences.current.mixes, [journey.id]: { ...levels, ...controls } } });
     setToast(saved ? C.savedToast : C.storageError);
   }
   function resetMix() {
     const reset = journey ? levelsForJourney(journey) : levelsForScene(scene);
-    setLevels(reset);
+    const nextControls = controlsForJourney(journey);
+    setLevels(reset); setControls(nextControls);
     Object.entries(reset).forEach(([id, value]) => player.current?.setLevel(id, value));
+    player.current?.setMixControls(nextControls);
     setToast(C.resetToast);
   }
+  function changeControl(key, input) {
+    const value = Number(input);
+    setControls(previous => ({ ...previous, [key]: value }));
+    player.current?.setMixControls({ [key]: value });
+  }
+  function switchVersion() {
+    if (!journey || !scene.legacyLayers?.length) return;
+    const nextVersion = audioVersion === '3.2' ? '3.1' : '3.2';
+    const place = sceneForJourney(journey, nextVersion);
+    const nextLevels = Object.fromEntries(place.layers.map(layer => [layer.id, levels[layer.id] ?? layer.defaultLevel]));
+    setAudioVersion(nextVersion); setLevels(nextLevels);
+    void player.current?.setScene(place, nextLevels, { play: playing || loading });
+  }
+  function startFocus(minutes) {
+    const elapsed = player.current?.getElapsedSeconds() ?? 0;
+    setFocusSession(minutes ? { minutes, until: elapsed + minutes * 60 } : null);
+    closePanel();
+  }
+  const focusSecondsRemaining = focusSession ? Math.max(0, Math.ceil(focusSession.until - (audio.elapsedSeconds || 0))) : 0;
   function toggleMotion() {
     const next=!motion; setMotion(next); persist({...preferences.current,motion:next});
   }
