@@ -98,7 +98,8 @@ test('Chiang Mai focus defaults to no human conversation, but retains a separate
   assert.equal(speech.defaultLevel,0);
   assert.equal(journey.mix.ambience,0);
   assert.equal(levelsForJourney(journey).ambience,0);
-  assert.equal(levelsForJourney(journey,{ambience:.045}).ambience,.045);
+  assert.equal(levelsForJourney(journey,{ambience:.045}).ambience,0,'old saved voice level must not silently persist');
+  assert.equal(levelsForJourney(journey,{ambience:.045,cafeVoicesOptIn:true}).ambience,.045);
   const legacy=sceneForJourney(journey,'3.1');
   assert.equal(legacy.layers.find(layer=>layer.id==='ambience').defaultLevel,0);
 });
@@ -107,4 +108,17 @@ test('mood-specific scene suggestions never silently switch the chosen intention
   assert.deepEqual(journeysForIntent('focus').map(j=>j.sceneId),['chiang-mai','da-lat','lisbon']);
   assert.deepEqual(journeysForIntent('meditate').map(j=>j.sceneId),['bali','kyoto']);
   assert.deepEqual(journeysForIntent('relax').map(j=>j.sceneId),['da-lat','bali','hoi-an']);
+});
+
+test('old saved café mixes cannot resurrect speech; a newly explicit opt-in can', () => {
+  const stale = readScenePreferences(storage(JSON.stringify({mixes:{
+    'focus-chiang-mai':{ambience:.45,harmony:.76}
+  }})));
+  assert.equal(stale.mixes['focus-chiang-mai'].ambience,0);
+  assert.equal(stale.mixes['focus-chiang-mai'].cafeVoicesOptIn,false);
+  const chosen = readScenePreferences(storage(JSON.stringify({mixes:{
+    'focus-chiang-mai':{ambience:.045,cafeVoicesOptIn:true}
+  }})));
+  assert.equal(chosen.mixes['focus-chiang-mai'].ambience,.045);
+  assert.equal(chosen.mixes['focus-chiang-mai'].cafeVoicesOptIn,true);
 });
