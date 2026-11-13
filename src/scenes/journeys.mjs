@@ -49,9 +49,13 @@ const clamp = (value, fallback) => typeof value === 'number' && Number.isFinite(
 export function levelsForJourney(journey, saved) {
   if (!journey) return {};
   const scene = sceneById(journey.sceneId);
-  return Object.fromEntries(scene.layers.map(layer => [
+  const levels=Object.fromEntries(scene.layers.map(layer => [
     layer.id, clamp(saved?.[layer.id],clamp(journey.mix[layer.id],layer.defaultLevel))
   ]));
+  // Old saved focus mixes can contain speech from the previous default.
+  // Do not revive it without a new, explicit user opt-in.
+  if (journey.id==='focus-chiang-mai' && saved?.cafeVoicesOptIn!==true) levels.ambience=0;
+  return levels;
 }
 export function controlsForJourney(journey, saved) {
   if (!journey) return {};
