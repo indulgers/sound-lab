@@ -283,3 +283,9 @@ html[lang="zh-CN"] .sc-intent-options button > span { font-family:Manrope,system
 /* Screenshot QA: keep state selection readable and preserve the poster when motion is off. */
 .scene-experience .sc-intent-entry h1 { color:#fff9ed; text-shadow:0 3px 26px #0e221a77; }
 .scene-experience .sc-video.is-paused { opacity:0; }
+
+/* A visible, eager poster layer prevents blank phone views while video is paused or loading. */
+.scene-experience .sc-poster { position:absolute; z-index:0; inset:0; width:100%; height:100%; object-fit:cover; object-position:var(--scene-position,center); pointer-events:none; }
+.scene-experience .sc-video { position:relative; z-index:1; }
+.scene-experience .sc-shade { z-index:2; }
+@media (max-width:680px) { .scene-experience .sc-poster { object-position:var(--scene-mobile-position,center); } }
