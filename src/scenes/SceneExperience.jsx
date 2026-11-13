@@ -265,7 +265,7 @@ export default function SceneExperience() {
     }
   }, [focusSession, focusSecondsRemaining, M.break]);
 
-  return <section ref={root} className={`scene-experience ${immersive?'sc-immersive':''} ${entered?'sc-entered':''}`} data-scene={sceneId} data-intent={intentId||'choose'} data-audio-state={audio.status}>
+  return <section ref={root} className={`scene-experience ${immersive?'sc-immersive':''} ${entered?'sc-entered':''}`} data-scene={sceneId} data-intent={intentId||'choose'} data-chapter={audio.chapter??0} data-audio-state={audio.status}>
     <SceneVideo scene={scene} motion={motion} onUnavailable={setVideoUnavailable}/>
     {intentId && playing && <div className="sc-chapter-hint" aria-live="off">{M.chapter} · {scene.chapters?.[audio.chapter || 0] || ''}</div>}
     {intentId === 'meditate' && breath && playing && <div className="sc-breath-guide" role="status"><div className="sc-breath-circle"/><span>{locale==='zh'?'缓缓吸气 · 缓缓呼气':'Breathe in · breathe out'}</span><button onClick={()=>setBreath(false)} aria-label={locale==='zh'?'关闭呼吸引导':'Close breathing guide'}>×</button></div>}
@@ -273,7 +273,7 @@ export default function SceneExperience() {
       <a href={localizePath('/',locale)} className="sc-brand-link" aria-label="Sound Cocktail"><Brand/></a>
       <nav className="sc-nav" aria-label={locale==='zh'?'场景导航':'Scene navigation'}>
         <button className="sc-nav-active" onClick={()=>openPanel('places')}>{C.places}</button>
-        <Link to={localizePath('/studio',locale)}>{C.studio}</Link>
+        <button onClick={()=>{setAdvanced(true);openPanel('mix')}}>{M.studio}</button>
         <button onClick={()=>openPanel('saved')}>{C.saved}</button>
       </nav>
       <div className="sc-header-end"><span className="sc-tiny-flower">✳</span><select value={locale} onChange={changeLanguage} aria-label={locale==='zh'?'语言':'Language'}><option value="en">EN</option><option value="zh">中</option></select></div>
@@ -350,7 +350,7 @@ export default function SceneExperience() {
           <div className="sc-sheet-master"><label htmlFor="sc-sheet-volume"><Icon name="sound"/>{C.volume}<output>{Math.round(prefs.master*100)}%</output></label><input id="sc-sheet-volume" type="range" min="0" max="1" step=".01" value={prefs.master} onChange={event=>changeMaster(event.target.value)} style={{'--range-value':`${prefs.master*100}%`}}/></div>
           <div className="sc-sheet-status" role="status">{toast}</div><div className="sc-panel-buttons"><button onClick={resetMix}>{C.reset}</button><button className="sc-primary" onClick={saveMix}><Icon name="bookmark"/>{M.save}</button></div>
         </>}
-        {(panel==='places'||panel==='saved') && <><p className="sc-panel-sub">{panel==='saved'?C.savedSub:C.chooseSub}</p><div className="sc-gallery">{JOURNEYS.filter(next=>panel!=='saved'||prefs.mixes[next.id]).map(next=>{const place=sceneById(next.sceneId);return <button className={`sc-gallery-card ${journey?.id===next.id?'is-current':''}`} onClick={()=>selectJourney(next)} key={next.id}><img src={place.poster} alt=""/><span className="sc-gallery-number">{place.number}</span><div><small>{T(intentById(next.intentId)?.name)} · {T(place.location)}</small><h3>{T(next.name)}</h3><span>{panel==='saved'?C.loadSaved:journey?.id===next.id?C.here:C.go}<Icon name={journey?.id===next.id?'check':'arrow'}/></span></div></button>;})}</div>{panel==='saved'&&!JOURNEYS.some(next=>prefs.mixes[next.id])&&<p className="sc-empty">{C.noneSaved}</p>}<div className="sc-gallery-links"><Link to={localizePath('/studio',locale)} onClick={closePanel}>{C.studio}<Icon name="arrow"/></Link><button onClick={()=>setPanel(panel==='saved'?'places':'saved')}>{panel==='saved'?C.places:C.saved}<Icon name="bookmark"/></button></div></>}
+        {(panel==='places'||panel==='saved') && <><p className="sc-panel-sub">{panel==='saved'?C.savedSub:C.chooseSub}</p><div className="sc-gallery">{JOURNEYS.filter(next=>panel!=='saved'||prefs.mixes[next.id]).map(next=>{const place=sceneById(next.sceneId);return <button className={`sc-gallery-card ${journey?.id===next.id?'is-current':''}`} onClick={()=>selectJourney(next)} key={next.id}><img src={place.poster} alt=""/><span className="sc-gallery-number">{place.number}</span><div><small>{T(intentById(next.intentId)?.name)} · {T(place.location)}</small><h3>{T(next.name)}</h3><span>{panel==='saved'?C.loadSaved:journey?.id===next.id?C.here:C.go}<Icon name={journey?.id===next.id?'check':'arrow'}/></span></div></button>;})}</div>{panel==='saved'&&!JOURNEYS.some(next=>prefs.mixes[next.id])&&<p className="sc-empty">{C.noneSaved}</p>}<div className="sc-gallery-links"><button onClick={()=>{setAdvanced(true);setPanel('mix')}}>{M.studio}<Icon name="arrow"/></button><button onClick={()=>setPanel(panel==='saved'?'places':'saved')}>{panel==='saved'?C.places:C.saved}<Icon name="bookmark"/></button></div></>}
         {panel==='timer' && <>
           <p className="sc-panel-sub">{C.timerSub}</p>
           {intentId==='focus' && <div className="sc-focus-options"><h3>{M.focus}</h3><p className="sc-panel-sub">{locale==='zh'?'专注计时仅作提醒，音乐不会被打断。暂停播放也会暂停计时。':'A gentle focus reminder; music never cuts off. Pausing sound pauses the clock.'}</p>
