@@ -1,23 +1,37 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { SCENES } from '../src/scenes/catalog.mjs';
-import { INTENTS, JOURNEYS, intentById, journeyById, journeysForIntent, recommendedJourneyForIntent, journeyForScene, levelsForJourney, sceneForJourney } from '../src/scenes/journeys.mjs';
+import { INTENTS, JOURNEYS, intentById, journeyById, journeysForIntent, recommendedJourneyForIntent, journeyForScene, levelsForJourney, controlsForJourney, sceneForJourney } from '../src/scenes/journeys.mjs';
 import { readScenePreferences, writeScenePreferences } from '../src/scenes/preferences.mjs';
+import { densityGate, suggestedChapter } from '../src/scenes/stream-player.mjs';
 
 const storage = value => ({ getItem: () => value, setItem() {} });
+const PLACE_IDS = ['bali','chiang-mai','da-lat','kyoto','lisbon','hoi-an'];
 
-test('every intention recommends a playable place with genuine scene stems', () => {
+test('six distinct places have three genuine 15-minute stems, with accurate provenance', () => {
+  assert.deepEqual(SCENES.map(x => x.id).sort(), PLACE_IDS.sort());
+  for (const scene of SCENES) {
+    assert.equal(scene.durationSeconds, 900);
+    assert.equal(scene.chapters.length, 5);
+    assert.equal(scene.layers.filter(x => /journeys\//.test(x.file)).length, 3);
+    assert.ok(scene.layers.every(x => x.file.startsWith('/assets/audio/')));
+    if (!scene.video) assert.match(scene.artworkProvenance, /not destination photography/);
+  }
+});
+
+test('every intention recommends a playable original journey', () => {
   for (const intent of INTENTS) {
     const journey = recommendedJourneyForIntent(intent.id);
     assert.ok(journey && journey.intentId === intent.id);
     const scene = sceneForJourney(journey);
-    assert.ok(SCENES.some(item => item.id === scene.id));
-    assert.ok(scene.layers.every(layer => layer.file.startsWith('/assets/audio/')));
+    assert.ok(PLACE_IDS.includes(scene.id));
+    assert.equal(scene.audioVersion, '3.2');
+    assert.equal(scene.durationSeconds, 900);
     assert.ok(journeysForIntent(intent.id).includes(journey));
   }
 });
 
-test('focus and meditation lead to separate destinations; unsupported values fail safely', () => {
+test('focus and meditation recommend the expected places, unsupported IDs fail safe', () => {
   assert.equal(recommendedJourneyForIntent('focus').sceneId, 'chiang-mai');
   assert.equal(recommendedJourneyForIntent('meditate').sceneId, 'bali');
   assert.equal(recommendedJourneyForIntent('unknown'), null);
@@ -25,33 +39,53 @@ test('focus and meditation lead to separate destinations; unsupported values fai
   assert.equal(journeyById('unknown'), null);
 });
 
-test('journeys in one place have different real stem levels but never invented audio', () => {
+test('shared destination can offer multiple distinct mix intentions', () => {
   const bath = journeyById('meditate-bali'), unwind = journeyById('relax-bali');
   assert.deepEqual(sceneForJourney(bath).layers, sceneForJourney(unwind).layers);
   assert.notDeepEqual(levelsForJourney(bath), levelsForJourney(unwind));
-  assert.deepEqual(levelsForJourney(bath, { music: 4, texture: -1, ambience: 'wrong' }),
-    { music: 1, texture: 0, air: .48, ambience: .10 });
+  assert.deepEqual(levelsForJourney(bath, { harmony: 4, details: -1, atmosphere: 'wrong' }),
+    { harmony: 1, details: 0, atmosphere: .44, ambience: .09 });
   assert.equal(journeyForScene('bali', 'relax').id, 'relax-bali');
-  assert.equal(journeyForScene('bali', 'focus').id, 'meditate-bali');
 });
 
-test('saved journey mixes stay separate and survive preference validation', () => {
-  const state = { sceneId: 'bali', master: .6, motion: false,
-    mixes: { 'meditate-bali': { music: .22 }, 'relax-bali': { music: .65 } } };
+test('per-journey sound levels and emotional controls persist independently', () => {
+  const state = { sceneId:'bali',master:.6,motion:false,
+    mixes:{'meditate-bali':{harmony:.22,space:.85},
+      'relax-bali':{harmony:.65,space:.33}} };
   let stored;
-  assert.equal(writeScenePreferences({ setItem(key, raw) { stored = raw; } }, state), true);
-  const saved = readScenePreferences(storage(stored));
-  assert.equal(saved.mixes['meditate-bali'].music, .22);
-  assert.equal(saved.mixes['relax-bali'].music, .65);
-  assert.equal(saved.mixes['meditate-bali'].texture, .82);
-  assert.equal(saved.mixes['relax-bali'].texture, .48);
-  assert.equal('playing' in saved, false);
+  assert.equal(writeScenePreferences({setItem(key,value){stored=value;}},state),true);
+  const saved=readScenePreferences(storage(stored));
+  assert.equal(saved.mixes['meditate-bali'].harmony,.22);
+  assert.equal(saved.mixes['relax-bali'].harmony,.65);
+  assert.equal(saved.mixes['meditate-bali'].space,.85);
+  assert.equal(saved.mixes['relax-bali'].space,.33);
+  assert.equal(saved.mixes['meditate-bali'].details,.67);
+  assert.equal(saved.mixes['relax-bali'].details,.35);
+  assert.deepEqual(Object.keys(controlsForJourney(journeyById('meditate-bali'))),
+    ['warmth','space','energy','nature']);
 });
 
-test('no intention is forced into a timer or paywall', () => {
-  for (const journey of JOURNEYS) {
-    assert.equal('paywall' in journey, false);
-    assert.equal('timerRequired' in journey, false);
-    assert.ok(Object.values(levelsForJourney(journey)).every(level => level >= 0 && level <= 1));
+test('the original 3-minute stems remain available only as labeled A/B references', () => {
+  for (const id of ['meditate-bali','focus-chiang-mai']) {
+    const scene=sceneForJourney(journeyById(id),'3.1');
+    assert.equal(scene.audioVersion,'3.1'); assert.equal(scene.durationSeconds,180);
+    assert.ok(scene.layers.some(x => /scenes\//.test(x.file)));
+  }
+  assert.equal(sceneForJourney(journeyById('focus-da-lat'),'3.1').audioVersion,'3.2');
+});
+
+test('musical activity gates actual detail passages, rather than a global volume multiplier', () => {
+  for (let t=0;t<1000;t+=23) assert.equal(densityGate(t,1,5),1);
+  const low=Array.from({length:30},(_,i)=>densityGate(i*23,.05,5));
+  assert.ok(low.some(x=>x===0) && low.some(x=>x===1));
+  assert.equal(suggestedChapter(0),0); assert.equal(suggestedChapter(480),2);
+  assert.equal(suggestedChapter(900),4);
+});
+
+test('all prototypes allow unrestricted listening without clinical effect or price claims', () => {
+  for (const j of JOURNEYS) {
+    assert.equal('paywall' in j,false); assert.equal('timerRequired' in j,false);
+    assert.ok(Object.values(levelsForJourney(j)).every(v=>v>=0&&v<=1));
+    assert.ok(Object.values(controlsForJourney(j)).every(v=>v>=0&&v<=1));
   }
 });
