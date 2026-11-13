@@ -12,6 +12,12 @@ async function verifyPage(page, locale = 'zh') {
   await page.locator('.scene-experience').waitFor({ state: 'visible', timeout: 30000 });
   assert.equal(await page.locator('.scene-experience').getAttribute('data-intent'), 'choose');
   assert.equal(await page.locator('.scene-experience').getAttribute('data-audio-state'), 'idle');
+  const headingColor = await page.locator('.sc-intent-entry h1').evaluate(el => getComputedStyle(el).color);
+  assert.equal(headingColor, 'rgb(255, 249, 237)', 'intention heading must be high contrast');
+  const videoOpacity = await page.locator('.sc-video').evaluate(el => getComputedStyle(el).opacity);
+  assert.equal(videoOpacity, '0', 'reduced-motion must reveal scene poster instead of blank video');
+  const poster = await page.locator('.sc-landscape').evaluate(el => getComputedStyle(el).backgroundImage);
+  assert.match(poster, /assets\\/scenes\\//, 'paused scene must show a real poster');
 }
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
