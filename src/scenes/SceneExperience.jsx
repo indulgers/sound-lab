@@ -4,7 +4,7 @@ import { localizePath, setLocale, useLocale } from '../locale.mjs';
 import { getLabController } from '../sound-lab.mjs';
 import { SCENES, sceneById, sceneText } from './catalog.mjs';
 import { levelsForScene, readScenePreferences, writeScenePreferences } from './preferences.mjs';
-import { INTENTS, JOURNEYS, intentById, journeyById, journeyForScene, journeysForIntent, recommendedJourneyForIntent, levelsForJourney, controlsForJourney, sceneForJourney } from './journeys.mjs';
+import { INTENTS, JOURNEYS, intentById, journeyById, journeysForIntent, recommendedJourneyForIntent, levelsForJourney, controlsForJourney, sceneForJourney } from './journeys.mjs';
 import { createStreamingJourneyPlayer } from './stream-player.mjs';
 
 const iconPaths = {
@@ -175,6 +175,10 @@ export default function SceneExperience() {
 
   function openPanel(name) { opener.current = document.activeElement; if (name==='places') setShowAllJourneys(!intentId); setPanel(name); }
   function closePanel() { setPanel(null); dialog.current?.close(); opener.current?.focus?.(); }
+  function openStudio() {
+    if (!intentId) { void navigate({to:localizePath('/studio',locale)}); return; }
+    setAdvanced(true); setPanel('mix');
+  }
   function selectJourney(next) {
     if (!next) return;
     const place = sceneForJourney(next);
@@ -274,7 +278,7 @@ export default function SceneExperience() {
       <a href={localizePath('/',locale)} className="sc-brand-link" aria-label="Sound Cocktail"><Brand/></a>
       <nav className="sc-nav" aria-label={locale==='zh'?'场景导航':'Scene navigation'}>
         <button className="sc-nav-active" onClick={()=>openPanel('places')}>{C.places}</button>
-        <button onClick={()=>{setAdvanced(true);openPanel('mix')}}>{M.studio}</button>
+        <button onClick={openStudio}>{M.studio}</button>
         <button onClick={()=>openPanel('saved')}>{C.saved}</button>
       </nav>
       <div className="sc-header-end"><span className="sc-tiny-flower">✳</span><select value={locale} onChange={changeLanguage} aria-label={locale==='zh'?'语言':'Language'}><option value="en">EN</option><option value="zh">中</option></select></div>
@@ -383,7 +387,7 @@ export default function SceneExperience() {
           </div>
           {panel==='saved'&&!JOURNEYS.some(next=>prefs.mixes[next.id])&&<p className="sc-empty">{C.noneSaved}</p>}
           <div className="sc-gallery-links">
-            <button onClick={()=>{setAdvanced(true);setPanel('mix')}}>{M.studio}<Icon name="arrow"/></button>
+            <button onClick={openStudio}>{M.studio}<Icon name="arrow"/></button>
             <button onClick={()=>setPanel(panel==='saved'?'places':'saved')}>{panel==='saved'?C.places:C.saved}<Icon name="bookmark"/></button>
           </div>
         </>}
@@ -394,7 +398,19 @@ export default function SceneExperience() {
           </div>}
           <h3>{C.timer}</h3><div className="sc-timer-options">{[0,20,30,45,60,90].map(minutes=><button key={minutes} onClick={()=>chooseTimer(minutes)} className={!deadline&&minutes===0?'is-selected':''}>{minutes?`${minutes} ${C.minutes}`:C.continuous}<Icon name={minutes?'clock':'wind'}/></button>)}</div>
         </>}
-        {panel==='info' && <div className="sc-credits"><span className="sc-credit-tag">{C.inspired}</span><p>{C.inspiredText}</p><h3>{C.musicCredit}</h3><p>{C.continuousNote}</p><h3>{C.videoCredit}</h3><p><a href="https://www.pexels.com/video/view-of-the-flowing-water-in-the-forest-8310457/" target="_blank" rel="noreferrer">Forest stream · I Am Sorin / Pexels</a></p><p><a href="https://www.pexels.com/video/charming-cafe-with-lush-garden-view-40913579/" target="_blank" rel="noreferrer">Garden café · LayG Traveller / Pexels</a><br/>{locale==='zh'?'清迈灵感声景 · 影像摄于阳朔':'Chiang Mai-inspired soundscape · filmed in Yangshuo'}</p><p><a href="/assets/scenes/credits.json" target="_blank" rel="noreferrer">{locale==='zh'?'完整视频来源与授权记录':'Complete film sources & license record'}</a></p><Link to={localizePath('/sources',locale)} onClick={closePanel}>{C.sources}<Icon name="arrow"/></Link></div>}
+        {panel==='info' && <div className="sc-credits">
+          <span className="sc-credit-tag">{C.inspired}</span>
+          <p>{C.inspiredText}</p>
+          <h3>{C.musicCredit.replace('V3.2', 'V'+audioVersion)}</h3>
+          <p>{audioVersion==='3.1'
+            ? (locale==='zh'?'当前是较早的三分钟编曲，采用平滑重复。':'This is the older three-minute composition, gently looped.')
+            : C.continuousNote}</p>
+          <h3>{C.videoCredit}</h3>
+          {sceneId==='bali' && <p><a href="https://www.pexels.com/video/view-of-the-flowing-water-in-the-forest-8310457/" target="_blank" rel="noreferrer">Forest stream · I Am Sorin / Pexels</a><br/>{locale==='zh'?'森林视频取景地未核实为巴厘岛。':'The film location is not verified as Bali.'}</p>}
+          {sceneId==='chiang-mai' && <p><a href="https://www.pexels.com/video/charming-cafe-with-lush-garden-view-40913579/" target="_blank" rel="noreferrer">Garden café · LayG Traveller / Pexels</a><br/>{locale==='zh'?'清迈灵感声景 · 影像实际摄于中国阳朔；咖啡馆人声是独立素材且默认关闭。':'Chiang Mai-inspired scene · film actually shot in Yangshuo, China. The separate conversation recording is off by default.'}</p>}
+          {!scene.video && <p>{locale==='zh'?'此地采用原创概念插画而非旅行实拍。当前音乐是原创程序合成实验，不是当地采样。':'Original illustrated concept art, not travel film. The soundtrack is a procedural experiment rather than a local field recording.'}</p>}
+          <Link to={localizePath('/sources',locale)} onClick={closePanel}>{C.sources}<Icon name="arrow"/></Link>
+        </div>}
       </div>
     </dialog>
   </section>;
