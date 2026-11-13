@@ -216,7 +216,10 @@ export default function SceneExperience() {
   function changeMaster(value) { const master=Number(value); player.current?.setMaster(master); persist({...preferences.current,master}); }
   function saveMix() {
     if (!journey) return;
-    const saved = persist({ ...preferences.current, mixes: { ...preferences.current.mixes, [journey.id]: { ...levels, ...controls } } });
+    const saved = persist({ ...preferences.current, mixes: { ...preferences.current.mixes, [journey.id]: {
+      ...levels, ...controls,
+      ...(journey.id==='focus-chiang-mai' ? {cafeVoicesOptIn:(levels.ambience??0)>0} : {}),
+    } } });
     setToast(saved ? C.savedToast : C.storageError);
   }
   function resetMix() {
