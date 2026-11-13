@@ -25,7 +25,7 @@ SCENES = {
  'chiang-mai': dict(title='清迈 · 花园咖啡馆', mood='专注 / 写作', seed=13, style='cafe',
    chords=[[50,57,61,64],[47,54,57,62],[43,50,54,59],[45,52,57,62],
            [50,57,59,64],[52,57,61,66],[43,50,57,62],[45,52,59,64]],
-   scene_rms=(.034,.010,.0025), chord_sec=41, lead_sec=19, palette=[69,71,73,74,76,78,81],
+   scene_rms=(.034,.009,.0025), chord_sec=41, lead_sec=25, palette=[69,71,73,74,76,78,81],
    moments=['花园开门','暖色琴键','树影摇动','一封未写完的信','回到第一杯咖啡']),
  'bali': dict(title='乌布 · 颂钵长廊', mood='冥想 / 放松', seed=37, style='bowl',
    chords=[[50,57,60,65],[46,53,57,62],[48,55,60,64],[43,50,57,62],
@@ -103,7 +103,7 @@ def pluck(note,start,amp,pan,style,seed, duration=5.):
     t=np.arange(length,dtype='f4')/SR
     f=note_freq(note)
     # Multiple decaying resonances + muted pick attack. No externally licensed samples.
-    spec={'cafe':[(1,1.,1.5),(2,.31,.58),(3,.13,.30),(4,.05,.20)],
+    spec={'cafe':[(1,1.,1.8),(2,.22,.69),(3,.075,.37),(4,.025,.21)],
           'mist':[(1,1.,2.6),(2,.18,.75),(3,.07,.47)],
           'tea':[(1,1.,2.7),(2,.20,.9),(3,.08,.52)],
           'sun':[(1,.95,1.5),(2,.36,.61),(3,.18,.32),(4,.07,.22)],
@@ -115,7 +115,7 @@ def pluck(note,start,amp,pan,style,seed, duration=5.):
     burst=rng.standard_normal(length,dtype='f4')
     sos=butter(1,2400 if style!='tea' else 1400,fs=SR,output='sos')
     burst=sosfilt(sos,burst).astype('f4')
-    sig+=burst*np.exp(-t/.014).astype('f4')*.11
+    sig+=burst*np.exp(-t/.014).astype('f4')*(.07 if style=='cafe' else .11)
     envelope=(1-np.exp(-t/.012))*np.minimum(1,(duration-t)/.2)
     sig*=envelope*amp
     return offset,np.column_stack((sig*np.sqrt((1-pan)/2),sig*np.sqrt((1+pan)/2))).astype('f4')
@@ -229,12 +229,13 @@ def build(scene,p):
         while at<DURATION-8:
             # A recognizable, soft returning shape, but not the same phrase every bar.
             notes=p['palette'];anchor=notes[(k*3+k//5)%len(notes)]
-            count=int(rng.choice([1,2,3] if style in ('cafe','sun') else [1,1,2,3]))
+            count=int(rng.choice([1,1,2,2,3] if style=='cafe' else [1,2,3] if style=='sun' else [1,1,2,3]))
             motif=[anchor]+[notes[(k*3+j*2+(k//4))%len(notes)] for j in range(1,count)]
             for j,note in enumerate(motif):
                 dt=j*float(rng.uniform(.45,1.4 if style=='sun' else 2.2))
-                vel={'cafe':.026,'mist':.020,'tea':.017,'sun':.027,'lantern':.021}[style]
+                vel={'cafe':.023,'mist':.020,'tea':.017,'sun':.027,'lantern':.021}[style]
                 v=vel*float(rng.uniform(.75,1.13))*(.82 if j>0 else 1)
+                if style=='cafe' and 210 < at < 710: v *= .88  # restrained, less salient working middle
                 put(d,pluck(note,at+dt,v,[-.48,.38,.09][j],style,p['seed']+k*3+j,duration=5.5))
             at+=float(p['lead_sec']*rng.uniform(.65,1.50))
             k+=1
@@ -303,7 +304,7 @@ def build(scene,p):
 
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
-    report={'version':'3.2-intent-build','sampleRate':SR,'clipDurationSeconds':DURATION,
+    report={'version':'3.2.1-quiet-cafe-focus','sampleRate':SR,'clipDurationSeconds':DURATION,
       'sessionOptions':[20,40,60,'∞'],'priceGateEnabled':False,'source':'v3.2-procedural-reconstruction','license':'Original programmatically generated prototype; not real destination field audio','scenes':{},
       'designLimits':['long sessions crossfade a 15min arranged programme rather than claiming 60min wholly unique recordings',
         'all new sounds are procedural synthetic sketches, not real location recordings, binaural science or verified therapeutic treatments']}
