@@ -15,6 +15,7 @@ import { Route as CafeRouteImport } from './routes/cafe'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as FocusRouteImport } from './routes/focus'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as HoneypotRouteImport } from './routes/honeypot'
 import { Route as RainRouteImport } from './routes/rain'
 import { Route as RelaxRouteImport } from './routes/relax'
 import { Route as ReturnRouteImport } from './routes/return'
@@ -90,6 +91,11 @@ const FocusRoute = FocusRouteImport.update({
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HoneypotRoute = HoneypotRouteImport.update({
+  id: '/honeypot',
+  path: '/honeypot',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RainRoute = RainRouteImport.update({
@@ -330,6 +336,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
+  '/honeypot': typeof HoneypotRoute
   '/rain': typeof RainRoute
   '/relax': typeof RelaxRoute
   '/return': typeof ReturnRoute
@@ -384,6 +391,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
+  '/honeypot': typeof HoneypotRoute
   '/rain': typeof RainRoute
   '/relax': typeof RelaxRoute
   '/return': typeof ReturnRoute
@@ -439,6 +447,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
+  '/honeypot': typeof HoneypotRoute
   '/rain': typeof RainRoute
   '/relax': typeof RelaxRoute
   '/return': typeof ReturnRoute
@@ -495,6 +504,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/focus'
     | '/health'
+    | '/honeypot'
     | '/rain'
     | '/relax'
     | '/return'
@@ -549,6 +559,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/focus'
     | '/health'
+    | '/honeypot'
     | '/rain'
     | '/relax'
     | '/return'
@@ -603,6 +614,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/focus'
     | '/health'
+    | '/honeypot'
     | '/rain'
     | '/relax'
     | '/return'
@@ -658,6 +670,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   FocusRoute: typeof FocusRoute
   HealthRoute: typeof HealthRoute
+  HoneypotRoute: typeof HoneypotRoute
   RainRoute: typeof RainRoute
   RelaxRoute: typeof RelaxRoute
   ReturnRoute: typeof ReturnRoute
@@ -748,6 +761,13 @@ declare module '@tanstack/react-router' {
       path: '/health'
       fullPath: '/health'
       preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/honeypot': {
+      id: '/honeypot'
+      path: '/honeypot'
+      fullPath: '/honeypot'
+      preLoaderRoute: typeof HoneypotRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rain': {
@@ -1082,6 +1102,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   FocusRoute: FocusRoute,
   HealthRoute: HealthRoute,
+  HoneypotRoute: HoneypotRoute,
   RainRoute: RainRoute,
   RelaxRoute: RelaxRoute,
   ReturnRoute: ReturnRoute,
