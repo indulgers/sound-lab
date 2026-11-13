@@ -1,5 +1,5 @@
 import { SCENES, sceneById } from './catalog.mjs';
-import { JOURNEYS, levelsForJourney } from './journeys.mjs';
+import { JOURNEYS, levelsForJourney, controlsForJourney } from './journeys.mjs';
 
 const KEY = 'sound-cocktail.places.v1';
 const clamp = (value, fallback) => typeof value === 'number' && Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : fallback;
@@ -14,7 +14,7 @@ export function readScenePreferences(storage) {
   }
   // Journey mixes are saved independently, even when journeys share a place.
   for (const journey of JOURNEYS) {
-    if (data.mixes?.[journey.id] && typeof data.mixes[journey.id] === 'object') mixes[journey.id] = levelsForJourney(journey, data.mixes[journey.id]);
+    if (data.mixes?.[journey.id] && typeof data.mixes[journey.id] === 'object') mixes[journey.id] = { ...levelsForJourney(journey, data.mixes[journey.id]), ...controlsForJourney(journey, data.mixes[journey.id]) };
   }
   return {
     sceneId: sceneById(data.sceneId).id,
