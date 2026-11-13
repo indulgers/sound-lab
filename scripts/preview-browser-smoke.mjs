@@ -29,6 +29,10 @@ try {
   await page.getByRole('button', { name: /专注/ }).first().click();
   await page.locator('[data-intent="focus"]').waitFor();
   assert.match(await page.locator('.sc-copy h1').innerText(), /清迈/);
+  assert.equal(await page.locator('.sc-place-chips button').count(),3,'focus shortcuts must only show focus Journeys');
+  assert.ok((await page.locator('.sc-place-chips').innerText()).includes('里斯本'));
+  assert.ok(!(await page.locator('.sc-place-chips').innerText()).includes('巴厘岛'));
+  console.log('PASS: Focus recommendations stay within selected intention');
   await page.screenshot({ path: 'preview-qa/desktop-focus-ready.png', fullPage: true });
   await page.locator('.sc-copy .sc-enter').click();
   await page.waitForFunction(() => document.querySelector('.scene-experience')?.dataset.audioState === 'playing', null, { timeout: 60000 });
@@ -41,7 +45,17 @@ try {
   const warmBefore = await warm.inputValue();
   await warm.focus(); await warm.press('ArrowLeft');
   assert.notEqual(await warm.inputValue(), warmBefore, 'warmth must change in simple mode');
+  assert.equal(await dialog.locator('.sc-voices-control').count(),1,'Chiang Mai exposes clear conversation choice');
+  assert.equal(await dialog.locator('.sc-voices-options button[aria-pressed="true"]').count(),1);
+  assert.match(await dialog.locator('.sc-voices-options button[aria-pressed="true"]').innerText(),/无交谈声/);
+  await dialog.locator('.sc-voices-options button').nth(1).click();
   await dialog.locator('.sc-advanced-toggle').click();
+  const crowdSlider=dialog.locator('.sc-layer').filter({hasText:/咖啡馆人声/}).locator('input[type=range]');
+  assert.ok(Number(await crowdSlider.inputValue())>0,'opt-in really raises cafe voices');
+  await dialog.locator('.sc-voices-options button').first().click();
+  assert.equal(Number(await crowdSlider.inputValue()),0,'quiet option fully mutes voices');
+  await dialog.screenshot({path:'preview-qa/desktop-chiang-mai-quiet-mixer.png'});
+  console.log('PASS: conversation muted by default, opt-in possible, reset works');
   assert.equal(await dialog.locator('.sc-eq-controls .sc-emotion-control').count(), 5, 'advanced EQ, reverb and stereo width must be present');
   const widthSlider=dialog.locator('#sc-advanced-width');
   const beforeWidth=await widthSlider.inputValue();
@@ -78,7 +92,12 @@ try {
   await page.locator('.sc-player-actions button').first().click();
   const places=page.locator('.sc-dialog[open]');
   await places.locator('.sc-gallery-card').first().waitFor();
-  assert.ok(await places.locator('.sc-gallery-card').count()>=8,'all six places and all states must be discoverable');
+  assert.equal(await places.locator('.sc-gallery-card').count(),2,'Meditation gallery should default to Bali and Kyoto only');
+  await places.getByRole('button',{name:/探索所有状态/}).click();
+  assert.equal(await places.locator('.sc-gallery-card').count(),8,'all eight journeys must remain discoverable');
+  await places.getByRole('button',{name:/适合当前状态/}).click();
+  assert.equal(await places.locator('.sc-gallery-card').count(),2);
+  await places.screenshot({path:'preview-qa/desktop-meditation-journeys.png'});
   await places.getByRole('button', {name:/茶室静水/}).click();
   await page.locator('[data-scene="kyoto"]').waitFor();
   await page.waitForFunction(() => document.querySelector('.scene-experience')?.dataset.audioState==='playing',null,{timeout:60000});
@@ -96,6 +115,15 @@ try {
   assert.match(await mobile.locator('.sc-copy h1').innerText(), /大叻/);
   await mobile.screenshot({ path: 'preview-qa/mobile-relax-ready.png', fullPage: true });
   console.log('PASS: mobile layout and relaxing journey');
+  await mobile.locator('.sc-change-goal').click();
+  await mobile.getByRole('button',{name:/专注/}).first().click();
+  await mobile.locator('[data-intent="focus"]').waitFor();
+  await mobile.locator('.sc-player-actions button[aria-label="调音"]').click();
+  await mobile.locator('.sc-dialog[open] .sc-voices-control').waitFor();
+  await mobile.screenshot({path:'preview-qa/mobile-quiet-cafe-mixer.png',fullPage:true});
+  const narrowOverflow=await mobile.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+  assert.ok(narrowOverflow<=1,'mobile mixer and quiet control must not overflow');
+  console.log('PASS: mobile quiet-first mixer is reachable');
 
   const english = await browser.newPage({ viewport: { width: 1366, height: 768 }, reducedMotion: 'reduce' });
   await verifyPage(english, 'en');
