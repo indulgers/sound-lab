@@ -1,0 +1,71 @@
+import assert from 'node:assert/strict';
+import { mkdir } from 'node:fs/promises';
+import { chromium } from 'playwright';
+
+const origin = process.env.PREVIEW_URL || 'https://sound-cocktail-pr5-review.weiyezhu180.workers.dev';
+await mkdir('preview-qa', { recursive: true });
+const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+const events = [];
+async function verifyPage(page, locale = 'zh') {
+  const response = await page.goto(`${origin}/${locale}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+  assert.ok(response?.ok(), `page HTTP ${response?.status()}`);
+  await page.locator('.scene-experience').waitFor({ state: 'visible', timeout: 30000 });
+  assert.equal(await page.locator('.scene-experience').getAttribute('data-intent'), 'choose');
+  assert.equal(await page.locator('.scene-experience').getAttribute('data-audio-state'), 'idle');
+}
+try {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+  page.on('pageerror', error => events.push(error.message));
+  await verifyPage(page, 'zh');
+  await page.locator('.sc-intent-entry').screenshot({ path: 'preview-qa/intent-zh.png' });
+  await page.getByRole('button', { name: /专注/ }).first().click();
+  await page.locator('[data-intent="focus"]').waitFor();
+  assert.match(await page.locator('.sc-copy h1').innerText(), /清迈/);
+  await page.screenshot({ path: 'preview-qa/desktop-focus-ready.png', fullPage: true });
+  await page.locator('.sc-copy .sc-enter').click();
+  await page.waitForFunction(() => document.querySelector('.scene-experience')?.dataset.audioState === 'playing', null, { timeout: 60000 });
+  console.log('PASS: Focus selected, music playing');
+  await page.locator('.sc-player-actions button').first().click();
+  const dialog = page.locator('.sc-dialog[open]');
+  await dialog.waitFor({ state: 'visible' });
+  assert.equal(await dialog.locator('.sc-layer').count(), 4);
+  const slider = dialog.locator('.sc-layers input[type=range]').first();
+  const before = await slider.inputValue();
+  await slider.focus();
+  await slider.press('ArrowLeft');
+  assert.notEqual(await slider.inputValue(), before, 'sound slider must actually change');
+  await dialog.getByRole('button', { name: /保存这份配比/ }).click();
+  await dialog.getByRole('button', { name: /关闭/ }).click();
+  console.log('PASS: sound controls and saved mix');
+  await page.locator('.sc-change-goal').click();
+  await page.locator('[data-intent="choose"]').waitFor();
+  await page.getByRole('button', { name: /冥想/ }).first().click();
+  await page.locator('[data-intent="meditate"]').waitFor();
+  assert.match(await page.locator('.sc-copy h1').innerText(), /巴厘岛/);
+  await page.locator('.sc-copy .sc-enter').click();
+  await page.waitForFunction(() => document.querySelector('.scene-experience')?.dataset.audioState === 'playing', null, { timeout: 60000 });
+  await page.screenshot({ path: 'preview-qa/desktop-meditate-playing.png', fullPage: true });
+  console.log('PASS: Bali meditation playback after state switch');
+
+  const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+  mobile.on('pageerror', error => events.push(error.message));
+  await verifyPage(mobile, 'zh');
+  const overflow = await mobile.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  assert.ok(overflow <= 1, `Mobile horizontal overflow: ${overflow}px`);
+  await mobile.screenshot({ path: 'preview-qa/mobile-intent-zh.png', fullPage: true });
+  await mobile.getByRole('button', { name: /放松/ }).first().click();
+  await mobile.locator('[data-intent="relax"]').waitFor();
+  assert.match(await mobile.locator('.sc-copy h1').innerText(), /巴厘岛/);
+  await mobile.screenshot({ path: 'preview-qa/mobile-relax-ready.png', fullPage: true });
+  console.log('PASS: mobile layout and relaxing journey');
+
+  const english = await browser.newPage({ viewport: { width: 1366, height: 768 }, reducedMotion: 'reduce' });
+  await verifyPage(english, 'en');
+  await english.getByRole('button', { name: /Focus/ }).first().click();
+  assert.match(await english.locator('.sc-copy h1').innerText(), /Chiang Mai/i);
+  console.log('PASS: English intention flow');
+  assert.deepEqual(events, [], 'No uncaught JavaScript errors');
+  console.log('PASS: all browser checks');
+} finally {
+  await browser.close();
+}
