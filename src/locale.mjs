@@ -3,19 +3,67 @@
  *
  * - 语言只决定文案，不决定货币和支付渠道（2026-11-12 用户明确规则：
  *   手动切换语言只改文案，支付方式和价格跟支付地区走，见 region.mjs）。
+ * - P1：语言由 URL 前缀决定（/en/* 与 /zh/*）。getLocale() 优先读 URL
+ *   前缀，其次 localStorage（手动选择仍持久化），最后浏览器语言。
+ *   SSR 时 URL 前缀就是语言来源，因此服务端 head 可以按语言输出
+ *   （修复了 P0 时代 SSR 标题无法本地化的限制）。
  * - 首次访问没有手动选择时，按浏览器语言自动判断：zh 开头（zh-CN、
  *   zh-TW、zh-HK 等）→ 中文，其他 → 英文。
  * - 手动切换存在 localStorage（键 sc-locale），优先于自动判断；
  *   切换后发 window 事件 soundcocktail:locale-changed，各组件用
  *   useLocale() 订阅，同步刷新。
- * - SSR 时读不到 localStorage 和 navigator，默认中文；水合后按本地
- *   存储或浏览器语言纠正。
  * - t(locale, key)：按点路径取字符串，缺失时回落到中文，再缺失返回 key 本身。
  */
-import { useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+
+/**
+ * 语言 Context（P1）：根路由外壳按 URL 前缀提供当前语言
+ * （/en/* → 'en'，/zh/* → 'zh'），子树里的 useLocale() 优先读它。
+ * 这样 SSR 渲染的就是正确语言的文案（不靠水合后纠正），也不会
+ * 出现服务端英文、客户端中文的水合不一致。没有 Provider 的页面
+ * （/return、/waffo-return 等独立页）回落到 getLocale()。
+ */
+export const LocaleContext = createContext(null);
 
 export const LOCALE_KEY = 'sc-locale';
 export const LOCALES = ['zh', 'en'];
+
+/** 不带语言前缀的路径：支付回跳页与爬虫/健康检查端点。 */
+export const BARE_PATHS = ['/return', '/waffo-return', '/health', '/robots.txt', '/sitemap.xml', '/llms.txt', '/llms-full.txt'];
+
+/**
+ * 从路径取语言前缀：/en/focus → 'en'，/zh → 'zh'，/focus → null。
+ * 纯函数，可在 node:test 里直接测。
+ */
+export function localeFromPath(pathname) {
+  if (typeof pathname !== 'string') return null;
+  const m = pathname.match(/^\/(en|zh)(?:\/|$)/);
+  return m ? m[1] : null;
+}
+
+/** 去掉语言前缀：/en/focus → /focus，/zh → /，/focus → /focus。 */
+export function stripLocalePrefix(pathname) {
+  const loc = localeFromPath(pathname);
+  if (!loc) return pathname;
+  const rest = pathname.slice(loc.length + 1);
+  return rest === '' ? '/' : rest;
+}
+
+/** 给路径加上语言前缀：localizePath('/focus', 'zh') → '/zh/focus'。 */
+export function localizePath(pathname, locale) {
+  const loc = normalizeLocale(locale);
+  const bare = stripLocalePrefix(pathname || '/');
+  if (bare === '/') return `/${loc}`;
+  return `/${loc}${bare}`;
+}
+
+/** 某路径是否应带语言前缀（支付回跳页与 /api/*、爬虫文件不带）。 */
+export function isLocalizablePath(pathname) {
+  const bare = stripLocalePrefix(pathname || '/');
+  if (BARE_PATHS.includes(bare)) return false;
+  if (bare.startsWith('/api/')) return false;
+  return true;
+}
 
 export function normalizeLocale(value) {
   return value === 'en' ? 'en' : 'zh';
@@ -37,10 +85,19 @@ export function detectUiLocale(languages) {
 }
 
 /**
- * 当前界面语言：手动选择（localStorage）优先；没有时按浏览器语言
- * 自动判断；SSR（无 window）时默认中文。
+ * 当前界面语言：URL 前缀优先；其次手动选择（localStorage）；没有时按
+ * 浏览器语言自动判断；SSR（无 window）且无 URL 前缀时默认英文
+ * （站点默认语言；/ 是 308 到 /en 的重定向）。
  */
 export function getLocale() {
+  try {
+    if (typeof window !== 'undefined' && window.location) {
+      const fromPath = localeFromPath(window.location.pathname);
+      if (fromPath) return fromPath;
+    }
+  } catch {
+    // location 不可用时继续往下判断。
+  }
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
       const stored = window.localStorage.getItem(LOCALE_KEY);
@@ -54,9 +111,9 @@ export function getLocale() {
       return detectUiLocale(navigator.languages || (navigator.language ? [navigator.language] : []));
     }
   } catch {
-    // navigator 不可用时默认中文。
+    // navigator 不可用时默认英文。
   }
-  return 'zh';
+  return 'en';
 }
 
 export function setLocale(locale) {
@@ -74,17 +131,22 @@ export function setLocale(locale) {
   return next;
 }
 
-/** 订阅语言变化的 React Hook（各组件直接用，不用经父组件传）。 */
+/**
+ * 订阅语言变化的 React Hook（各组件直接用，不用经父组件传）。
+ * 有 LocaleContext Provider 时以 Provider 的语言为准（SSR 与水合
+ * 一致）；没有时回落到 getLocale()（URL 前缀 → localStorage → 浏览器语言）。
+ */
 export function useLocale() {
-  const [locale, setState] = useState(() => getLocale());
+  const provided = useContext(LocaleContext);
+  const [locale, setState] = useState(() => (provided ? normalizeLocale(provided) : getLocale()));
   useEffect(() => {
-    setState(getLocale());
+    setState(provided ? normalizeLocale(provided) : getLocale());
     function onChange(event) {
       setState(normalizeLocale(event?.detail?.locale ?? getLocale()));
     }
     window.addEventListener('soundcocktail:locale-changed', onChange);
     return () => window.removeEventListener('soundcocktail:locale-changed', onChange);
-  }, []);
+  }, [provided]);
   return [locale, setLocale];
 }
 
@@ -326,6 +388,23 @@ export const STRINGS = {
       payHintLocal: '支付后端（同源 /api，由本站服务器路由提供）',
       payHintRemote: '支付后端 {base}',
     },
+    landing: {
+      presetLabel: '这页的配方',
+      playMix: '播放这杯',
+      saveMix: '存下这杯',
+      faqTitle: '常见问题',
+      moreTitle: '换个场景',
+      backHome: '← 回到首页',
+      otherPages: '更多场景',
+    },
+    mix: {
+      sharedCup: '朋友分享的一杯',
+      ingredients: '配料',
+      openInMixer: '在调音台打开这杯',
+      invalidTitle: '这个配方码读不出来',
+      invalidDesc: '可能是链接复制得不完整，或者配方里没有任何本站认识的声音。',
+      backHome: '← 回到首页调一杯',
+    },
   },
   en: {
     skipLink: 'Skip to the mixer',
@@ -563,6 +642,23 @@ export const STRINGS = {
       payConnectFailed: 'Can’t reach the payment service: {hint}. Make sure the payment backend is running.',
       payHintLocal: 'payment backend (same-origin /api, served by this site’s server routes)',
       payHintRemote: 'payment backend {base}',
+    },
+    landing: {
+      presetLabel: 'This page’s recipe',
+      playMix: 'Play this cup',
+      saveMix: 'Save this cup',
+      faqTitle: 'Frequently asked questions',
+      moreTitle: 'Try another scene',
+      backHome: '← Back to home',
+      otherPages: 'More scenes',
+    },
+    mix: {
+      sharedCup: 'A cup a friend shared',
+      ingredients: 'Ingredients',
+      openInMixer: 'Open this cup in the mixer',
+      invalidTitle: 'That recipe code doesn’t read',
+      invalidDesc: 'The link may have been copied incompletely, or the recipe has no sounds this site knows.',
+      backHome: '← Back home to mix a cup',
     },
   },
 };

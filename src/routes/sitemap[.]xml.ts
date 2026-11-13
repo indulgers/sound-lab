@@ -1,10 +1,10 @@
 /**
- * GET /sitemap.xml — 动态 sitemap（P0）。
+ * GET /sitemap.xml — 动态 sitemap（P0 + P1）。
  *
- * 只列公开可收录页（/ 与 /focus），绝对 URL + lastmod；
- * /checkout、/return、/waffo-return 与全部 /api/* 不进索引，
- * 故不列入。P1 加 /en + /zh 与场景落地页时，在 seo.mjs 的
- * PUBLIC_PATHS 里扩展。
+ * 全部可收录页 × 两种语言（/en/* 与 /zh/*），绝对 URL + lastmod，
+ * 每个 <url> 带 xhtml:link hreflang 标注（见 seo.mjs 的 sitemapXml）。
+ * /checkout、/return、/waffo-return、/mix/:code 与全部 /api/* 不进索引，
+ * 故不列入。
  */
 import { createFileRoute } from '@tanstack/react-router'
 import { sitemapXml } from '../seo.mjs'

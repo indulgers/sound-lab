@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Link, useRouterState } from '@tanstack/react-router';
+import { useState } from 'react';
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import AuthButton from './AuthButton.jsx';
 import { recipeDisplay } from './catalog.mjs';
 import { isFreeSound } from './listening-session.mjs';
 import { PACKS, isMixUnlocked, packDisplay, soundsForPacks } from './packs.mjs';
 import { currencyForRegion, useRegion } from './region.mjs';
-import { setLocale, t, useLocale } from './locale.mjs';
+import { isLocalizablePath, localizePath, setLocale, t, useLocale } from './locale.mjs';
 
 function BrandMark() {
   return (
@@ -45,6 +45,19 @@ function Background() {
 
 function Navigation({ user, onAuthChange }) {
   const [locale] = useLocale();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const search = useRouterState({ select: (state) => state.location.search });
+  // 语言切换（P1）：跳到另一语言的 URL（同一页），手动选择仍存
+  // localStorage 持久化；支付地区不受影响（见 region.mjs 解耦规则）。
+  // 不可本地化的路径（支付回跳页等）只换文案、不导航。
+  function toggleLocale() {
+    const next = locale === 'en' ? 'zh' : 'en';
+    setLocale(next);
+    if (isLocalizablePath(pathname)) {
+      void navigate({ to: localizePath(pathname, next), search });
+    }
+  }
   return (
     <nav className="topbar">
       <span className="mark brand"><BrandMark /><span className="brand-word">Sound Cocktail</span></span>
@@ -56,7 +69,7 @@ function Navigation({ user, onAuthChange }) {
       <button
         type="button"
         className="btn btn-ghost btn-sm"
-        onClick={() => setLocale(locale === 'en' ? 'zh' : 'en')}
+        onClick={toggleLocale}
         aria-label={locale === 'en' ? 'Switch to Chinese' : '切换到英文'}
       >
         {locale === 'en' ? '中文' : 'EN'}
@@ -389,7 +402,7 @@ function Plus({ ownedPacks, pendingWaffoOrders }) {
                 ) : pending ? (
                   <a href={pending.checkoutUrl} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>{t(locale, 'plus.continuePay')}</a>
                 ) : (
-                  <Link to="/checkout" search={{ pack: pack.id }} className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>{t(locale, 'plus.buy')}</Link>
+                  <Link to={localizePath('/checkout', locale)} search={{ pack: pack.id }} className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>{t(locale, 'plus.buy')}</Link>
                 )}
               </div>
             </article>
@@ -463,19 +476,16 @@ function Sources() {
 
 function About() {
   const [locale] = useLocale();
-  // SEO 介绍区：SSR 固定英文（爬虫在首屏 HTML 里看到关键词），水合后
-  // 按界面语言切换。mounted 前后都先渲染英文，避免水合不一致。
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-  const l = mounted ? locale : 'en';
+  // P1：语言由 URL 前缀经 LocaleContext 提供，SSR 即正确语言，
+  // 不再需要"先渲染英文、水合后切换"的 mounted 保护。
   return (
     <section className="blk" id="about">
-      <div className="sec-head"><h2>{t(l, 'about.title')}</h2>{l === 'en' ? <span className="en">{t(l, 'about.en')}</span> : null}</div>
-      <p className="sec-sub">{t(l, 'about.lead')}</p>
+      <div className="sec-head"><h2>{t(locale, 'about.title')}</h2>{locale === 'en' ? <span className="en">{t(locale, 'about.en')}</span> : null}</div>
+      <p className="sec-sub">{t(locale, 'about.lead')}</p>
       <ul className="about-points">
-        <li>{t(l, 'about.points.0')}</li>
-        <li>{t(l, 'about.points.1')}</li>
-        <li>{t(l, 'about.points.2')}</li>
+        <li>{t(locale, 'about.points.0')}</li>
+        <li>{t(locale, 'about.points.1')}</li>
+        <li>{t(locale, 'about.points.2')}</li>
       </ul>
     </section>
   )
@@ -539,23 +549,12 @@ function Overlays() {
 
 export default function SoundLabView({ recipes = [], sounds = [], onChooseScene, onShowPremium, user = null, ownedPacks = [], pendingWaffoOrders = [], onAuthChange }) {
   const [locale] = useLocale();
-  const pathname = useRouterState({ select: (state) => state.location.pathname.replace(/\/$/, '') });
-  const isFocus = pathname === '/focus';
   // 能用的通道 = 免费通道 + 已拥有包的通道；进阶配方按这个集合判定是否可听。
   const unlockedSounds = new Set(sounds.filter((sound) => isFreeSound(sound.id)).map((sound) => sound.id));
   soundsForPacks(ownedPacks).forEach((id) => unlockedSounds.add(id));
-  // 语言切换时同步 <html lang>（无障碍与浏览器翻译提示用），
-  // 同时同步 <title> 和 meta description（首屏由服务端 head 给英文；
-  // 水合后及手动切换语言时由这里按界面语言接管，/focus 用专注页标题；
-  // 支付地区不受影响）。
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      document.documentElement.lang = locale === 'en' ? 'en' : 'zh-CN';
-      document.title = isFocus ? t(locale, 'meta.focusTitle') : `Sound Cocktail · ${t(locale, 'meta.title')}`;
-      const description = document.querySelector('meta[name="description"]');
-      if (description) description.setAttribute('content', t(locale, isFocus ? 'meta.focusDescription' : 'meta.description'));
-    }
-  }, [locale, isFocus]);
+  // P1：<title> 与 meta description 由各路由 head() 按语言 URL 输出
+  // （SSR 即正确语言），这里不再由客户端 effect 覆盖；<html lang>
+  // 由根路由外壳同步。支付地区不受语言切换影响。
   return (
     <>
       <a className="skip-link" href="#mixer">{t(locale, 'skipLink')}</a>

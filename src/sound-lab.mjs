@@ -1117,15 +1117,15 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     if(on===playing) return true;
     clearTimeout(stopVoicesTimer);
     playing=on;
-    var t=AC.currentTime, envelope=transport.gain;
+    var now=AC.currentTime, envelope=transport.gain;
     updateMasterGain();
-    if(envelope.cancelAndHoldAtTime) envelope.cancelAndHoldAtTime(t);
+    if(envelope.cancelAndHoldAtTime) envelope.cancelAndHoldAtTime(now);
     else {
       var value=envelope.value;
-      envelope.cancelScheduledValues(t);
-      envelope.setValueAtTime(value,t);
+      envelope.cancelScheduledValues(now);
+      envelope.setValueAtTime(value,now);
     }
-    envelope.linearRampToValueAtTime(on ? 1 : 0,t+(on ? 3 : 5));
+    envelope.linearRampToValueAtTime(on ? 1 : 0,now+(on ? 3 : 5));
     if(on){
       AC.resume().catch(function(){ toast(t(L(),'audio.cantPlay')); });
       if(fillEmpty!==false){
@@ -1192,6 +1192,24 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     }
     pendingScene=null;
     enterImmersive();
+  }
+
+  /**
+   * 落地页预设（P1）：只把配方"摆"到推子上——推子动、杯子变，不播放、
+   * 不进沉浸模式。tweenTo 本身会过滤进阶通道；applyGain 在音频未
+   * 初始化（AC 为空）时直接返回，所以页面首次打开（无用户手势）
+   * 调用也是安全的。不要用 chooseScene 做预设：它会调 playMix
+   * （手势前静默失败）再进沉浸模式。
+   */
+  function setMix(mix){
+    activeScene=null;
+    tweenTo(mix || {});
+    return true;
+  }
+
+  /** 落地页"播放这杯"：走已有的 playSavedMix（进阶通道过滤 + 提示 + 播放）。 */
+  function playRecipe(recipe){
+    return playSavedMix(recipe);
   }
 
   function playSavedMix(recipe){
@@ -1686,6 +1704,8 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
 
   return {
     chooseScene,
+    setMix,
+    playRecipe,
     showPremium,
     setOwnedPacks,
     setFocus(open) {

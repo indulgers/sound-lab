@@ -66,6 +66,10 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
   document.getElementById('title').textContent = T.title;
   document.getElementById('goMixer').textContent = T.goMixer;
   document.getElementById('backHome').textContent = T.backHome;
+  // 回调音台的链接按用户语言走 /en 或 /zh（P1：裸 / 会 308 到 /en，
+  // 中文用户直接给 /zh，少一次跳转、语言也不闪一下英文）。
+  document.getElementById('goMixer').href = '/' + locale;
+  document.getElementById('backHome').href = '/' + locale;
   var status = document.getElementById('status');
   if (!${safeNo ? 'true' : 'false'}) { status.textContent = T.noOrder; return; }
   status.textContent = T.checking;

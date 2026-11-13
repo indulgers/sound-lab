@@ -1378,3 +1378,16 @@ body.is-immersive{overflow:hidden}
 .about-points{margin:0;padding-left:20px;max-width:44em;color:var(--ink-2);font-size:14px;line-height:1.9}
 .about-points li{margin-bottom:6px}
 .about-points li::marker{color:var(--ember)}
+
+/* ---- 场景落地页与 About/混音页（SEO/GEO P1）：复用 .blk/.sec-head/.sec-sub/.btn ---- */
+.landing-copy{max-width:760px}
+.landing-copy h1{font-size:clamp(28px,4.5vw,40px);line-height:1.25;margin:0 0 12px}
+.landing-copy h2{font-size:20px;margin:28px 0 8px}
+.landing-copy p{color:var(--ink-2);font-size:15px;line-height:1.9;margin:0 0 14px}
+.landing-copy .landing-standfirst{font-size:16.5px;color:var(--ink)}
+.landing-copy .landing-preset{font-size:14px}
+.landing-copy .cta-row{margin:4px 0 8px}
+.landing-copy .faq-item h3{font-size:16px;margin:18px 0 6px}
+.landing-copy .faq-item p{margin-bottom:10px}
+.landing-links{margin:0;padding-left:20px;color:var(--ink-2);font-size:14.5px;line-height:2}
+.landing-links a{color:var(--ink)}
