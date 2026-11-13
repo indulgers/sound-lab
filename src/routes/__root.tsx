@@ -7,6 +7,8 @@ import { fetchWaffoPending } from '../pay-api.js'
 import { countryFromRequest, useRegion } from '../region.mjs'
 import { LocaleContext, getLocale, localeFromPath, localizePath, stripLocalePrefix, useLocale } from '../locale.mjs'
 import { OG_IMAGE_URL, seoForRoute, verificationFromContext, verificationMeta } from '../seo.mjs'
+import { botGuardMiddleware } from '../server/bot-guard-middleware'
+import { verificationMiddleware } from '../server/verification-middleware'
 import { mountSoundLab } from '../sound-lab.mjs'
 import { mountVisualEffects } from '../visual-effects.mjs'
 import appCss from '../styles.css?url'
@@ -37,22 +39,42 @@ const FAVICON =
 
 export const Route = createRootRoute({
   /**
+   * 机器人防护（B6 蜜罐 + UA 封禁 + IP 限速，见 src/bot-guard.mjs）：
+   * 根路由的 server.middleware 对所有请求都跑（根路由永远匹配），
+   * 在路由处理之前拦截。env 直接取 cloudflare:workers 绑定。
+   */
+  server: {
+    // verification 在前：它经 next({ context }) 把站长验证代码注入
+    // loader context（botGuard 短路 403 时不需要 verification）。
+    middleware: [verificationMiddleware, botGuardMiddleware],
+  },
+  /**
    * 根路由 loader（SSR 时在服务端跑）：只读请求的国家，用于
-   * shell 的 <html lang> 回落（URL 没带语言前缀时）；同时从 Cloudflare
-   * env 读三组可选的站长验证代码（Google / Bing / 百度），供 head
-   * 输出 verification meta。客户端导航时 loader 也会跑，但那时没有
-   * 入站请求，country 为 null，shell 改按 URL 前缀回落。loader 本身
-   * 不读任何密钥或个人信息。
+   * shell 的 <html lang> 回落（URL 没带语言前缀时）；站长验证代码
+   * 由 verification 中间件注入 serverContext（见下），loader
+   * 优先读它，兜底读 context.cloudflare.env（本项目恒为空，见
+   * src/seo.mjs 里 verificationFromContext 的注释）。客户端导航时
+   * loader 也会跑，但那时没有入站请求，country 为 null，shell 改按
+   * URL 前缀回落；verification 也为空，meta 只在 SSR 首屏出现——
+   * 验证爬虫只读首屏，够了。loader 本身不读任何密钥或个人信息。
    *
    * P1：SSR head 已按语言 URL 本地化（/en/* 英文、/zh/* 中文，
    * 各子路由 head 输出本语言版本 + hreflang），不再有 P0 时代
    * "SSR 标题无法本地化"的限制；根路由 head 只提供默认英文首页
    * head，子路由会覆盖。
    */
-  loader: async ({ request, context }: { request?: Request; context?: unknown }) => {
+  loader: async ({ request, context, serverContext }: { request?: Request; context?: unknown; serverContext?: unknown }) => {
+    // serverContext 是服务端中间件合并后的上下文（框架把
+    // additionalContext = { serverContext } 铺进 loader 参数，与
+    // context 并列——不是 context 的子属性；见 node_modules 里
+    // load-server.js 的 getLoaderContext）。verification 中间件把
+    // 站长验证代码写在这里。
+    const sc = (serverContext && typeof serverContext === 'object' ? serverContext : {}) as {
+      verification?: { google: string | null; bing: string | null; baidu: string | null }
+    }
     return {
       country: countryFromRequest(request),
-      verification: verificationFromContext(context),
+      verification: sc.verification ?? verificationFromContext(context),
     }
   },
   head: ({ loaderData }: { loaderData?: { verification?: { google: string | null; bing: string | null; baidu: string | null } } }) => ({
@@ -108,6 +130,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         <Scripts />
+        {/* B6 蜜罐链接（见 src/bot-guard.mjs）：全站每页一个隐藏链接指向
+            /honeypot/。正常用户看不到、点不到（aria-hidden + display:none）；
+            只有无视 robots.txt 又到处跟链接的机器人会踩进去，踩中即封 IP。
+            链接文本是零宽连接符（U+200D），人眼不可见。 */}
+        <a id="honey" aria-hidden="true" tabIndex={-1} href="/honeypot">
+          {'\u200d'}
+        </a>
       </body>
     </html>
   )

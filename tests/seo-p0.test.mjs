@@ -23,7 +23,7 @@ const seo = await import('../src/seo.mjs');
 const robotsRoute = (await import('../src/routes/robots[.]txt.ts')).Route;
 const sitemapRoute = (await import('../src/routes/sitemap[.]xml.ts')).Route;
 
-const { SITE_URL, OG_IMAGE_URL, ROUTE_SEO, headForRoute, verificationMeta, verificationFromContext, robotsTxt, sitemapXml } = seo;
+const { SITE_URL, OG_IMAGE_URL, ROUTE_SEO, headForRoute, verificationMeta, verificationTokensFromEnv, verificationFromContext, robotsTxt, sitemapXml } = seo;
 
 const projectRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -35,8 +35,9 @@ test('seo: robots.txt allows the named crawlers and points at the sitemap', () =
     assert.match(txt, new RegExp(`User-agent: ${bot}\\nAllow: /`), bot);
   }
   assert.match(txt, new RegExp(`^Sitemap: ${SITE_URL.replace(/\//g, '\\/')}/sitemap\\.xml$`, 'm'));
-  // 不屏蔽任何爬虫：没有任何 Disallow。
-  assert.doesNotMatch(txt, /Disallow:/);
+  // 唯一 Disallow 是 B6 蜜罐 /honeypot/：正常爬虫不会去，踩进去的机器人会被封 IP。
+  assert.match(txt, /User-agent: \*\nAllow: \/\nDisallow: \/honeypot\//);
+  assert.equal((txt.match(/Disallow:/g) || []).length, 1);
 });
 
 test('seo: GET /robots.txt returns the robots file as text/plain', async () => {
@@ -156,6 +157,16 @@ test('seo: verificationMeta emits Google/Bing/Baidu tags only when set', () => {
     { name: 'baidu-site-verification', content: 'x' },
   ]);
 });
+
+test('seo: verificationTokensFromEnv reads a plain env object', () => {
+  assert.deepEqual(
+    verificationTokensFromEnv({ GOOGLE_SITE_VERIFICATION: ' g ', BING_SITE_VERIFICATION: 'b', BAIDU_SITE_VERIFICATION: '' }),
+    { google: 'g', bing: 'b', baidu: null },
+  )
+  assert.deepEqual(verificationTokensFromEnv({}), { google: null, bing: null, baidu: null })
+  assert.deepEqual(verificationTokensFromEnv(null), { google: null, bing: null, baidu: null })
+  assert.deepEqual(verificationTokensFromEnv(undefined), { google: null, bing: null, baidu: null })
+})
 
 test('seo: verificationFromContext reads context.cloudflare.env defensively', () => {
   assert.deepEqual(

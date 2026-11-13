@@ -245,17 +245,38 @@ export function verificationMeta(env) {
   return out
 }
 
-/** 根路由 loader 从 TanStack Start 的 loader context 取 Cloudflare env（context.cloudflare.env）。 */
-export function verificationFromContext(context) {
-  const env = context && context.cloudflare && context.cloudflare.env ? context.cloudflare.env : {}
+/**
+ * 从一个纯 env 对象读三组站长验证代码（Google / Bing / 百度）。
+ * 纯函数，可单元测试；调用方（verification 中间件）直接传
+ * cloudflare:workers 的 env。
+ */
+export function verificationTokensFromEnv(env) {
+  const e = env && typeof env === 'object' ? env : {}
+  const pick = (v) => (typeof v === 'string' && v.trim() !== '' ? v.trim() : null)
   return {
-    google: typeof env.GOOGLE_SITE_VERIFICATION === 'string' ? env.GOOGLE_SITE_VERIFICATION : null,
-    bing: typeof env.BING_SITE_VERIFICATION === 'string' ? env.BING_SITE_VERIFICATION : null,
-    baidu: typeof env.BAIDU_SITE_VERIFICATION === 'string' ? env.BAIDU_SITE_VERIFICATION : null,
+    google: pick(e.GOOGLE_SITE_VERIFICATION),
+    bing: pick(e.BING_SITE_VERIFICATION),
+    baidu: pick(e.BAIDU_SITE_VERIFICATION),
   }
 }
 
-/** robots.txt 内容：明确放行所有主流爬虫与 AI 爬虫，不屏蔽任何一方；指向 sitemap。 */
+/**
+ * 根路由 loader 从 TanStack Start 的 loader context 取 Cloudflare env
+ *（context.cloudflare.env）。注意：实测本项目的默认 server-entry 从不
+ * 往 context 里注入 cloudflare env（框架源码：middleware context 只
+ * 来自 requestOpts.context，默认入口不传；2026-11-13 探针验证
+ * hasEnv:false），所以它恒返回 null；真正生效的路径是 verification
+ * 中间件（src/server/verification-middleware.ts）经 next({ context })
+ * 注入的 context.verification。本函数只保留作兜底与测试。
+ */
+export function verificationFromContext(context) {
+  const env = context && context.cloudflare && context.cloudflare.env ? context.cloudflare.env : {}
+  return verificationTokensFromEnv(env)
+}
+
+/** robots.txt 内容：明确放行所有主流爬虫与 AI 爬虫，不屏蔽任何一方；指向 sitemap。
+ * 唯一 Disallow 是 B6 蜜罐 /honeypot/（见 src/bot-guard.mjs）：正常爬虫不会去，
+ * 踩进去的机器人会被封 IP。 */
 export function robotsTxt() {
   return [
     '# Sound Cocktail — robots.txt',
@@ -263,6 +284,7 @@ export function robotsTxt() {
     '',
     'User-agent: *',
     'Allow: /',
+    'Disallow: /honeypot/',
     '',
     'User-agent: Googlebot',
     'Allow: /',
