@@ -267,14 +267,15 @@ def build(scene,p):
     if scene in mapping:
         starts=mapping[scene]
         old=[decode_old(scene,name) for name in starts]
-        length=min(180*SR,*[len(x) for x in old if x is not None])
-        tim=np.arange(length,dtype='f4')/SR
-        old_fade=np.clip((180.-tim)/27.,0,1)
-        new_fade=np.clip((tim-146.)/30.,0,1)
-        for arr,oldarr in zip((h,d,a),old):
-            if oldarr is not None:
-                arr[:length]*=new_fade[:,None]
-                arr[:length]+=oldarr[:length]*old_fade[:,None]
+        if any(x is not None for x in old):
+            length=min([180*SR]+[len(x) for x in old if x is not None])
+            tim=np.arange(length,dtype='f4')/SR
+            old_fade=np.clip((180.-tim)/27.,0,1)
+            new_fade=np.clip((tim-146.)/30.,0,1)
+            for arr,oldarr in zip((h,d,a),old):
+                if oldarr is not None:
+                    arr[:length]*=new_fade[:,None]
+                    arr[:length]+=oldarr[:length]*old_fade[:,None]
         del old
     # 1.8s fade from silence avoids clicks, last 0.6s slight attenuation for mid-journey crossfade.
     n_in=int(1.8*SR);n_out=int(.6*SR)
