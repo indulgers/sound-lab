@@ -40,6 +40,8 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
 } = {}) {
   let context = null, selected = null, levels = {}, current = null, next = null;
   let master = null, limiter = null, softFilter = null, shelf = null, dry = null, wet = null, delay = null;
+  let eqLow = null, eqMid = null, eqHigh = null, widthMatrix = null, room = null;
+  const advanced = {bass:.5,mid:.5,treble:.5,width:.5,reverb:.5};
   let targetMaster = .7, warmth = .55, space = .35, energy = .4, nature = .35;
   let playing = false, disposed = false, generation = 0, ticker = null;
   let timerDeadline = null, startedAt = 0, totalElapsed = 0, error = null, cycle = 0;
@@ -58,11 +60,34 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
     softFilter = context.createBiquadFilter(); softFilter.type = 'lowpass';
     shelf = context.createBiquadFilter(); shelf.type = 'lowshelf'; shelf.frequency.value = 260;
     dry = context.createGain(); wet = context.createGain(); delay = context.createDelay(0.5); delay.delayTime.value = .085;
-    dry.connect(shelf); delay.connect(wet); wet.connect(shelf);
+    room = context.createConvolver();
+    const irLength = Math.floor(context.sampleRate * 1.5);
+    const ir = context.createBuffer(2, irLength, context.sampleRate);
+    for (let ch=0;ch<2;ch++) {
+      const samples = ir.getChannelData(ch);
+      let state = 101 + ch * 7919;
+      for (let i=0;i<irLength;i++) {
+        state = Math.imul(state ^ (state>>>13), 1664525) + 1013904223 | 0;
+        const noise = (state / 2147483648) * .22;
+        samples[i] = (i < .025*context.sampleRate ? 0 : noise) * Math.pow(1-i/irLength,3.5);
+      }
+    }
+    room.buffer = ir;
+    dry.connect(shelf); delay.connect(room).connect(wet); wet.connect(shelf);
+    eqLow = context.createBiquadFilter(); eqLow.type='lowshelf'; eqLow.frequency.value=200;
+    eqMid = context.createBiquadFilter(); eqMid.type='peaking'; eqMid.frequency.value=1100; eqMid.Q.value=.82;
+    eqHigh = context.createBiquadFilter(); eqHigh.type='highshelf'; eqHigh.frequency.value=5700;
+    const split = context.createChannelSplitter(2), merge = context.createChannelMerger(2);
+    const lToL=context.createGain(),lToR=context.createGain(),rToL=context.createGain(),rToR=context.createGain();
+    split.connect(lToL,0);split.connect(lToR,0);split.connect(rToL,1);split.connect(rToR,1);
+    lToL.connect(merge,0,0);rToL.connect(merge,0,0);
+    lToR.connect(merge,0,1);rToR.connect(merge,0,1);
+    widthMatrix={lToL,lToR,rToL,rToR};
     limiter = context.createDynamicsCompressor();
     limiter.threshold.value = -10; limiter.knee.value = 10; limiter.ratio.value = 10;
     limiter.attack.value = .003; limiter.release.value = .22;
-    shelf.connect(softFilter).connect(limiter).connect(master).connect(context.destination);
+    shelf.connect(eqLow).connect(eqMid).connect(eqHigh).connect(split);
+    merge.connect(softFilter).connect(limiter).connect(master).connect(context.destination);
     applyTone();
     return context;
   }
@@ -77,7 +102,16 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
     ramp(softFilter.frequency, 6000 + (1 - warmth) * 11000, .15);
     ramp(shelf.gain, (warmth - .5) * 7, .15);
     ramp(dry.gain, 1, .09);
-    ramp(wet.gain, space * .34, .25);
+    ramp(wet.gain, space * (.10 + advanced.reverb*.64), .25);
+    ramp(eqLow.gain, (advanced.bass-.5)*10, .15);
+    ramp(eqMid.gain, (advanced.mid-.5)*8, .15);
+    ramp(eqHigh.gain, (advanced.treble-.5)*10, .15);
+    if (widthMatrix) {
+      const side = .6 + .8*advanced.width;
+      const direct = (1+side)/2, cross = (1-side)/2;
+      ramp(widthMatrix.lToL.gain,direct,.15);ramp(widthMatrix.rToR.gain,direct,.15);
+      ramp(widthMatrix.lToR.gain,cross,.15);ramp(widthMatrix.rToL.gain,cross,.15);
+    }
   }
   function makeDeck(scene) {
     const c = ensureGraph(), output = c.createGain(); output.gain.value = 0;
@@ -240,6 +274,7 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
     if ('space' in values) space = clamp(values.space, space);
     if ('energy' in values) energy = clamp(values.energy, energy);
     if ('nature' in values) nature = clamp(values.nature, nature);
+    for(const key of Object.keys(advanced)) if (key in values) advanced[key]=clamp(values[key],advanced[key]);
     applyTone(); applyDeck(current); applyDeck(next);
   }
   function setSleepTimer(ms) {
