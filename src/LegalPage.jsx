@@ -6,6 +6,7 @@
  * 底部互链另一法律页与回首页。locale 由路由按语言传入，SSR 即
  * 正确语言；文案全部来自 legal.mjs（单一事实来源）。
  */
+import { useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
 import { TERMS_PAGE, PRIVACY_PAGE, LEGAL_UPDATED } from './legal.mjs';
 import { t, useLocale, localizePath } from './locale.mjs';
@@ -18,6 +19,14 @@ export default function LegalPage({ page, locale }) {
   const data = PAGES[page];
   const content = data.content[loc];
   const other = page === 'terms' ? 'privacy' : 'terms';
+  // 文章渲染在调音台外壳之下：导航后滚动到顶部会落在调音台上，
+  // 所以挂载（及切换 terms/privacy）时直接跳到文章开头。
+  // 'instant'：文章在整页调音台之下，smooth 滑过去又慢又怪。
+  // sticky header 的偏移靠已有的 .blk[id]{scroll-margin-top:86px}。
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    document.getElementById(`${page}-page`)?.scrollIntoView({ behavior: 'instant', block: 'start' });
+  }, [page]);
   return (
     <article className="blk landing-copy" id={`${page}-page`}>
       <div className="sec-head">
