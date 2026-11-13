@@ -35,7 +35,7 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
   interval = (cb, delay) => setInterval(cb, delay), clearIntervalFn = id => clearInterval(id),
 } = {}) {
   let context = null, selected = null, levels = {}, current = null, next = null;
-  let master = null, softFilter = null, shelf = null, dry = null, wet = null, delay = null;
+  let master = null, limiter = null, softFilter = null, shelf = null, dry = null, wet = null, delay = null;
   let targetMaster = .7, warmth = .55, space = .35, energy = .4, nature = .35;
   let playing = false, disposed = false, generation = 0, ticker = null;
   let timerDeadline = null, startedAt = 0, totalElapsed = 0, error = null, cycle = 0;
@@ -55,7 +55,10 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
     shelf = context.createBiquadFilter(); shelf.type = 'lowshelf'; shelf.frequency.value = 260;
     dry = context.createGain(); wet = context.createGain(); delay = context.createDelay(0.5); delay.delayTime.value = .085;
     dry.connect(shelf); delay.connect(wet); wet.connect(shelf);
-    shelf.connect(softFilter).connect(master).connect(context.destination);
+    limiter = context.createDynamicsCompressor();
+    limiter.threshold.value = -10; limiter.knee.value = 10; limiter.ratio.value = 10;
+    limiter.attack.value = .003; limiter.release.value = .22;
+    shelf.connect(softFilter).connect(limiter).connect(master).connect(context.destination);
     applyTone();
     return context;
   }
