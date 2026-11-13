@@ -334,7 +334,13 @@ export default function SceneExperience() {
 
     <dialog ref={dialog} className={`sc-dialog sc-dialog--${panel||'closed'}`} aria-labelledby="sc-dialog-title" onCancel={event=>{event.preventDefault();closePanel();}} onClick={event=>{if(event.target===dialog.current)closePanel();}}>
       <div className="sc-dialog-inner">
-        <div className="sc-dialog-head"><span className="sc-kicker">SOUND COCKTAIL · {T(scene.name)}</span><button className="sc-icon-button" aria-label={C.close} onClick={closePanel}><Icon name="close"/></button></div>
+        <div className="sc-dialog-head">
+          <span className="sc-kicker">SOUND COCKTAIL · {T(scene.name)}</span>
+          <div className="sc-dialog-head-actions">
+            {panel==='mix' && <button className="sc-quick-save" onClick={saveMix} aria-label={M.save}><Icon name="bookmark"/>{locale==='zh'?'保存':'Save'}</button>}
+            <button className="sc-icon-button" aria-label={C.close} onClick={closePanel}><Icon name="close"/></button>
+          </div>
+        </div>
         <h2 id="sc-dialog-title">{dialogTitle}</h2>
         {panel==='mix' && <>
           <p className="sc-panel-sub">{C.soundSub}</p>
