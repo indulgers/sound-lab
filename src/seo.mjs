@@ -53,6 +53,7 @@ export const PUBLIC_PAGES = [
 
 /** 不进 sitemap、但有 head 的页面（法律页）：key → URL 段。 */
 export const NON_INDEXED_PAGES = [
+  ['studio', '/studio'],
   ['terms', '/terms'],
   ['privacy', '/privacy'],
 ]
@@ -75,6 +76,21 @@ export function canonicalUrl(key, locale) {
 /** 首页与 focus 页的双语标题/描述（P0 的英文 + P1 补中文）。 */
 export const ROUTE_SEO = {
   home: {
+    path: '',
+    en: {
+      title: 'Sound Cocktail · Somewhere slower',
+      description: 'Step into Bali rainforest and Chiang Mai inspired listening rooms. Original music, real looping video, adjustable sound layers and continuous listening for a slower moment.',
+      ogTitle: 'Sound Cocktail · Somewhere slower',
+      ogDescription: 'Two little corners of the world. Original music, immersive video and a sound balance of your own.',
+    },
+    zh: {
+      title: 'Sound Cocktail · 在某个地方，慢下来',
+      description: '进入以巴厘岛雨林和清迈咖啡馆为灵感的聆听空间。原创音乐、真实循环视频、独立分轨调音与持续播放，陪你慢慢放松，找回自己的节奏。',
+      ogTitle: 'Sound Cocktail · 在某个地方，慢下来',
+      ogDescription: '世界的两个小角落。沉浸画面、原创音乐，还有属于你的声音配比。',
+    },
+  },
+  studio: {
     path: '',
     en: {
       title: 'Sound Cocktail · Mix a cup of sound',

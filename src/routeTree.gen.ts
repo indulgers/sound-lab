@@ -45,6 +45,7 @@ import { Route as EnRecipesRouteImport } from './routes/en/recipes'
 import { Route as EnRelaxRouteImport } from './routes/en/relax'
 import { Route as EnSleepRouteImport } from './routes/en/sleep'
 import { Route as EnSourcesRouteImport } from './routes/en/sources'
+import { Route as EnStudioRouteImport } from './routes/en/studio'
 import { Route as EnTermsRouteImport } from './routes/en/terms'
 import { Route as MixCodeRouteImport } from './routes/mix.$code'
 import { Route as ZhIndexRouteImport } from './routes/zh/index'
@@ -60,6 +61,7 @@ import { Route as ZhRecipesRouteImport } from './routes/zh/recipes'
 import { Route as ZhRelaxRouteImport } from './routes/zh/relax'
 import { Route as ZhSleepRouteImport } from './routes/zh/sleep'
 import { Route as ZhSourcesRouteImport } from './routes/zh/sources'
+import { Route as ZhStudioRouteImport } from './routes/zh/studio'
 import { Route as ZhTermsRouteImport } from './routes/zh/terms'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
@@ -261,6 +263,11 @@ const EnSourcesRoute = EnSourcesRouteImport.update({
   path: '/en/sources',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnStudioRoute = EnStudioRouteImport.update({
+  id: '/en/studio',
+  path: '/en/studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnTermsRoute = EnTermsRouteImport.update({
   id: '/en/terms',
   path: '/en/terms',
@@ -334,6 +341,11 @@ const ZhSleepRoute = ZhSleepRouteImport.update({
 const ZhSourcesRoute = ZhSourcesRouteImport.update({
   id: '/zh/sources',
   path: '/zh/sources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZhStudioRoute = ZhStudioRouteImport.update({
+  id: '/zh/studio',
+  path: '/zh/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ZhTermsRoute = ZhTermsRouteImport.update({
@@ -473,6 +485,7 @@ export interface FileRoutesByFullPath {
   '/en/relax': typeof EnRelaxRoute
   '/en/sleep': typeof EnSleepRoute
   '/en/sources': typeof EnSourcesRoute
+  '/en/studio': typeof EnStudioRoute
   '/en/terms': typeof EnTermsRoute
   '/mix/$code': typeof MixCodeRoute
   '/zh/about': typeof ZhAboutRoute
@@ -487,6 +500,7 @@ export interface FileRoutesByFullPath {
   '/zh/relax': typeof ZhRelaxRoute
   '/zh/sleep': typeof ZhSleepRoute
   '/zh/sources': typeof ZhSourcesRoute
+  '/zh/studio': typeof ZhStudioRoute
   '/zh/terms': typeof ZhTermsRoute
   '/en/': typeof EnIndexRoute
   '/zh/': typeof ZhIndexRoute
@@ -546,6 +560,7 @@ export interface FileRoutesByTo {
   '/en/relax': typeof EnRelaxRoute
   '/en/sleep': typeof EnSleepRoute
   '/en/sources': typeof EnSourcesRoute
+  '/en/studio': typeof EnStudioRoute
   '/en/terms': typeof EnTermsRoute
   '/mix/$code': typeof MixCodeRoute
   '/zh/about': typeof ZhAboutRoute
@@ -560,6 +575,7 @@ export interface FileRoutesByTo {
   '/zh/relax': typeof ZhRelaxRoute
   '/zh/sleep': typeof ZhSleepRoute
   '/zh/sources': typeof ZhSourcesRoute
+  '/zh/studio': typeof ZhStudioRoute
   '/zh/terms': typeof ZhTermsRoute
   '/en': typeof EnIndexRoute
   '/zh': typeof ZhIndexRoute
@@ -620,6 +636,7 @@ export interface FileRoutesById {
   '/en/relax': typeof EnRelaxRoute
   '/en/sleep': typeof EnSleepRoute
   '/en/sources': typeof EnSourcesRoute
+  '/en/studio': typeof EnStudioRoute
   '/en/terms': typeof EnTermsRoute
   '/mix/$code': typeof MixCodeRoute
   '/zh/about': typeof ZhAboutRoute
@@ -634,6 +651,7 @@ export interface FileRoutesById {
   '/zh/relax': typeof ZhRelaxRoute
   '/zh/sleep': typeof ZhSleepRoute
   '/zh/sources': typeof ZhSourcesRoute
+  '/zh/studio': typeof ZhStudioRoute
   '/zh/terms': typeof ZhTermsRoute
   '/en/': typeof EnIndexRoute
   '/zh/': typeof ZhIndexRoute
@@ -695,6 +713,7 @@ export interface FileRouteTypes {
     | '/en/relax'
     | '/en/sleep'
     | '/en/sources'
+    | '/en/studio'
     | '/en/terms'
     | '/mix/$code'
     | '/zh/about'
@@ -709,6 +728,7 @@ export interface FileRouteTypes {
     | '/zh/relax'
     | '/zh/sleep'
     | '/zh/sources'
+    | '/zh/studio'
     | '/zh/terms'
     | '/en/'
     | '/zh/'
@@ -768,6 +788,7 @@ export interface FileRouteTypes {
     | '/en/relax'
     | '/en/sleep'
     | '/en/sources'
+    | '/en/studio'
     | '/en/terms'
     | '/mix/$code'
     | '/zh/about'
@@ -782,6 +803,7 @@ export interface FileRouteTypes {
     | '/zh/relax'
     | '/zh/sleep'
     | '/zh/sources'
+    | '/zh/studio'
     | '/zh/terms'
     | '/en'
     | '/zh'
@@ -841,6 +863,7 @@ export interface FileRouteTypes {
     | '/en/relax'
     | '/en/sleep'
     | '/en/sources'
+    | '/en/studio'
     | '/en/terms'
     | '/mix/$code'
     | '/zh/about'
@@ -855,6 +878,7 @@ export interface FileRouteTypes {
     | '/zh/relax'
     | '/zh/sleep'
     | '/zh/sources'
+    | '/zh/studio'
     | '/zh/terms'
     | '/en/'
     | '/zh/'
@@ -915,6 +939,7 @@ export interface RootRouteChildren {
   EnRelaxRoute: typeof EnRelaxRoute
   EnSleepRoute: typeof EnSleepRoute
   EnSourcesRoute: typeof EnSourcesRoute
+  EnStudioRoute: typeof EnStudioRoute
   EnTermsRoute: typeof EnTermsRoute
   MixCodeRoute: typeof MixCodeRoute
   ZhAboutRoute: typeof ZhAboutRoute
@@ -929,6 +954,7 @@ export interface RootRouteChildren {
   ZhRelaxRoute: typeof ZhRelaxRoute
   ZhSleepRoute: typeof ZhSleepRoute
   ZhSourcesRoute: typeof ZhSourcesRoute
+  ZhStudioRoute: typeof ZhStudioRoute
   ZhTermsRoute: typeof ZhTermsRoute
   EnIndexRoute: typeof EnIndexRoute
   ZhIndexRoute: typeof ZhIndexRoute
@@ -1207,6 +1233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnSourcesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/studio': {
+      id: '/en/studio'
+      path: '/en/studio'
+      fullPath: '/en/studio'
+      preLoaderRoute: typeof EnStudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/terms': {
       id: '/en/terms'
       path: '/en/terms'
@@ -1310,6 +1343,13 @@ declare module '@tanstack/react-router' {
       path: '/zh/sources'
       fullPath: '/zh/sources'
       preLoaderRoute: typeof ZhSourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zh/studio': {
+      id: '/zh/studio'
+      path: '/zh/studio'
+      fullPath: '/zh/studio'
+      preLoaderRoute: typeof ZhStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/zh/terms': {
@@ -1491,6 +1531,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnRelaxRoute: EnRelaxRoute,
   EnSleepRoute: EnSleepRoute,
   EnSourcesRoute: EnSourcesRoute,
+  EnStudioRoute: EnStudioRoute,
   EnTermsRoute: EnTermsRoute,
   MixCodeRoute: MixCodeRoute,
   ZhAboutRoute: ZhAboutRoute,
@@ -1505,6 +1546,7 @@ const rootRouteChildren: RootRouteChildren = {
   ZhRelaxRoute: ZhRelaxRoute,
   ZhSleepRoute: ZhSleepRoute,
   ZhSourcesRoute: ZhSourcesRoute,
+  ZhStudioRoute: ZhStudioRoute,
   ZhTermsRoute: ZhTermsRoute,
   EnIndexRoute: EnIndexRoute,
   ZhIndexRoute: ZhIndexRoute,

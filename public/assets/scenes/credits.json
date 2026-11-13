@@ -1,0 +1,69 @@
+{
+  "checkedOn": "2026-11-13",
+  "license": {
+    "name": "Pexels License",
+    "url": "https://www.pexels.com/license/"
+  },
+  "sources": [
+    {
+      "scene": "bali",
+      "creator": "I Am Sorin",
+      "title": "View of the Flowing Water in the Forest",
+      "url": "https://www.pexels.com/video/view-of-the-flowing-water-in-the-forest-8310457/",
+      "location": "Not specified; not verified as Bali",
+      "files": [
+        "bali-rainforest.mp4",
+        "bali-rainforest.jpg",
+        "bali-rainforest-mobile.mp4",
+        "bali-rainforest-mobile.jpg"
+      ]
+    },
+    {
+      "scene": "chiang-mai",
+      "creator": "LayG Traveller",
+      "title": "Charming Cafe with Lush Garden View",
+      "url": "https://www.pexels.com/video/charming-cafe-with-lush-garden-view-40913579/",
+      "location": "Yangshuo, China (source description); not Chiang Mai",
+      "files": [
+        "chiang-mai-cafe.mp4",
+        "chiang-mai-cafe.jpg",
+        "chiang-mai-cafe-mobile.mp4",
+        "chiang-mai-cafe-mobile.jpg"
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "file": "bali-rainforest-mobile.mp4",
+      "sha256": "f68eb30fda16774e27f326cd722347613a717bdc6fe1f2056c9d106e7e6c86c7",
+      "bytes": 3073328,
+      "durationSeconds": 28.52,
+      "width": 540,
+      "height": 960
+    },
+    {
+      "file": "bali-rainforest.mp4",
+      "sha256": "2464cf8670645047b6aebea5d4147df24a573d7d4fe5474f0cfd927fb9f52e6e",
+      "bytes": 5634140,
+      "durationSeconds": 28.52,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "file": "chiang-mai-cafe-mobile.mp4",
+      "sha256": "02776c9970f74b7dbe228ed26f2e24ecf5e17fff95155bf4167dde3d9c711568",
+      "bytes": 566132,
+      "durationSeconds": 6.8,
+      "width": 540,
+      "height": 960
+    },
+    {
+      "file": "chiang-mai-cafe.mp4",
+      "sha256": "e3eef4664c8227ad6867a25d05edfbe985b80e3cdedcf37a112da2ce0771889a",
+      "bytes": 1227138,
+      "durationSeconds": 6.8,
+      "width": 1600,
+      "height": 900
+    }
+  ]
+}

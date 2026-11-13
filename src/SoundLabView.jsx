@@ -52,7 +52,7 @@ function Background() {
 }
 
 const NAV_ITEMS = [
-  ['mixer', '/'],
+  ['mixer', '/studio'],
   ['recipes', '/recipes'],
   ['plus', '/plus'],
   ['mine', '/mine'],
@@ -80,7 +80,7 @@ function Header({ user, onAuthChange }) {
   return (
     <header className="topbar-wrap">
       <nav className="topbar">
-        <span className="mark brand"><BrandMark /><span className="brand-word">Sound Cocktail</span></span>
+        <Link className="mark brand" to={localizePath('/', locale)} aria-label={locale === 'zh' ? 'Sound Cocktail · 回到场景' : 'Sound Cocktail · Places'}><BrandMark /><span className="brand-word">Sound Cocktail</span></Link>
         {NAV_ITEMS.map(([key, path]) => (
           <Link
             key={key}
@@ -116,7 +116,7 @@ function Footer() {
   const [locale] = useLocale();
   return (
     <footer>
-      <span className="brand brand-foot"><BrandMark /><span className="brand-word">Sound Cocktail</span></span>
+      <Link className="brand brand-foot" to={localizePath('/', locale)}><BrandMark /><span className="brand-word">Sound Cocktail</span></Link>
       <span>{t(locale, 'footer.tagline')}</span>
       <Link to={localizePath('/sources', locale)}>{t(locale, 'nav.sources')}</Link>
       {/* 法律页链接（Waffo 商家审核清单要求：页脚放服务条款与隐私政策链接，无登录可打开）。 */}
@@ -181,8 +181,10 @@ function Overlays() {
  */
 export default function SoundLabView({ user = null, onAuthChange }) {
   const [locale] = useLocale();
+  const pathname = useRouterState({ select: state => state.location.pathname });
+  const sceneHome = (stripLocalePrefix(pathname).replace(/\/$/, '') || '/') === '/';
   return (
-    <>
+    <div className={sceneHome ? 'scene-home' : 'studio-shell'}>
       <a className="skip-link" href="#main">{t(locale, 'skipLink')}</a>
       <Background />
       <Header user={user} onAuthChange={onAuthChange} />
@@ -191,6 +193,6 @@ export default function SoundLabView({ user = null, onAuthChange }) {
         <Footer />
       </main>
       <Overlays />
-    </>
+    </div>
   );
 }

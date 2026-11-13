@@ -103,9 +103,13 @@ test('seo: home and /focus have different English titles and descriptions', () =
       }
     }
   }
-  // 首页标题与描述包含品类关键词。
-  assert.match(metaOf(home, 'description').content, /white noise/);
-  assert.match(metaOf(home, 'description').content, /ambient sound mixer/);
+  // Place home describes the new music/video experience. The classic sound
+  // mixer retains its own category copy and canonical route at /studio.
+  assert.match(metaOf(home, 'description').content, /music/i);
+  assert.match(metaOf(home, 'description').content, /video/i);
+  const studio = headForRoute('studio', 'en');
+  assert.match(metaOf(studio, 'description').content, /white noise/);
+  assert.match(metaOf(studio, 'description').content, /ambient sound mixer/);
   // /focus 标题与描述不同于首页。
   assert.match(metaOf(focus, 'description').content, /focus/i);
   assert.doesNotMatch(metaOf(focus, 'description').content, /white noise/);
