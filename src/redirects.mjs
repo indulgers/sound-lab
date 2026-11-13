@@ -6,7 +6,7 @@
  *
  * 规则：
  * - `/` → `/en`（默认语言；站内尚未收录任何 URL，重定向安全）。
- * - 裸内容页（/focus、/sleep、/relax、/rain、/cafe、/about）→ 同名 /en 版。
+ * - 裸内容页（/focus、/sleep、/relax、/rain、/cafe、/about、/terms、/privacy）→ 同名 /en 版。
  * - /checkout → /en/checkout（search 原样保留，?pack= 不丢）。
  * - /mix/:code → /en/mix/:code。
  * - 已带语言前缀（/en/*、/zh/*）与支付回跳页（/return、/waffo-return）、
@@ -17,7 +17,7 @@
 import { localeFromPath, stripLocalePrefix } from './locale.mjs';
 
 /** 裸路径可重定向的内容页（段名即路由段）。 */
-export const REDIRECTABLE_BARE = ['focus', 'sleep', 'relax', 'rain', 'cafe', 'about'];
+export const REDIRECTABLE_BARE = ['focus', 'sleep', 'relax', 'rain', 'cafe', 'about', 'terms', 'privacy'];
 
 export const REDIRECT_STATUS = 308;
 

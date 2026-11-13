@@ -16,6 +16,7 @@
  * 语言切换不影响支付地区与价格（见 src/region.mjs，解耦规则）。
  */
 import { LANDING_PAGES, ABOUT_PAGE } from './landing.mjs';
+import { TERMS_PAGE, PRIVACY_PAGE } from './legal.mjs';
 import { SOUNDS, soundDisplayName } from './catalog.mjs';
 
 const SOUND_BY_ID = new Map(SOUNDS.map((s) => [s.id, s]));
@@ -33,6 +34,8 @@ export const HREFLANG = { en: 'en', zh: 'zh-CN' }
 /**
  * 可收录的公开页面（sitemap + llms.txt 用；/checkout、/return、
  * /waffo-return、/mix/:code 与 /api/* 不进索引）。
+ * 法律页（/terms、/privacy）有 head（canonical + hreflang）但不进
+ * sitemap：Waffo 审核清单只要求页脚链接与完整内容，不要求收录。
  * 格式为 [页面 key, URL 段]，URL 段不含语言前缀；home 的段为空。
  */
 export const PUBLIC_PAGES = [
@@ -45,12 +48,18 @@ export const PUBLIC_PAGES = [
   ['about', '/about'],
 ]
 
+/** 不进 sitemap、但有 head 的页面（法律页）：key → URL 段。 */
+export const NON_INDEXED_PAGES = [
+  ['terms', '/terms'],
+  ['privacy', '/privacy'],
+]
+
 /** 可收录页面的全部语言版本 URL 路径（sitemap 用）。 */
 export const PUBLIC_PATHS = PUBLIC_PAGES.flatMap(([, seg]) => LOCALES.map((l) => `/${l}${seg}`))
 
 /** 某页某语言的规范路径（home 为 /en、/zh，无尾斜杠）。 */
 export function canonicalPath(key, locale) {
-  const page = PUBLIC_PAGES.find(([k]) => k === key)
+  const page = PUBLIC_PAGES.find(([k]) => k === key) || NON_INDEXED_PAGES.find(([k]) => k === key)
   if (!page) throw new Error(`unknown seo page: ${key}`)
   if (!LOCALES.includes(locale)) throw new Error(`unknown locale: ${locale}`)
   return `/${locale}${page[1]}`
@@ -100,10 +109,12 @@ export const ROUTE_SEO = {
   },
 }
 
-/** 取某页某语言的标题/描述（落地页与 About 页取自 landing.mjs）。 */
+/** 取某页某语言的标题/描述（落地页与 About、法律页取自 landing.mjs / legal.mjs）。 */
 export function seoForRoute(key, locale) {
   if (LANDING_PAGES[key]) return LANDING_PAGES[key].seo[locale]
   if (key === 'about') return ABOUT_PAGE.seo[locale]
+  if (key === 'terms') return TERMS_PAGE.seo[locale]
+  if (key === 'privacy') return PRIVACY_PAGE.seo[locale]
   const r = ROUTE_SEO[key]
   if (!r) throw new Error(`unknown seo route: ${key}`)
   return r[locale]
