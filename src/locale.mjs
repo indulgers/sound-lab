@@ -298,7 +298,7 @@ export const STRINGS = {
       bedPink: '粉红噪音 床声',
       bedBrown: '褐色噪音 床声',
     },
-    footer: { tagline: '自己调一杯声音 · 睡前、工作、雨夜', terms: '服务条款', privacy: '隐私政策' },
+    footer: { tagline: '自己调一杯声音 · 睡前、工作、雨夜', terms: '服务条款', privacy: '隐私政策', contact: '联系我们' },
     overlays: {
       sessionDoneTitle: '这 10 分钟结束了',
       sessionDoneSub: '这杯还在。可以存下来，或再开一段体验。',
@@ -553,7 +553,7 @@ export const STRINGS = {
       bedPink: 'Pink noise bed',
       bedBrown: 'Brown noise bed',
     },
-    footer: { tagline: 'Mix your own cup of sound · bedtime, work, rainy nights', terms: 'Terms of Service', privacy: 'Privacy Policy' },
+    footer: { tagline: 'Mix your own cup of sound · bedtime, work, rainy nights', terms: 'Terms of Service', privacy: 'Privacy Policy', contact: 'Contact us' },
     overlays: {
       sessionDoneTitle: 'These 10 minutes are up',
       sessionDoneSub: 'Your cup is still here. Save it, or start another session.',

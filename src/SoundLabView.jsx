@@ -6,6 +6,7 @@ import { isFreeSound } from './listening-session.mjs';
 import { PACKS, isMixUnlocked, packDisplay, soundsForPacks } from './packs.mjs';
 import { currencyForRegion, useRegion } from './region.mjs';
 import { isLocalizablePath, localizePath, setLocale, t, useLocale } from './locale.mjs';
+import { LEGAL_OPERATOR } from './legal.mjs';
 
 function BrandMark() {
   return (
@@ -503,6 +504,9 @@ function Footer() {
       {/* 法律页链接（Waffo 商家审核清单要求：页脚放服务条款与隐私政策链接，无登录可打开）。 */}
       <Link to={localizePath('/terms', locale)}>{t(locale, 'footer.terms')}</Link>
       <Link to={localizePath('/privacy', locale)}>{t(locale, 'footer.privacy')}</Link>
+      {/* 客服邮箱（Waffo 自检要求：页脚须公示有效联系方式，不只藏在条款正文里）。
+          地址取自 legal.mjs 的 LEGAL_OPERATOR，与条款/隐私政策里的邮箱同一来源，不会漂移。 */}
+      <span>{t(locale, 'footer.contact')}: <a href={`mailto:${LEGAL_OPERATOR.email}`}>{LEGAL_OPERATOR.email}</a></span>
     </footer>
   )
 }
