@@ -33,6 +33,10 @@ jobs:
         with:
           path: public/assets/audio/journeys
           key: pr5-journeys-v3-${{ hashFiles('scripts/render_journeys.py', 'public/assets/audio/scenes/manifest.json') }}
+      - name: Install audio codec tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
       - name: Render original 15-minute stems (only when cache is missing)
         run: |
           if [ ! -s public/assets/audio/journeys/manifest.json ]; then
