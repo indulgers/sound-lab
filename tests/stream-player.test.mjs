@@ -101,3 +101,22 @@ test('passage activity gate and chapter boundaries are deterministic',()=>{
   assert.equal(densityGate(90,.25,2),densityGate(90,.25,2));
   assert.equal(suggestedChapter(890),4);
 });
+
+test('A/B original switch reloads the actual audio files within the same Journey', async () => {
+  const h=setup();
+  const v32={...scene,audioVersion:'3.2'};
+  await h.player.setScene(v32);
+  await h.player.play();
+  const firstFiles=h.media.map(x=>x.src);
+  assert.equal(h.media.length,3);
+  const v31={...scene,audioVersion:'3.1',durationSeconds:180,layers:scene.layers.map(layer=>({
+    ...layer,file:layer.file.replace('/journeys/','/scenes/').replace('chiang-mai-','chiang-mai-original-')
+  }))};
+  assert.notDeepEqual(v31.layers.map(x=>x.file),firstFiles);
+  await h.player.setScene(v31,{}, {play:true});
+  assert.equal(h.media.length,6,'must start a new set of media elements');
+  assert.deepEqual(h.media.slice(3).map(x=>x.src),v31.layers.map(x=>x.file));
+  assert.ok(h.media.slice(0,3).every(x=>x.paused));
+  assert.equal(h.player.getPlaying(),true);
+  h.player.dispose();
+});
