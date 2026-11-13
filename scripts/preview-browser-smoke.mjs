@@ -120,6 +120,12 @@ try {
   await mobile.locator('[data-intent="focus"]').waitFor();
   await mobile.locator('.sc-player-actions button[aria-label="调音"]').click();
   await mobile.locator('.sc-dialog[open] .sc-voices-control').waitFor();
+  const quickSave=mobile.locator('.sc-dialog[open] .sc-quick-save');
+  assert.equal(await quickSave.isVisible(),true,'Save should be reachable on phones without scrolling to the footer');
+  await quickSave.click();
+  const mobileMix=await mobile.evaluate(()=>JSON.parse(window.localStorage.getItem('sound-cocktail.places.v1')||'{}').mixes?.['focus-chiang-mai']);
+  assert.ok(mobileMix,'top Save must actually persist the current Journey');
+  assert.equal(mobileMix.ambience,0,'quiet default must remain muted when saved');
   await mobile.screenshot({path:'preview-qa/mobile-quiet-cafe-mixer.png',fullPage:true});
   const narrowOverflow=await mobile.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
   assert.ok(narrowOverflow<=1,'mobile mixer and quiet control must not overflow');
