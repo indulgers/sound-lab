@@ -339,6 +339,14 @@ export default function SceneExperience() {
             <label htmlFor={`sc-mix-${key}`}><span>{M[key]}</span><output>{Math.round((controls[key] ?? .5)*100)}%</output></label>
             <input id={`sc-mix-${key}`} type="range" min="0" max="1" step=".01" value={controls[key] ?? .5} onChange={event=>changeControl(key,event.target.value)} style={{'--range-value':`${(controls[key]??.5)*100}%`}}/>
           </div>)}</div>
+          {sceneId==='chiang-mai' && <div className="sc-voices-control" role="group" aria-label={M.voices}>
+            <div className="sc-voices-title">{M.voices}</div>
+            <div className="sc-voices-options">
+              <button className={(levels.ambience??0)===0?'is-active':''} aria-pressed={(levels.ambience??0)===0} onClick={()=>changeLevel('ambience',0)}>{M.quiet}</button>
+              <button className={(levels.ambience??0)>0?'is-active':''} aria-pressed={(levels.ambience??0)>0} onClick={()=>changeLevel('ambience',.045)}>{M.someVoices}</button>
+            </div>
+            <p className="sc-voices-hint">{M.voicesHint}</p>
+          </div>}
           <button className="sc-advanced-toggle" onClick={()=>setAdvanced(v=>!v)} aria-expanded={advanced}>{M.advanced} <Icon name="tune"/></button>
           {advanced && <div className="sc-advanced-mixer">
             <div className="sc-eq-controls">{['bass','mid','treble','width','reverb'].map(key=><div className="sc-emotion-control" key={key}>
