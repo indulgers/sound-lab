@@ -4,7 +4,7 @@ import { localizePath, setLocale, useLocale } from '../locale.mjs';
 import { getLabController } from '../sound-lab.mjs';
 import { SCENES, sceneById, sceneText } from './catalog.mjs';
 import { levelsForScene, readScenePreferences, writeScenePreferences } from './preferences.mjs';
-import { INTENTS, JOURNEYS, intentById, journeyById, journeyForScene, recommendedJourneyForIntent, levelsForJourney, controlsForJourney, sceneForJourney } from './journeys.mjs';
+import { INTENTS, JOURNEYS, intentById, journeyById, journeyForScene, journeysForIntent, recommendedJourneyForIntent, levelsForJourney, controlsForJourney, sceneForJourney } from './journeys.mjs';
 import { createStreamingJourneyPlayer } from './stream-player.mjs';
 
 const iconPaths = {
@@ -60,7 +60,8 @@ function SceneVideo({ scene, motion, onUnavailable }) {
   const src = mobile && scene.mobileVideo ? scene.mobileVideo : scene.video;
   const poster = mobile && scene.mobilePoster ? scene.mobilePoster : scene.poster;
   useEffect(() => {
-    onUnavailable(!src);
+    // Missing video is expected for illustrated destinations; only report real failures.
+    onUnavailable(false);
     if (!src || !video.current) return;
     if (motion) video.current.play().catch(() => onUnavailable(true));
     else video.current.pause();
@@ -90,6 +91,7 @@ export default function SceneExperience() {
   const [levels, setLevels] = useState(() => levelsForScene(SCENES[0]));
   const [controls, setControls] = useState({warmth:.55,space:.35,energy:.40,nature:.35});
   const [advanced, setAdvanced] = useState(false);
+  const [showAllJourneys, setShowAllJourneys] = useState(false);
   const [breath, setBreath] = useState(false);
   const [focusSession, setFocusSession] = useState(null);
   const [audio, setAudio] = useState({status:'idle', sceneId:'bali', error:null});
@@ -171,7 +173,7 @@ export default function SceneExperience() {
     return () => { window.clearInterval(interval); document.removeEventListener('visibilitychange',tick); };
   }, [deadline, C.timerDone]);
 
-  function openPanel(name) { opener.current = document.activeElement; setPanel(name); }
+  function openPanel(name) { opener.current = document.activeElement; if (name==='places') setShowAllJourneys(!intentId); setPanel(name); }
   function closePanel() { setPanel(null); dialog.current?.close(); opener.current?.focus?.(); }
   function selectJourney(next) {
     if (!next) return;
@@ -192,7 +194,6 @@ export default function SceneExperience() {
     closePanel();
   }
   function chooseIntent(id) { selectJourney(recommendedJourneyForIntent(id)); }
-  function choosePlace(place) { selectJourney(journeyForScene(place.id, intentId)); }
   function changeIntent() {
     player.current?.pause();
     setIntentId(null);
@@ -305,7 +306,7 @@ export default function SceneExperience() {
 
     {intentId && <div className="sc-place-preview">
       <span className="sc-kicker">{C.change}</span>
-      <div className="sc-place-chips">{SCENES.slice(0,3).map(place=>{const next=journeyForScene(place.id,intentId);return <button key={place.id} className={`sc-place-chip ${sceneId===place.id?'is-current':''}`} onClick={()=>choosePlace(place)} aria-pressed={sceneId===place.id} aria-label={`${T(place.name)} · ${T(intentById(next?.intentId)?.name)}`}><img src={place.poster} alt=""/><span><small>{T(intentById(next?.intentId)?.name)}</small>{T(place.name)}</span>{place.id===sceneId?<span className="sc-chip-dot"/>:<Icon name="arrow"/>}</button>;})}</div>
+      <div className="sc-place-chips">{journeysForIntent(intentId).map(next=>{const place=sceneById(next.sceneId);return <button key={next.id} className={`sc-place-chip ${journeyId===next.id?'is-current':''}`} onClick={()=>selectJourney(next)} aria-pressed={journeyId===next.id} aria-label={`${T(next.name)} · ${T(place.name)}`}><img src={place.poster} alt=""/><span><small>{T(place.name)}</small>{T(next.name)}</span>{journeyId===next.id?<span className="sc-chip-dot"/>:<Icon name="arrow"/>}</button>;})}</div>
     </div>}
 
     {immersive && <button className="sc-leave sc-glass-button" onClick={()=>setImmersive(false)}><Icon name="back"/>{C.leave}</button>}
