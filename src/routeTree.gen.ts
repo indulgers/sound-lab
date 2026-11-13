@@ -10,16 +10,38 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as CafeRouteImport } from './routes/cafe'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as FocusRouteImport } from './routes/focus'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as RainRouteImport } from './routes/rain'
+import { Route as RelaxRouteImport } from './routes/relax'
 import { Route as ReturnRouteImport } from './routes/return'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SleepRouteImport } from './routes/sleep'
 import { Route as WaffoReturnRouteImport } from './routes/waffo-return'
 import { Route as ApiEntitlementsRouteImport } from './routes/api/entitlements'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
 import { Route as ApiRegionRouteImport } from './routes/api/region'
+import { Route as EnIndexRouteImport } from './routes/en/index'
+import { Route as EnAboutRouteImport } from './routes/en/about'
+import { Route as EnCafeRouteImport } from './routes/en/cafe'
+import { Route as EnCheckoutRouteImport } from './routes/en/checkout'
+import { Route as EnFocusRouteImport } from './routes/en/focus'
+import { Route as EnRainRouteImport } from './routes/en/rain'
+import { Route as EnRelaxRouteImport } from './routes/en/relax'
+import { Route as EnSleepRouteImport } from './routes/en/sleep'
+import { Route as MixCodeRouteImport } from './routes/mix.$code'
+import { Route as ZhIndexRouteImport } from './routes/zh/index'
+import { Route as ZhAboutRouteImport } from './routes/zh/about'
+import { Route as ZhCafeRouteImport } from './routes/zh/cafe'
+import { Route as ZhCheckoutRouteImport } from './routes/zh/checkout'
+import { Route as ZhFocusRouteImport } from './routes/zh/focus'
+import { Route as ZhRainRouteImport } from './routes/zh/rain'
+import { Route as ZhRelaxRouteImport } from './routes/zh/relax'
+import { Route as ZhSleepRouteImport } from './routes/zh/sleep'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
@@ -34,6 +56,8 @@ import { Route as ApiWaffoCreateRouteImport } from './routes/api/waffo/create'
 import { Route as ApiWaffoOrderStatusRouteImport } from './routes/api/waffo/order-status'
 import { Route as ApiWaffoPendingRouteImport } from './routes/api/waffo/pending'
 import { Route as ApiWaffoWebhookRouteImport } from './routes/api/waffo/webhook'
+import { Route as EnMixCodeRouteImport } from './routes/en/mix.$code'
+import { Route as ZhMixCodeRouteImport } from './routes/zh/mix.$code'
 import { Route as ApiAuthGoogleIndexRouteImport } from './routes/api/auth/google/index'
 import { Route as ApiAuthGoogleCallbackRouteImport } from './routes/api/auth/google/callback'
 import { Route as ApiPayQueryOutTradeNoRouteImport } from './routes/api/pay/query.$outTradeNo'
@@ -41,6 +65,16 @@ import { Route as ApiPayQueryOutTradeNoRouteImport } from './routes/api/pay/quer
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CafeRoute = CafeRouteImport.update({
+  id: '/cafe',
+  path: '/cafe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -58,6 +92,16 @@ const HealthRoute = HealthRouteImport.update({
   path: '/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RainRoute = RainRouteImport.update({
+  id: '/rain',
+  path: '/rain',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RelaxRoute = RelaxRouteImport.update({
+  id: '/relax',
+  path: '/relax',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReturnRoute = ReturnRouteImport.update({
   id: '/return',
   path: '/return',
@@ -71,6 +115,11 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SleepRoute = SleepRouteImport.update({
+  id: '/sleep',
+  path: '/sleep',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WaffoReturnRoute = WaffoReturnRouteImport.update({
@@ -91,6 +140,91 @@ const ApiProductsRoute = ApiProductsRouteImport.update({
 const ApiRegionRoute = ApiRegionRouteImport.update({
   id: '/api/region',
   path: '/api/region',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnIndexRoute = EnIndexRouteImport.update({
+  id: '/en/',
+  path: '/en/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnAboutRoute = EnAboutRouteImport.update({
+  id: '/en/about',
+  path: '/en/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnCafeRoute = EnCafeRouteImport.update({
+  id: '/en/cafe',
+  path: '/en/cafe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnCheckoutRoute = EnCheckoutRouteImport.update({
+  id: '/en/checkout',
+  path: '/en/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnFocusRoute = EnFocusRouteImport.update({
+  id: '/en/focus',
+  path: '/en/focus',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnRainRoute = EnRainRouteImport.update({
+  id: '/en/rain',
+  path: '/en/rain',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnRelaxRoute = EnRelaxRouteImport.update({
+  id: '/en/relax',
+  path: '/en/relax',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnSleepRoute = EnSleepRouteImport.update({
+  id: '/en/sleep',
+  path: '/en/sleep',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MixCodeRoute = MixCodeRouteImport.update({
+  id: '/mix/$code',
+  path: '/mix/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZhIndexRoute = ZhIndexRouteImport.update({
+  id: '/zh/',
+  path: '/zh/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZhAboutRoute = ZhAboutRouteImport.update({
+  id: '/zh/about',
+  path: '/zh/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZhCafeRoute = ZhCafeRouteImport.update({
+  id: '/zh/cafe',
+  path: '/zh/cafe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZhCheckoutRoute = ZhCheckoutRouteImport.update({
+  id: '/zh/checkout',
+  path: '/zh/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZhFocusRoute = ZhFocusRouteImport.update({
+  id: '/zh/focus',
+  path: '/zh/focus',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZhRainRoute = ZhRainRouteImport.update({
+  id: '/zh/rain',
+  path: '/zh/rain',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZhRelaxRoute = ZhRelaxRouteImport.update({
+  id: '/zh/relax',
+  path: '/zh/relax',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZhSleepRoute = ZhSleepRouteImport.update({
+  id: '/zh/sleep',
+  path: '/zh/sleep',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
@@ -163,6 +297,16 @@ const ApiWaffoWebhookRoute = ApiWaffoWebhookRouteImport.update({
   path: '/api/waffo/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnMixCodeRoute = EnMixCodeRouteImport.update({
+  id: '/en/mix/$code',
+  path: '/en/mix/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZhMixCodeRoute = ZhMixCodeRouteImport.update({
+  id: '/zh/mix/$code',
+  path: '/zh/mix/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthGoogleIndexRoute = ApiAuthGoogleIndexRouteImport.update({
   id: '/api/auth/google/',
   path: '/api/auth/google/',
@@ -181,16 +325,38 @@ const ApiPayQueryOutTradeNoRoute = ApiPayQueryOutTradeNoRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/cafe': typeof CafeRoute
   '/checkout': typeof CheckoutRoute
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
+  '/rain': typeof RainRoute
+  '/relax': typeof RelaxRoute
   '/return': typeof ReturnRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sleep': typeof SleepRoute
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
   '/api/region': typeof ApiRegionRoute
+  '/en/about': typeof EnAboutRoute
+  '/en/cafe': typeof EnCafeRoute
+  '/en/checkout': typeof EnCheckoutRoute
+  '/en/focus': typeof EnFocusRoute
+  '/en/rain': typeof EnRainRoute
+  '/en/relax': typeof EnRelaxRoute
+  '/en/sleep': typeof EnSleepRoute
+  '/mix/$code': typeof MixCodeRoute
+  '/zh/about': typeof ZhAboutRoute
+  '/zh/cafe': typeof ZhCafeRoute
+  '/zh/checkout': typeof ZhCheckoutRoute
+  '/zh/focus': typeof ZhFocusRoute
+  '/zh/rain': typeof ZhRainRoute
+  '/zh/relax': typeof ZhRelaxRoute
+  '/zh/sleep': typeof ZhSleepRoute
+  '/en/': typeof EnIndexRoute
+  '/zh/': typeof ZhIndexRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
@@ -205,22 +371,46 @@ export interface FileRoutesByFullPath {
   '/api/waffo/order-status': typeof ApiWaffoOrderStatusRoute
   '/api/waffo/pending': typeof ApiWaffoPendingRoute
   '/api/waffo/webhook': typeof ApiWaffoWebhookRoute
+  '/en/mix/$code': typeof EnMixCodeRoute
+  '/zh/mix/$code': typeof ZhMixCodeRoute
   '/api/auth/google/callback': typeof ApiAuthGoogleCallbackRoute
   '/api/pay/query/$outTradeNo': typeof ApiPayQueryOutTradeNoRoute
   '/api/auth/google/': typeof ApiAuthGoogleIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/cafe': typeof CafeRoute
   '/checkout': typeof CheckoutRoute
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
+  '/rain': typeof RainRoute
+  '/relax': typeof RelaxRoute
   '/return': typeof ReturnRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sleep': typeof SleepRoute
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
   '/api/region': typeof ApiRegionRoute
+  '/en/about': typeof EnAboutRoute
+  '/en/cafe': typeof EnCafeRoute
+  '/en/checkout': typeof EnCheckoutRoute
+  '/en/focus': typeof EnFocusRoute
+  '/en/rain': typeof EnRainRoute
+  '/en/relax': typeof EnRelaxRoute
+  '/en/sleep': typeof EnSleepRoute
+  '/mix/$code': typeof MixCodeRoute
+  '/zh/about': typeof ZhAboutRoute
+  '/zh/cafe': typeof ZhCafeRoute
+  '/zh/checkout': typeof ZhCheckoutRoute
+  '/zh/focus': typeof ZhFocusRoute
+  '/zh/rain': typeof ZhRainRoute
+  '/zh/relax': typeof ZhRelaxRoute
+  '/zh/sleep': typeof ZhSleepRoute
+  '/en': typeof EnIndexRoute
+  '/zh': typeof ZhIndexRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
@@ -235,6 +425,8 @@ export interface FileRoutesByTo {
   '/api/waffo/order-status': typeof ApiWaffoOrderStatusRoute
   '/api/waffo/pending': typeof ApiWaffoPendingRoute
   '/api/waffo/webhook': typeof ApiWaffoWebhookRoute
+  '/en/mix/$code': typeof EnMixCodeRoute
+  '/zh/mix/$code': typeof ZhMixCodeRoute
   '/api/auth/google/callback': typeof ApiAuthGoogleCallbackRoute
   '/api/pay/query/$outTradeNo': typeof ApiPayQueryOutTradeNoRoute
   '/api/auth/google': typeof ApiAuthGoogleIndexRoute
@@ -242,16 +434,38 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/cafe': typeof CafeRoute
   '/checkout': typeof CheckoutRoute
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
+  '/rain': typeof RainRoute
+  '/relax': typeof RelaxRoute
   '/return': typeof ReturnRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sleep': typeof SleepRoute
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
   '/api/region': typeof ApiRegionRoute
+  '/en/about': typeof EnAboutRoute
+  '/en/cafe': typeof EnCafeRoute
+  '/en/checkout': typeof EnCheckoutRoute
+  '/en/focus': typeof EnFocusRoute
+  '/en/rain': typeof EnRainRoute
+  '/en/relax': typeof EnRelaxRoute
+  '/en/sleep': typeof EnSleepRoute
+  '/mix/$code': typeof MixCodeRoute
+  '/zh/about': typeof ZhAboutRoute
+  '/zh/cafe': typeof ZhCafeRoute
+  '/zh/checkout': typeof ZhCheckoutRoute
+  '/zh/focus': typeof ZhFocusRoute
+  '/zh/rain': typeof ZhRainRoute
+  '/zh/relax': typeof ZhRelaxRoute
+  '/zh/sleep': typeof ZhSleepRoute
+  '/en/': typeof EnIndexRoute
+  '/zh/': typeof ZhIndexRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/me': typeof ApiAuthMeRoute
@@ -266,6 +480,8 @@ export interface FileRoutesById {
   '/api/waffo/order-status': typeof ApiWaffoOrderStatusRoute
   '/api/waffo/pending': typeof ApiWaffoPendingRoute
   '/api/waffo/webhook': typeof ApiWaffoWebhookRoute
+  '/en/mix/$code': typeof EnMixCodeRoute
+  '/zh/mix/$code': typeof ZhMixCodeRoute
   '/api/auth/google/callback': typeof ApiAuthGoogleCallbackRoute
   '/api/pay/query/$outTradeNo': typeof ApiPayQueryOutTradeNoRoute
   '/api/auth/google/': typeof ApiAuthGoogleIndexRoute
@@ -274,16 +490,38 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
+    | '/cafe'
     | '/checkout'
     | '/focus'
     | '/health'
+    | '/rain'
+    | '/relax'
     | '/return'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/sleep'
     | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
     | '/api/region'
+    | '/en/about'
+    | '/en/cafe'
+    | '/en/checkout'
+    | '/en/focus'
+    | '/en/rain'
+    | '/en/relax'
+    | '/en/sleep'
+    | '/mix/$code'
+    | '/zh/about'
+    | '/zh/cafe'
+    | '/zh/checkout'
+    | '/zh/focus'
+    | '/zh/rain'
+    | '/zh/relax'
+    | '/zh/sleep'
+    | '/en/'
+    | '/zh/'
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/me'
@@ -298,22 +536,46 @@ export interface FileRouteTypes {
     | '/api/waffo/order-status'
     | '/api/waffo/pending'
     | '/api/waffo/webhook'
+    | '/en/mix/$code'
+    | '/zh/mix/$code'
     | '/api/auth/google/callback'
     | '/api/pay/query/$outTradeNo'
     | '/api/auth/google/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
+    | '/cafe'
     | '/checkout'
     | '/focus'
     | '/health'
+    | '/rain'
+    | '/relax'
     | '/return'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/sleep'
     | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
     | '/api/region'
+    | '/en/about'
+    | '/en/cafe'
+    | '/en/checkout'
+    | '/en/focus'
+    | '/en/rain'
+    | '/en/relax'
+    | '/en/sleep'
+    | '/mix/$code'
+    | '/zh/about'
+    | '/zh/cafe'
+    | '/zh/checkout'
+    | '/zh/focus'
+    | '/zh/rain'
+    | '/zh/relax'
+    | '/zh/sleep'
+    | '/en'
+    | '/zh'
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/me'
@@ -328,22 +590,46 @@ export interface FileRouteTypes {
     | '/api/waffo/order-status'
     | '/api/waffo/pending'
     | '/api/waffo/webhook'
+    | '/en/mix/$code'
+    | '/zh/mix/$code'
     | '/api/auth/google/callback'
     | '/api/pay/query/$outTradeNo'
     | '/api/auth/google'
   id:
     | '__root__'
     | '/'
+    | '/about'
+    | '/cafe'
     | '/checkout'
     | '/focus'
     | '/health'
+    | '/rain'
+    | '/relax'
     | '/return'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/sleep'
     | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
     | '/api/region'
+    | '/en/about'
+    | '/en/cafe'
+    | '/en/checkout'
+    | '/en/focus'
+    | '/en/rain'
+    | '/en/relax'
+    | '/en/sleep'
+    | '/mix/$code'
+    | '/zh/about'
+    | '/zh/cafe'
+    | '/zh/checkout'
+    | '/zh/focus'
+    | '/zh/rain'
+    | '/zh/relax'
+    | '/zh/sleep'
+    | '/en/'
+    | '/zh/'
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/me'
@@ -358,6 +644,8 @@ export interface FileRouteTypes {
     | '/api/waffo/order-status'
     | '/api/waffo/pending'
     | '/api/waffo/webhook'
+    | '/en/mix/$code'
+    | '/zh/mix/$code'
     | '/api/auth/google/callback'
     | '/api/pay/query/$outTradeNo'
     | '/api/auth/google/'
@@ -365,16 +653,38 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  CafeRoute: typeof CafeRoute
   CheckoutRoute: typeof CheckoutRoute
   FocusRoute: typeof FocusRoute
   HealthRoute: typeof HealthRoute
+  RainRoute: typeof RainRoute
+  RelaxRoute: typeof RelaxRoute
   ReturnRoute: typeof ReturnRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SleepRoute: typeof SleepRoute
   WaffoReturnRoute: typeof WaffoReturnRoute
   ApiEntitlementsRoute: typeof ApiEntitlementsRoute
   ApiProductsRoute: typeof ApiProductsRoute
   ApiRegionRoute: typeof ApiRegionRoute
+  EnAboutRoute: typeof EnAboutRoute
+  EnCafeRoute: typeof EnCafeRoute
+  EnCheckoutRoute: typeof EnCheckoutRoute
+  EnFocusRoute: typeof EnFocusRoute
+  EnRainRoute: typeof EnRainRoute
+  EnRelaxRoute: typeof EnRelaxRoute
+  EnSleepRoute: typeof EnSleepRoute
+  MixCodeRoute: typeof MixCodeRoute
+  ZhAboutRoute: typeof ZhAboutRoute
+  ZhCafeRoute: typeof ZhCafeRoute
+  ZhCheckoutRoute: typeof ZhCheckoutRoute
+  ZhFocusRoute: typeof ZhFocusRoute
+  ZhRainRoute: typeof ZhRainRoute
+  ZhRelaxRoute: typeof ZhRelaxRoute
+  ZhSleepRoute: typeof ZhSleepRoute
+  EnIndexRoute: typeof EnIndexRoute
+  ZhIndexRoute: typeof ZhIndexRoute
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
   ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
   ApiAuthMeRoute: typeof ApiAuthMeRoute
@@ -389,6 +699,8 @@ export interface RootRouteChildren {
   ApiWaffoOrderStatusRoute: typeof ApiWaffoOrderStatusRoute
   ApiWaffoPendingRoute: typeof ApiWaffoPendingRoute
   ApiWaffoWebhookRoute: typeof ApiWaffoWebhookRoute
+  EnMixCodeRoute: typeof EnMixCodeRoute
+  ZhMixCodeRoute: typeof ZhMixCodeRoute
   ApiAuthGoogleCallbackRoute: typeof ApiAuthGoogleCallbackRoute
   ApiPayQueryOutTradeNoRoute: typeof ApiPayQueryOutTradeNoRoute
   ApiAuthGoogleIndexRoute: typeof ApiAuthGoogleIndexRoute
@@ -401,6 +713,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cafe': {
+      id: '/cafe'
+      path: '/cafe'
+      fullPath: '/cafe'
+      preLoaderRoute: typeof CafeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -424,6 +750,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rain': {
+      id: '/rain'
+      path: '/rain'
+      fullPath: '/rain'
+      preLoaderRoute: typeof RainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/relax': {
+      id: '/relax'
+      path: '/relax'
+      fullPath: '/relax'
+      preLoaderRoute: typeof RelaxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/return': {
       id: '/return'
       path: '/return'
@@ -443,6 +783,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sleep': {
+      id: '/sleep'
+      path: '/sleep'
+      fullPath: '/sleep'
+      preLoaderRoute: typeof SleepRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/waffo-return': {
@@ -471,6 +818,125 @@ declare module '@tanstack/react-router' {
       path: '/api/region'
       fullPath: '/api/region'
       preLoaderRoute: typeof ApiRegionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/': {
+      id: '/en/'
+      path: '/en'
+      fullPath: '/en/'
+      preLoaderRoute: typeof EnIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/about': {
+      id: '/en/about'
+      path: '/en/about'
+      fullPath: '/en/about'
+      preLoaderRoute: typeof EnAboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/cafe': {
+      id: '/en/cafe'
+      path: '/en/cafe'
+      fullPath: '/en/cafe'
+      preLoaderRoute: typeof EnCafeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/checkout': {
+      id: '/en/checkout'
+      path: '/en/checkout'
+      fullPath: '/en/checkout'
+      preLoaderRoute: typeof EnCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/focus': {
+      id: '/en/focus'
+      path: '/en/focus'
+      fullPath: '/en/focus'
+      preLoaderRoute: typeof EnFocusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/rain': {
+      id: '/en/rain'
+      path: '/en/rain'
+      fullPath: '/en/rain'
+      preLoaderRoute: typeof EnRainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/relax': {
+      id: '/en/relax'
+      path: '/en/relax'
+      fullPath: '/en/relax'
+      preLoaderRoute: typeof EnRelaxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/sleep': {
+      id: '/en/sleep'
+      path: '/en/sleep'
+      fullPath: '/en/sleep'
+      preLoaderRoute: typeof EnSleepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mix/$code': {
+      id: '/mix/$code'
+      path: '/mix/$code'
+      fullPath: '/mix/$code'
+      preLoaderRoute: typeof MixCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zh/': {
+      id: '/zh/'
+      path: '/zh'
+      fullPath: '/zh/'
+      preLoaderRoute: typeof ZhIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zh/about': {
+      id: '/zh/about'
+      path: '/zh/about'
+      fullPath: '/zh/about'
+      preLoaderRoute: typeof ZhAboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zh/cafe': {
+      id: '/zh/cafe'
+      path: '/zh/cafe'
+      fullPath: '/zh/cafe'
+      preLoaderRoute: typeof ZhCafeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zh/checkout': {
+      id: '/zh/checkout'
+      path: '/zh/checkout'
+      fullPath: '/zh/checkout'
+      preLoaderRoute: typeof ZhCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zh/focus': {
+      id: '/zh/focus'
+      path: '/zh/focus'
+      fullPath: '/zh/focus'
+      preLoaderRoute: typeof ZhFocusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zh/rain': {
+      id: '/zh/rain'
+      path: '/zh/rain'
+      fullPath: '/zh/rain'
+      preLoaderRoute: typeof ZhRainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zh/relax': {
+      id: '/zh/relax'
+      path: '/zh/relax'
+      fullPath: '/zh/relax'
+      preLoaderRoute: typeof ZhRelaxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zh/sleep': {
+      id: '/zh/sleep'
+      path: '/zh/sleep'
+      fullPath: '/zh/sleep'
+      preLoaderRoute: typeof ZhSleepRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/login': {
@@ -571,6 +1037,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWaffoWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/mix/$code': {
+      id: '/en/mix/$code'
+      path: '/en/mix/$code'
+      fullPath: '/en/mix/$code'
+      preLoaderRoute: typeof EnMixCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zh/mix/$code': {
+      id: '/zh/mix/$code'
+      path: '/zh/mix/$code'
+      fullPath: '/zh/mix/$code'
+      preLoaderRoute: typeof ZhMixCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/google/': {
       id: '/api/auth/google/'
       path: '/api/auth/google'
@@ -597,16 +1077,38 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  CafeRoute: CafeRoute,
   CheckoutRoute: CheckoutRoute,
   FocusRoute: FocusRoute,
   HealthRoute: HealthRoute,
+  RainRoute: RainRoute,
+  RelaxRoute: RelaxRoute,
   ReturnRoute: ReturnRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SleepRoute: SleepRoute,
   WaffoReturnRoute: WaffoReturnRoute,
   ApiEntitlementsRoute: ApiEntitlementsRoute,
   ApiProductsRoute: ApiProductsRoute,
   ApiRegionRoute: ApiRegionRoute,
+  EnAboutRoute: EnAboutRoute,
+  EnCafeRoute: EnCafeRoute,
+  EnCheckoutRoute: EnCheckoutRoute,
+  EnFocusRoute: EnFocusRoute,
+  EnRainRoute: EnRainRoute,
+  EnRelaxRoute: EnRelaxRoute,
+  EnSleepRoute: EnSleepRoute,
+  MixCodeRoute: MixCodeRoute,
+  ZhAboutRoute: ZhAboutRoute,
+  ZhCafeRoute: ZhCafeRoute,
+  ZhCheckoutRoute: ZhCheckoutRoute,
+  ZhFocusRoute: ZhFocusRoute,
+  ZhRainRoute: ZhRainRoute,
+  ZhRelaxRoute: ZhRelaxRoute,
+  ZhSleepRoute: ZhSleepRoute,
+  EnIndexRoute: EnIndexRoute,
+  ZhIndexRoute: ZhIndexRoute,
   ApiAuthLoginRoute: ApiAuthLoginRoute,
   ApiAuthLogoutRoute: ApiAuthLogoutRoute,
   ApiAuthMeRoute: ApiAuthMeRoute,
@@ -621,6 +1123,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiWaffoOrderStatusRoute: ApiWaffoOrderStatusRoute,
   ApiWaffoPendingRoute: ApiWaffoPendingRoute,
   ApiWaffoWebhookRoute: ApiWaffoWebhookRoute,
+  EnMixCodeRoute: EnMixCodeRoute,
+  ZhMixCodeRoute: ZhMixCodeRoute,
   ApiAuthGoogleCallbackRoute: ApiAuthGoogleCallbackRoute,
   ApiPayQueryOutTradeNoRoute: ApiPayQueryOutTradeNoRoute,
   ApiAuthGoogleIndexRoute: ApiAuthGoogleIndexRoute,

@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useSearch } from '@tanstack/react-router';
+import { Link, useRouterState } from '@tanstack/react-router';
 import { findPack, packDisplay } from './packs.mjs';
 import { createPayment, createWaffoPayment, fetchProducts, fetchWaffoPending } from './pay-api.js';
 import { checkoutConfig, useRegion } from './region.mjs';
-import { t, useLocale } from './locale.mjs';
+import { localizePath, t, useLocale } from './locale.mjs';
 
 /**
- * 结账页（路由 /checkout?pack=<id>）。
+ * 结账页（路由 /en/checkout 与 /zh/checkout，?pack=<id>）。
  *
  * 文案语言与支付选择已解耦（2026-11-12 用户明确规则）：
  * - 文案只看 locale（浏览器语言自动判断，导航栏手动切换覆盖）；
@@ -28,7 +28,9 @@ import { t, useLocale } from './locale.mjs';
  * 登录框；登录成功后（soundcocktail:auth-changed 事件）自动重试下单。
  */
 export default function CheckoutView() {
-  const { pack: packId } = useSearch({ from: '/checkout' });
+  // ?pack= 从路由状态读（两个语言路由共用本组件；useSearch 只能绑定
+  // 一条 from 路径，/en/checkout 与 /zh/checkout 不能共用）。
+  const { pack: packId } = useRouterState({ select: (state) => state.location.search });
   const pack = findPack(packId);
   const [locale] = useLocale();
   const { region } = useRegion();
@@ -181,7 +183,7 @@ export default function CheckoutView() {
             <h3>{t(locale, 'checkout.noProductTitle')}</h3>
             <p>{t(locale, 'checkout.noProductDesc')}</p>
             <div className="row">
-              <Link to="/" className="btn btn-primary" style={{ textDecoration: 'none' }}>{t(locale, 'checkout.back')}</Link>
+              <Link to={localizePath('/', locale)} className="btn btn-primary" style={{ textDecoration: 'none' }}>{t(locale, 'checkout.back')}</Link>
             </div>
           </div>
         ) : (
@@ -239,7 +241,7 @@ export default function CheckoutView() {
               <button type="button" className="btn btn-primary" onClick={handlePay} disabled={busy || status === 'opened'}>
                 {status === 'creating' ? t(locale, 'checkout.creating') : status === 'redirecting' ? t(locale, 'checkout.redirecting') : status === 'opened' ? t(locale, 'checkout.openingCheckout') : pendingOrder ? t(locale, 'checkout.continuePay') : isWaffo ? t(locale, 'checkout.payWaffo') : t(locale, 'checkout.payAlipay')}
               </button>
-              <Link to="/" className="btn btn-ghost" style={{ textDecoration: 'none' }}>{t(locale, 'checkout.back')}</Link>
+              <Link to={localizePath('/', locale)} className="btn btn-ghost" style={{ textDecoration: 'none' }}>{t(locale, 'checkout.back')}</Link>
             </div>
             <div ref={formHostRef} aria-hidden="true" />
           </div>

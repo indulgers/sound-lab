@@ -1,5 +1,6 @@
 /**
- * SEO/GEO P0 测试。
+ * SEO/GEO P0 测试（P1 后更新：head 按语言签名、规范 URL 带 /en 前缀、
+ * sitemap 为 7 页 × 2 语言 + hreflang、llms.txt 列双语 URL）。
  *
  * 覆盖：robots.txt（放行各爬虫 + Sitemap 指向）、sitemap.xml
  * （只列可收录页）、每路由 head（首页 ≠ /focus、均为英文、自指
@@ -52,17 +53,25 @@ test('seo: GET /robots.txt returns the robots file as text/plain', async () => {
 test('seo: sitemap.xml lists only the public pages with absolute URLs and lastmod', () => {
   const xml = sitemapXml(new Date('2026-11-13T00:00:00Z'));
   assert.ok(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>'));
-  assert.ok(xml.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'));
+  assert.ok(xml.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'));
   assert.ok(xml.endsWith('</urlset>\n'));
-  assert.ok(xml.includes(`<loc>${SITE_URL}/</loc>`));
-  assert.ok(xml.includes(`<loc>${SITE_URL}/focus</loc>`));
+  // 7 页 × 2 语言，全部带语言前缀；裸 / 与 /focus 不再是规范 URL。
+  for (const p of ['/en', '/zh', '/en/focus', '/zh/focus', '/en/sleep', '/zh/sleep', '/en/relax', '/zh/relax', '/en/rain', '/zh/rain', '/en/cafe', '/zh/cafe', '/en/about', '/zh/about']) {
+    assert.ok(xml.includes(`<loc>${SITE_URL}${p}</loc>`), p);
+  }
+  assert.doesNotMatch(xml, /<loc>https:\/\/soundcocktail\.app\/<\/loc>/);
+  assert.doesNotMatch(xml, /<loc>https:\/\/soundcocktail\.app\/focus<\/loc>/);
   assert.ok(xml.includes('<lastmod>2026-11-13</lastmod>'));
-  for (const excluded of ['/checkout', '/return', '/waffo-return', '/api/']) {
+  for (const excluded of ['/checkout', '/return', '/waffo-return', '/api/', '/mix/']) {
     assert.doesNotMatch(xml, new RegExp(`<loc>[^<]*${excluded.replace(/\//g, '\\/')}`), excluded);
   }
-  // 结构完整：每个 <url> 都有开闭标签，数量与 PUBLIC_PATHS 一致。
-  assert.equal((xml.match(/<url>/g) || []).length, 2);
-  assert.equal((xml.match(/<\/url>/g) || []).length, 2);
+  // 每个 <url> 带 hreflang 标注（en、zh-CN、x-default）。
+  assert.ok(xml.includes(`<xhtml:link rel="alternate" hreflang="en" href="${SITE_URL}/en/sleep"/>`));
+  assert.ok(xml.includes(`<xhtml:link rel="alternate" hreflang="zh-CN" href="${SITE_URL}/zh/sleep"/>`));
+  assert.ok(xml.includes(`<xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}/en/sleep"/>`));
+  // 结构完整：每个 <url> 都有开闭标签，数量与 PUBLIC_PATHS 一致（14）。
+  assert.equal((xml.match(/<url>/g) || []).length, 14);
+  assert.equal((xml.match(/<\/url>/g) || []).length, 14);
 });
 
 test('seo: GET /sitemap.xml returns well-formed XML', async () => {
@@ -70,16 +79,16 @@ test('seo: GET /sitemap.xml returns well-formed XML', async () => {
   assert.equal(res.status, 200);
   assert.match(res.headers.get('content-type'), /application\/xml/);
   const body = await res.text();
-  assert.ok(body.includes(`<loc>${SITE_URL}/</loc>`));
-  assert.ok(body.includes(`<loc>${SITE_URL}/focus</loc>`));
+  assert.ok(body.includes(`<loc>${SITE_URL}/en</loc>`));
+  assert.ok(body.includes(`<loc>${SITE_URL}/zh/sleep</loc>`));
   assert.doesNotMatch(body, /checkout|waffo-return|api\//);
 });
 
 // --- 每路由 head ---
 
 test('seo: home and /focus have different English titles and descriptions', () => {
-  const home = headForRoute('home');
-  const focus = headForRoute('focus');
+  const home = headForRoute('home', 'en');
+  const focus = headForRoute('focus', 'en');
   const metaOf = (head, key) => head.meta.find((m) => m.name === key || m.property === key);
   const titleOf = (head) => head.meta.find((m) => typeof m.title === 'string').title;
   assert.notEqual(titleOf(home), titleOf(focus));
@@ -103,15 +112,25 @@ test('seo: home and /focus have different English titles and descriptions', () =
 
 test('seo: head carries absolute og:image, twitter card and self-referencing canonical', () => {
   assert.equal(OG_IMAGE_URL, `${SITE_URL}/og-image.png`);
-  for (const [key, canonical] of [['home', `${SITE_URL}/`], ['focus', `${SITE_URL}/focus`]]) {
-    const head = headForRoute(key);
+  for (const [key, canonical] of [['home', `${SITE_URL}/en`], ['focus', `${SITE_URL}/en/focus`]]) {
+    const head = headForRoute(key, 'en');
     const ogImage = head.meta.find((m) => m.property === 'og:image');
     assert.equal(ogImage.content, OG_IMAGE_URL);
     assert.equal(head.meta.find((m) => m.name === 'twitter:card').content, 'summary_large_image');
     assert.equal(head.meta.find((m) => m.property === 'og:url').content, canonical);
-    assert.deepEqual(head.links, [{ rel: 'canonical', href: canonical }]);
+    // links[0] 为自指 canonical；其后是 hreflang（en、zh-CN、x-default）。
+    assert.deepEqual(head.links[0], { rel: 'canonical', href: canonical });
+    assert.deepEqual(
+      head.links.slice(1).map((l) => [l.hreflang, l.href]),
+      [
+        ['en', `${SITE_URL}/en${key === 'home' ? '' : '/focus'}`],
+        ['zh-CN', `${SITE_URL}/zh${key === 'home' ? '' : '/focus'}`],
+        ['x-default', `${SITE_URL}/en${key === 'home' ? '' : '/focus'}`],
+      ],
+    );
   }
-  assert.throws(() => headForRoute('nope'), /unknown seo route/);
+  assert.throws(() => headForRoute('nope', 'en'), /unknown seo route/);
+  assert.throws(() => headForRoute('home', 'fr'), /unknown locale/);
 });
 
 // --- 站长验证 meta ---
@@ -180,8 +199,11 @@ test('seo: llms.txt and llms-full.txt exist in public/ and map the key pages', (
   for (const f of ['llms.txt', 'llms-full.txt']) {
     const content = fs.readFileSync(path.join(projectRoot, 'public', f), 'utf8');
     assert.ok(content.length > 100, f);
-    assert.ok(content.includes('https://soundcocktail.app/'), f);
-    assert.ok(content.includes('https://soundcocktail.app/focus'), f);
+    // P1：页面列表为双语 URL（/en + /zh），不再有裸 / 与 /focus。
+    assert.ok(content.includes('https://soundcocktail.app/en'), f);
+    assert.ok(content.includes('https://soundcocktail.app/zh/sleep'), f);
+    assert.ok(content.includes('https://soundcocktail.app/en/sleep'), f);
+    assert.doesNotMatch(content, /soundcocktail\.app\/focus[^/]/, f);
   }
   const full = fs.readFileSync(path.join(projectRoot, 'public/llms-full.txt'), 'utf8');
   assert.ok(full.includes('22'));

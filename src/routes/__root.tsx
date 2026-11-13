@@ -5,8 +5,8 @@ import { RECIPES, SOUNDS } from '../catalog.mjs'
 import { fetchEntitlements, fetchMe } from '../auth-api.js'
 import { fetchWaffoPending } from '../pay-api.js'
 import { countryFromRequest, useRegion } from '../region.mjs'
-import { useLocale } from '../locale.mjs'
-import { OG_IMAGE_URL, ROUTE_SEO, headForRoute, verificationFromContext, verificationMeta } from '../seo.mjs'
+import { LocaleContext, getLocale, localeFromPath, localizePath, stripLocalePrefix, useLocale } from '../locale.mjs'
+import { OG_IMAGE_URL, seoForRoute, verificationFromContext, verificationMeta } from '../seo.mjs'
 import { mountSoundLab } from '../sound-lab.mjs'
 import { mountVisualEffects } from '../visual-effects.mjs'
 import appCss from '../styles.css?url'
@@ -38,19 +38,16 @@ const FAVICON =
 export const Route = createRootRoute({
   /**
    * 根路由 loader（SSR 时在服务端跑）：只读请求的国家，用于
-   * shell 的 <html lang>，避免首屏语言属性闪烁；同时从 Cloudflare
+   * shell 的 <html lang> 回落（URL 没带语言前缀时）；同时从 Cloudflare
    * env 读三组可选的站长验证代码（Google / Bing / 百度），供 head
    * 输出 verification meta。客户端导航时 loader 也会跑，但那时没有
-   * 入站请求，country 为 null，shell 改按界面语言回落。loader 本身
+   * 入站请求，country 为 null，shell 改按 URL 前缀回落。loader 本身
    * 不读任何密钥或个人信息。
    *
-   * 注意：实测 TanStack Start 传给 loader 的 request 不带任何请求头
-   * （Accept-Language、cf-ipcountry 都读不到，本地 workerd 与 vite dev
-   * 一致），所以首屏 <title>/meta 无法按语言本地化；P0 的 SSR head
-   * 固定英文（爬虫从美国来、不带 Accept-Language，看到的就是海外/
-   * 英文版），水合后由 SoundLabView 的 locale effect 按界面语言同步
-   * document.title 与 meta description。中文版 head 随 P1 的 /zh
-   * URL 一起来。语言切换本身不受影响。
+   * P1：SSR head 已按语言 URL 本地化（/en/* 英文、/zh/* 中文，
+   * 各子路由 head 输出本语言版本 + hreflang），不再有 P0 时代
+   * "SSR 标题无法本地化"的限制；根路由 head 只提供默认英文首页
+   * head，子路由会覆盖。
    */
   loader: async ({ request, context }: { request?: Request; context?: unknown }) => {
     return {
@@ -63,11 +60,11 @@ export const Route = createRootRoute({
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
       { name: 'color-scheme', content: 'light' },
-      // 首页默认英文 head（/focus 由子路由 head 覆盖；中文版在 P1 的 /zh）。
-      { title: ROUTE_SEO.home.title },
-      { name: 'description', content: ROUTE_SEO.home.description },
-      { property: 'og:title', content: ROUTE_SEO.home.ogTitle },
-      { property: 'og:description', content: ROUTE_SEO.home.ogDescription },
+      // 默认英文首页 head（子路由 head 会覆盖；/zh 由子路由输出中文 head）。
+      { title: seoForRoute('home', 'en').title },
+      { name: 'description', content: seoForRoute('home', 'en').description },
+      { property: 'og:title', content: seoForRoute('home', 'en').ogTitle },
+      { property: 'og:description', content: seoForRoute('home', 'en').ogDescription },
       { property: 'og:type', content: 'website' },
       { property: 'og:image', content: OG_IMAGE_URL },
       { name: 'twitter:card', content: 'summary_large_image' },
@@ -88,8 +85,10 @@ export const Route = createRootRoute({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  // <html lang> 优先用服务端 loader 的国家（SSR 首屏就有，不闪烁）；
-  // 拿不到国家时按客户端界面语言（水合后由下面的 effect 再同步一次）。
+  // <html lang>：URL 语言前缀优先（/zh/* → zh-CN，/en/* → en），
+  // 其次服务端 loader 的国家，最后客户端界面语言。
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const pathLocale = localeFromPath(pathname)
   let serverLang: string | null = null
   try {
     const data = Route.useLoaderData() as { country?: string | null } | undefined
@@ -100,7 +99,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     serverLang = null
   }
   const [locale] = useLocale()
-  const lang = serverLang ?? (locale === 'en' ? 'en' : 'zh-CN')
+  const lang = pathLocale ? (pathLocale === 'en' ? 'en' : 'zh-CN') : (serverLang ?? (locale === 'en' ? 'en' : 'zh-CN'))
   return (
     <html lang={lang}>
       <head>
@@ -117,6 +116,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 interface LabController {
   chooseScene: (recipe: unknown) => void
   showPremium: (name: string) => void
+  setMix: (mix: Record<string, number>) => boolean
+  playRecipe: (recipe: { name: string; mix: Record<string, number>; params?: unknown }) => boolean
   setOwnedPacks: (packIds: string[]) => void
   setFocus: (open: boolean) => void
   dispose: () => void
@@ -125,14 +126,16 @@ interface LabController {
 /**
  * 应用外壳（原 src/main.jsx 的 SoundLab 组件，未改行为）：
  * 音频引擎只在客户端挂载（useLayoutEffect，SSR 时不执行），
- * / 与 /focus 共用同一个 View，/checkout 以 <Outlet/> 叠加在上面，
- * 引擎在路由切换时保持挂载。
+ * /en 与 /zh 首页、/focus 与各落地页共用同一个 View，/checkout 与
+ * /mix/:code 以 <Outlet/> 叠加在上面，引擎在路由切换时保持挂载。
+ * 语言由 URL 前缀决定：外壳按当前路径给子树提供 LocaleContext，
+ * 所以 SSR 渲染的就是正确语言的文案（/zh 页不再水合后才变中文）。
  */
 function SoundLab() {
   const router = useRouter()
-  const focusRoute = useRouterState({
-    select: (state) => state.location.pathname.replace(/\/$/, '') === '/focus',
-  })
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const pathLocale = localeFromPath(pathname)
+  const focusRoute = stripLocalePrefix(pathname).replace(/\/$/, '') === '/focus'
   const controller = useRef<LabController | null>(null)
   const chooseScene = useCallback((recipe: unknown) => controller.current?.chooseScene(recipe), [])
   const showPremium = useCallback((name: string) => controller.current?.showPremium(name), [])
@@ -170,8 +173,8 @@ function SoundLab() {
     }
   }, [region])
 
-  // 界面语言变化时同步 <html lang>（SSR 时由 loader 的国家决定，
-  // 水合后及手动切换语言时由这里接管；支付地区不受语言切换影响）。
+  // 界面语言变化时同步 <html lang>（SSR 时由 RootDocument 按 URL 前缀
+  // 决定，水合后及手动切换语言时由这里接管；支付地区不受语言切换影响）。
   const [uiLocale] = useLocale()
   useEffect(() => {
     try {
@@ -180,6 +183,10 @@ function SoundLab() {
       // 非浏览器环境忽略。
     }
   }, [uiLocale])
+
+  // 子树语言：URL 前缀优先；裸路径回落到 getLocale()
+  // （localStorage → 浏览器语言）。支付地区不受影响。
+  const shellLocale = pathLocale ?? uiLocale
 
   useEffect(() => {
     void refreshAuth()
@@ -196,14 +203,44 @@ function SoundLab() {
       onMixChange: effects.onMixChange,
       onFocusChange(open: boolean) {
         const path = router.state.location.pathname
-        const to = (open ? '/focus' : '/') as '/' | '/focus'
-        if (path.replace(/\/$/, '') !== to.replace(/\/$/, '')) {
+        const locale = localeFromPath(path) ?? getLocale()
+        const to = localizePath(open ? '/focus' : '/', locale) as '/en' | '/zh' | '/en/focus' | '/zh/focus'
+        if (stripLocalePrefix(path).replace(/\/$/, '') !== (open ? '/focus' : '/')) {
           void router.navigate({ to, resetScroll: false })
         }
       },
     })
     controller.current = lab
+    // 落地页 / 混音页预设事件（P1）：LandingCopy 与 MixPage 发事件，
+    // 外壳转交音频引擎。监听器注册在 mount useLayoutEffect 里，
+    // 先于子组件的 useEffect 执行，所以落地页挂载时发出的预设不会丢。
+    // apply-preset：只摆推子，不播放、不进沉浸模式。
+    // play-mix：播放整杯（用户手势触发，音频可初始化）。
+    // save-mix：把名字填进保存框并点保存（走引擎已有保存流程）。
+    function onApplyPreset(event: Event) {
+      const mix = (event as CustomEvent)?.detail?.mix
+      if (mix) controller.current?.setMix(mix)
+    }
+    function onPlayMix(event: Event) {
+      const detail = (event as CustomEvent)?.detail
+      if (detail?.mix) {
+        controller.current?.playRecipe({ name: detail.name, mix: detail.mix, params: detail.params })
+      }
+    }
+    function onSaveMix(event: Event) {
+      const name = (event as CustomEvent)?.detail?.name
+      const input = document.getElementById('recipeName') as HTMLInputElement | null
+      const btn = document.getElementById('saveBtn')
+      if (input && typeof name === 'string' && name) input.value = name
+      btn?.click()
+    }
+    window.addEventListener('soundcocktail:apply-preset', onApplyPreset)
+    window.addEventListener('soundcocktail:play-mix', onPlayMix)
+    window.addEventListener('soundcocktail:save-mix', onSaveMix)
     return () => {
+      window.removeEventListener('soundcocktail:apply-preset', onApplyPreset)
+      window.removeEventListener('soundcocktail:play-mix', onPlayMix)
+      window.removeEventListener('soundcocktail:save-mix', onSaveMix)
       lab.dispose()
       effects.dispose()
       controller.current = null
@@ -215,7 +252,7 @@ function SoundLab() {
   }, [focusRoute])
 
   return (
-    <>
+    <LocaleContext.Provider value={shellLocale}>
       <View
         recipes={RECIPES}
         sounds={SOUNDS}
@@ -227,6 +264,6 @@ function SoundLab() {
         onAuthChange={refreshAuth}
       />
       <Outlet />
-    </>
+    </LocaleContext.Provider>
   )
 }

@@ -4,8 +4,20 @@
 
 ## Pages
 
-- [Sound Cocktail](https://soundcocktail.app/): Mix ambient sounds like a cocktail. 22 sounds, live recordings, instrument samples and live synthesis. Save mixes as recipes and share them.
-- [Focus mode](https://soundcocktail.app/focus): Immersive focus mode — rain, brown noise and café ambience for deep work and studying. One timer, one cup of sound, nothing else on screen.
+- [Sound Cocktail](https://soundcocktail.app/en): Mix ambient sounds like a cocktail. 22 sounds, live recordings, instrument samples and live synthesis. Save mixes as recipes and share them.
+- [Sound Cocktail （中文）](https://soundcocktail.app/zh): 免费环境音混音器：22 种白噪音与环境音，随意混搭、存成一杯，助眠或专注都用得上。
+- [Rain sounds for sleep](https://soundcocktail.app/en/sleep): Steady rain, a little piano and wind — the most-saved mix for sleep.
+- [雨声助眠](https://soundcocktail.app/zh/sleep): 稳定的雨声、一点钢琴和风，最多人保存的助眠配方。
+- [Focus sounds for studying](https://soundcocktail.app/en/focus): Café voices, keyboard taps and a little guitar for deep work and studying.
+- [专注白噪音](https://soundcocktail.app/zh/focus): 咖啡馆人声、键盘轻敲和一点吉他，陪你深度工作与学习。
+- [Relaxing sounds to wind down](https://soundcocktail.app/en/relax): Fire, wind and a little piano — slow sounds for the last hour of the day.
+- [放松白噪音](https://soundcocktail.app/zh/relax): 篝火、风和一点钢琴，给一天最后一小时的慢声音。
+- [Rain sounds](https://soundcocktail.app/en/rain): Rain on a window with a stream underneath — the plainest mix, and the most-played.
+- [雨声](https://soundcocktail.app/zh/rain): 窗边的雨，下面一条溪流，站里最简单、也最多人听的配方。
+- [Café ambience for writing](https://soundcocktail.app/en/cafe): Low voices, keyboard taps and a little piano — a café where nobody bothers you.
+- [咖啡馆背景音](https://soundcocktail.app/zh/cafe): 低声交谈、键盘轻敲和一点钢琴，那种没人打扰你的咖啡馆的声音。
+- [About Sound Cocktail](https://soundcocktail.app/en/about): Made by one independent developer. How the sounds were made, what it costs, and what it is not.
+- [关于 Sound Cocktail](https://soundcocktail.app/zh/about): 一个独立开发者的作品：声音是怎么来的、多少钱、它不是什么。
 
 ## Sound packs (one-time purchase)
 
