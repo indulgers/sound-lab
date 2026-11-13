@@ -48,7 +48,7 @@ try {
   await slider.focus();
   await slider.press('ArrowLeft');
   assert.notEqual(await slider.inputValue(), before, 'sound slider must actually change');
-  await dialog.getByRole('button', { name: /保存这份配比/ }).click();
+  await dialog.getByRole('button', { name: /保存这段旅程/ }).click();
   await dialog.getByRole('button', { name: /关闭/ }).click();
   console.log('PASS: sound controls and saved mix');
   await page.locator('.sc-leave').click();
@@ -61,6 +61,18 @@ try {
   await page.waitForFunction(() => document.querySelector('.scene-experience')?.dataset.audioState === 'playing', null, { timeout: 60000 });
   await page.screenshot({ path: 'preview-qa/desktop-meditate-playing.png', fullPage: true });
   console.log('PASS: Bali meditation playback after state switch');
+  await page.getByRole('button', { name: /呼吸引导/ }).first().click();
+  await page.locator('.sc-breath-guide').waitFor({state:'visible'});
+  await page.locator('.sc-breath-guide button').click();
+  await page.locator('.sc-breath-guide').waitFor({state:'hidden'});
+  await page.locator('.sc-player-actions button').first().click();
+  const places=page.locator('.sc-dialog[open]');
+  await places.locator('.sc-gallery-card').first().waitFor();
+  assert.ok(await places.locator('.sc-gallery-card').count()>=8,'all six places and all states must be discoverable');
+  await places.getByRole('button', {name:/茶室静水/}).click();
+  await page.locator('[data-scene="kyoto"]').waitFor();
+  await page.waitForFunction(() => document.querySelector('.scene-experience')?.dataset.audioState==='playing',null,{timeout:60000});
+  console.log('PASS: immersive journey switch and Kyoto long-form playback');
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
   mobile.on('pageerror', error => events.push(error.message));
