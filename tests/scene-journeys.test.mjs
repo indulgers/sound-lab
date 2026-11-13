@@ -89,3 +89,22 @@ test('all prototypes allow unrestricted listening without clinical effect or pri
     assert.ok(Object.values(controlsForJourney(j)).every(v=>v>=0&&v<=1));
   }
 });
+
+test('Chiang Mai focus defaults to no human conversation, but retains a separately adjustable optional recording', () => {
+  const journey=journeyById('focus-chiang-mai');
+  const place=sceneForJourney(journey);
+  const speech=place.layers.find(layer=>layer.id==='ambience');
+  assert.ok(speech && speech.containsSpeech);
+  assert.equal(speech.defaultLevel,0);
+  assert.equal(journey.mix.ambience,0);
+  assert.equal(levelsForJourney(journey).ambience,0);
+  assert.equal(levelsForJourney(journey,{ambience:.045}).ambience,.045);
+  const legacy=sceneForJourney(journey,'3.1');
+  assert.equal(legacy.layers.find(layer=>layer.id==='ambience').defaultLevel,0);
+});
+
+test('mood-specific scene suggestions never silently switch the chosen intention', () => {
+  assert.deepEqual(journeysForIntent('focus').map(j=>j.sceneId),['chiang-mai','da-lat','lisbon']);
+  assert.deepEqual(journeysForIntent('meditate').map(j=>j.sceneId),['bali','kyoto']);
+  assert.deepEqual(journeysForIntent('relax').map(j=>j.sceneId),['da-lat','bali','hoi-an']);
+});
