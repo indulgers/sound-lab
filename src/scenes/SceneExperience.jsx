@@ -256,10 +256,19 @@ export default function SceneExperience() {
     const next=event.target.value; setLocale(next); void navigate({to:localizePath('/',next),resetScroll:false});
   }
   const timerLabel = deadline ? `${Math.ceil(remaining/60000)} ${C.minutes}` : C.continuous;
+  const focusLabel = focusSession ? `${Math.floor(focusSecondsRemaining/60)}:${String(focusSecondsRemaining%60).padStart(2,'0')}` : null;
   const dialogTitle = panel==='mix' ? C.soundTitle : panel==='timer' ? C.timerTitle : panel==='saved' ? C.savedTitle : panel==='info' ? C.info : C.choose;
+  useEffect(() => {
+    if (focusSession && focusSecondsRemaining <= 0) {
+      setFocusSession(null);
+      setToast(M.break);
+    }
+  }, [focusSession, focusSecondsRemaining, M.break]);
 
   return <section ref={root} className={`scene-experience ${immersive?'sc-immersive':''} ${entered?'sc-entered':''}`} data-scene={sceneId} data-intent={intentId||'choose'} data-audio-state={audio.status}>
     <SceneVideo scene={scene} motion={motion} onUnavailable={setVideoUnavailable}/>
+    {intentId && playing && <div className="sc-chapter-hint" aria-live="off">{M.chapter} · {scene.chapters?.[audio.chapter || 0] || ''}</div>}
+    {intentId === 'meditate' && breath && playing && <div className="sc-breath-guide" role="status"><div className="sc-breath-circle"/><span>{locale==='zh'?'缓缓吸气 · 缓缓呼气':'Breathe in · breathe out'}</span><button onClick={()=>setBreath(false)} aria-label={locale==='zh'?'关闭呼吸引导':'Close breathing guide'}>×</button></div>}
     <header className="sc-header">
       <a href={localizePath('/',locale)} className="sc-brand-link" aria-label="Sound Cocktail"><Brand/></a>
       <nav className="sc-nav" aria-label={locale==='zh'?'场景导航':'Scene navigation'}>
@@ -296,7 +305,7 @@ export default function SceneExperience() {
 
     {intentId && <div className="sc-place-preview">
       <span className="sc-kicker">{C.change}</span>
-      <div className="sc-place-chips">{SCENES.map(place=>{const next=journeyForScene(place.id,intentId);return <button key={place.id} className={`sc-place-chip ${sceneId===place.id?'is-current':''}`} onClick={()=>choosePlace(place)} aria-pressed={sceneId===place.id} aria-label={`${T(place.name)} · ${T(intentById(next?.intentId)?.name)}`}><img src={place.poster} alt=""/><span><small>{T(intentById(next?.intentId)?.name)}</small>{T(place.name)}</span>{place.id===sceneId?<span className="sc-chip-dot"/>:<Icon name="arrow"/>}</button>;})}</div>
+      <div className="sc-place-chips">{SCENES.slice(0,3).map(place=>{const next=journeyForScene(place.id,intentId);return <button key={place.id} className={`sc-place-chip ${sceneId===place.id?'is-current':''}`} onClick={()=>choosePlace(place)} aria-pressed={sceneId===place.id} aria-label={`${T(place.name)} · ${T(intentById(next?.intentId)?.name)}`}><img src={place.poster} alt=""/><span><small>{T(intentById(next?.intentId)?.name)}</small>{T(place.name)}</span>{place.id===sceneId?<span className="sc-chip-dot"/>:<Icon name="arrow"/>}</button>;})}</div>
     </div>}
 
     {immersive && <button className="sc-leave sc-glass-button" onClick={()=>setImmersive(false)}><Icon name="back"/>{C.leave}</button>}
@@ -306,14 +315,15 @@ export default function SceneExperience() {
         <div className="sc-now"><strong>{T(scene.trackTitle)}</strong><span>{loading?C.loading:playing?C.listening:entered?C.paused:C.ready}</span></div>
         <div className="sc-master"><Icon name="sound"/><input type="range" min="0" max="1" step=".01" aria-label={C.volume} value={prefs.master} onChange={event=>changeMaster(event.target.value)} style={{'--range-value':`${prefs.master*100}%`}}/></div>
         <div className="sc-player-actions">
+          <button onClick={()=>openPanel('places')} aria-label={M.journey} title={M.journey} aria-haspopup="dialog"><Icon name="leaf"/></button>
           <button onClick={()=>openPanel('mix')} aria-label={C.sound} aria-haspopup="dialog"><Icon name="tune"/><span>{C.sound}</span></button>
           <button className={deadline?'sc-timer-active':''} onClick={()=>openPanel('timer')} aria-label={`${C.timer}: ${timerLabel}`} aria-haspopup="dialog"><Icon name="clock"/><span>{timerLabel}</span></button>
           <button onClick={()=>setImmersive(value=>!value)} aria-label={immersive?C.leave:C.immersive} aria-pressed={immersive}><Icon name="expand"/></button>
         </div>
       </div>
-      <div className="sc-bottom-line"><span>{C.foot}</span><div><button onClick={toggleMotion} aria-pressed={!motion}><Icon name={motion?'pause':'motion'}/><span>{motion?C.motionOn:C.motionOff}</span></button><button onClick={()=>openPanel('info')} aria-label={C.info}><Icon name="info"/></button><button className="sc-fullscreen" onClick={toggleFullscreen} aria-label={full?C.exitFull:C.full}><Icon name="expand"/></button></div></div>
+      <div className="sc-bottom-line"><span>{focusLabel ? `${M.focus} · ${focusLabel}` : C.foot}</span><div>{intentId==='meditate' && <button onClick={()=>setBreath(v=>!v)} aria-pressed={breath}><Icon name="wind"/>{M.breathe}</button>}{intentId==='focus' && <button onClick={()=>openPanel('timer')}><Icon name="clock"/>{focusLabel || M.focus}</button>}<button onClick={toggleMotion} aria-pressed={!motion}><Icon name={motion?'pause':'motion'}/><span>{motion?C.motionOn:C.motionOff}</span></button><button onClick={()=>openPanel('info')} aria-label={C.info}><Icon name="info"/></button><button className="sc-fullscreen" onClick={toggleFullscreen} aria-label={full?C.exitFull:C.full}><Icon name="expand"/></button></div></div>
     </div>}
-    {videoUnavailable && <span className="sc-video-status">{C.videoFallback}</span>}
+    {videoUnavailable && <span className="sc-video-status">{scene.video ? C.videoFallback : M.noFilm}</span>}
     {audio.status==='error' && <div className="sc-error" role="alert"><span>{C.error}</span><button onClick={()=>void player.current?.play()}>{C.retry}<Icon name="arrow"/></button></div>}
     <div className="sc-toast" role="status" aria-live="polite">{toast}</div>
 
@@ -321,9 +331,33 @@ export default function SceneExperience() {
       <div className="sc-dialog-inner">
         <div className="sc-dialog-head"><span className="sc-kicker">SOUND COCKTAIL · {T(scene.name)}</span><button className="sc-icon-button" aria-label={C.close} onClick={closePanel}><Icon name="close"/></button></div>
         <h2 id="sc-dialog-title">{dialogTitle}</h2>
-        {panel==='mix' && <><p className="sc-panel-sub">{C.soundSub}</p><div className="sc-layers">{scene.layers.map(layer=><div className="sc-layer" key={layer.id}><div className="sc-layer-title"><span><Icon name={layer.icon}/>{T(layer.label)}</span><output>{Math.round(levels[layer.id]*100)}<small>%</small></output></div><input type="range" min="0" max="1" step=".01" value={levels[layer.id]} aria-label={T(layer.label)} onChange={event=>changeLevel(layer.id,event.target.value)} style={{'--range-value':`${levels[layer.id]*100}%`}}/><small>{T(layer.detail)}</small></div>)}</div><div className="sc-sheet-master"><label htmlFor="sc-sheet-volume"><Icon name="sound"/>{C.volume}<output>{Math.round(prefs.master*100)}%</output></label><input id="sc-sheet-volume" type="range" min="0" max="1" step=".01" value={prefs.master} onChange={event=>changeMaster(event.target.value)} style={{'--range-value':`${prefs.master*100}%`}}/></div><div className="sc-sheet-status" role="status">{toast}</div><div className="sc-panel-buttons"><button onClick={resetMix}>{C.reset}</button><button className="sc-primary" onClick={saveMix}><Icon name="bookmark"/>{C.save}</button></div><span className="sc-panel-foot"><Icon name="leaf"/>{T(scene.note)}</span></>}
+        {panel==='mix' && <>
+          <p className="sc-panel-sub">{C.soundSub}</p>
+          <h3 className="sc-mixer-section">{M.simple}</h3>
+          <div className="sc-emotion-controls">{['warmth','space','energy','nature'].map(key=><div className="sc-emotion-control" key={key}>
+            <label htmlFor={`sc-mix-${key}`}><span>{M[key]}</span><output>{Math.round((controls[key] ?? .5)*100)}%</output></label>
+            <input id={`sc-mix-${key}`} type="range" min="0" max="1" step=".01" value={controls[key] ?? .5} onChange={event=>changeControl(key,event.target.value)} style={{'--range-value':`${(controls[key]??.5)*100}%`}}/>
+          </div>)}</div>
+          <button className="sc-advanced-toggle" onClick={()=>setAdvanced(v=>!v)} aria-expanded={advanced}>{M.advanced} <Icon name="tune"/></button>
+          {advanced && <div className="sc-advanced-mixer">
+            <div className="sc-layers">{scene.layers.map(layer=><div className="sc-layer" key={layer.id}>
+              <div className="sc-layer-title"><span><Icon name={layer.icon}/>{T(layer.label)}</span><output>{Math.round((levels[layer.id] ?? layer.defaultLevel)*100)}<small>%</small></output></div>
+              <input type="range" min="0" max="1" step=".01" value={levels[layer.id] ?? layer.defaultLevel} aria-label={T(layer.label)} onChange={event=>changeLevel(layer.id,event.target.value)} style={{'--range-value':`${(levels[layer.id]??layer.defaultLevel)*100}%`}}/><small>{T(layer.detail)}</small>
+            </div>)}</div>
+            {scene.legacyLayers?.length>0 && <button className="sc-version-button" onClick={switchVersion}>{audioVersion==='3.2'?M.compare:M.newVersion} · {audioVersion}</button>}
+            <div className="sc-mixer-provenance">{locale==='zh'?'长时音景为程序合成实验；音符密度控制通过细节声部分段门控实现。':'Long-form music is a procedural prototype. Musical activity gates intervals of the detail stem.'}</div>
+          </div>}
+          <div className="sc-sheet-master"><label htmlFor="sc-sheet-volume"><Icon name="sound"/>{C.volume}<output>{Math.round(prefs.master*100)}%</output></label><input id="sc-sheet-volume" type="range" min="0" max="1" step=".01" value={prefs.master} onChange={event=>changeMaster(event.target.value)} style={{'--range-value':`${prefs.master*100}%`}}/></div>
+          <div className="sc-sheet-status" role="status">{toast}</div><div className="sc-panel-buttons"><button onClick={resetMix}>{C.reset}</button><button className="sc-primary" onClick={saveMix}><Icon name="bookmark"/>{M.save}</button></div>
+        </>}
         {(panel==='places'||panel==='saved') && <><p className="sc-panel-sub">{panel==='saved'?C.savedSub:C.chooseSub}</p><div className="sc-gallery">{JOURNEYS.filter(next=>panel!=='saved'||prefs.mixes[next.id]).map(next=>{const place=sceneById(next.sceneId);return <button className={`sc-gallery-card ${journey?.id===next.id?'is-current':''}`} onClick={()=>selectJourney(next)} key={next.id}><img src={place.poster} alt=""/><span className="sc-gallery-number">{place.number}</span><div><small>{T(intentById(next.intentId)?.name)} · {T(place.location)}</small><h3>{T(next.name)}</h3><span>{panel==='saved'?C.loadSaved:journey?.id===next.id?C.here:C.go}<Icon name={journey?.id===next.id?'check':'arrow'}/></span></div></button>;})}</div>{panel==='saved'&&!JOURNEYS.some(next=>prefs.mixes[next.id])&&<p className="sc-empty">{C.noneSaved}</p>}<div className="sc-gallery-links"><Link to={localizePath('/studio',locale)} onClick={closePanel}>{C.studio}<Icon name="arrow"/></Link><button onClick={()=>setPanel(panel==='saved'?'places':'saved')}>{panel==='saved'?C.places:C.saved}<Icon name="bookmark"/></button></div></>}
-        {panel==='timer' && <><p className="sc-panel-sub">{C.timerSub}</p><div className="sc-timer-options">{[0,20,30,45,60,90].map(minutes=><button key={minutes} onClick={()=>chooseTimer(minutes)} className={!deadline&&minutes===0?'is-selected':''}>{minutes?`${minutes} ${C.minutes}`:C.continuous}<Icon name={minutes?'clock':'wind'}/></button>)}</div></>}
+        {panel==='timer' && <>
+          <p className="sc-panel-sub">{C.timerSub}</p>
+          {intentId==='focus' && <div className="sc-focus-options"><h3>{M.focus}</h3><p className="sc-panel-sub">{locale==='zh'?'专注计时仅作提醒，音乐不会被打断。暂停播放也会暂停计时。':'A gentle focus reminder; music never cuts off. Pausing sound pauses the clock.'}</p>
+            <div className="sc-timer-options">{[0,25,45,60].map(minutes=><button key={minutes} onClick={()=>startFocus(minutes)}>{minutes?`${minutes} ${C.minutes}`:C.continuous}<Icon name={minutes?'clock':'wind'}/></button>)}</div>
+          </div>}
+          <h3>{C.timer}</h3><div className="sc-timer-options">{[0,20,30,45,60,90].map(minutes=><button key={minutes} onClick={()=>chooseTimer(minutes)} className={!deadline&&minutes===0?'is-selected':''}>{minutes?`${minutes} ${C.minutes}`:C.continuous}<Icon name={minutes?'clock':'wind'}/></button>)}</div>
+        </>}
         {panel==='info' && <div className="sc-credits"><span className="sc-credit-tag">{C.inspired}</span><p>{C.inspiredText}</p><h3>{C.musicCredit}</h3><p>{C.continuousNote}</p><h3>{C.videoCredit}</h3><p><a href="https://www.pexels.com/video/view-of-the-flowing-water-in-the-forest-8310457/" target="_blank" rel="noreferrer">Forest stream · I Am Sorin / Pexels</a></p><p><a href="https://www.pexels.com/video/charming-cafe-with-lush-garden-view-40913579/" target="_blank" rel="noreferrer">Garden café · LayG Traveller / Pexels</a><br/>{locale==='zh'?'清迈灵感声景 · 影像摄于阳朔':'Chiang Mai-inspired soundscape · filmed in Yangshuo'}</p><p><a href="/assets/scenes/credits.json" target="_blank" rel="noreferrer">{locale==='zh'?'完整视频来源与授权记录':'Complete film sources & license record'}</a></p><Link to={localizePath('/sources',locale)} onClick={closePanel}>{C.sources}<Icon name="arrow"/></Link></div>}
       </div>
     </dialog>
