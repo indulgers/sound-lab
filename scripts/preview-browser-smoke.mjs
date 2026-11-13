@@ -42,6 +42,11 @@ try {
   await warm.focus(); await warm.press('ArrowLeft');
   assert.notEqual(await warm.inputValue(), warmBefore, 'warmth must change in simple mode');
   await dialog.locator('.sc-advanced-toggle').click();
+  assert.equal(await dialog.locator('.sc-eq-controls .sc-emotion-control').count(), 5, 'advanced EQ, reverb and stereo width must be present');
+  const widthSlider=dialog.locator('#sc-advanced-width');
+  const beforeWidth=await widthSlider.inputValue();
+  await widthSlider.focus(); await widthSlider.press('ArrowRight');
+  assert.notEqual(await widthSlider.inputValue(),beforeWidth,'stereo width must be adjustable');
   assert.equal(await dialog.locator('.sc-layer').count(), 4, 'advanced mixer must expose real synced stems');
   const slider = dialog.locator('.sc-layers input[type=range]').first();
   const before = await slider.inputValue();
@@ -51,6 +56,11 @@ try {
   await dialog.getByRole('button', { name: /保存这段旅程/ }).click();
   await dialog.getByRole('button', { name: /关闭/ }).click();
   console.log('PASS: sound controls and saved mix');
+  await page.getByRole('button', { name: /定时停止/ }).first().click();
+  await page.locator('.sc-dialog[open] .sc-focus-options').waitFor();
+  await page.locator('.sc-focus-options').getByRole('button', { name: /25/ }).click();
+  assert.match(await page.locator('.sc-bottom-line').innerText(), /专注时段/);
+  console.log('PASS: focus timer starts independently of music cutoff');
   await page.locator('.sc-leave').click();
   await page.locator('.sc-change-goal').click();
   await page.locator('[data-intent="choose"]').waitFor();
@@ -72,6 +82,7 @@ try {
   await places.getByRole('button', {name:/茶室静水/}).click();
   await page.locator('[data-scene="kyoto"]').waitFor();
   await page.waitForFunction(() => document.querySelector('.scene-experience')?.dataset.audioState==='playing',null,{timeout:60000});
+  await page.screenshot({ path: 'preview-qa/desktop-kyoto-playing.png', fullPage: true });
   console.log('PASS: immersive journey switch and Kyoto long-form playback');
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
