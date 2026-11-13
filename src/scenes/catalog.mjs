@@ -5,7 +5,10 @@ const longLayers = (slug, ambience = null) => [
   { id:'harmony', label: label('Harmony','和声铺底'), detail: label('Slowly evolving original harmony','渐变的和声层'), file: journeyFile(slug,'harmony'), defaultLevel:.78, icon:'music' },
   { id:'details', label: label('Musical details','音乐细节'), detail: label('Occasional motifs and answering tones','少量主题与回应'), file: journeyFile(slug,'details'), defaultLevel:.54, icon:'spark' },
   { id:'atmosphere', label: label('Air & texture','空气与纹理'), detail: label('Synthetic atmosphere, not a location recording','合成氛围纹理，非真实当地录音'), file: journeyFile(slug,'atmosphere'), defaultLevel:.47, icon:'wind' },
-  ...(ambience ? [{ id:'ambience', label: label('Environment','环境声'), detail:label('Separate environment recording','独立环境录音'),file:ambience,defaultLevel:.12,icon:'leaf' }] : []),
+  ...(ambience ? [{ id:'ambience',
+    label: ambience.includes('/cafe.') ? label('Café voices (optional)','咖啡馆人声（可选）') : label('Forest ambience','森林环境声'),
+    detail: ambience.includes('/cafe.') ? label('Contains conversations; off by default for focus','包含交谈声音；专注模式默认关闭') : label('Separate environment recording','独立环境录音'),
+    file:ambience,defaultLevel:ambience.includes('/cafe.') ? 0 : .12,containsSpeech:ambience.includes('/cafe.'),icon:'leaf' }] : []),
 ];
 
 export const SCENES = [
@@ -51,7 +54,7 @@ export const SCENES = [
       { id: 'music', label: label('Music', '音乐'), detail: label('Warm keys, harmony & light rhythm', '暖琴、和声与轻节奏'), file: musicFile('chiang-mai-score'), defaultLevel: .85, icon: 'music' },
       { id: 'texture', label: label('Wood tones', '木质拨弦'), detail: label('Gentle, separate plucked notes', '独立的轻柔拨弦声部'), file: musicFile('chiang-mai-wood'), defaultLevel: .8, icon: 'spark' },
       { id: 'air', label: label('Air texture', '空气纹理'), detail: label('A soft, synthesized atmosphere', '轻柔的合成氛围'), file: musicFile('chiang-mai-air'), defaultLevel: .55, icon: 'wind' },
-      { id: 'ambience', label: label('Café ambience', '咖啡馆环境声'), detail: label('A separate café recording', '独立咖啡馆录音'), file: '/assets/audio/cafe.mp3', loopOverlapSeconds: 1, defaultLevel: .12, icon: 'cup' },
+      { id: 'ambience', label: label('Café voices (optional)', '咖啡馆人声（可选）'), detail: label('Conversation recording; off by default for focus', '交谈录音；专注时默认关闭'), file: '/assets/audio/cafe.mp3', loopOverlapSeconds: 1, defaultLevel: 0, containsSpeech:true, icon: 'cup' },
     ],
     durationSeconds: 900, audioVersion:'3.2',
     chapters: ['花园开门','暖色琴键','树影摇动','一封未写完的信','回到第一杯咖啡'],
