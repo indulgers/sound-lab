@@ -120,3 +120,23 @@ test('A/B original switch reloads the actual audio files within the same Journey
   assert.equal(h.player.getPlaying(),true);
   h.player.dispose();
 });
+
+test('Nature control never amplifies the opt-in cafe conversation lane', async () => {
+  const h=setup();
+  const withSpeech={...scene,layers:[...scene.layers,{
+    id:'ambience',file:'/assets/audio/cafe.mp3',containsSpeech:true,defaultLevel:0
+  }]};
+  await h.player.setScene(withSpeech,{ambience:.045});
+  await h.player.play();
+  const speechSource=h.context.sources.find(x=>x.media.src==='/assets/audio/cafe.mp3');
+  assert.ok(speechSource);
+  const gain=speechSource.source.connections[0].gain;
+  assert.ok(Math.abs(gain.value-.045)<1e-6);
+  h.player.setMixControls({nature:0});
+  assert.ok(Math.abs(gain.value-.045)<1e-6);
+  h.player.setMixControls({nature:1});
+  assert.ok(Math.abs(gain.value-.045)<1e-6,'Nature cannot amplify human speech');
+  h.player.setLevel('ambience',0);
+  assert.equal(gain.value,0,'quiet button must fully mute crowd');
+  h.player.dispose();
+});
