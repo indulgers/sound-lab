@@ -334,3 +334,11 @@ html[lang="zh-CN"] .sc-intent-options button > span { font-family:Manrope,system
 .scene-experience[data-chapter="2"] .sc-shade { opacity:.78; }
 .scene-experience[data-chapter="3"] .sc-shade { opacity:.85; }
 .scene-experience[data-chapter="4"] .sc-shade { opacity:1; }
+
+/* Subtle 48-second illustration camera drift, clearly distinct from filmed location footage. */
+.sc-landscape[data-artwork="illustration"][data-motion="on"] .sc-poster {
+  animation:sc-scenic-drift 48s ease-in-out infinite alternate;
+  transform-origin:50% 50%;
+}
+@keyframes sc-scenic-drift { 0%{transform:scale(1.02) translateX(0);} 100%{transform:scale(1.10) translateX(-1.2%);} }
+@media(prefers-reduced-motion:reduce){.sc-landscape .sc-poster{animation:none !important;}}
