@@ -10,7 +10,7 @@ class Param {
   cancelScheduledValues(time) { this.events.push(['cancel',time]); }
 }
 class Node {
-  constructor() { this.gain=new Param(); this.frequency=new Param(); this.delayTime=new Param(); this.threshold=new Param(); this.knee=new Param();this.ratio=new Param();this.attack=new Param();this.release=new Param();this.connections=[]; }
+  constructor() { this.gain=new Param(); this.frequency=new Param(); this.Q=new Param(); this.delayTime=new Param(); this.threshold=new Param(); this.knee=new Param();this.ratio=new Param();this.attack=new Param();this.release=new Param();this.connections=[]; }
   connect(node) { this.connections.push(node);return node; }
   disconnect() { this.connections.length=0; }
 }
@@ -22,10 +22,17 @@ class TestMedia {
   removeAttribute() {}
 }
 class TestContext {
-  constructor() { this.currentTime=10;this.destination=new Node();this.gains=[];this.sources=[];this.compressor=null;this.state='suspended'; }
+  constructor() { this.sampleRate=1000;this.currentTime=10;this.destination=new Node();this.gains=[];this.sources=[];this.compressor=null;this.state='suspended'; }
   createGain() { const n=new Node();this.gains.push(n);return n; }
   createBiquadFilter() { return new Node(); }
   createDelay() { return new Node(); }
+  createConvolver() { return new Node(); }
+  createChannelSplitter() { return new Node(); }
+  createChannelMerger() { return new Node(); }
+  createBuffer(channels, length, sampleRate) {
+    const data=Array.from({length:channels},()=>new Float32Array(length));
+    return {numberOfChannels:channels,length,sampleRate,getChannelData:c=>data[c]};
+  }
   createDynamicsCompressor() { this.compressor=new Node();return this.compressor; }
   createMediaElementSource(media) { const source=new Node();this.sources.push({media,source});return source; }
   resume() { this.state='running';return Promise.resolve(); }
@@ -55,7 +62,7 @@ test('streaming transport stages silently and starts aligned media elements, nev
   assert.ok(h.media.every(m=>m.loop && m.events.includes('play')));
   assert.equal(h.context.compressor.ratio.value,10);
   assert.equal(h.states.at(-1).status,'playing');
-  h.player.setMixControls({warmth:.8,space:.7,energy:0,nature:.9});
+  h.player.setMixControls({warmth:.8,space:.7,energy:0,nature:.9,bass:.1,mid:.8,treble:.2,width:1,reverb:.9});
   h.player.setLevel('harmony',.3);
   assert.equal(h.player.getPlaying(),true);
   h.player.dispose();assert.equal(h.context.state,'closed');
