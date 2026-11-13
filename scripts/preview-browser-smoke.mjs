@@ -29,6 +29,8 @@ try {
   await page.getByRole('button', { name: /专注/ }).first().click();
   await page.locator('[data-intent="focus"]').waitFor();
   assert.match(await page.locator('.sc-copy h1').innerText(), /清迈/);
+  await page.locator('.sc-poster').evaluate(img=>img.decode());
+  assert.match(await page.locator('.sc-poster').getAttribute('src'),/chiang-mai/,'focus title and visible poster must agree');
   assert.equal(await page.locator('.sc-place-chips button').count(),3,'focus shortcuts must only show focus Journeys');
   assert.ok((await page.locator('.sc-place-chips').innerText()).includes('里斯本'));
   assert.ok(!(await page.locator('.sc-place-chips').innerText()).includes('巴厘岛'));
@@ -81,6 +83,8 @@ try {
   await page.getByRole('button', { name: /冥想/ }).first().click();
   await page.locator('[data-intent="meditate"]').waitFor();
   assert.match(await page.locator('.sc-copy h1').innerText(), /巴厘岛/);
+  await page.locator('.sc-poster').evaluate(img=>img.decode());
+  assert.match(await page.locator('.sc-poster').getAttribute('src'),/bali/);
   await page.locator('.sc-copy .sc-enter').click();
   await page.waitForFunction(() => document.querySelector('.scene-experience')?.dataset.audioState === 'playing', null, { timeout: 60000 });
   await page.screenshot({ path: 'preview-qa/desktop-meditate-playing.png', fullPage: true });
@@ -100,6 +104,8 @@ try {
   await places.screenshot({path:'preview-qa/desktop-meditation-journeys.png'});
   await places.getByRole('button', {name:/茶室静水/}).click();
   await page.locator('[data-scene="kyoto"]').waitFor();
+  await page.locator('.sc-poster').evaluate(img=>img.decode());
+  assert.match(await page.locator('.sc-poster').getAttribute('src'),/kyoto/);
   await page.waitForFunction(() => document.querySelector('.scene-experience')?.dataset.audioState==='playing',null,{timeout:60000});
   await page.screenshot({ path: 'preview-qa/desktop-kyoto-playing.png', fullPage: true });
   console.log('PASS: immersive journey switch and Kyoto long-form playback');
@@ -113,6 +119,7 @@ try {
   await mobile.getByRole('button', { name: /放松/ }).first().click();
   await mobile.locator('[data-intent="relax"]').waitFor();
   assert.match(await mobile.locator('.sc-copy h1').innerText(), /大叻/);
+  await mobile.locator('.sc-poster').evaluate(img=>img.decode());
   await mobile.screenshot({ path: 'preview-qa/mobile-relax-ready.png', fullPage: true });
   console.log('PASS: mobile layout and relaxing journey');
   await mobile.locator('.sc-change-goal').click();
