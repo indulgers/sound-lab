@@ -16,12 +16,14 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as FocusRouteImport } from './routes/focus'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as HoneypotRouteImport } from './routes/honeypot'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RainRouteImport } from './routes/rain'
 import { Route as RelaxRouteImport } from './routes/relax'
 import { Route as ReturnRouteImport } from './routes/return'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SleepRouteImport } from './routes/sleep'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WaffoReturnRouteImport } from './routes/waffo-return'
 import { Route as ApiEntitlementsRouteImport } from './routes/api/entitlements'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
@@ -31,18 +33,22 @@ import { Route as EnAboutRouteImport } from './routes/en/about'
 import { Route as EnCafeRouteImport } from './routes/en/cafe'
 import { Route as EnCheckoutRouteImport } from './routes/en/checkout'
 import { Route as EnFocusRouteImport } from './routes/en/focus'
+import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
 import { Route as EnRainRouteImport } from './routes/en/rain'
 import { Route as EnRelaxRouteImport } from './routes/en/relax'
 import { Route as EnSleepRouteImport } from './routes/en/sleep'
+import { Route as EnTermsRouteImport } from './routes/en/terms'
 import { Route as MixCodeRouteImport } from './routes/mix.$code'
 import { Route as ZhIndexRouteImport } from './routes/zh/index'
 import { Route as ZhAboutRouteImport } from './routes/zh/about'
 import { Route as ZhCafeRouteImport } from './routes/zh/cafe'
 import { Route as ZhCheckoutRouteImport } from './routes/zh/checkout'
 import { Route as ZhFocusRouteImport } from './routes/zh/focus'
+import { Route as ZhPrivacyRouteImport } from './routes/zh/privacy'
 import { Route as ZhRainRouteImport } from './routes/zh/rain'
 import { Route as ZhRelaxRouteImport } from './routes/zh/relax'
 import { Route as ZhSleepRouteImport } from './routes/zh/sleep'
+import { Route as ZhTermsRouteImport } from './routes/zh/terms'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
@@ -98,6 +104,11 @@ const HoneypotRoute = HoneypotRouteImport.update({
   path: '/honeypot',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RainRoute = RainRouteImport.update({
   id: '/rain',
   path: '/rain',
@@ -126,6 +137,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SleepRoute = SleepRouteImport.update({
   id: '/sleep',
   path: '/sleep',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WaffoReturnRoute = WaffoReturnRouteImport.update({
@@ -173,6 +189,11 @@ const EnFocusRoute = EnFocusRouteImport.update({
   path: '/en/focus',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnPrivacyRoute = EnPrivacyRouteImport.update({
+  id: '/en/privacy',
+  path: '/en/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnRainRoute = EnRainRouteImport.update({
   id: '/en/rain',
   path: '/en/rain',
@@ -186,6 +207,11 @@ const EnRelaxRoute = EnRelaxRouteImport.update({
 const EnSleepRoute = EnSleepRouteImport.update({
   id: '/en/sleep',
   path: '/en/sleep',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnTermsRoute = EnTermsRouteImport.update({
+  id: '/en/terms',
+  path: '/en/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MixCodeRoute = MixCodeRouteImport.update({
@@ -218,6 +244,11 @@ const ZhFocusRoute = ZhFocusRouteImport.update({
   path: '/zh/focus',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZhPrivacyRoute = ZhPrivacyRouteImport.update({
+  id: '/zh/privacy',
+  path: '/zh/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ZhRainRoute = ZhRainRouteImport.update({
   id: '/zh/rain',
   path: '/zh/rain',
@@ -231,6 +262,11 @@ const ZhRelaxRoute = ZhRelaxRouteImport.update({
 const ZhSleepRoute = ZhSleepRouteImport.update({
   id: '/zh/sleep',
   path: '/zh/sleep',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZhTermsRoute = ZhTermsRouteImport.update({
+  id: '/zh/terms',
+  path: '/zh/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
@@ -337,12 +373,14 @@ export interface FileRoutesByFullPath {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/honeypot': typeof HoneypotRoute
+  '/privacy': typeof PrivacyRoute
   '/rain': typeof RainRoute
   '/relax': typeof RelaxRoute
   '/return': typeof ReturnRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sleep': typeof SleepRoute
+  '/terms': typeof TermsRoute
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
@@ -351,17 +389,21 @@ export interface FileRoutesByFullPath {
   '/en/cafe': typeof EnCafeRoute
   '/en/checkout': typeof EnCheckoutRoute
   '/en/focus': typeof EnFocusRoute
+  '/en/privacy': typeof EnPrivacyRoute
   '/en/rain': typeof EnRainRoute
   '/en/relax': typeof EnRelaxRoute
   '/en/sleep': typeof EnSleepRoute
+  '/en/terms': typeof EnTermsRoute
   '/mix/$code': typeof MixCodeRoute
   '/zh/about': typeof ZhAboutRoute
   '/zh/cafe': typeof ZhCafeRoute
   '/zh/checkout': typeof ZhCheckoutRoute
   '/zh/focus': typeof ZhFocusRoute
+  '/zh/privacy': typeof ZhPrivacyRoute
   '/zh/rain': typeof ZhRainRoute
   '/zh/relax': typeof ZhRelaxRoute
   '/zh/sleep': typeof ZhSleepRoute
+  '/zh/terms': typeof ZhTermsRoute
   '/en/': typeof EnIndexRoute
   '/zh/': typeof ZhIndexRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
@@ -392,12 +434,14 @@ export interface FileRoutesByTo {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/honeypot': typeof HoneypotRoute
+  '/privacy': typeof PrivacyRoute
   '/rain': typeof RainRoute
   '/relax': typeof RelaxRoute
   '/return': typeof ReturnRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sleep': typeof SleepRoute
+  '/terms': typeof TermsRoute
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
@@ -406,17 +450,21 @@ export interface FileRoutesByTo {
   '/en/cafe': typeof EnCafeRoute
   '/en/checkout': typeof EnCheckoutRoute
   '/en/focus': typeof EnFocusRoute
+  '/en/privacy': typeof EnPrivacyRoute
   '/en/rain': typeof EnRainRoute
   '/en/relax': typeof EnRelaxRoute
   '/en/sleep': typeof EnSleepRoute
+  '/en/terms': typeof EnTermsRoute
   '/mix/$code': typeof MixCodeRoute
   '/zh/about': typeof ZhAboutRoute
   '/zh/cafe': typeof ZhCafeRoute
   '/zh/checkout': typeof ZhCheckoutRoute
   '/zh/focus': typeof ZhFocusRoute
+  '/zh/privacy': typeof ZhPrivacyRoute
   '/zh/rain': typeof ZhRainRoute
   '/zh/relax': typeof ZhRelaxRoute
   '/zh/sleep': typeof ZhSleepRoute
+  '/zh/terms': typeof ZhTermsRoute
   '/en': typeof EnIndexRoute
   '/zh': typeof ZhIndexRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
@@ -448,12 +496,14 @@ export interface FileRoutesById {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/honeypot': typeof HoneypotRoute
+  '/privacy': typeof PrivacyRoute
   '/rain': typeof RainRoute
   '/relax': typeof RelaxRoute
   '/return': typeof ReturnRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sleep': typeof SleepRoute
+  '/terms': typeof TermsRoute
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
@@ -462,17 +512,21 @@ export interface FileRoutesById {
   '/en/cafe': typeof EnCafeRoute
   '/en/checkout': typeof EnCheckoutRoute
   '/en/focus': typeof EnFocusRoute
+  '/en/privacy': typeof EnPrivacyRoute
   '/en/rain': typeof EnRainRoute
   '/en/relax': typeof EnRelaxRoute
   '/en/sleep': typeof EnSleepRoute
+  '/en/terms': typeof EnTermsRoute
   '/mix/$code': typeof MixCodeRoute
   '/zh/about': typeof ZhAboutRoute
   '/zh/cafe': typeof ZhCafeRoute
   '/zh/checkout': typeof ZhCheckoutRoute
   '/zh/focus': typeof ZhFocusRoute
+  '/zh/privacy': typeof ZhPrivacyRoute
   '/zh/rain': typeof ZhRainRoute
   '/zh/relax': typeof ZhRelaxRoute
   '/zh/sleep': typeof ZhSleepRoute
+  '/zh/terms': typeof ZhTermsRoute
   '/en/': typeof EnIndexRoute
   '/zh/': typeof ZhIndexRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
@@ -505,12 +559,14 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/honeypot'
+    | '/privacy'
     | '/rain'
     | '/relax'
     | '/return'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/sleep'
+    | '/terms'
     | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
@@ -519,17 +575,21 @@ export interface FileRouteTypes {
     | '/en/cafe'
     | '/en/checkout'
     | '/en/focus'
+    | '/en/privacy'
     | '/en/rain'
     | '/en/relax'
     | '/en/sleep'
+    | '/en/terms'
     | '/mix/$code'
     | '/zh/about'
     | '/zh/cafe'
     | '/zh/checkout'
     | '/zh/focus'
+    | '/zh/privacy'
     | '/zh/rain'
     | '/zh/relax'
     | '/zh/sleep'
+    | '/zh/terms'
     | '/en/'
     | '/zh/'
     | '/api/auth/login'
@@ -560,12 +620,14 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/honeypot'
+    | '/privacy'
     | '/rain'
     | '/relax'
     | '/return'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/sleep'
+    | '/terms'
     | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
@@ -574,17 +636,21 @@ export interface FileRouteTypes {
     | '/en/cafe'
     | '/en/checkout'
     | '/en/focus'
+    | '/en/privacy'
     | '/en/rain'
     | '/en/relax'
     | '/en/sleep'
+    | '/en/terms'
     | '/mix/$code'
     | '/zh/about'
     | '/zh/cafe'
     | '/zh/checkout'
     | '/zh/focus'
+    | '/zh/privacy'
     | '/zh/rain'
     | '/zh/relax'
     | '/zh/sleep'
+    | '/zh/terms'
     | '/en'
     | '/zh'
     | '/api/auth/login'
@@ -615,12 +681,14 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/honeypot'
+    | '/privacy'
     | '/rain'
     | '/relax'
     | '/return'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/sleep'
+    | '/terms'
     | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
@@ -629,17 +697,21 @@ export interface FileRouteTypes {
     | '/en/cafe'
     | '/en/checkout'
     | '/en/focus'
+    | '/en/privacy'
     | '/en/rain'
     | '/en/relax'
     | '/en/sleep'
+    | '/en/terms'
     | '/mix/$code'
     | '/zh/about'
     | '/zh/cafe'
     | '/zh/checkout'
     | '/zh/focus'
+    | '/zh/privacy'
     | '/zh/rain'
     | '/zh/relax'
     | '/zh/sleep'
+    | '/zh/terms'
     | '/en/'
     | '/zh/'
     | '/api/auth/login'
@@ -671,12 +743,14 @@ export interface RootRouteChildren {
   FocusRoute: typeof FocusRoute
   HealthRoute: typeof HealthRoute
   HoneypotRoute: typeof HoneypotRoute
+  PrivacyRoute: typeof PrivacyRoute
   RainRoute: typeof RainRoute
   RelaxRoute: typeof RelaxRoute
   ReturnRoute: typeof ReturnRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SleepRoute: typeof SleepRoute
+  TermsRoute: typeof TermsRoute
   WaffoReturnRoute: typeof WaffoReturnRoute
   ApiEntitlementsRoute: typeof ApiEntitlementsRoute
   ApiProductsRoute: typeof ApiProductsRoute
@@ -685,17 +759,21 @@ export interface RootRouteChildren {
   EnCafeRoute: typeof EnCafeRoute
   EnCheckoutRoute: typeof EnCheckoutRoute
   EnFocusRoute: typeof EnFocusRoute
+  EnPrivacyRoute: typeof EnPrivacyRoute
   EnRainRoute: typeof EnRainRoute
   EnRelaxRoute: typeof EnRelaxRoute
   EnSleepRoute: typeof EnSleepRoute
+  EnTermsRoute: typeof EnTermsRoute
   MixCodeRoute: typeof MixCodeRoute
   ZhAboutRoute: typeof ZhAboutRoute
   ZhCafeRoute: typeof ZhCafeRoute
   ZhCheckoutRoute: typeof ZhCheckoutRoute
   ZhFocusRoute: typeof ZhFocusRoute
+  ZhPrivacyRoute: typeof ZhPrivacyRoute
   ZhRainRoute: typeof ZhRainRoute
   ZhRelaxRoute: typeof ZhRelaxRoute
   ZhSleepRoute: typeof ZhSleepRoute
+  ZhTermsRoute: typeof ZhTermsRoute
   EnIndexRoute: typeof EnIndexRoute
   ZhIndexRoute: typeof ZhIndexRoute
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
@@ -770,6 +848,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HoneypotRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rain': {
       id: '/rain'
       path: '/rain'
@@ -810,6 +895,13 @@ declare module '@tanstack/react-router' {
       path: '/sleep'
       fullPath: '/sleep'
       preLoaderRoute: typeof SleepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/waffo-return': {
@@ -875,6 +967,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnFocusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/privacy': {
+      id: '/en/privacy'
+      path: '/en/privacy'
+      fullPath: '/en/privacy'
+      preLoaderRoute: typeof EnPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/rain': {
       id: '/en/rain'
       path: '/en/rain'
@@ -894,6 +993,13 @@ declare module '@tanstack/react-router' {
       path: '/en/sleep'
       fullPath: '/en/sleep'
       preLoaderRoute: typeof EnSleepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/terms': {
+      id: '/en/terms'
+      path: '/en/terms'
+      fullPath: '/en/terms'
+      preLoaderRoute: typeof EnTermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mix/$code': {
@@ -938,6 +1044,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZhFocusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/zh/privacy': {
+      id: '/zh/privacy'
+      path: '/zh/privacy'
+      fullPath: '/zh/privacy'
+      preLoaderRoute: typeof ZhPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/zh/rain': {
       id: '/zh/rain'
       path: '/zh/rain'
@@ -957,6 +1070,13 @@ declare module '@tanstack/react-router' {
       path: '/zh/sleep'
       fullPath: '/zh/sleep'
       preLoaderRoute: typeof ZhSleepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zh/terms': {
+      id: '/zh/terms'
+      path: '/zh/terms'
+      fullPath: '/zh/terms'
+      preLoaderRoute: typeof ZhTermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/login': {
@@ -1103,12 +1223,14 @@ const rootRouteChildren: RootRouteChildren = {
   FocusRoute: FocusRoute,
   HealthRoute: HealthRoute,
   HoneypotRoute: HoneypotRoute,
+  PrivacyRoute: PrivacyRoute,
   RainRoute: RainRoute,
   RelaxRoute: RelaxRoute,
   ReturnRoute: ReturnRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SleepRoute: SleepRoute,
+  TermsRoute: TermsRoute,
   WaffoReturnRoute: WaffoReturnRoute,
   ApiEntitlementsRoute: ApiEntitlementsRoute,
   ApiProductsRoute: ApiProductsRoute,
@@ -1117,17 +1239,21 @@ const rootRouteChildren: RootRouteChildren = {
   EnCafeRoute: EnCafeRoute,
   EnCheckoutRoute: EnCheckoutRoute,
   EnFocusRoute: EnFocusRoute,
+  EnPrivacyRoute: EnPrivacyRoute,
   EnRainRoute: EnRainRoute,
   EnRelaxRoute: EnRelaxRoute,
   EnSleepRoute: EnSleepRoute,
+  EnTermsRoute: EnTermsRoute,
   MixCodeRoute: MixCodeRoute,
   ZhAboutRoute: ZhAboutRoute,
   ZhCafeRoute: ZhCafeRoute,
   ZhCheckoutRoute: ZhCheckoutRoute,
   ZhFocusRoute: ZhFocusRoute,
+  ZhPrivacyRoute: ZhPrivacyRoute,
   ZhRainRoute: ZhRainRoute,
   ZhRelaxRoute: ZhRelaxRoute,
   ZhSleepRoute: ZhSleepRoute,
+  ZhTermsRoute: ZhTermsRoute,
   EnIndexRoute: EnIndexRoute,
   ZhIndexRoute: ZhIndexRoute,
   ApiAuthLoginRoute: ApiAuthLoginRoute,

@@ -498,6 +498,9 @@ function Footer() {
       <span className="brand brand-foot"><BrandMark /><span className="brand-word">Sound Cocktail</span></span>
       <span>{t(locale, 'footer.tagline')}</span>
       <a href="#sources">{t(locale, 'nav.sources')}</a>
+      {/* 法律页链接（Waffo 商家审核清单要求：页脚放服务条款与隐私政策链接，无登录可打开）。 */}
+      <Link to={localizePath('/terms', locale)}>{t(locale, 'footer.terms')}</Link>
+      <Link to={localizePath('/privacy', locale)}>{t(locale, 'footer.privacy')}</Link>
     </footer>
   )
 }

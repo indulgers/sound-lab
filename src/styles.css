@@ -1389,6 +1389,9 @@ body.is-immersive{overflow:hidden}
 .landing-copy .cta-row{margin:4px 0 8px}
 .landing-copy .faq-item h3{font-size:16px;margin:18px 0 6px}
 .landing-copy .faq-item p{margin-bottom:10px}
+.landing-copy ul{color:var(--ink-2);font-size:15px;line-height:1.9;margin:0 0 14px;padding-left:22px}
+.landing-copy ul li{margin-bottom:6px}
+.landing-copy .legal-updated{font-size:13px;color:var(--ink-3)}
 .landing-links{margin:0;padding-left:20px;color:var(--ink-2);font-size:14.5px;line-height:2}
 .landing-links a{color:var(--ink)}
 

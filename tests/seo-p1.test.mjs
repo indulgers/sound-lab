@@ -29,6 +29,7 @@ const codec = await import('../src/recipe-code.mjs');
 const { isFreeSound } = await import('../src/listening-session.mjs');
 const { detectRegion, currencyForRegion } = await import('../src/region.mjs');
 const { SOUNDS } = await import('../src/catalog.mjs');
+const { TERMS_PAGE, PRIVACY_PAGE, LEGAL_OPERATOR, LEGAL_UPDATED } = await import('../src/legal.mjs');
 
 const { SITE_URL, headForRoute, headForMix, canonicalUrl, hreflangLinksFor } = seo;
 const { LANDING_KEYS, LANDING_PAGES, LANDING_PRESETS, LANDING_FAQS, ABOUT_PAGE, faqsForPage } = landing;
@@ -42,7 +43,7 @@ const CJK = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/;
 
 test('p1: bare paths 308-redirect to /en, localized and payment paths do not', () => {
   assert.deepEqual(redirectForPath('/'), { to: '/en', statusCode: 308 });
-  for (const seg of ['focus', 'sleep', 'relax', 'rain', 'cafe', 'about']) {
+  for (const seg of ['focus', 'sleep', 'relax', 'rain', 'cafe', 'about', 'terms', 'privacy']) {
     assert.deepEqual(redirectForPath(`/${seg}`), { to: `/en/${seg}`, statusCode: 308 }, seg);
   }
   assert.deepEqual(redirectForPath('/checkout'), { to: '/en/checkout', statusCode: 308 });
@@ -81,7 +82,7 @@ test('p1: locale URL helpers — prefix in, prefix out, bare paths stay bare', (
 // --- 1. 语言 URL：head ---
 
 test('p1: /en and /zh heads differ in language, canonical is self, hreflang is reciprocal with one x-default', () => {
-  for (const key of ['home', 'focus', 'sleep', 'relax', 'rain', 'cafe', 'about']) {
+  for (const key of ['home', 'focus', 'sleep', 'relax', 'rain', 'cafe', 'about', 'terms', 'privacy']) {
     const en = headForRoute(key, 'en');
     const zh = headForRoute(key, 'zh');
     const titleOf = (h) => h.meta.find((m) => typeof m.title === 'string').title;
@@ -338,6 +339,67 @@ test('p1: about page states the creator, the 18 real recordings, and the medical
   assert.match(aboutEnAll, /free/i);
   assert.match(aboutEnAll, /22 sounds/);
   assert.match(aboutEnAll, /no account needed to mix/);
+});
+
+// --- 5b. 法律页（Terms / Privacy，Waffo 商家审核清单）---
+
+function legalText(page, loc) {
+  const c = page.content[loc];
+  return [c.h1, c.lead, ...c.sections.flatMap((s) => [s.h2, ...s.body, ...(s.list || [])])].join(' ');
+}
+
+test('p1: legal pages have complete EN+ZH content, no mixed languages, checklist phrases present', () => {
+  // 运营者与更新日期：双语一致、真实（非占位符）。
+  assert.equal(LEGAL_OPERATOR.nameEn, 'Zhu Weiye');
+  assert.equal(LEGAL_OPERATOR.nameZh, '朱伟晔');
+  assert.equal(LEGAL_OPERATOR.email, 'weiyezhu180@gmail.com');
+  assert.ok(LEGAL_UPDATED.en.includes('13 November 2026'));
+  assert.ok(LEGAL_UPDATED.zh.includes('2026年11月13日'));
+  for (const [key, page] of [['terms', TERMS_PAGE], ['privacy', PRIVACY_PAGE]]) {
+    for (const loc of ['en', 'zh']) {
+      const c = page.content[loc];
+      assert.ok(c.h1 && c.lead.length > 40, `${key} ${loc}: h1/lead`);
+      assert.equal(c.sections.length, 14, `${key} ${loc}: 14 sections`);
+      for (const s of c.sections) {
+        assert.ok(s.h2, `${key} ${loc}: section h2`);
+        assert.ok(Array.isArray(s.body) && s.body.length > 0, `${key} ${loc}: ${s.h2} body`);
+      }
+      // 联系邮箱在双语都出现（审核清单：客服邮箱须真实、已监控）。
+      assert.ok(legalText(page, loc).includes('weiyezhu180@gmail.com'), `${key} ${loc}: support email`);
+    }
+    // 英文版 600–1000 词、无 CJK；中文版实质长度（>1000 汉字）。
+    const enText = legalText(page, 'en');
+    const enWords = enText.split(/\s+/).filter(Boolean).length;
+    assert.ok(enWords >= 600 && enWords <= 1000, `${key} en words: ${enWords}`);
+    assert.doesNotMatch(enText, CJK, `${key} en: no CJK`);
+    const zhText = legalText(page, 'zh');
+    assert.ok((zhText.match(new RegExp(CJK.source, 'g')) || []).length > 1000, `${key} zh: substantial`);
+  }
+  // ToS 清单要点（审核清单 + ToS 模板）：产品描述、价格与计费周期、
+  // 退款政策、免责、违规/停用、支付处理方、医疗免责。
+  const tosEn = legalText(TERMS_PAGE, 'en');
+  for (const phrase of ['Zhu Weiye', 'Focus ($1.99', 'Sleep ($2.99', 'Rain Night ($3.99', 'Waffo Pancake', 'No subscription', '7 days', '90 days', '12 months', '14 days', 'not a medical product', 'PCI-DSS']) {
+    assert.ok(tosEn.includes(phrase), `terms en: ${phrase}`);
+  }
+  const tosZh = legalText(TERMS_PAGE, 'zh');
+  for (const phrase of ['朱伟晔', '专注包', '助眠包', '雨夜包', 'Waffo Pancake', '没有订阅', '7 天', '90 天', '12 个月', '14 天', '不是医疗产品', '不治疗失眠、焦虑或耳鸣']) {
+    assert.ok(tosZh.includes(phrase), `terms zh: ${phrase}`);
+  }
+  // Privacy 清单要点（Privacy 模板 14 节）：收集什么、如何使用与
+  // 存储、第三方共享、用户权利；卡号不经本站；Waffo 为 PCI-DSS 处理方。
+  const privEn = legalText(PRIVACY_PAGE, 'en');
+  for (const phrase of ['Waffo Pancake', 'Alipay', 'Cloudflare', 'Google', 'We do not collect card numbers', 'do not sell', 'PBKDF2', '72 hours', '90 days', '30 calendar days', '15 days', 'sc_session', 'sound-lab.recipes']) {
+    assert.ok(privEn.includes(phrase), `privacy en: ${phrase}`);
+  }
+  const privZh = legalText(PRIVACY_PAGE, 'zh');
+  for (const phrase of ['Waffo Pancake', '支付宝', 'Cloudflare', 'Google', '我们不收集银行卡号', '不出售', 'PBKDF2', '72 小时', '90 天', '30 个自然日', '15 天', 'sc_session', 'sound-lab.recipes']) {
+    assert.ok(privZh.includes(phrase), `privacy zh: ${phrase}`);
+  }
+  // ToS 与 Privacy 互相印证：同一运营者、同一退款窗口、同一删除期限。
+  assert.match(tosEn, /weiyezhu180@gmail\.com/);
+  assert.match(privEn, /weiyezhu180@gmail\.com/);
+  assert.match(tosEn, /90 days/);
+  assert.match(privEn, /90 days/);
 });
 
 // --- 6. 解耦守卫：语言 URL 不改变支付地区与币种 ---

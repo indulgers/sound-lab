@@ -63,7 +63,7 @@ test('seo: sitemap.xml lists only the public pages with absolute URLs and lastmo
   assert.doesNotMatch(xml, /<loc>https:\/\/soundcocktail\.app\/<\/loc>/);
   assert.doesNotMatch(xml, /<loc>https:\/\/soundcocktail\.app\/focus<\/loc>/);
   assert.ok(xml.includes('<lastmod>2026-11-13</lastmod>'));
-  for (const excluded of ['/checkout', '/return', '/waffo-return', '/api/', '/mix/']) {
+  for (const excluded of ['/checkout', '/return', '/waffo-return', '/api/', '/mix/', '/terms', '/privacy']) {
     assert.doesNotMatch(xml, new RegExp(`<loc>[^<]*${excluded.replace(/\//g, '\\/')}`), excluded);
   }
   // 每个 <url> 带 hreflang 标注（en、zh-CN、x-default）。
