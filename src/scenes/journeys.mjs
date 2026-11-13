@@ -55,7 +55,7 @@ export function levelsForJourney(journey, saved) {
 }
 export function controlsForJourney(journey, saved) {
   if (!journey) return {};
-  return Object.fromEntries(['warmth','space','energy','nature'].map(key => [
+  return Object.fromEntries(['warmth','space','energy','nature','bass','mid','treble','width','reverb'].map(key => [
     key, clamp(saved?.[key],clamp(journey.controls[key],.5))
   ]));
 }
