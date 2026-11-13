@@ -14,6 +14,8 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as FocusRouteImport } from './routes/focus'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as ReturnRouteImport } from './routes/return'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as WaffoReturnRouteImport } from './routes/waffo-return'
 import { Route as ApiEntitlementsRouteImport } from './routes/api/entitlements'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
@@ -59,6 +61,16 @@ const HealthRoute = HealthRouteImport.update({
 const ReturnRoute = ReturnRouteImport.update({
   id: '/return',
   path: '/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WaffoReturnRoute = WaffoReturnRouteImport.update({
@@ -173,6 +185,8 @@ export interface FileRoutesByFullPath {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/return': typeof ReturnRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
@@ -201,6 +215,8 @@ export interface FileRoutesByTo {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/return': typeof ReturnRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
@@ -230,6 +246,8 @@ export interface FileRoutesById {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/return': typeof ReturnRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
   '/api/products': typeof ApiProductsRoute
@@ -260,6 +278,8 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/return'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
@@ -288,6 +308,8 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/return'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
@@ -316,6 +338,8 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/return'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/waffo-return'
     | '/api/entitlements'
     | '/api/products'
@@ -345,6 +369,8 @@ export interface RootRouteChildren {
   FocusRoute: typeof FocusRoute
   HealthRoute: typeof HealthRoute
   ReturnRoute: typeof ReturnRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WaffoReturnRoute: typeof WaffoReturnRoute
   ApiEntitlementsRoute: typeof ApiEntitlementsRoute
   ApiProductsRoute: typeof ApiProductsRoute
@@ -403,6 +429,20 @@ declare module '@tanstack/react-router' {
       path: '/return'
       fullPath: '/return'
       preLoaderRoute: typeof ReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/waffo-return': {
@@ -561,6 +601,8 @@ const rootRouteChildren: RootRouteChildren = {
   FocusRoute: FocusRoute,
   HealthRoute: HealthRoute,
   ReturnRoute: ReturnRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   WaffoReturnRoute: WaffoReturnRoute,
   ApiEntitlementsRoute: ApiEntitlementsRoute,
   ApiProductsRoute: ApiProductsRoute,

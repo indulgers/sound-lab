@@ -95,6 +95,18 @@ export const STRINGS = {
       title: '调一杯声音',
       description: '混合 22 种声音，听雨落在车窗上，听咖啡馆里的轻声谈话。调成一杯保存，留给专注或放空的时间。',
       ogDescription: '现场录音、乐器采样与实时合成。选几种声音，调一杯自己的声景。',
+      focusTitle: '专注模式 · Sound Cocktail — 助你深度专注的环境音',
+      focusDescription: '沉浸专注模式：雨声、棕色噪音与咖啡馆背景音，适合深度工作与学习。一个计时器，一杯声音，屏幕上什么都没有。',
+    },
+    about: {
+      title: 'Sound Cocktail 是什么？',
+      en: 'what is sound cocktail',
+      lead: 'Sound Cocktail 是一款免费的环境音混音器。从 22 种白噪音和环境音里挑几种——窗边的雨声、篝火、咖啡馆人声、夜行火车、钢琴——调一杯属于自己的声音，用于助眠、专注或放空。不用下载应用，不用注册就能开始调。',
+      points: [
+        '雨声助眠与专注：雨声加雷声、雨落在窗上，是最多人保存的搭配。',
+        '咖啡馆背景音：咖啡馆人声加键盘轻敲，适合写作和阅读。',
+        '自己调一杯：每种声音都能单独调音量与音色，喜欢的搭配存成配方，分享给朋友。',
+      ],
     },
     cup: {
       svgAria: '随配比变化的手绘涂鸦鸡尾酒杯',
@@ -321,6 +333,18 @@ export const STRINGS = {
       title: 'Mix a cup of sound',
       description: 'Mix 22 sounds — rain on the car window, low talk in a café. Save your cup for focused or empty time.',
       ogDescription: 'Live recordings, instrument samples and live synthesis. Pick a few sounds and mix a soundscape of your own.',
+      focusTitle: 'Focus Mode · Sound Cocktail — ambient sounds for deep focus',
+      focusDescription: 'Immersive focus mode: mix rain, brown noise and café ambience for deep work and studying. One timer, one cup of sound, nothing else on screen.',
+    },
+    about: {
+      title: 'What is Sound Cocktail?',
+      en: 'what is sound cocktail',
+      lead: 'Sound Cocktail is a free ambient sound mixer. Pick from 22 white noise and ambient sounds — rain on a window, a bonfire, café voices, a night train, piano — and mix your own soundscape for sleep, focus, or unwinding. No app to install, no account needed to start mixing.',
+      points: [
+        'Rain sounds for sleep and focus: rain plus thunder, or rain on a window, is the most-saved mix.',
+        'Café ambience for writing and reading: café voices plus soft keyboard taps.',
+        'Mix your own sounds: every sound has its own fader and tuning. Save a mix you love as a recipe and share it with a friend.',
+      ],
     },
     cup: {
       svgAria: 'Hand-drawn doodle cocktail glass that changes with the mix',

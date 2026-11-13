@@ -1373,3 +1373,8 @@ body.is-immersive{overflow:hidden}
 .auth-divider span{white-space:nowrap}
 .auth-google{width:100%;justify-content:center}
 .auth-google svg{width:18px;height:18px;flex:none}
+
+/* SEO 介绍区（#about）：复用 .blk/.sec-head/.sec-sub，只补要点列表样式。 */
+.about-points{margin:0;padding-left:20px;max-width:44em;color:var(--ink-2);font-size:14px;line-height:1.9}
+.about-points li{margin-bottom:6px}
+.about-points li::marker{color:var(--ember)}

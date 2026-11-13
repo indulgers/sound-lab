@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, useRouterState } from '@tanstack/react-router';
 import AuthButton from './AuthButton.jsx';
 import { recipeDisplay } from './catalog.mjs';
 import { isFreeSound } from './listening-session.mjs';
@@ -461,6 +461,26 @@ function Sources() {
   )
 }
 
+function About() {
+  const [locale] = useLocale();
+  // SEO 介绍区：SSR 固定英文（爬虫在首屏 HTML 里看到关键词），水合后
+  // 按界面语言切换。mounted 前后都先渲染英文，避免水合不一致。
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const l = mounted ? locale : 'en';
+  return (
+    <section className="blk" id="about">
+      <div className="sec-head"><h2>{t(l, 'about.title')}</h2>{l === 'en' ? <span className="en">{t(l, 'about.en')}</span> : null}</div>
+      <p className="sec-sub">{t(l, 'about.lead')}</p>
+      <ul className="about-points">
+        <li>{t(l, 'about.points.0')}</li>
+        <li>{t(l, 'about.points.1')}</li>
+        <li>{t(l, 'about.points.2')}</li>
+      </ul>
+    </section>
+  )
+}
+
 function Footer() {
   const [locale] = useLocale();
   return (
@@ -519,20 +539,23 @@ function Overlays() {
 
 export default function SoundLabView({ recipes = [], sounds = [], onChooseScene, onShowPremium, user = null, ownedPacks = [], pendingWaffoOrders = [], onAuthChange }) {
   const [locale] = useLocale();
+  const pathname = useRouterState({ select: (state) => state.location.pathname.replace(/\/$/, '') });
+  const isFocus = pathname === '/focus';
   // 能用的通道 = 免费通道 + 已拥有包的通道；进阶配方按这个集合判定是否可听。
   const unlockedSounds = new Set(sounds.filter((sound) => isFreeSound(sound.id)).map((sound) => sound.id));
   soundsForPacks(ownedPacks).forEach((id) => unlockedSounds.add(id));
   // 语言切换时同步 <html lang>（无障碍与浏览器翻译提示用），
-  // 同时同步 <title> 和 meta description（首屏由服务端 head 按
-  // Accept-Language 定，手动切换后由这里接管；支付地区不受影响）。
+  // 同时同步 <title> 和 meta description（首屏由服务端 head 给英文；
+  // 水合后及手动切换语言时由这里按界面语言接管，/focus 用专注页标题；
+  // 支付地区不受影响）。
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = locale === 'en' ? 'en' : 'zh-CN';
-      document.title = `Sound Cocktail · ${t(locale, 'meta.title')}`;
+      document.title = isFocus ? t(locale, 'meta.focusTitle') : `Sound Cocktail · ${t(locale, 'meta.title')}`;
       const description = document.querySelector('meta[name="description"]');
-      if (description) description.setAttribute('content', t(locale, 'meta.description'));
+      if (description) description.setAttribute('content', t(locale, isFocus ? 'meta.focusDescription' : 'meta.description'));
     }
-  }, [locale]);
+  }, [locale, isFocus]);
   return (
     <>
       <a className="skip-link" href="#mixer">{t(locale, 'skipLink')}</a>
@@ -545,6 +568,7 @@ export default function SoundLabView({ recipes = [], sounds = [], onChooseScene,
         <Plus ownedPacks={ownedPacks} pendingWaffoOrders={pendingWaffoOrders} />
         <SavedRecipes />
         <Sources />
+        <About />
         <Footer />
       </main>
       <Overlays />

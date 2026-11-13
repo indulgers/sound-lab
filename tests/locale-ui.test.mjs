@@ -35,6 +35,7 @@ const EN_ONLY_SUBTITLES = new Set([
   'plus.en',
   'mine.en',
   'sources.en',
+  'about.en',
   'checkout.en',
 ]);
 // 中文文案里允许出现的非中文记号：品牌名、支付品牌、配方码前缀、协议名、
