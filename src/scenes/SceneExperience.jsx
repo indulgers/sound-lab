@@ -61,7 +61,7 @@ function SceneVideo({ scene, motion, onUnavailable }) {
     else video.current.pause();
   }, [motion, src]);
   return <div className="sc-landscape" style={{ '--scene-position':scene.position, '--scene-mobile-position':scene.mobilePosition, backgroundImage:`url(${poster})` }}>
-    <video ref={video} key={src} className="sc-video" src={src} poster={poster} muted loop playsInline autoPlay={motion} preload="metadata" aria-hidden="true" onError={() => onUnavailable(true)} onPlaying={() => onUnavailable(false)} />
+    <video ref={video} key={src} className={`sc-video ${motion ? 'is-moving' : 'is-paused'}`} src={src} poster={poster} muted loop playsInline autoPlay={motion} preload="metadata" aria-hidden="true" onError={() => onUnavailable(true)} onPlaying={() => onUnavailable(false)} />
     <div className="sc-shade" />
   </div>;
 }
