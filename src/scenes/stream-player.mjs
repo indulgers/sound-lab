@@ -256,7 +256,10 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
         scene.layers.some(layer => !layer.file || !layer.id)) {
       error = 'This journey has no playable stems'; emit('error', error); return false;
     }
-    const same = selected?.id === scene.id && selected?.journeyId === scene.journeyId;
+    const same = selected?.id === scene.id && selected?.journeyId === scene.journeyId
+      && selected?.audioVersion === scene.audioVersion
+      && selected.layers.length === scene.layers.length
+      && selected.layers.every((layer, i) => layer.id === scene.layers[i].id && layer.file === scene.layers[i].file);
     selected = scene;
     levels = Object.fromEntries(scene.layers.map(layer => [layer.id, clamp(savedLevels[layer.id], clamp(layer.defaultLevel, .55))]));
     if (!same) {
