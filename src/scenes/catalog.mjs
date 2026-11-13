@@ -1,5 +1,12 @@
 const label = (en, zh) => ({ en, zh });
 const musicFile = name => `/assets/audio/scenes/${name}.mp3`;
+const journeyFile = (slug, layer) => `/assets/audio/journeys/${slug}-${layer}.mp3`;
+const longLayers = (slug, ambience = null) => [
+  { id:'harmony', label: label('Harmony','和声铺底'), detail: label('Slowly evolving original harmony','渐变的和声层'), file: journeyFile(slug,'harmony'), defaultLevel:.78, icon:'music' },
+  { id:'details', label: label('Musical details','音乐细节'), detail: label('Occasional motifs and answering tones','少量主题与回应'), file: journeyFile(slug,'details'), defaultLevel:.54, icon:'spark' },
+  { id:'atmosphere', label: label('Air & texture','空气与纹理'), detail: label('Synthetic atmosphere, not a location recording','合成氛围纹理，非真实当地录音'), file: journeyFile(slug,'atmosphere'), defaultLevel:.47, icon:'wind' },
+  ...(ambience ? [{ id:'ambience', label: label('Environment','环境声'), detail:label('Separate environment recording','独立环境录音'),file:ambience,defaultLevel:.12,icon:'leaf' }] : []),
+];
 
 export const SCENES = [
   {
@@ -16,12 +23,15 @@ export const SCENES = [
     mobilePoster: '/assets/scenes/bali-rainforest-mobile.jpg',
     position: '57% center', mobilePosition: '58% center',
     warmth: .46, space: .37,
-    layers: [
+    legacyLayers: [
       { id: 'music', label: label('Bowls & harmony', '颂钵与和声'), detail: label('The original musical score', '完整音乐主轨'), file: musicFile('bali-score'), defaultLevel: .85, icon: 'music' },
       { id: 'texture', label: label('Distant resonance', '远处回响'), detail: label('Occasional answering tones', '间或响起的泛音回应'), file: musicFile('bali-resonance'), defaultLevel: .8, icon: 'spark' },
       { id: 'air', label: label('Air texture', '空气纹理'), detail: label('A soft, synthesized atmosphere', '轻柔的合成氛围'), file: musicFile('bali-air'), defaultLevel: .55, icon: 'wind' },
       { id: 'ambience', label: label('Forest', '林间环境声'), detail: label('A separate field recording', '独立环境录音'), file: '/assets/audio/forest.mp3', loopOverlapSeconds: 1, defaultLevel: .12, icon: 'leaf' },
     ],
+    durationSeconds: 900, audioVersion:'3.2',
+    chapters: ['木门后的安静','第一道回响','光落在地面','更深的留白','余音慢慢退去'],
+    layers: longLayers('bali', '/assets/audio/forest.mp3'),
   },
   {
     id: 'chiang-mai', number: '02', name: label('Chiang Mai', '清迈'),
@@ -37,13 +47,69 @@ export const SCENES = [
     mobilePoster: '/assets/scenes/chiang-mai-cafe-mobile.jpg',
     position: 'center', mobilePosition: 'center',
     warmth: .55, space: .28,
-    layers: [
+    legacyLayers: [
       { id: 'music', label: label('Music', '音乐'), detail: label('Warm keys, harmony & light rhythm', '暖琴、和声与轻节奏'), file: musicFile('chiang-mai-score'), defaultLevel: .85, icon: 'music' },
       { id: 'texture', label: label('Wood tones', '木质拨弦'), detail: label('Gentle, separate plucked notes', '独立的轻柔拨弦声部'), file: musicFile('chiang-mai-wood'), defaultLevel: .8, icon: 'spark' },
       { id: 'air', label: label('Air texture', '空气纹理'), detail: label('A soft, synthesized atmosphere', '轻柔的合成氛围'), file: musicFile('chiang-mai-air'), defaultLevel: .55, icon: 'wind' },
       { id: 'ambience', label: label('Café ambience', '咖啡馆环境声'), detail: label('A separate café recording', '独立咖啡馆录音'), file: '/assets/audio/cafe.mp3', loopOverlapSeconds: 1, defaultLevel: .12, icon: 'cup' },
     ],
+    durationSeconds: 900, audioVersion:'3.2',
+    chapters: ['花园开门','暖色琴键','树影摇动','一封未写完的信','回到第一杯咖啡'],
+    layers: longLayers('chiang-mai', '/assets/audio/cafe.mp3'),
   },
+,
+  {
+    id:'da-lat', number:'03', name:label('Da Lat','大叻'),
+    location:label('Pine hills after the rain','雨后的松林山谷'),
+    title:label('Morning mist\nin Da Lat.','大叻，\n雾里的清晨。'),
+    description:label('A page of a book and a cup of warmth. The hills take their time.','书翻到下一页，窗外的雾还没散。'),
+    note:label('Inspired by the place, not recorded there.','以当地氛围为灵感，并非当地实录。'),
+    tag:label('SLOW FLOW · MORNING','慢心流 · 晨雾'),trackTitle:label('Da Lat Morning Mist','大叻 · 晨雾与咖啡'),
+    poster:'/assets/scenes/da-lat-concept.svg', mobilePoster:'/assets/scenes/da-lat-concept.svg',
+    position:'center',mobilePosition:'center',warmth:0.62,space:0.28,
+    durationSeconds:900,audioVersion:'3.2',chapters:["山谷刚醒","杯口的热气","雾慢慢散开","窗前的一页书","山间渐渐明亮"],
+    layers:longLayers('da-lat'),
+    artworkProvenance:'Original illustrated concept art — not destination photography.',
+  },
+  {
+    id:'kyoto', number:'04', name:label('Kyoto','京都'),
+    location:label('A garden of quiet rain','雨中的茶室'),
+    title:label('Quiet rain\nin Kyoto.','京都，\n雨里的茶室。'),
+    description:label('A small room for long pauses and an unhurried breath.','让雨声轻轻延续，给呼吸多一点空间。'),
+    note:label('Inspired by the place, not recorded there.','以当地氛围为灵感，并非当地实录。'),
+    tag:label('MEDITATE · STILLNESS','冥想 · 静心'),trackTitle:label('Kyoto Still Water','京都 · 静水茶室'),
+    poster:'/assets/scenes/kyoto-concept.svg', mobilePoster:'/assets/scenes/kyoto-concept.svg',
+    position:'center',mobilePosition:'center',warmth:0.43,space:0.48,
+    durationSeconds:900,audioVersion:'3.2',chapters:["推开障子门","屋檐下的雨","庭院的苔","茶水将凉","雨仍在下"],
+    layers:longLayers('kyoto'),
+    artworkProvenance:'Original illustrated concept art — not destination photography.',
+  },
+  {
+    id:'lisbon', number:'05', name:label('Lisbon','里斯本'),
+    location:label('An afternoon in soft sunlight','午后的阳光'),
+    title:label('The light\nin Lisbon.','里斯本，\n午后的光。'),
+    description:label('Gentle motion, warm strings and a little space for an idea.','琴弦轻轻走动，灵感也不急着抵达。'),
+    note:label('Inspired by the place, not recorded there.','以当地氛围为灵感，并非当地实录。'),
+    tag:label('CREATE · FLOW','创作 · 心流'),trackTitle:label('Lisbon Golden Hour','里斯本 · 午后金光'),
+    poster:'/assets/scenes/lisbon-concept.svg', mobilePoster:'/assets/scenes/lisbon-concept.svg',
+    position:'center',mobilePosition:'center',warmth:0.69,space:0.25,
+    durationSeconds:900,audioVersion:'3.2',chapters:["阳光斜进窗","远处的脚步","旋律经过街角","写作刚刚开始","落在桌面的余晖"],
+    layers:longLayers('lisbon'),
+    artworkProvenance:'Original illustrated concept art — not destination photography.',
+  },
+  {
+    id:'hoi-an', number:'06', name:label('Hoi An','会安'),
+    location:label('Lanterns along the river','灯笼亮起的河边'),
+    title:label('Lanterns\nin Hoi An.','会安，\n灯笼亮起。'),
+    description:label('A river settles down while the evening grows softer.','河水慢下来，灯笼倒映着夜色。'),
+    note:label('Inspired by the place, not recorded there.','以当地氛围为灵感，并非当地实录。'),
+    tag:label('UNWIND · EVENING','放松 · 夜色'),trackTitle:label('Hoi An Lantern River','会安 · 灯笼河畔'),
+    poster:'/assets/scenes/hoi-an-concept.svg', mobilePoster:'/assets/scenes/hoi-an-concept.svg',
+    position:'center',mobilePosition:'center',warmth:0.61,space:0.38,
+    durationSeconds:900,audioVersion:'3.2',chapters:["灯笼初亮","桥下有水声","街道变安静","晚风吹过木窗","河面只剩余光"],
+    layers:longLayers('hoi-an'),
+    artworkProvenance:'Original illustrated concept art — not destination photography.',
+  }
 ];
 
 export const sceneById = id => SCENES.find(scene => scene.id === id) ?? SCENES[0];
