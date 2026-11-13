@@ -65,6 +65,32 @@ input{font-family:inherit}
 .topbar a:hover{color:var(--ink);background:var(--panel-2)}
 @media (max-width:560px){ .topbar a{padding:7px 7px;font-size:12.5px} .topbar .mark{font-size:15px} }
 
+/* ---- top nav wrap: pill (logo + nav) + utils cluster (language + profile) ---- */
+/* 药丸不再是整行块级元素，改由 .topbar-wrap 包住：药丸按内容收窄、
+   居中；语言与登录区抽出药丸，放在药丸外右侧的空白区。上下 16px
+   对称内边距：既是药丸与视口顶部的距离，也是 utils 垂直居中的基准
+   （top:50% 正好落在药丸中心）。 */
+.topbar-wrap{
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;
+  padding:16px clamp(14px,4vw,40px);
+}
+.topbar-wrap .topbar{position:static;margin:0}
+.topbar-utils{
+  display:flex;align-items:center;gap:8px;
+}
+.topbar-utils .auth-email{max-width:180px}
+@media (min-width:1600px){
+  /* 宽屏：utils 绝对定位到药丸外右侧，与药丸垂直居中，不占流式空间。 */
+  .topbar-utils{
+    position:absolute;right:clamp(14px,4vw,40px);top:50%;transform:translateY(-50%);
+  }
+}
+@media (max-width:1599px){
+  /* 窄屏：utils 换到药丸下方第二行，右对齐，不再往药丸里挤。 */
+  .topbar-utils{flex-basis:100%;justify-content:flex-end}
+}
+
 main{max-width:1180px;margin:0 auto;padding:0 clamp(14px,4vw,40px) 70px}
 
 /* ---------- hero ---------- */
@@ -1325,7 +1351,7 @@ body.is-immersive{overflow:hidden}
 #immFocus{font-variant-numeric:tabular-nums}
 @media(max-width:560px){.access-cards{grid-template-columns:1fr}.immersive.open{gap:14px}}
 @media(max-width:440px){
-  .topbar a[href="#sources"]{display:none}
+  .topbar a[data-nav="sources"]{display:none}
   .hero{row-gap:24px}
   .hero .cta-row{gap:7px}
   .hero .cta-row .btn{padding-inline:8px;font-size:13px}

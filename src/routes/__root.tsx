@@ -1,6 +1,7 @@
-import { HeadContent, Outlet, Scripts, createRootRoute, useRouter, useRouterState } from '@tanstack/react-router'
+import { HeadContent, Scripts, createRootRoute, useRouter, useRouterState } from '@tanstack/react-router'
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import SoundLabView from '../SoundLabView.jsx'
+import { LabContext } from '../lab-context.jsx'
 import { RECIPES, SOUNDS } from '../catalog.mjs'
 import { fetchEntitlements, fetchMe } from '../auth-api.js'
 import { fetchWaffoPending } from '../pay-api.js'
@@ -149,16 +150,32 @@ interface LabController {
   playRecipe: (recipe: { name: string; mix: Record<string, number>; params?: unknown }) => boolean
   setOwnedPacks: (packIds: string[]) => void
   setFocus: (open: boolean) => void
+  /** 页面挂载时接 DOM（首页/落地页 Hero + 调音台、我的配方、音源清单）。 */
+  bindHero: () => void
+  unbindHero: () => void
+  bindMixer: () => void
+  unbindMixer: () => void
+  bindMine: () => void
+  unbindMine: () => void
+  bindSources: () => void
+  unbindSources: () => void
+  /** 落地页“存下这杯”：直接存当前配比，不依赖保存框 DOM。 */
+  saveMixAs: (name: string) => boolean
+  /** 卸载时把杯子从沉浸遮罩搬回 Hero。 */
+  restoreCupStage: () => void
   dispose: () => void
 }
 
 /**
  * 应用外壳（原 src/main.jsx 的 SoundLab 组件，未改行为）：
  * 音频引擎只在客户端挂载（useLayoutEffect，SSR 时不执行），
- * /en 与 /zh 首页、/focus 与各落地页共用同一个 View，/checkout 与
- * /mix/:code 以 <Outlet/> 叠加在上面，引擎在路由切换时保持挂载。
+ * 常驻整个会话；各页面组件用 getLabController() 接自己那块 DOM。
+ * 外壳只渲染框架（顶栏 + <main><Outlet/></main> + 页脚 + 遮罩），
+ * 路由页面各自只渲染自己的内容（拆页后条款页不再叠在调音台之下）。
  * 语言由 URL 前缀决定：外壳按当前路径给子树提供 LocaleContext，
  * 所以 SSR 渲染的就是正确语言的文案（/zh 页不再水合后才变中文）。
+ * 各页面的共享数据（配方/音色、选场景回调、登录态与权益）经
+ * LabContext 提供，路由组件用 useLab() 读。
  */
 function SoundLab() {
   const router = useRouter()
@@ -245,7 +262,7 @@ function SoundLab() {
     // 先于子组件的 useEffect 执行，所以落地页挂载时发出的预设不会丢。
     // apply-preset：只摆推子，不播放、不进沉浸模式。
     // play-mix：播放整杯（用户手势触发，音频可初始化）。
-    // save-mix：把名字填进保存框并点保存（走引擎已有保存流程）。
+    // save-mix：直接存当前配比（拆页后保存框只在 /mine，不再填框点保存）。
     function onApplyPreset(event: Event) {
       const mix = (event as CustomEvent)?.detail?.mix
       if (mix) controller.current?.setMix(mix)
@@ -258,18 +275,43 @@ function SoundLab() {
     }
     function onSaveMix(event: Event) {
       const name = (event as CustomEvent)?.detail?.name
-      const input = document.getElementById('recipeName') as HTMLInputElement | null
-      const btn = document.getElementById('saveBtn')
-      if (input && typeof name === 'string' && name) input.value = name
-      btn?.click()
+      if (typeof name === 'string' && name) controller.current?.saveMixAs(name)
+    }
+    // 引擎在没有调音台的页面上触发了“去调音台/我的配方/进阶”：
+    // playSavedMix（/mine 调出配方、/mix 打开这杯）、会话结束对话框
+    // 的“存下这杯”、进阶弹窗的“了解进阶”。当前已在目标页就不跳。
+    function showRoute(seg: string) {
+      const path = router.state.location.pathname
+      const locale = localeFromPath(path) ?? getLocale()
+      if (stripLocalePrefix(path).replace(/\/$/, '') === seg) return
+      void router.navigate({ to: localizePath(seg, locale) as '/en' | '/zh' | '/en/recipes' | '/zh/recipes' | '/en/plus' | '/zh/plus' | '/en/mine' | '/zh/mine' | '/en/sources' | '/zh/sources' })
+    }
+    function onShowMixer() {
+      showRoute('/')
+    }
+    function onShowMine() {
+      showRoute('/mine')
+      // 跳过去后把名字框聚焦（页面挂载需要一点时间，尽量等一下）。
+      setTimeout(() => {
+        document.getElementById('recipeName')?.focus({ preventScroll: true })
+      }, 400)
+    }
+    function onShowPlus() {
+      showRoute('/plus')
     }
     window.addEventListener('soundcocktail:apply-preset', onApplyPreset)
     window.addEventListener('soundcocktail:play-mix', onPlayMix)
     window.addEventListener('soundcocktail:save-mix', onSaveMix)
+    window.addEventListener('soundcocktail:show-mixer', onShowMixer)
+    window.addEventListener('soundcocktail:show-mine', onShowMine)
+    window.addEventListener('soundcocktail:show-plus', onShowPlus)
     return () => {
       window.removeEventListener('soundcocktail:apply-preset', onApplyPreset)
       window.removeEventListener('soundcocktail:play-mix', onPlayMix)
       window.removeEventListener('soundcocktail:save-mix', onSaveMix)
+      window.removeEventListener('soundcocktail:show-mixer', onShowMixer)
+      window.removeEventListener('soundcocktail:show-mine', onShowMine)
+      window.removeEventListener('soundcocktail:show-plus', onShowPlus)
       lab.dispose()
       effects.dispose()
       controller.current = null
@@ -282,17 +324,20 @@ function SoundLab() {
 
   return (
     <LocaleContext.Provider value={shellLocale}>
-      <View
-        recipes={RECIPES}
-        sounds={SOUNDS}
-        onChooseScene={chooseScene}
-        onShowPremium={showPremium}
-        user={authUser}
-        ownedPacks={ownedPacks}
-        pendingWaffoOrders={pendingWaffoOrders}
-        onAuthChange={refreshAuth}
-      />
-      <Outlet />
+      <LabContext.Provider
+        value={{
+          recipes: RECIPES,
+          sounds: SOUNDS,
+          chooseScene,
+          showPremium,
+          user: authUser,
+          ownedPacks,
+          pendingWaffoOrders,
+          onAuthChange: refreshAuth,
+        }}
+      >
+        <View user={authUser} onAuthChange={refreshAuth} />
+      </LabContext.Provider>
     </LocaleContext.Provider>
   )
 }

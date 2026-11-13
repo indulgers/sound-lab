@@ -18,6 +18,12 @@
 - [咖啡馆背景音](https://soundcocktail.app/zh/cafe): 低声交谈、键盘轻敲和一点钢琴，那种没人打扰你的咖啡馆的声音。
 - [About Sound Cocktail](https://soundcocktail.app/en/about): Made by one independent developer. How the sounds were made, what it costs, and what it is not.
 - [关于 Sound Cocktail](https://soundcocktail.app/zh/about): 一个独立开发者的作品：声音是怎么来的、多少钱、它不是什么。
+- [Sound recipes](https://soundcocktail.app/en/recipes): Free ambient sound recipes for sleep, focus and rain — open any one in the mixer and make it yours.
+- [声音配方](https://soundcocktail.app/zh/recipes): 助眠、专注与雨声的免费声音配方——在调音台打开任意配方，调成你的。
+- [Sound Cocktail Plus](https://soundcocktail.app/en/plus): One-time sound packs — Focus Pack, Sleep Pack and Rain Night Pack. No subscription.
+- [Sound Cocktail 进阶](https://soundcocktail.app/zh/plus): 一次购买的声音包：专注包、助眠包与雨夜包，不订阅。
+- [Sources & licences](https://soundcocktail.app/en/sources): Where every sound comes from — real recordings, instrument samples and live synthesis, with authors and licences.
+- [音源与授权](https://soundcocktail.app/zh/sources): 每个声音的出处：真实录音、乐器采样与实时合成，附作者与授权说明。
 
 ## Sound packs (one-time purchase)
 

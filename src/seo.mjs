@@ -46,6 +46,9 @@ export const PUBLIC_PAGES = [
   ['rain', '/rain'],
   ['cafe', '/cafe'],
   ['about', '/about'],
+  ['recipes', '/recipes'],
+  ['plus', '/plus'],
+  ['sources', '/sources'],
 ]
 
 /** 不进 sitemap、但有 head 的页面（法律页）：key → URL 段。 */
@@ -105,6 +108,77 @@ export const ROUTE_SEO = {
         '沉浸专注模式：用雨声、棕色噪音和咖啡馆氛围调一杯深度工作与学习的声音。一个计时器，一杯声音，屏幕上什么都没有。',
       ogTitle: '专注模式 · Sound Cocktail',
       ogDescription: '雨声、咖啡馆氛围与棕色噪音，陪你深度专注——一个计时器，一杯声音，屏幕上什么都没有。',
+    },
+  },
+  recipes: {
+    path: '/recipes',
+    en: {
+      title: 'Recipes · Sound Cocktail — free ambient sound mixes for sleep, focus and rain',
+      description:
+        'Browse free ambient sound recipes — rain, fire, café voices, piano and more — mixed for sleep, focus and relaxation. Open any recipe in the mixer and make it yours.',
+      ogTitle: 'Recipes · Sound Cocktail',
+      ogDescription:
+        'Free ambient sound recipes for sleep, focus and rain — open any one in the mixer and make it yours.',
+    },
+    zh: {
+      title: '配方 · Sound Cocktail — 助眠、专注与雨声的免费声音配方',
+      description:
+        '浏览免费的环境音配方：雨声、篝火、咖啡馆人声、钢琴……为助眠、专注与放松而调。在调音台打开任意配方，调成你的。',
+      ogTitle: '配方 · Sound Cocktail',
+      ogDescription: '助眠、专注与雨声的免费声音配方——在调音台打开任意配方，调成你的。',
+    },
+  },
+  plus: {
+    path: '/plus',
+    en: {
+      title: 'Sound Cocktail Plus — one-time sound packs',
+      description:
+        'Unlock more sounds with a one-time purchase: Focus Pack, Sleep Pack and Rain Night Pack. No subscription — buy once, keep forever.',
+      ogTitle: 'Sound Cocktail Plus — one-time sound packs',
+      ogDescription:
+        'Focus Pack, Sleep Pack and Rain Night Pack — one-time purchases, no subscription.',
+    },
+    zh: {
+      title: 'Sound Cocktail 进阶 · 一次购买的声音包',
+      description:
+        '一次性购买解锁更多声音：专注包、助眠包与雨夜包。不订阅，买一次，永久用。',
+      ogTitle: 'Sound Cocktail 进阶 · 一次购买的声音包',
+      ogDescription: '专注包、助眠包与雨夜包——一次性购买，不订阅。',
+    },
+  },
+  sources: {
+    path: '/sources',
+    en: {
+      title: 'Sources & licences · Sound Cocktail — real recordings',
+      description:
+        'Where every sound comes from: real recordings, instrument samples and live synthesis, with authors and licences.',
+      ogTitle: 'Sources & licences · Sound Cocktail',
+      ogDescription:
+        'Real recordings, instrument samples and live synthesis — every sound, with its author and licence.',
+    },
+    zh: {
+      title: '音源与授权 · Sound Cocktail — 真实录音',
+      description:
+        '每个声音的出处：真实录音、乐器采样与实时合成，附作者与授权说明。',
+      ogTitle: '音源与授权 · Sound Cocktail',
+      ogDescription: '真实录音、乐器采样与实时合成——每个声音都有作者与授权说明。',
+    },
+  },
+  mine: {
+    path: '/mine',
+    en: {
+      title: 'My recipes · Sound Cocktail',
+      description:
+        'Your saved sound recipes — open any cup in the mixer, or import a shared recipe code.',
+      ogTitle: 'My recipes · Sound Cocktail',
+      ogDescription: 'Your saved sound recipes.',
+    },
+    zh: {
+      title: '我的配方 · Sound Cocktail',
+      description:
+        '你存下的声音配方——在调音台打开任意一杯，或导入朋友分享的配方码。',
+      ogTitle: '我的配方 · Sound Cocktail',
+      ogDescription: '你存下的声音配方。',
     },
   },
 }
@@ -174,6 +248,25 @@ export function headForRoute(key, locale = 'en', options = {}) {
   return {
     meta,
     links: [{ rel: 'canonical', href: canonical }, ...hreflangLinksFor(key)],
+  }
+}
+
+/**
+ * 个人内容页的 head（/mine）：标题 + 描述 + robots noindex，
+ * 不出 canonical、不出 hreflang（同一登录用户的内容没有“另一语言
+ * 版本”可指）、不进 sitemap。结账页是同一先例（见 checkout 路由，
+ * 只出 noindex）；这里多给标题与描述，方便浏览器标签页识别。
+ */
+export function headForNoindex(key, locale = 'en') {
+  if (!LOCALES.includes(locale)) throw new Error(`unknown locale: ${locale}`)
+  const s = seoForRoute(key, locale)
+  return {
+    meta: [
+      { title: s.title },
+      { name: 'description', content: s.description },
+      { name: 'robots', content: 'noindex' },
+    ],
+    links: [],
   }
 }
 

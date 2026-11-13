@@ -42,11 +42,11 @@ export default function MixPage({ recipe, locale }) {
 
   function openInMixer() {
     if (typeof window === 'undefined') return;
+    // 引擎的 playSavedMix 在本页没有 #mixer 时会发
+    // soundcocktail:show-mixer，外壳跳回首页——这里只发事件即可。
     window.dispatchEvent(
       new CustomEvent('soundcocktail:play-mix', { detail: { name, mix: recipe.mix, params: recipe.params } }),
     );
-    const mixer = document.getElementById('mixer');
-    if (mixer) mixer.scrollIntoView({ behavior: 'smooth' });
   }
 
   return (
