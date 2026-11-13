@@ -10,7 +10,7 @@ name: Deploy Sound Cocktail Worker
 
 on:
   push:
-    branches: [tanstack-start]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
