@@ -1,7 +1,7 @@
 name: Deploy Sound Cocktail Worker
 
 # Deploys the TanStack Start build to Cloudflare Workers.
-# Runs only on pushes to the tanstack-start branch; the live site on main
+# Runs only on pushes to the main branch; the live site on main
 # (Cloudflare Pages) is untouched.
 # Payment secrets are NOT set here: until they exist the Worker returns
 # 503 PAYMENT_NOT_CONFIGURED on payment endpoints, which the checkout
