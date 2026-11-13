@@ -326,3 +326,11 @@ html[lang="zh-CN"] .sc-intent-options button > span { font-family:Manrope,system
   .scene-experience .sc-dialog--mix{max-height:85svh;}
 }
 @media(prefers-reduced-motion:reduce){.sc-breath-circle{animation:none;transform:scale(.83);}}
+
+/* Gentle scene-story lighting: transitions take 14 seconds and never flash. */
+.scene-experience .sc-shade { transition:background 14s ease, opacity 14s ease; }
+.scene-experience[data-chapter="0"] .sc-shade { opacity:.97; }
+.scene-experience[data-chapter="1"] .sc-shade { opacity:.87; }
+.scene-experience[data-chapter="2"] .sc-shade { opacity:.78; }
+.scene-experience[data-chapter="3"] .sc-shade { opacity:.85; }
+.scene-experience[data-chapter="4"] .sc-shade { opacity:1; }
