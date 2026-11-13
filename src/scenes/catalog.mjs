@@ -57,7 +57,6 @@ export const SCENES = [
     chapters: ['花园开门','暖色琴键','树影摇动','一封未写完的信','回到第一杯咖啡'],
     layers: longLayers('chiang-mai', '/assets/audio/cafe.mp3'),
   },
-,
   {
     id:'da-lat', number:'03', name:label('Da Lat','大叻'),
     location:label('Pine hills after the rain','雨后的松林山谷'),
