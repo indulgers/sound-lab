@@ -1,47 +1,68 @@
-# Intent-first sound journeys — PR #5 integration
+# Sound Cocktail — six-place long-form Journey integration
 
-Updated 2026-11-13. This implements the new-user flow on the existing immersive UI branch, without merging or deploying production.
+Updated 2026-11-13. The working tree is PR #5 (`codex/immersive-video-scenes`). **Do not merge to `main` or publish production** without approval.
 
-## User journey
+## Product flow
 
-1. The initial page is silent and asks **Focus / Meditate / Unwind**. It does not restore a previously selected intention or auto-play audio.
-2. Choosing an intention stages a recommended **Journey** and place, with no sound until the user presses **Enter & listen**.
-3. The existing full-screen silent place film, synced stem player, saved mix controls and adjustable ambience remain in place.
-4. The goal can be changed from the Journey header; the player pauses before presenting the intention selector again.
-5. The Places gallery lists real Journeys, not just films, and shows their matching intention. Multiple Journeys in one place can save different stem balances.
-6. A session has **no forced timer** in this build; an optional 20/30/45/60/90-minute timer can be selected.
-7. The original /en/studio and /zh/studio remain available. No legacy-user flow or migration has been introduced.
+**Intent → Journey → Place → Studio**. First-time visitors select Focus / Meditate / Unwind, then receive a recommended journey; audio only begins after a user click. Once listening, they may change journeys without leaving the scenery. The existing brand is retained; cocktail visuals are not the development focus.
 
-## Implemented journey mapping
+### Places & actual audio
 
-| Intention | Default | Existing audio used | Recommended timer |
+| Place | Primary role | Media | Music |
 | --- | --- | --- | --- |
-| Focus | Chiang Mai · Café Flow | V3.1 Chiang Mai stems | 45 min, optional |
-| Meditate | Bali · Sound Bath | V3.1 Bali stems | 20 min, optional |
-| Unwind | Bali · Rainforest Exhale | The same Bali stems, but with an independent, lower-music/wetter mix | None |
-| Unwind alternative | Chiang Mai · One More Coffee | The same Chiang Mai stems, with a lighter mix | None |
+| Chiang Mai | Focus / warm café | licensed Yangshuo stock film, explicitly not Chiang Mai photography | 15m original algorithmic composition with V3.1 opening retained |
+| Bali / Ubud | Meditate / sound bath | licensed forest footage; location not verified as Bali | 15m programmatic resonance-based composition with V3.1 opening retained |
+| Da Lat | Focus / relaxed reading | original illustrated concept, not travel film | 15m procedural original |
+| Kyoto | Meditate | original illustrated concept, not travel film | 15m procedural original |
+| Lisbon | Creative focus | original illustrated concept, not travel film | 15m procedural original |
+| Hoi An | Unwind | original illustrated concept, not travel film | 15m procedural original |
 
-These names distinguish curation/mix, **not four separately composed pieces of music**. The actual location of the stock footage is described in docs/immersive-video-review.md. Do not misrepresent it as local footage.
+All 6 currently have 3 aligned 15-minute stems (`harmony`, `details`, `atmosphere`). Optional existing licensed environmental loops can be adjusted independently. Shared places may have several mix-intention presets; these are **not** represented as independent compositions. The previous V3.1 3m Chiang Mai and Bali stems remain accessible through a labeled A/B option in advanced mixing. All prototype music is open for long listening; no mandatory 10-minute cutoff or paywall.
 
-## Audio boundary and next ingestion step
+## Streaming engine
 
-This PR still contains **two original V3.1 compositions of about three minutes**, replayed with a join for indefinite listening. The V3.2 15-minute stems and Da Lat, Kyoto, Lisbon and Hoi An compositions are in a separate local archive, *not* in the PR assets. Neither the soundtrack length nor the number of destinations has been silently changed.
+`src/scenes/stream-player.mjs` uses HTMLMediaElement-backed Web Audio layers rather than fully decoding three 15-minute stereo MP3s into unbounded PCM memory. Grouped media playback uses a shared Web Audio graph, time alignment, independent stem gains, ~9-second crossfade near the end, background-tab independent audio and a conservative dynamics guard. It supports a real elapsed-time clock for focus sessions and a separate optional sleep deadline.
 
-To ingest the V3.2 audio responsibly, add a Journey audio manifest with chapters, duration, stems and provenance. Do **not** pass every 15-minute decoded stereo stem into the present Web Audio buffer player on mobile: memory use becomes excessive. Provide incremental delivery or a streaming/media-source-based arrangement with seam tests and a bounded buffer policy, then verify background tab/mobile playback, sync, music/video independence and crossfade before switching the catalogue. Keep the V3.1 files until the replacement is actually verified.
+Audio controls are **functional**, not decorative:
 
-## Validation
+- **Simple:** warmth (tone), space (wet/dry depth), musical activity (gate of varying 23-second passages of the details stem), nature (atmosphere vs music ratio).
+- **Advanced:** individual stems, low/mid/high EQ through BiquadFilters, convolution room reverb, mid/side stereo width with channel split/merge matrix, original V3.1 vs V3.2 where actually available.
+- Controls are per-Journey, clamp to safe UI ranges and persist separately in local preferences.
 
-- Module tests in `tests/scene-journeys.test.mjs` verify recommendations, real audio paths, mix separation and preference persistence.
-- All previous player tests remain unmodified.
-- Full repository `npm test`, application build, authenticated browser listening and mobile acceptance have **not** been rerun in this chat. The earlier 136-pass figure predates this feature and must not be treated as a fresh result.
-- No merge to `main` or deployment to `soundcocktail.app` occurred.
+The music-activity slider gates the rendered detail stem and **does not recompose notes**. The advanced EQ and stereo controls can improve a recording's balance but cannot make a weak arrangement a strong one. Multichannel width only applies if the exported stems have stereo information.
 
-## Manual acceptance checklist
+## State-specific P1 listening tools
 
-- First visit: goals visible, no music, no displaced or clipped controls on 390px and desktop.
-- Pick Focus → Chiang Mai; pick Meditate → Bali; pick Unwind → Bali and change to Chiang Mai.
-- Check video movement, pause-motion fallback and keyboard Escape.
-- Enter playback, pause/resume, switch goals and switch places while playing. Ensure no overlap or stale fetch restart.
-- Compare the four Journey stem balances; adjust, save, revisit and reset each independently.
-- Check saved/places dialogs, localised text, optional timers and indefinite playback.
-- Repeat in Chrome, Safari and iOS/Android with headphones.
+- **Focus:** optional 25 / 45 / 60-minute work block with gentle completion reminder; pauses with audio and does not interrupt it.
+- **Meditate:** optional on-screen breathing animation; can be dismissed and respects reduced-motion settings.
+- **Unwind:** continuous playing without interruption is the default.
+- **Visual:** five subtle light phases with scene chapter labels; user can pause video motion independently of music.
+- **Customization:** the `Studio` entry in the Journey opens the in-place advanced mixer, retaining live controls; the classic /zh/studio and /en/studio remain available as separate legacy screens.
+
+## Music production + composer
+
+- `scripts/render_journeys.py`: reproducible six-destination procedural 15m stems and manifest, with the existing Chiang Mai/Bali opening (when compatible source stems exist).
+- `scripts/validate_journey_audio.py`: validates durations, matching stem structure and basic peak/format constraints.
+- `scripts/publish_production_audio.py`: future handoff utility for **rights-cleared** DAW WAV stems and delivery manifest; does not supply a professional score by itself.
+- `docs/music-production-playbook.md`: detailed briefs, Chiang Mai motif timeline, instrument/realism choices, copyright evidence, technical quality gates, and human listening evaluation.
+
+### Chiang Mai brief
+
+Retain a welcoming, recognisable opening, then make the middle less repetitive using sparse reprises (~4:07, ~8:40, ~12:12), longer chords, less frequent distinct events, no aggressive or sudden crescendos. This is an iteration on an experimental synth piece; **real-world listener preference has not been proven**.
+
+## QA status and scope
+
+On isolated review run [#43459606679](https://github.com/indulgers/sound-lab/actions/runs/43459606679), actual Github Actions evidence showed:
+- six 15-minute stem groups rendered / validated;
+- **148 tests passed, 0 failed**, production build succeeded;
+- isolated Cloudflare review Worker published and Chromium smoke succeeded on desktop, 390px mobile viewport and English interface;
+- confirmed browser Focus playback, true 2-level mixer and stored levels, focus clock, Bali breathing guide, journey switch to Kyoto while playing, and long-form asset playback.
+
+[Open review preview (Chinese)](https://sound-cocktail-pr5-review.weiyezhu180.workers.dev/zh). Production domain `soundcocktail.app` and branch `main` remain unchanged. PR remains draft.
+
+## Incomplete, still requiring honest follow-up
+
+1. New four destinations have **concept illustrations**, not verified local films. Chiang Mai video is filmed in Yangshuo; Bali film location is not proven. Source records must remain visible.
+2. Professional recordings, human performances, DAW-produced alternate compositions and subjective musical quality gate remain future. Do not label this as clinically validated music therapy.
+3. Real Safari/iOS playback, lock-screen/background hours-long session, 15m crossfade across multiple cycles, headset audio compatibility and accessibility audit need device-specific QA. Browser unit tests are not a substitute.
+4. Professional audio publishing needs documented ownership, stems and master rights. Future payments are not enabled.
