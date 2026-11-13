@@ -131,12 +131,20 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
     if (!deck || !context) return;
     const p = deck.parts[0]?.media.currentTime || 0;
     for (const part of deck.parts) {
-      const isNature = part.id === 'atmosphere' || part.id === 'ambience' || part.id === 'air';
+      const isSpeech = Boolean(part.layer.containsSpeech);
+      const isNature = !isSpeech && (part.id === 'atmosphere' || part.id === 'ambience' || part.id === 'air');
       const isDetails = part.id === 'details' || part.id === 'texture';
       const base = clamp(levels[part.id], clamp(part.layer.defaultLevel, .55));
-      const level = base * (isNature ? .55 + nature * .9 : 1)
-        * (isDetails ? densityGate(p, energy, sceneSeed()) : 1);
-      ramp(part.gain.gain, level, isDetails ? .45 : .09);
+      const passage = isDetails ? densityGate(p, energy, sceneSeed()) : 1;
+      // Natural-air controls must never turn conversation recordings up.
+      // Passage changes should emerge gradually, not interrupt focused work.
+      if (isDetails && part.lastPassage !== undefined && part.lastPassage !== passage) {
+        part.gateTransitionUntil = context.currentTime + 2.7;
+      }
+      part.lastPassage = passage;
+      const level = base * (isNature ? .55 + nature * .9 : 1) * passage;
+      const inTransition = isDetails && context.currentTime < (part.gateTransitionUntil || 0);
+      ramp(part.gain.gain, level, inTransition ? 1.2 : .09);
     }
   }
   function sceneSeed() {
