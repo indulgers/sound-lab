@@ -17,7 +17,20 @@
 import { localeFromPath, stripLocalePrefix } from './locale.mjs';
 
 /** 裸路径可重定向的内容页（段名即路由段）。 */
-export const REDIRECTABLE_BARE = ['focus', 'sleep', 'relax', 'rain', 'cafe', 'about', 'terms', 'privacy'];
+export const REDIRECTABLE_BARE = [
+  'focus',
+  'sleep',
+  'relax',
+  'rain',
+  'cafe',
+  'about',
+  'terms',
+  'privacy',
+  'recipes',
+  'plus',
+  'mine',
+  'sources',
+];
 
 export const REDIRECT_STATUS = 308;
 
@@ -41,6 +54,22 @@ export function redirectForPath(pathname) {
 /** 语言前缀的反向操作：供路由层判断当前路径是否已本地化。 */
 export function isLocalizedPath(pathname) {
   return localeFromPath(pathname) !== null;
+}
+
+/**
+ * 旧版页内锚点 → 新路由段（拆页兼容）。
+ *
+ * 旧版是单页长滚动，导航与外链用 #recipes / #plus / #mine / #sources；
+ * 拆页后这些区块各是独立路由，首页挂载时读到这些锚点就跳到对应路由
+ * （replace，不留一跳历史）。#mixer 本就是首页，返回 null 不跳；
+ * 其他锚点（#faq 等页内定位）也返回 null，保持原地。
+ * 纯函数：返回 '/recipes' 这类段（不含语言前缀），或 null。
+ */
+export function routeForAnchor(hash) {
+  if (typeof hash !== 'string') return null;
+  const seg = hash.replace(/^#/, '');
+  if (seg === 'recipes' || seg === 'plus' || seg === 'mine' || seg === 'sources') return `/${seg}`;
+  return null;
 }
 
 export { stripLocalePrefix };

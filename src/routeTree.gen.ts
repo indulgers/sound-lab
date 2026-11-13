@@ -16,13 +16,17 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as FocusRouteImport } from './routes/focus'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as HoneypotRouteImport } from './routes/honeypot'
+import { Route as MineRouteImport } from './routes/mine'
+import { Route as PlusRouteImport } from './routes/plus'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RainRouteImport } from './routes/rain'
+import { Route as RecipesRouteImport } from './routes/recipes'
 import { Route as RelaxRouteImport } from './routes/relax'
 import { Route as ReturnRouteImport } from './routes/return'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SleepRouteImport } from './routes/sleep'
+import { Route as SourcesRouteImport } from './routes/sources'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WaffoReturnRouteImport } from './routes/waffo-return'
 import { Route as ApiEntitlementsRouteImport } from './routes/api/entitlements'
@@ -33,10 +37,14 @@ import { Route as EnAboutRouteImport } from './routes/en/about'
 import { Route as EnCafeRouteImport } from './routes/en/cafe'
 import { Route as EnCheckoutRouteImport } from './routes/en/checkout'
 import { Route as EnFocusRouteImport } from './routes/en/focus'
+import { Route as EnMineRouteImport } from './routes/en/mine'
+import { Route as EnPlusRouteImport } from './routes/en/plus'
 import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
 import { Route as EnRainRouteImport } from './routes/en/rain'
+import { Route as EnRecipesRouteImport } from './routes/en/recipes'
 import { Route as EnRelaxRouteImport } from './routes/en/relax'
 import { Route as EnSleepRouteImport } from './routes/en/sleep'
+import { Route as EnSourcesRouteImport } from './routes/en/sources'
 import { Route as EnTermsRouteImport } from './routes/en/terms'
 import { Route as MixCodeRouteImport } from './routes/mix.$code'
 import { Route as ZhIndexRouteImport } from './routes/zh/index'
@@ -44,10 +52,14 @@ import { Route as ZhAboutRouteImport } from './routes/zh/about'
 import { Route as ZhCafeRouteImport } from './routes/zh/cafe'
 import { Route as ZhCheckoutRouteImport } from './routes/zh/checkout'
 import { Route as ZhFocusRouteImport } from './routes/zh/focus'
+import { Route as ZhMineRouteImport } from './routes/zh/mine'
+import { Route as ZhPlusRouteImport } from './routes/zh/plus'
 import { Route as ZhPrivacyRouteImport } from './routes/zh/privacy'
 import { Route as ZhRainRouteImport } from './routes/zh/rain'
+import { Route as ZhRecipesRouteImport } from './routes/zh/recipes'
 import { Route as ZhRelaxRouteImport } from './routes/zh/relax'
 import { Route as ZhSleepRouteImport } from './routes/zh/sleep'
+import { Route as ZhSourcesRouteImport } from './routes/zh/sources'
 import { Route as ZhTermsRouteImport } from './routes/zh/terms'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
@@ -104,6 +116,16 @@ const HoneypotRoute = HoneypotRouteImport.update({
   path: '/honeypot',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MineRoute = MineRouteImport.update({
+  id: '/mine',
+  path: '/mine',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlusRoute = PlusRouteImport.update({
+  id: '/plus',
+  path: '/plus',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -112,6 +134,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const RainRoute = RainRouteImport.update({
   id: '/rain',
   path: '/rain',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecipesRoute = RecipesRouteImport.update({
+  id: '/recipes',
+  path: '/recipes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RelaxRoute = RelaxRouteImport.update({
@@ -137,6 +164,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SleepRoute = SleepRouteImport.update({
   id: '/sleep',
   path: '/sleep',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SourcesRoute = SourcesRouteImport.update({
+  id: '/sources',
+  path: '/sources',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -189,6 +221,16 @@ const EnFocusRoute = EnFocusRouteImport.update({
   path: '/en/focus',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnMineRoute = EnMineRouteImport.update({
+  id: '/en/mine',
+  path: '/en/mine',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnPlusRoute = EnPlusRouteImport.update({
+  id: '/en/plus',
+  path: '/en/plus',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnPrivacyRoute = EnPrivacyRouteImport.update({
   id: '/en/privacy',
   path: '/en/privacy',
@@ -199,6 +241,11 @@ const EnRainRoute = EnRainRouteImport.update({
   path: '/en/rain',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnRecipesRoute = EnRecipesRouteImport.update({
+  id: '/en/recipes',
+  path: '/en/recipes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnRelaxRoute = EnRelaxRouteImport.update({
   id: '/en/relax',
   path: '/en/relax',
@@ -207,6 +254,11 @@ const EnRelaxRoute = EnRelaxRouteImport.update({
 const EnSleepRoute = EnSleepRouteImport.update({
   id: '/en/sleep',
   path: '/en/sleep',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnSourcesRoute = EnSourcesRouteImport.update({
+  id: '/en/sources',
+  path: '/en/sources',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnTermsRoute = EnTermsRouteImport.update({
@@ -244,6 +296,16 @@ const ZhFocusRoute = ZhFocusRouteImport.update({
   path: '/zh/focus',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZhMineRoute = ZhMineRouteImport.update({
+  id: '/zh/mine',
+  path: '/zh/mine',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZhPlusRoute = ZhPlusRouteImport.update({
+  id: '/zh/plus',
+  path: '/zh/plus',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ZhPrivacyRoute = ZhPrivacyRouteImport.update({
   id: '/zh/privacy',
   path: '/zh/privacy',
@@ -254,6 +316,11 @@ const ZhRainRoute = ZhRainRouteImport.update({
   path: '/zh/rain',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZhRecipesRoute = ZhRecipesRouteImport.update({
+  id: '/zh/recipes',
+  path: '/zh/recipes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ZhRelaxRoute = ZhRelaxRouteImport.update({
   id: '/zh/relax',
   path: '/zh/relax',
@@ -262,6 +329,11 @@ const ZhRelaxRoute = ZhRelaxRouteImport.update({
 const ZhSleepRoute = ZhSleepRouteImport.update({
   id: '/zh/sleep',
   path: '/zh/sleep',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZhSourcesRoute = ZhSourcesRouteImport.update({
+  id: '/zh/sources',
+  path: '/zh/sources',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ZhTermsRoute = ZhTermsRouteImport.update({
@@ -373,13 +445,17 @@ export interface FileRoutesByFullPath {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/honeypot': typeof HoneypotRoute
+  '/mine': typeof MineRoute
+  '/plus': typeof PlusRoute
   '/privacy': typeof PrivacyRoute
   '/rain': typeof RainRoute
+  '/recipes': typeof RecipesRoute
   '/relax': typeof RelaxRoute
   '/return': typeof ReturnRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sleep': typeof SleepRoute
+  '/sources': typeof SourcesRoute
   '/terms': typeof TermsRoute
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
@@ -389,20 +465,28 @@ export interface FileRoutesByFullPath {
   '/en/cafe': typeof EnCafeRoute
   '/en/checkout': typeof EnCheckoutRoute
   '/en/focus': typeof EnFocusRoute
+  '/en/mine': typeof EnMineRoute
+  '/en/plus': typeof EnPlusRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/rain': typeof EnRainRoute
+  '/en/recipes': typeof EnRecipesRoute
   '/en/relax': typeof EnRelaxRoute
   '/en/sleep': typeof EnSleepRoute
+  '/en/sources': typeof EnSourcesRoute
   '/en/terms': typeof EnTermsRoute
   '/mix/$code': typeof MixCodeRoute
   '/zh/about': typeof ZhAboutRoute
   '/zh/cafe': typeof ZhCafeRoute
   '/zh/checkout': typeof ZhCheckoutRoute
   '/zh/focus': typeof ZhFocusRoute
+  '/zh/mine': typeof ZhMineRoute
+  '/zh/plus': typeof ZhPlusRoute
   '/zh/privacy': typeof ZhPrivacyRoute
   '/zh/rain': typeof ZhRainRoute
+  '/zh/recipes': typeof ZhRecipesRoute
   '/zh/relax': typeof ZhRelaxRoute
   '/zh/sleep': typeof ZhSleepRoute
+  '/zh/sources': typeof ZhSourcesRoute
   '/zh/terms': typeof ZhTermsRoute
   '/en/': typeof EnIndexRoute
   '/zh/': typeof ZhIndexRoute
@@ -434,13 +518,17 @@ export interface FileRoutesByTo {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/honeypot': typeof HoneypotRoute
+  '/mine': typeof MineRoute
+  '/plus': typeof PlusRoute
   '/privacy': typeof PrivacyRoute
   '/rain': typeof RainRoute
+  '/recipes': typeof RecipesRoute
   '/relax': typeof RelaxRoute
   '/return': typeof ReturnRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sleep': typeof SleepRoute
+  '/sources': typeof SourcesRoute
   '/terms': typeof TermsRoute
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
@@ -450,20 +538,28 @@ export interface FileRoutesByTo {
   '/en/cafe': typeof EnCafeRoute
   '/en/checkout': typeof EnCheckoutRoute
   '/en/focus': typeof EnFocusRoute
+  '/en/mine': typeof EnMineRoute
+  '/en/plus': typeof EnPlusRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/rain': typeof EnRainRoute
+  '/en/recipes': typeof EnRecipesRoute
   '/en/relax': typeof EnRelaxRoute
   '/en/sleep': typeof EnSleepRoute
+  '/en/sources': typeof EnSourcesRoute
   '/en/terms': typeof EnTermsRoute
   '/mix/$code': typeof MixCodeRoute
   '/zh/about': typeof ZhAboutRoute
   '/zh/cafe': typeof ZhCafeRoute
   '/zh/checkout': typeof ZhCheckoutRoute
   '/zh/focus': typeof ZhFocusRoute
+  '/zh/mine': typeof ZhMineRoute
+  '/zh/plus': typeof ZhPlusRoute
   '/zh/privacy': typeof ZhPrivacyRoute
   '/zh/rain': typeof ZhRainRoute
+  '/zh/recipes': typeof ZhRecipesRoute
   '/zh/relax': typeof ZhRelaxRoute
   '/zh/sleep': typeof ZhSleepRoute
+  '/zh/sources': typeof ZhSourcesRoute
   '/zh/terms': typeof ZhTermsRoute
   '/en': typeof EnIndexRoute
   '/zh': typeof ZhIndexRoute
@@ -496,13 +592,17 @@ export interface FileRoutesById {
   '/focus': typeof FocusRoute
   '/health': typeof HealthRoute
   '/honeypot': typeof HoneypotRoute
+  '/mine': typeof MineRoute
+  '/plus': typeof PlusRoute
   '/privacy': typeof PrivacyRoute
   '/rain': typeof RainRoute
+  '/recipes': typeof RecipesRoute
   '/relax': typeof RelaxRoute
   '/return': typeof ReturnRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sleep': typeof SleepRoute
+  '/sources': typeof SourcesRoute
   '/terms': typeof TermsRoute
   '/waffo-return': typeof WaffoReturnRoute
   '/api/entitlements': typeof ApiEntitlementsRoute
@@ -512,20 +612,28 @@ export interface FileRoutesById {
   '/en/cafe': typeof EnCafeRoute
   '/en/checkout': typeof EnCheckoutRoute
   '/en/focus': typeof EnFocusRoute
+  '/en/mine': typeof EnMineRoute
+  '/en/plus': typeof EnPlusRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/rain': typeof EnRainRoute
+  '/en/recipes': typeof EnRecipesRoute
   '/en/relax': typeof EnRelaxRoute
   '/en/sleep': typeof EnSleepRoute
+  '/en/sources': typeof EnSourcesRoute
   '/en/terms': typeof EnTermsRoute
   '/mix/$code': typeof MixCodeRoute
   '/zh/about': typeof ZhAboutRoute
   '/zh/cafe': typeof ZhCafeRoute
   '/zh/checkout': typeof ZhCheckoutRoute
   '/zh/focus': typeof ZhFocusRoute
+  '/zh/mine': typeof ZhMineRoute
+  '/zh/plus': typeof ZhPlusRoute
   '/zh/privacy': typeof ZhPrivacyRoute
   '/zh/rain': typeof ZhRainRoute
+  '/zh/recipes': typeof ZhRecipesRoute
   '/zh/relax': typeof ZhRelaxRoute
   '/zh/sleep': typeof ZhSleepRoute
+  '/zh/sources': typeof ZhSourcesRoute
   '/zh/terms': typeof ZhTermsRoute
   '/en/': typeof EnIndexRoute
   '/zh/': typeof ZhIndexRoute
@@ -559,13 +667,17 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/honeypot'
+    | '/mine'
+    | '/plus'
     | '/privacy'
     | '/rain'
+    | '/recipes'
     | '/relax'
     | '/return'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/sleep'
+    | '/sources'
     | '/terms'
     | '/waffo-return'
     | '/api/entitlements'
@@ -575,20 +687,28 @@ export interface FileRouteTypes {
     | '/en/cafe'
     | '/en/checkout'
     | '/en/focus'
+    | '/en/mine'
+    | '/en/plus'
     | '/en/privacy'
     | '/en/rain'
+    | '/en/recipes'
     | '/en/relax'
     | '/en/sleep'
+    | '/en/sources'
     | '/en/terms'
     | '/mix/$code'
     | '/zh/about'
     | '/zh/cafe'
     | '/zh/checkout'
     | '/zh/focus'
+    | '/zh/mine'
+    | '/zh/plus'
     | '/zh/privacy'
     | '/zh/rain'
+    | '/zh/recipes'
     | '/zh/relax'
     | '/zh/sleep'
+    | '/zh/sources'
     | '/zh/terms'
     | '/en/'
     | '/zh/'
@@ -620,13 +740,17 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/honeypot'
+    | '/mine'
+    | '/plus'
     | '/privacy'
     | '/rain'
+    | '/recipes'
     | '/relax'
     | '/return'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/sleep'
+    | '/sources'
     | '/terms'
     | '/waffo-return'
     | '/api/entitlements'
@@ -636,20 +760,28 @@ export interface FileRouteTypes {
     | '/en/cafe'
     | '/en/checkout'
     | '/en/focus'
+    | '/en/mine'
+    | '/en/plus'
     | '/en/privacy'
     | '/en/rain'
+    | '/en/recipes'
     | '/en/relax'
     | '/en/sleep'
+    | '/en/sources'
     | '/en/terms'
     | '/mix/$code'
     | '/zh/about'
     | '/zh/cafe'
     | '/zh/checkout'
     | '/zh/focus'
+    | '/zh/mine'
+    | '/zh/plus'
     | '/zh/privacy'
     | '/zh/rain'
+    | '/zh/recipes'
     | '/zh/relax'
     | '/zh/sleep'
+    | '/zh/sources'
     | '/zh/terms'
     | '/en'
     | '/zh'
@@ -681,13 +813,17 @@ export interface FileRouteTypes {
     | '/focus'
     | '/health'
     | '/honeypot'
+    | '/mine'
+    | '/plus'
     | '/privacy'
     | '/rain'
+    | '/recipes'
     | '/relax'
     | '/return'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/sleep'
+    | '/sources'
     | '/terms'
     | '/waffo-return'
     | '/api/entitlements'
@@ -697,20 +833,28 @@ export interface FileRouteTypes {
     | '/en/cafe'
     | '/en/checkout'
     | '/en/focus'
+    | '/en/mine'
+    | '/en/plus'
     | '/en/privacy'
     | '/en/rain'
+    | '/en/recipes'
     | '/en/relax'
     | '/en/sleep'
+    | '/en/sources'
     | '/en/terms'
     | '/mix/$code'
     | '/zh/about'
     | '/zh/cafe'
     | '/zh/checkout'
     | '/zh/focus'
+    | '/zh/mine'
+    | '/zh/plus'
     | '/zh/privacy'
     | '/zh/rain'
+    | '/zh/recipes'
     | '/zh/relax'
     | '/zh/sleep'
+    | '/zh/sources'
     | '/zh/terms'
     | '/en/'
     | '/zh/'
@@ -743,13 +887,17 @@ export interface RootRouteChildren {
   FocusRoute: typeof FocusRoute
   HealthRoute: typeof HealthRoute
   HoneypotRoute: typeof HoneypotRoute
+  MineRoute: typeof MineRoute
+  PlusRoute: typeof PlusRoute
   PrivacyRoute: typeof PrivacyRoute
   RainRoute: typeof RainRoute
+  RecipesRoute: typeof RecipesRoute
   RelaxRoute: typeof RelaxRoute
   ReturnRoute: typeof ReturnRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SleepRoute: typeof SleepRoute
+  SourcesRoute: typeof SourcesRoute
   TermsRoute: typeof TermsRoute
   WaffoReturnRoute: typeof WaffoReturnRoute
   ApiEntitlementsRoute: typeof ApiEntitlementsRoute
@@ -759,20 +907,28 @@ export interface RootRouteChildren {
   EnCafeRoute: typeof EnCafeRoute
   EnCheckoutRoute: typeof EnCheckoutRoute
   EnFocusRoute: typeof EnFocusRoute
+  EnMineRoute: typeof EnMineRoute
+  EnPlusRoute: typeof EnPlusRoute
   EnPrivacyRoute: typeof EnPrivacyRoute
   EnRainRoute: typeof EnRainRoute
+  EnRecipesRoute: typeof EnRecipesRoute
   EnRelaxRoute: typeof EnRelaxRoute
   EnSleepRoute: typeof EnSleepRoute
+  EnSourcesRoute: typeof EnSourcesRoute
   EnTermsRoute: typeof EnTermsRoute
   MixCodeRoute: typeof MixCodeRoute
   ZhAboutRoute: typeof ZhAboutRoute
   ZhCafeRoute: typeof ZhCafeRoute
   ZhCheckoutRoute: typeof ZhCheckoutRoute
   ZhFocusRoute: typeof ZhFocusRoute
+  ZhMineRoute: typeof ZhMineRoute
+  ZhPlusRoute: typeof ZhPlusRoute
   ZhPrivacyRoute: typeof ZhPrivacyRoute
   ZhRainRoute: typeof ZhRainRoute
+  ZhRecipesRoute: typeof ZhRecipesRoute
   ZhRelaxRoute: typeof ZhRelaxRoute
   ZhSleepRoute: typeof ZhSleepRoute
+  ZhSourcesRoute: typeof ZhSourcesRoute
   ZhTermsRoute: typeof ZhTermsRoute
   EnIndexRoute: typeof EnIndexRoute
   ZhIndexRoute: typeof ZhIndexRoute
@@ -848,6 +1004,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HoneypotRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mine': {
+      id: '/mine'
+      path: '/mine'
+      fullPath: '/mine'
+      preLoaderRoute: typeof MineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plus': {
+      id: '/plus'
+      path: '/plus'
+      fullPath: '/plus'
+      preLoaderRoute: typeof PlusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -860,6 +1030,13 @@ declare module '@tanstack/react-router' {
       path: '/rain'
       fullPath: '/rain'
       preLoaderRoute: typeof RainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recipes': {
+      id: '/recipes'
+      path: '/recipes'
+      fullPath: '/recipes'
+      preLoaderRoute: typeof RecipesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/relax': {
@@ -895,6 +1072,13 @@ declare module '@tanstack/react-router' {
       path: '/sleep'
       fullPath: '/sleep'
       preLoaderRoute: typeof SleepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sources': {
+      id: '/sources'
+      path: '/sources'
+      fullPath: '/sources'
+      preLoaderRoute: typeof SourcesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -967,6 +1151,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnFocusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/mine': {
+      id: '/en/mine'
+      path: '/en/mine'
+      fullPath: '/en/mine'
+      preLoaderRoute: typeof EnMineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/plus': {
+      id: '/en/plus'
+      path: '/en/plus'
+      fullPath: '/en/plus'
+      preLoaderRoute: typeof EnPlusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/privacy': {
       id: '/en/privacy'
       path: '/en/privacy'
@@ -981,6 +1179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnRainRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/recipes': {
+      id: '/en/recipes'
+      path: '/en/recipes'
+      fullPath: '/en/recipes'
+      preLoaderRoute: typeof EnRecipesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en/relax': {
       id: '/en/relax'
       path: '/en/relax'
@@ -993,6 +1198,13 @@ declare module '@tanstack/react-router' {
       path: '/en/sleep'
       fullPath: '/en/sleep'
       preLoaderRoute: typeof EnSleepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/sources': {
+      id: '/en/sources'
+      path: '/en/sources'
+      fullPath: '/en/sources'
+      preLoaderRoute: typeof EnSourcesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en/terms': {
@@ -1044,6 +1256,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZhFocusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/zh/mine': {
+      id: '/zh/mine'
+      path: '/zh/mine'
+      fullPath: '/zh/mine'
+      preLoaderRoute: typeof ZhMineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zh/plus': {
+      id: '/zh/plus'
+      path: '/zh/plus'
+      fullPath: '/zh/plus'
+      preLoaderRoute: typeof ZhPlusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/zh/privacy': {
       id: '/zh/privacy'
       path: '/zh/privacy'
@@ -1058,6 +1284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZhRainRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/zh/recipes': {
+      id: '/zh/recipes'
+      path: '/zh/recipes'
+      fullPath: '/zh/recipes'
+      preLoaderRoute: typeof ZhRecipesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/zh/relax': {
       id: '/zh/relax'
       path: '/zh/relax'
@@ -1070,6 +1303,13 @@ declare module '@tanstack/react-router' {
       path: '/zh/sleep'
       fullPath: '/zh/sleep'
       preLoaderRoute: typeof ZhSleepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zh/sources': {
+      id: '/zh/sources'
+      path: '/zh/sources'
+      fullPath: '/zh/sources'
+      preLoaderRoute: typeof ZhSourcesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/zh/terms': {
@@ -1223,13 +1463,17 @@ const rootRouteChildren: RootRouteChildren = {
   FocusRoute: FocusRoute,
   HealthRoute: HealthRoute,
   HoneypotRoute: HoneypotRoute,
+  MineRoute: MineRoute,
+  PlusRoute: PlusRoute,
   PrivacyRoute: PrivacyRoute,
   RainRoute: RainRoute,
+  RecipesRoute: RecipesRoute,
   RelaxRoute: RelaxRoute,
   ReturnRoute: ReturnRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SleepRoute: SleepRoute,
+  SourcesRoute: SourcesRoute,
   TermsRoute: TermsRoute,
   WaffoReturnRoute: WaffoReturnRoute,
   ApiEntitlementsRoute: ApiEntitlementsRoute,
@@ -1239,20 +1483,28 @@ const rootRouteChildren: RootRouteChildren = {
   EnCafeRoute: EnCafeRoute,
   EnCheckoutRoute: EnCheckoutRoute,
   EnFocusRoute: EnFocusRoute,
+  EnMineRoute: EnMineRoute,
+  EnPlusRoute: EnPlusRoute,
   EnPrivacyRoute: EnPrivacyRoute,
   EnRainRoute: EnRainRoute,
+  EnRecipesRoute: EnRecipesRoute,
   EnRelaxRoute: EnRelaxRoute,
   EnSleepRoute: EnSleepRoute,
+  EnSourcesRoute: EnSourcesRoute,
   EnTermsRoute: EnTermsRoute,
   MixCodeRoute: MixCodeRoute,
   ZhAboutRoute: ZhAboutRoute,
   ZhCafeRoute: ZhCafeRoute,
   ZhCheckoutRoute: ZhCheckoutRoute,
   ZhFocusRoute: ZhFocusRoute,
+  ZhMineRoute: ZhMineRoute,
+  ZhPlusRoute: ZhPlusRoute,
   ZhPrivacyRoute: ZhPrivacyRoute,
   ZhRainRoute: ZhRainRoute,
+  ZhRecipesRoute: ZhRecipesRoute,
   ZhRelaxRoute: ZhRelaxRoute,
   ZhSleepRoute: ZhSleepRoute,
+  ZhSourcesRoute: ZhSourcesRoute,
   ZhTermsRoute: ZhTermsRoute,
   EnIndexRoute: EnIndexRoute,
   ZhIndexRoute: ZhIndexRoute,

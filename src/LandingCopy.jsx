@@ -1,19 +1,20 @@
 /**
- * 场景落地页正文（SEO/GEO P1）。
+ * 场景落地页（SEO/GEO P1）。
  *
- * 渲染在调音台外壳（SoundLabView）之下：页面上方是可直接播放的
- * 混音器，下方是本页的 SEO 正文（h1、导语、3 节、FAQ、内链）。
- * 正文全部是 SSR HTML（由路由按语言传 locale，不依赖水合后的
- * useLocale，避免服务端英文、客户端中文的水合不一致）。
+ * 独立路由页面：上方是预载本页配方的调音台（MixerSection，与首页
+ * 共用、接常驻引擎），下方是本页的 SEO 正文（h1、导语、3 节、FAQ、
+ * 内链）。正文全部是 SSR HTML（由路由按语言传 locale，不依赖水合后
+ * 的 useLocale，避免服务端英文、客户端中文的水合不一致）。
  *
  * 挂载时把本页预设配方"摆"到推子上：发 soundcocktail:apply-preset
  * 事件，外壳在 mount useLayoutEffect 里注册的监听器接住后调引擎
  * setMix（只摆推子，不播放、不进沉浸模式）。"播放这杯"与"存下这杯"
  * 同样走事件（soundcocktail:play-mix / soundcocktail:save-mix），
- * 由外壳转交给音频引擎的 playRecipe / 保存流程。
+ * 由外壳转交给音频引擎的 playRecipe / saveMixAs。
  */
 import { useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
+import MixerSection from './MixerSection.jsx';
 import { LANDING_KEYS, LANDING_PAGES, LANDING_PRESETS, faqsForPage } from './landing.mjs';
 import { t, useLocale, localizePath } from './locale.mjs';
 
@@ -49,7 +50,9 @@ export default function LandingCopy({ page, locale }) {
   }
 
   return (
-    <article className="blk landing-copy" id="landing">
+    <>
+      <MixerSection />
+      <article className="blk landing-copy" id="landing">
       <div className="sec-head">
         <h1>{content.h1}</h1>
       </div>
@@ -95,5 +98,6 @@ export default function LandingCopy({ page, locale }) {
         <Link to={localizePath('/', loc)}>{t(loc, 'landing.backHome')}</Link>
       </p>
     </article>
+    </>
   );
 }

@@ -23,6 +23,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
  * 出现服务端英文、客户端中文的水合不一致。没有 Provider 的页面
  * （/return、/waffo-return 等独立页）回落到 getLocale()。
  */
+/** @type {import('react').Context<string | null>} */
 export const LocaleContext = createContext(null);
 
 export const LOCALE_KEY = 'sc-locale';
@@ -135,6 +136,7 @@ export function setLocale(locale) {
  * 订阅语言变化的 React Hook（各组件直接用，不用经父组件传）。
  * 有 LocaleContext Provider 时以 Provider 的语言为准（SSR 与水合
  * 一致）；没有时回落到 getLocale()（URL 前缀 → localStorage → 浏览器语言）。
+ * @returns {[string, (locale: string) => string]}
  */
 export function useLocale() {
   const provided = useContext(LocaleContext);
@@ -152,7 +154,7 @@ export function useLocale() {
 
 export const STRINGS = {
   zh: {
-    skipLink: '跳到调音台',
+    skipLink: '跳到正文',
     meta: {
       title: '调一杯声音',
       description: '混合 22 种声音，听雨落在车窗上，听咖啡馆里的轻声谈话。调成一杯保存，留给专注或放空的时间。',
@@ -407,7 +409,7 @@ export const STRINGS = {
     },
   },
   en: {
-    skipLink: 'Skip to the mixer',
+    skipLink: 'Skip to content',
     meta: {
       title: 'Mix a cup of sound',
       description: 'Mix 22 sounds — rain on the car window, low talk in a café. Save your cup for focused or empty time.',

@@ -19,6 +19,9 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const seo = await import('../src/seo.mjs');
 const ld = await import('../src/seo-ld.mjs');
@@ -31,10 +34,10 @@ const { detectRegion, currencyForRegion } = await import('../src/region.mjs');
 const { SOUNDS } = await import('../src/catalog.mjs');
 const { TERMS_PAGE, PRIVACY_PAGE, LEGAL_OPERATOR, LEGAL_UPDATED } = await import('../src/legal.mjs');
 
-const { SITE_URL, headForRoute, headForMix, canonicalUrl, hreflangLinksFor } = seo;
+const { SITE_URL, headForRoute, headForNoindex, headForMix, canonicalUrl, hreflangLinksFor } = seo;
 const { LANDING_KEYS, LANDING_PAGES, LANDING_PRESETS, LANDING_FAQS, ABOUT_PAGE, faqsForPage } = landing;
 const { localeFromPath, stripLocalePrefix, localizePath, isLocalizablePath } = locale;
-const { redirectForPath } = redirects;
+const { redirectForPath, routeForAnchor } = redirects;
 const { encodeRecipeCode, decodeRecipeCode } = codec;
 
 const CJK = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/;
@@ -43,7 +46,7 @@ const CJK = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/;
 
 test('p1: bare paths 308-redirect to /en, localized and payment paths do not', () => {
   assert.deepEqual(redirectForPath('/'), { to: '/en', statusCode: 308 });
-  for (const seg of ['focus', 'sleep', 'relax', 'rain', 'cafe', 'about', 'terms', 'privacy']) {
+  for (const seg of ['focus', 'sleep', 'relax', 'rain', 'cafe', 'about', 'terms', 'privacy', 'recipes', 'plus', 'mine', 'sources']) {
     assert.deepEqual(redirectForPath(`/${seg}`), { to: `/en/${seg}`, statusCode: 308 }, seg);
   }
   assert.deepEqual(redirectForPath('/checkout'), { to: '/en/checkout', statusCode: 308 });
@@ -53,6 +56,89 @@ test('p1: bare paths 308-redirect to /en, localized and payment paths do not', (
     assert.equal(redirectForPath(p), null, p);
   }
   assert.equal(redirectForPath(null), null);
+});
+
+// --- 1b. 拆页：旧版页内锚点 → 新路由 ---
+
+test('split: routeForAnchor maps the old in-page anchors to route segments, nothing else', () => {
+  for (const seg of ['recipes', 'plus', 'mine', 'sources']) {
+    assert.equal(routeForAnchor(`#${seg}`), `/${seg}`, seg);
+  }
+  // #mixer 本就是首页，不跳；其他锚点（页内定位）也不跳。
+  for (const hash of ['#mixer', '#faq', '#landing', '#about-page', '', '#', null, undefined, 42]) {
+    assert.equal(routeForAnchor(hash), null, String(hash));
+  }
+});
+
+test('split: /mine head is title + description + noindex, no canonical/hreflang, not in the sitemap', async () => {
+  for (const locale of ['en', 'zh']) {
+    const head = headForNoindex('mine', locale);
+    const title = head.meta.find((m) => typeof m.title === 'string').title;
+    const desc = head.meta.find((m) => m.name === 'description').content;
+    assert.ok(title && desc, locale);
+    assert.equal(head.meta.find((m) => m.name === 'robots').content, 'noindex', locale);
+    assert.equal(head.links.length, 0, locale);
+    assert.ok(!head.meta.some((m) => String(m.property || '').startsWith('og:')), locale);
+  }
+  // 中文标题与描述含 CJK，英文不含（与 headForRoute 同一守卫）。
+  assert.doesNotMatch(headForNoindex('mine', 'en').meta.find((m) => typeof m.title === 'string').title, CJK);
+  assert.match(headForNoindex('mine', 'zh').meta.find((m) => m.name === 'description').content, CJK);
+  const { sitemapXml } = seo;
+  assert.doesNotMatch(sitemapXml(new Date('2026-11-13T00:00:00Z')), /\/mine/);
+});
+
+test('split: no in-page anchor links remain in src (routes only)', () => {
+  // 拆页后站内导航全是路由链接：href="#mixer" / "#recipes" / "#plus" /
+  // "#mine" / "#sources" 不得再出现在源码里。允许的例外：#main（跳到
+  // 正文的 skip link 目标）与 #wcBowl / #wcSway（杯子 SVG 内部引用）；
+  // 注释里提及旧锚点与 routeForAnchor 的兼容处理不算链接。
+  const srcDir = fileURLToPath(new URL('../src/', import.meta.url));
+  const walk = (dir) => {
+    const out = [];
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, entry.name);
+      if (entry.isDirectory()) out.push(...walk(p));
+      else if (/\.(jsx|tsx|ts|mjs|css)$/.test(entry.name)) out.push(p);
+    }
+    return out;
+  };
+  const bad = [];
+  for (const file of walk(srcDir)) {
+    const text = fs.readFileSync(file, 'utf8');
+    for (const m of text.matchAll(/href=["']#(mixer|recipes|plus|mine|sources)\b/g)) {
+      bad.push(`${path.relative(process.cwd(), file)}: ${m[0]}`);
+    }
+  }
+  assert.deepEqual(bad, []);
+});
+
+test('split: header keeps logo + nav in the pill, language + profile outside it', () => {
+  // 静态结构守卫：语言 select 与登录区（AuthButton）必须在药丸
+  // （<nav className="topbar">）之外、<header className="topbar-wrap">
+  // 之内的 .topbar-utils 里；药丸里只留 logo 与导航链接。
+  const view = fs.readFileSync(new URL('../src/SoundLabView.jsx', import.meta.url), 'utf8');
+  const headerStart = view.indexOf('<header className="topbar-wrap">');
+  assert.ok(headerStart !== -1, 'topbar-wrap header exists');
+  const navStart = view.indexOf('<nav className="topbar">', headerStart);
+  const navEnd = view.indexOf('</nav>', navStart);
+  assert.ok(navStart !== -1 && navEnd > navStart, 'pill nav exists inside the wrap');
+  const nav = view.slice(navStart, navEnd);
+  assert.ok(nav.includes('BrandMark'), 'pill has the logo');
+  assert.ok(nav.includes('NAV_ITEMS'), 'pill has the nav links');
+  assert.ok(!nav.includes('lang-select'), 'language select is NOT inside the pill');
+  assert.ok(!nav.includes('AuthButton'), 'profile/sign-in is NOT inside the pill');
+  const utilsStart = view.indexOf('<div className="topbar-utils">', navEnd);
+  assert.ok(utilsStart !== -1, 'topbar-utils exists after the pill nav');
+  const utilsEnd = view.indexOf('</div>', utilsStart);
+  const utils = view.slice(utilsStart, utilsEnd);
+  assert.ok(utils.includes('lang-select'), 'utils has the language select');
+  assert.ok(utils.includes('AuthButton'), 'utils has the profile/sign-in');
+  // 样式：utils 在宽屏绝对定位到药丸外右侧，窄屏换行到药丸下方右对齐。
+  const css = fs.readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
+  assert.ok(css.includes('.topbar-wrap'), 'topbar-wrap CSS exists');
+  assert.ok(css.includes('.topbar-utils'), 'topbar-utils CSS exists');
+  assert.match(css, /@media \(min-width:1600px\)\{\s*\/\*[\s\S]*?\.topbar-utils\{\s*position:absolute/, 'utils is absolute right at >=1600px');
+  assert.match(css, /@media \(max-width:1599px\)\{[\s\S]*?\.topbar-utils\{flex-basis:100%;justify-content:flex-end\}/, 'utils wraps to a second row below 1600px');
 });
 
 test('p1: locale URL helpers — prefix in, prefix out, bare paths stay bare', () => {
@@ -82,7 +168,7 @@ test('p1: locale URL helpers — prefix in, prefix out, bare paths stay bare', (
 // --- 1. 语言 URL：head ---
 
 test('p1: /en and /zh heads differ in language, canonical is self, hreflang is reciprocal with one x-default', () => {
-  for (const key of ['home', 'focus', 'sleep', 'relax', 'rain', 'cafe', 'about', 'terms', 'privacy']) {
+  for (const key of ['home', 'focus', 'sleep', 'relax', 'rain', 'cafe', 'about', 'terms', 'privacy', 'recipes', 'plus', 'sources']) {
     const en = headForRoute(key, 'en');
     const zh = headForRoute(key, 'zh');
     const titleOf = (h) => h.meta.find((m) => typeof m.title === 'string').title;

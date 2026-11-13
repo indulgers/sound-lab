@@ -1,4 +1,3 @@
-import { getLocale, t } from './locale.mjs'
 import { createRuntimeScope } from './runtime-scope.mjs'
 
 export function mountVisualEffects() {
@@ -254,40 +253,13 @@ export function mountVisualEffects() {
         }
       }
 
-      /* inline error state for the recipe code import: calm and specific,
-         shown next to the field instead of only in a toast */
-      var ta=document.getElementById("importCode"), ibtn=document.getElementById("importBtn");
-      if(ta && ibtn){
-        var field=ta.closest(".field");
-        var msg=document.createElement("p"); msg.className="err-msg";
-        msg.textContent=t(getLocale(),'mine.importBadCode');
-        field.appendChild(msg);
-        listen(window,"soundcocktail:locale-changed",function(){ msg.textContent=t(getLocale(),'mine.importBadCode'); });
-        ibtn.addEventListener("click", function(){
-          var v=ta.value.trim();
-          if(!v || v.indexOf("SYL-")!==0){ field.classList.add("err"); }
-          else { field.classList.remove("err"); }
-        });
-        ta.addEventListener("input", function(){ field.classList.remove("err"); });
-      }
-
-      /* current nav item follows the section in view (skill B9) */
-      var navLinks=document.querySelectorAll(".topbar a[href^='#']");
-      if(navLinks.length && "IntersectionObserver" in window){
-        var byId={};
-        navLinks.forEach(function(a){ byId[a.getAttribute("href").slice(1)]=a; });
-        var nio=observeIntersections(function(entries){
-          entries.forEach(function(en){
-            if(en.isIntersecting){
-              navLinks.forEach(function(a){ a.removeAttribute("aria-current"); });
-              var link=byId[en.target.id]; if(link) link.setAttribute("aria-current","page");
-            }
-          });
-        },{rootMargin:"-30% 0px -55% 0px",threshold:0});
-        Object.keys(byId).forEach(function(id){
-          var s=document.getElementById(id); if(s) nio.observe(s);
-        });
-      }
+      // （拆页后删掉的两块，见下。）
+      // 1. 配方码导入的行内红字：改由 MinePage 用 React state 管
+      //    （这里只在外壳挂载时跑一次，/mine 页面挂载时 #importCode
+      //    还不在 DOM 里，接不上；两边都管会渲染出两条红字）。
+      // 2. 导航 scroll-spy（skill B9）：顶栏导航已是路由链接（/en/
+      //    recipes 等），不再有 href^='#' 的锚点链接；当前栏目高亮
+      //    由路由的 aria-current / activeOptions 提供。
     })();
   return {
     onMixChange,

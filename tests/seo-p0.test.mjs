@@ -1,6 +1,6 @@
 /**
  * SEO/GEO P0 测试（P1 后更新：head 按语言签名、规范 URL 带 /en 前缀、
- * sitemap 为 7 页 × 2 语言 + hreflang、llms.txt 列双语 URL）。
+ * sitemap 为 10 页 × 2 语言 + hreflang、llms.txt 列双语 URL）。
  *
  * 覆盖：robots.txt（放行各爬虫 + Sitemap 指向）、sitemap.xml
  * （只列可收录页）、每路由 head（首页 ≠ /focus、均为英文、自指
@@ -56,23 +56,23 @@ test('seo: sitemap.xml lists only the public pages with absolute URLs and lastmo
   assert.ok(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>'));
   assert.ok(xml.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'));
   assert.ok(xml.endsWith('</urlset>\n'));
-  // 7 页 × 2 语言，全部带语言前缀；裸 / 与 /focus 不再是规范 URL。
-  for (const p of ['/en', '/zh', '/en/focus', '/zh/focus', '/en/sleep', '/zh/sleep', '/en/relax', '/zh/relax', '/en/rain', '/zh/rain', '/en/cafe', '/zh/cafe', '/en/about', '/zh/about']) {
+  // 10 页 × 2 语言，全部带语言前缀；裸 / 与 /focus 不再是规范 URL。
+  for (const p of ['/en', '/zh', '/en/focus', '/zh/focus', '/en/sleep', '/zh/sleep', '/en/relax', '/zh/relax', '/en/rain', '/zh/rain', '/en/cafe', '/zh/cafe', '/en/about', '/zh/about', '/en/recipes', '/zh/recipes', '/en/plus', '/zh/plus', '/en/sources', '/zh/sources']) {
     assert.ok(xml.includes(`<loc>${SITE_URL}${p}</loc>`), p);
   }
   assert.doesNotMatch(xml, /<loc>https:\/\/soundcocktail\.app\/<\/loc>/);
   assert.doesNotMatch(xml, /<loc>https:\/\/soundcocktail\.app\/focus<\/loc>/);
   assert.ok(xml.includes('<lastmod>2026-11-13</lastmod>'));
-  for (const excluded of ['/checkout', '/return', '/waffo-return', '/api/', '/mix/', '/terms', '/privacy']) {
+  for (const excluded of ['/checkout', '/return', '/waffo-return', '/api/', '/mix/', '/terms', '/privacy', '/mine']) {
     assert.doesNotMatch(xml, new RegExp(`<loc>[^<]*${excluded.replace(/\//g, '\\/')}`), excluded);
   }
   // 每个 <url> 带 hreflang 标注（en、zh-CN、x-default）。
   assert.ok(xml.includes(`<xhtml:link rel="alternate" hreflang="en" href="${SITE_URL}/en/sleep"/>`));
   assert.ok(xml.includes(`<xhtml:link rel="alternate" hreflang="zh-CN" href="${SITE_URL}/zh/sleep"/>`));
   assert.ok(xml.includes(`<xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}/en/sleep"/>`));
-  // 结构完整：每个 <url> 都有开闭标签，数量与 PUBLIC_PATHS 一致（14）。
-  assert.equal((xml.match(/<url>/g) || []).length, 14);
-  assert.equal((xml.match(/<\/url>/g) || []).length, 14);
+  // 结构完整：每个 <url> 都有开闭标签，数量与 PUBLIC_PATHS 一致（20）。
+  assert.equal((xml.match(/<url>/g) || []).length, 20);
+  assert.equal((xml.match(/<\/url>/g) || []).length, 20);
 });
 
 test('seo: GET /sitemap.xml returns well-formed XML', async () => {
