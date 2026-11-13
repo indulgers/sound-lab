@@ -89,7 +89,7 @@ jobs:
           # A new version can take a couple of minutes to reach every
           # edge, so retry the homepage instead of failing at once.
           for i in 1 2 3 4 5 6; do
-            if curl -sf "$URL/" -o /tmp/home.html; then break; fi
+            if curl -sfL "$URL/" -o /tmp/home.html; then break; fi
             echo "homepage not ready yet (attempt $i/6), waiting 20s..."
             sleep 20
           done
