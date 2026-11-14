@@ -94,7 +94,7 @@ def probe(path):
     if not doc.get("streams"): raise ValueError("Missing video track")
     stream=doc["streams"][0]
     duration=float(doc["format"]["duration"])
-    if stream["width"] < 960 or stream["height"] < 540 or duration < 10:
+    if min(stream["width"], stream["height"]) < 540 or max(stream["width"], stream["height"]) < 960 or duration < 10:
         raise ValueError(f"Invalid video: {stream}, duration={duration}")
     return duration,stream
 
