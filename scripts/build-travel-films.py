@@ -49,14 +49,18 @@ FILMS = {
    "saturation": .78, "exposure": -.02, "position": .50,
  },
  "kyoto": {
-   "url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/f/f9/Drone_flyover_video_of_Mount_Atago.webm/Drone_flyover_video_of_Mount_Atago.webm.720p.vp9.webm",
-   "sourcePage": "https://commons.wikimedia.org/wiki/File:Drone_flyover_video_of_Mount_Atago.webm",
-   "creator": "Benlisquare", "license": "CC BY-SA 4.0",
-   "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-   "sourceDescription": "Original aerial drone travel across Mount Atago in Kyoto Prefecture, filmed August 21 2024",
-   "placeEvidence": "Geotagged source with 35.042564 N, 135.661303 E; camera DJI Mavic Air 2. A real Kyoto-prefecture mountain flight, not a shrine or tea room.",
-   "travelView": "Moving drone over forested ridges at Mount Atago, Kyoto Prefecture",
-   "duration": 48, "start": 13.0, "saturation": .88, "exposure": -.018, "position": .52,
+   "url": "https://www.pexels.com/download/video/32309074/",
+   "sourcePage": "https://www.pexels.com/video/tranquil-japanese-garden-in-kyoto-32309074/",
+   "creator": "Brian Zhang", "license": "Pexels License",
+   "licenseUrl": "https://www.pexels.com/license/",
+   "sourceDescription": "Source-described Kyoto garden with moss, rock formations and natural moving water",
+   "placeEvidence": "Both original Pexels pages are Kyoto-labelled by their photographer; no independent GPS metadata verification.",
+   "travelView": "Quiet Kyoto garden-to-bamboo-fountain film sequence, gentle real water movement, no crowds or signs",
+   "duration": 72.5, "start": 1, "saturation": .78, "exposure": -.026, "position": .52,
+   "secondUrl": "https://www.pexels.com/download/video/32272459/",
+   "secondSourcePage": "https://www.pexels.com/video/tranquil-kyoto-temple-bamboo-fountain-32272459/",
+   "secondSourceDescription": "Brian Zhang: bamboo water fountain in a lush Kyoto temple garden",
+   "secondCreator": "Brian Zhang"
  },
  "lisbon": {
    "url": "https://www.pexels.com/download/video/19909760/",
@@ -129,6 +133,39 @@ def render(src, target, start, duration, width, height, saturation, exposure):
     if target.stat().st_size > 16_000_000:
         raise ValueError(f"Video exceeds 16 MB per variant: {target.name}")
 
+def render_kyoto_pair(first, second, target, width, height, saturation, exposure):
+    """Two real, peaceful Kyoto-labelled clips instead of a crowded temple entrance.
+
+    Sequence: moss garden with flowing water -> bamboo fountain, 1.5s dissolve;
+    the whole result has a subtle end-to-head dissolve, but no image-based fake travel.
+    """
+    overlap=1.5
+    a_len,b_len=52.0,22.0
+    duration=a_len+b_len-overlap
+    f=(f"fps=24,scale={width}:{height}:force_original_aspect_ratio=increase,"
+       f"crop={width}:{height},eq=saturation={saturation}:brightness={exposure},format=yuv420p")
+    graph=(f"[0:v]{f},trim=start=1:duration={a_len},setpts=PTS-STARTPTS[a];"
+           f"[1:v]{f},trim=start=1:duration={b_len},setpts=PTS-STARTPTS[b];"
+           f"[a][b]xfade=transition=fade:duration={overlap}:offset={a_len-overlap}[travel];"
+           f"[travel]split=2[all][loopHead];"
+           f"[all]trim=duration={duration},setpts=PTS-STARTPTS[whole];"
+           f"[loopHead]trim=duration={overlap},setpts=PTS-STARTPTS[head];"
+           f"[whole][head]xfade=transition=fade:duration={overlap}:offset={duration-overlap}[out]")
+    cmd=["ffmpeg","-hide_banner","-loglevel","error","-nostdin","-y",
+         "-i",str(first),"-i",str(second),"-filter_complex",graph,
+         "-map","[out]","-an","-pix_fmt","yuv420p",
+         "-c:v","libx264","-preset","veryfast","-crf","28",
+         "-maxrate","1500k" if width>1000 else "700k",
+         "-bufsize","3000k" if width>1000 else "1400k",
+         "-movflags","+faststart",str(target)]
+    run(cmd)
+    actual,stream=probe(target)
+    if abs(actual-duration)>1.5 or (stream["width"],stream["height"])!=(width,height):
+        raise ValueError(f"Invalid Kyoto result: {actual} {stream}")
+    if target.stat().st_size>16_000_000:
+        raise ValueError(f"Kyoto result too large: {target.stat().st_size}")
+    return duration
+
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -153,10 +190,24 @@ def main():
             requested=s["duration"]
             chosen=min(requested,math.floor((duration-s["start"]-.4)*24)/24)
             if chosen<9.5: raise ValueError(f"Short input for {slug}: {duration}")
+            second=None
+            if slug=="kyoto":
+                second=root/"kyoto-bamboo.source"
+                run(["curl","--fail","--location","--silent","--show-error","--retry","2",
+                    "--connect-timeout","20","--max-time","240",
+                    "--user-agent","Mozilla/5.0 SoundCocktail/0.1 licensed-scene-asset-build",
+                    s["secondUrl"],"--output",str(second)])
+                duration2,_=probe(second)
+                if duration<54 or duration2<24:
+                    raise ValueError(f"Kyoto originals too short: {duration}, {duration2}")
+                chosen=72.5
             files={}
             for suffix,(w,h) in (("travel",(1280,720)),("travel-mobile",(540,960))):
                 dest=OUT / f"{slug}-{suffix}.mp4"
-                render(source,dest,s["start"],chosen,w,h,s["saturation"],s["exposure"])
+                if second:
+                    render_kyoto_pair(source,second,dest,w,h,s["saturation"],s["exposure"])
+                else:
+                    render(source,dest,s["start"],chosen,w,h,s["saturation"],s["exposure"])
                 files[dest.name]={"sizeBytes":dest.stat().st_size,"sha256":sha(dest),"dimensions":[w,h]}
             for suffix,videoSuffix in (("travel","travel"),("travel-mobile","travel-mobile")):
                 target=OUT / f"{slug}-{suffix}.jpg"
@@ -167,6 +218,11 @@ def main():
             metadata["scenes"][slug]={key:s[key] for key in CREDIT_FIELDS}
             metadata["scenes"][slug].update({"motionType":"real source footage","durationSeconds":round(chosen,2),
                 "sourceDimensions":[stream["width"],stream["height"]],"files":files})
+            if slug=="kyoto":
+                metadata["scenes"][slug]["additionalSources"]=[{
+                    "sourcePage":s["secondSourcePage"],"creator":s["secondCreator"],
+                    "description":s["secondSourceDescription"],"license":"Pexels License",
+                    "licenseUrl":"https://www.pexels.com/license/"}]
             print(f"PASS FILM {slug}: {chosen:.1f}s; files={sum(v['sizeBytes'] for v in files.values())/1e6:.1f}MB",flush=True)
     (OUT/"real-travel-films.json").write_text(json.dumps(metadata,ensure_ascii=False,indent=2)+"\n")
     print("PASS six destination-specific video sets",flush=True)
