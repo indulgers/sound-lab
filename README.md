@@ -21,6 +21,10 @@ npm run dev        # http://localhost:3000（TanStack Start 开发服务器，�
 
 用 `npm test` 运行计时与配方权限测试。用 `npm run build` 构建，再用 `npm run preview` 预览生产包（同样跑在 workerd 里）。
 
+### 支付宝正式密钥配置
+
+支付宝正式环境使用 **RSA2 + 密钥模式**；本项目已存在支付路由和 Cloudflare Workers 接入。请按 [支付宝正式密钥配置指南](docs/alipay-production.md) 在本地生成 PKCS#1 密钥、上传应用公钥、保存支付宝公钥并设置 Worker Secrets。**私钥绝不提交仓库，正式环境密钥不得复用沙箱密钥。**
+
 ### 支付（本地沙箱）
 
 支付 API 与网站跑在同一个 Worker 里（`src/routes/api/*`，同源 `/api`，不需要开发代理）。本地开发用支付宝沙箱配置：
