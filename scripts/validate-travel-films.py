@@ -25,7 +25,7 @@ def main():
     assert set(info["scenes"])==EXPECTED,set(info["scenes"])
     for scene,data in info["scenes"].items():
         assert data["creator"] and data["sourcePage"].startswith("https://")
-        assert data["license"] in ("Pexels License","CC BY 3.0")
+        assert data["license"] in ("Pexels License","CC BY 3.0","CC BY-SA 4.0")
         assert data["placeEvidence"] and data["travelView"]
         for suffix, expected in (("travel",(1280,720)),("travel-mobile",(540,960))):
             path=OUT/f"{scene}-{suffix}.mp4"
