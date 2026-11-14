@@ -54,19 +54,21 @@
     },
     {
       "scene": "kyoto",
-      "creator": "Sezaki Hiroyuki",
-      "title": "Shrine in Kyoto",
-      "url": "https://www.pexels.com/video/shrine-in-kyoto-11834439/",
-      "license": "Pexels License",
-      "licenseUrl": "https://www.pexels.com/license/",
-      "location": "Kyoto, Japan",
-      "locationEvidence": "source uploader describes Kyoto; exact shrine/GPS not independently verified",
+      "creator": "Benlisquare",
+      "title": "Drone flyover video of Mount Atago, Kyoto Prefecture",
+      "url": "https://commons.wikimedia.org/wiki/File:Drone_flyover_video_of_Mount_Atago.webm",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "location": "Mount Atago, Kyoto Prefecture, Japan; 35.042564 N, 135.661303 E",
+      "locationEvidence": "Creator-published GPS position; DJI Mavic Air 2 aerial flight, 21 August 2024",
       "files": [
         "kyoto-travel.mp4",
         "kyoto-travel-mobile.mp4",
         "kyoto-travel.jpg",
         "kyoto-travel-mobile.jpg"
-      ]
+      ],
+      "modifiedVideoLicense": "CC BY-SA 4.0; cropped, color adjusted, silenced and crossfade-looped film derivative licensed under same terms",
+      "changesNotice": "Adapted from original via silent H.264 conversion, landscape/portrait crops, gentle color grading and loop blend"
     },
     {
       "scene": "lisbon",
@@ -129,6 +131,12 @@
         "chiang-mai-cafe-mobile.jpg"
       ],
       "status": "archived; not shown in current experience"
+    },
+    {
+      "scene": "kyoto",
+      "creator": "Sezaki Hiroyuki",
+      "url": "https://www.pexels.com/video/shrine-in-kyoto-11834439/",
+      "status": "Archived. This people-and-signage-rich footage is not shown in the immersive Kyoto scene."
     }
   ],
   "generatedManifest": "/assets/scenes/real-travel-films.json"
