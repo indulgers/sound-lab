@@ -22,7 +22,7 @@ export const JOURNEYS = Object.freeze([
   { id:'meditate-bali',intentId:'meditate',sceneId:'bali',name:label('Sound Bath','乌布颂钵声浴'),description:label('Singing-bowl-inspired resonance, deep space and extended silence.','空间化颂钵泛音与留白缓缓交替。'),suggestedMinutes:20,
     mix:{harmony:.74,details:.67,atmosphere:.44,ambience:.09},
     controls:{warmth:.48,space:.75,energy:.17,nature:.23} },
-  { id:'meditate-kyoto',intentId:'meditate',sceneId:'kyoto',name:label('Mountain Stillness','山林静心'),description:label('Slowly changing harmony for quiet travel above Kyoto’s forested mountains.','在京都山林上空慢慢前行，和声稀疏，留下安静。'),suggestedMinutes:20,
+  { id:'meditate-kyoto',intentId:'meditate',sceneId:'kyoto',name:label('Still Water Garden','苔庭静水'),description:label('Soft harmonic space while the moss garden and bamboo water flow.','苔庭流水慢慢展开，和声保持稀疏、安静。'),suggestedMinutes:20,
     mix:{harmony:.68,details:.31,atmosphere:.46},
     controls:{warmth:.46,space:.59,energy:.09,nature:.45} },
   { id:'relax-da-lat',intentId:'relax',sceneId:'da-lat',name:label('Morning Mist','山谷晨雾'),description:label('A small pause among pine hills.','山谷里的空气、拨弦与温柔和声。'),suggestedMinutes:null,
