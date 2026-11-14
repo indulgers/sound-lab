@@ -83,6 +83,7 @@ export default function SceneExperience() {
   const T = value => sceneText(value, locale);
   const navigate = useNavigate();
   const [prefs, setPrefs] = useState(() => readScenePreferences(null));
+  const [ready, setReady] = useState(false);
   const [intentId, setIntentId] = useState(null);
   const [sceneId, setSceneId] = useState('bali');
   const [journeyId, setJourneyId] = useState(null);
@@ -140,6 +141,8 @@ export default function SceneExperience() {
     const onFull = () => setFull(document.fullscreenElement === root.current);
     window.addEventListener('soundcocktail:legacy-play',pauseForStudio);
     document.addEventListener('fullscreenchange',onFull);
+    // Only enable the first Journey choice after hydration and audio-controller setup.
+    setReady(true);
     return () => {
       reduced.removeEventListener('change',onReduced);
       window.removeEventListener('soundcocktail:legacy-play',pauseForStudio);
@@ -276,7 +279,7 @@ export default function SceneExperience() {
     }
   }, [focusSession, focusSecondsRemaining, M.break]);
 
-  return <section ref={root} className={`scene-experience ${immersive?'sc-immersive':''} ${entered?'sc-entered':''}`} data-scene={sceneId} data-intent={intentId||'choose'} data-chapter={audio.chapter??0} data-audio-state={audio.status}>
+  return <section ref={root} className={`scene-experience ${immersive?'sc-immersive':''} ${entered?'sc-entered':''}`} data-scene={sceneId} data-intent={intentId||'choose'} data-hydrated={ready?'true':'false'} data-chapter={audio.chapter??0} data-audio-state={audio.status}>
     <SceneVideo key={scene.id} scene={scene} motion={motion} onUnavailable={setVideoUnavailable}/>
     {intentId && playing && <div className="sc-chapter-hint" aria-live="off">{M.chapter} · {scene.chapters?.[audio.chapter || 0] || ''}</div>}
     {intentId === 'meditate' && breath && playing && <div className="sc-breath-guide" role="status"><div className="sc-breath-circle"/><span>{locale==='zh'?'缓缓吸气 · 缓缓呼气':'Breathe in · breathe out'}</span><button onClick={()=>setBreath(false)} aria-label={locale==='zh'?'关闭呼吸引导':'Close breathing guide'}>×</button></div>}
@@ -300,7 +303,7 @@ export default function SceneExperience() {
       <h1>{G.title}</h1>
       <p>{G.intro}</p>
       <div className="sc-intent-options" role="group" aria-label={G.title}>
-        {INTENTS.map(option=><button key={option.id} type="button" onClick={()=>chooseIntent(option.id)}>
+        {INTENTS.map(option=><button key={option.id} type="button" disabled={!ready} onClick={()=>chooseIntent(option.id)}>
           <span>{T(option.name)}</span><small>{T(option.prompt)}</small><Icon name="arrow"/>
         </button>)}
       </div>
