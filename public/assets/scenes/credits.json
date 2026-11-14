@@ -1,0 +1,149 @@
+{
+  "checkedOn": "2026-11-14",
+  "status": "Review preview assets; source-described locations, no independent GPS guarantee",
+  "usage": "Actual location-described moving video. Not original Sound Cocktail field footage. Music is separately procedurally produced.",
+  "sources": [
+    {
+      "scene": "chiang-mai",
+      "creator": "Free Stock Vids",
+      "title": "Drone footage of temple in Chiang Mai, Thailand",
+      "url": "https://commons.wikimedia.org/wiki/File:Drone_footage_of_temple_in_Chiang_Mai,_Thailand.webm",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "location": "Royal Park Rajapruek / Ho Kham Luang, Chiang Mai, Thailand",
+      "locationEvidence": "recognizable landmark; creator identifies location",
+      "edit": "Silent MP4 render, 16:9 and 9:16 crops, color grading, tail-to-head dissolve",
+      "files": [
+        "chiang-mai-travel.mp4",
+        "chiang-mai-travel-mobile.mp4",
+        "chiang-mai-travel.jpg",
+        "chiang-mai-travel-mobile.jpg"
+      ]
+    },
+    {
+      "scene": "bali",
+      "creator": "Florian Delée",
+      "title": "Stunning aerial view of Balinese rice terraces",
+      "url": "https://www.pexels.com/video/stunning-aerial-view-of-balinese-rice-terraces-36492277/",
+      "license": "Pexels License",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "location": "Bali, Indonesia",
+      "locationEvidence": "source uploader describes Bali; camera GPS not independently verified",
+      "files": [
+        "bali-travel.mp4",
+        "bali-travel-mobile.mp4",
+        "bali-travel.jpg",
+        "bali-travel-mobile.jpg"
+      ]
+    },
+    {
+      "scene": "da-lat",
+      "creator": "Hữu Thịnh 79",
+      "title": "4K aerial view of pine forest in Vietnam",
+      "url": "https://www.pexels.com/video/4k-aerial-view-of-pine-forest-in-vietnam-31597905/",
+      "license": "Pexels License",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "location": "Da Lat, Vietnam",
+      "locationEvidence": "source uploader describes Da Lat; camera GPS not independently verified",
+      "files": [
+        "da-lat-travel.mp4",
+        "da-lat-travel-mobile.mp4",
+        "da-lat-travel.jpg",
+        "da-lat-travel-mobile.jpg"
+      ]
+    },
+    {
+      "scene": "kyoto",
+      "creator": "Brian Zhang",
+      "title": "Tranquil Japanese Garden in Kyoto & Tranquil Kyoto Temple Bamboo Fountain",
+      "url": "https://www.pexels.com/video/tranquil-japanese-garden-in-kyoto-32309074/",
+      "license": "Pexels License",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "location": "Kyoto, Japan (creator-described garden and bamboo fountain; GPS unverified)",
+      "locationEvidence": "Both original Pexels videos explicitly describe Kyoto; GPS not independently checked",
+      "files": [
+        "kyoto-travel.mp4",
+        "kyoto-travel-mobile.mp4",
+        "kyoto-travel.jpg",
+        "kyoto-travel-mobile.jpg"
+      ],
+      "changesNotice": "Two 9:16 source videos edited into a calm continuous scene, 16:9 and 9:16 silent H.264 renders, color matching and dissolves",
+      "additionalSources": [
+        {
+          "creator": "Brian Zhang",
+          "url": "https://www.pexels.com/video/tranquil-kyoto-temple-bamboo-fountain-32272459/",
+          "license": "Pexels License"
+        }
+      ]
+    },
+    {
+      "scene": "lisbon",
+      "creator": "Aaron Hairston",
+      "title": "Lisbon aerial",
+      "url": "https://www.pexels.com/video/lisbon-aerial-19909760/",
+      "license": "Pexels License",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "location": "Lisbon, Portugal",
+      "locationEvidence": "source uploader describes Lisbon; camera GPS not independently verified",
+      "files": [
+        "lisbon-travel.mp4",
+        "lisbon-travel-mobile.mp4",
+        "lisbon-travel.jpg",
+        "lisbon-travel-mobile.jpg"
+      ]
+    },
+    {
+      "scene": "hoi-an",
+      "creator": "Khanh Hoang Minh",
+      "title": "Nightlife on lantern-lit river in Hoi An",
+      "url": "https://www.pexels.com/video/nightlife-on-lantern-lit-river-in-hoi-an-37510579/",
+      "license": "Pexels License",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "location": "Hoi An, Vietnam",
+      "locationEvidence": "source uploader describes Hoi An; camera GPS not independently verified",
+      "files": [
+        "hoi-an-travel.mp4",
+        "hoi-an-travel-mobile.mp4",
+        "hoi-an-travel.jpg",
+        "hoi-an-travel-mobile.jpg"
+      ]
+    }
+  ],
+  "previousFootage": [
+    {
+      "scene": "bali",
+      "creator": "I Am Sorin",
+      "title": "View of the Flowing Water in the Forest",
+      "url": "https://www.pexels.com/video/view-of-the-flowing-water-in-the-forest-8310457/",
+      "location": "Not specified; not verified as Bali",
+      "files": [
+        "bali-rainforest.mp4",
+        "bali-rainforest.jpg",
+        "bali-rainforest-mobile.mp4",
+        "bali-rainforest-mobile.jpg"
+      ],
+      "status": "archived; not shown in current experience"
+    },
+    {
+      "scene": "chiang-mai",
+      "creator": "LayG Traveller",
+      "title": "Charming Cafe with Lush Garden View",
+      "url": "https://www.pexels.com/video/charming-cafe-with-lush-garden-view-40913579/",
+      "location": "Yangshuo, China (source description); not Chiang Mai",
+      "files": [
+        "chiang-mai-cafe.mp4",
+        "chiang-mai-cafe.jpg",
+        "chiang-mai-cafe-mobile.mp4",
+        "chiang-mai-cafe-mobile.jpg"
+      ],
+      "status": "archived; not shown in current experience"
+    },
+    {
+      "scene": "kyoto",
+      "creator": "Sezaki Hiroyuki",
+      "url": "https://www.pexels.com/video/shrine-in-kyoto-11834439/",
+      "status": "Archived. This people-and-signage-rich footage is not shown in the immersive Kyoto scene."
+    }
+  ],
+  "generatedManifest": "/assets/scenes/real-travel-films.json"
+}

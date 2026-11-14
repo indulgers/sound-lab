@@ -13,6 +13,7 @@ import { verificationMiddleware } from '../server/verification-middleware'
 import { mountSoundLab } from '../sound-lab.mjs'
 import { mountVisualEffects } from '../visual-effects.mjs'
 import appCss from '../styles.css?url'
+import scenesCss from '../scenes/scenes.css?url'
 
 // 字体自托管（P0）：不再请求 Google Fonts。Fontsource 包随构建
 // 打包进 dist，浏览器只下载 unicode-range 命中的子集。
@@ -101,6 +102,7 @@ export const Route = createRootRoute({
     links: [
       { rel: 'icon', href: FAVICON },
       { rel: 'stylesheet', href: appCss },
+      { rel: 'stylesheet', href: scenesCss },
     ],
   }),
   shellComponent: RootDocument,
@@ -253,8 +255,8 @@ function SoundLab() {
       onFocusChange(open: boolean) {
         const path = router.state.location.pathname
         const locale = localeFromPath(path) ?? getLocale()
-        const to = localizePath(open ? '/focus' : '/', locale) as '/en' | '/zh' | '/en/focus' | '/zh/focus'
-        if (stripLocalePrefix(path).replace(/\/$/, '') !== (open ? '/focus' : '/')) {
+        const to = localizePath(open ? '/focus' : '/studio', locale) as '/en/studio' | '/zh/studio' | '/en/focus' | '/zh/focus'
+        if (stripLocalePrefix(path).replace(/\/$/, '') !== (open ? '/focus' : '/studio')) {
           void router.navigate({ to, resetScroll: false })
         }
       },
@@ -290,7 +292,7 @@ function SoundLab() {
       void router.navigate({ to: localizePath(seg, locale) as '/en' | '/zh' | '/en/recipes' | '/zh/recipes' | '/en/plus' | '/zh/plus' | '/en/mine' | '/zh/mine' | '/en/sources' | '/zh/sources' })
     }
     function onShowMixer() {
-      showRoute('/')
+      showRoute('/studio')
     }
     function onShowMine() {
       showRoute('/mine')

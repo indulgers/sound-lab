@@ -7,7 +7,7 @@
  */
 import { useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import MixerSection from './MixerSection.jsx';
+import SceneExperience from './scenes/SceneExperience.jsx';
 import { routeForAnchor } from './redirects.mjs';
 import { localizePath, useLocale } from './locale.mjs';
 
@@ -16,8 +16,8 @@ export default function HomePage() {
   const [locale] = useLocale();
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const seg = routeForAnchor(window.location.hash);
+    const seg = window.location.hash === '#mixer' ? '/studio' : routeForAnchor(window.location.hash);
     if (seg) void navigate({ to: localizePath(seg, locale), replace: true });
   }, []);
-  return <MixerSection />;
+  return <SceneExperience />;
 }

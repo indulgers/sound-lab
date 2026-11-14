@@ -1177,6 +1177,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   function setPlaying(on, fillEmpty){
     if(on && !openListeningWindow()) return false;
     if(on===playing) return true;
+    if(on) window.dispatchEvent(new Event('soundcocktail:legacy-play'));
     clearTimeout(stopVoicesTimer);
     playing=on;
     var now=AC.currentTime, envelope=transport.gain;
@@ -1664,6 +1665,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   var bedNodes={};
   function startBed(kind){
     if(bedNodes[kind] || !openListeningWindow()) return;
+    window.dispatchEvent(new Event('soundcocktail:legacy-play'));
     if(AC.state!=="running") AC.resume().catch(function(){ toast(t(L(),'audio.cantPlay')); });
     var src=AC.createBufferSource(); src.buffer=noiseBuffer(kind); src.loop=true;
     var f=filt("lowpass",kind==="brown"?420:kind==="pink"?2400:3200);
@@ -1887,6 +1889,19 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   }
 
   const api = {
+    // The place player has its own clock. Relinquish all legacy audio before
+    // it starts, including optional noise beds outside the mixer transport.
+    pauseForScene() {
+      if(!AC) return;
+      if(playing) setPlaying(false);
+      clearTimeout(stopVoicesTimer);
+      if(sessionGain){
+        sessionGain.gain.cancelScheduledValues(AC.currentTime);
+        sessionGain.gain.setValueAtTime(0,AC.currentTime);
+      }
+      SOUNDS.forEach(function(sound){ stopGen(sound.id); });
+      Object.keys(bedNodes).forEach(stopBed);
+    },
     setMix,
     playRecipe,
     showPremium,
