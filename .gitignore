@@ -12,3 +12,5 @@ dist-ssr/
 !.dev.vars.example
 # 支付宝沙箱配置（本地开发专用，含私钥，绝不提交）
 .alipay-sandbox.json
+# 本地生成的支付宝正式密钥，永不提交
+.secrets/
