@@ -293,7 +293,7 @@ export default function SceneExperience() {
     {intentId && <div className="sc-scene-top"><span className="sc-live-dot"/><span>{T(scene.name)} · {T(scene.location)}</span></div>}
     {intentId && scene.filmSourcePage && <div className="sc-film-caption">
       <span className="sc-film-identity">{T(scene.filmPlace)}</span>
-      <span>{locale==='zh'?'实景移动镜头':'Real motion footage'} <span aria-hidden="true">·</span> <a href={scene.filmSourcePage} target="_blank" rel="noreferrer">{scene.filmCreator}</a> · <a href={filmLicenseUrl} target="_blank" rel="noreferrer">{scene.filmLicense}</a></span>
+      <span>{scene.filmMotionType==='natural-water'?(locale==='zh'?'实景流水影像':'Real garden water footage'):(locale==='zh'?'实景移动镜头':'Real moving-camera footage')} <span aria-hidden="true">·</span> <a href={scene.filmSourcePage} target="_blank" rel="noreferrer">{scene.filmCreator}</a> · <a href={filmLicenseUrl} target="_blank" rel="noreferrer">{scene.filmLicense}</a></span>
     </div>}
     {!intentId && <div className="sc-intent-entry">
       <span className="sc-kicker">{G.kicker}</span>
@@ -336,7 +336,7 @@ export default function SceneExperience() {
           <button onClick={()=>setImmersive(value=>!value)} aria-label={immersive?C.leave:C.immersive} aria-pressed={immersive}><Icon name="expand"/></button>
         </div>
       </div>
-      <div className="sc-bottom-line"><span>{focusLabel ? `${M.focus} · ${focusLabel}` : C.foot}</span><div>{intentId==='meditate' && <button onClick={()=>setBreath(v=>!v)} aria-pressed={breath}><Icon name="wind"/>{M.breathe}</button>}{intentId==='focus' && <button onClick={()=>openPanel('timer')}><Icon name="clock"/>{focusLabel || M.focus}</button>}<button onClick={toggleMotion} aria-pressed={!motion}><Icon name={motion?'pause':'motion'}/><span>{motion?C.motionOn:C.motionOff}</span></button><button onClick={()=>openPanel('info')} aria-label={C.info}><Icon name="info"/></button><button className="sc-fullscreen" onClick={toggleFullscreen} aria-label={full?C.exitFull:C.full}><Icon name="expand"/></button></div></div>
+      <div className="sc-bottom-line"><span>{focusLabel ? `${M.focus} · ${focusLabel}` : C.foot}</span><div>{intentId==='meditate' && <button onClick={()=>setBreath(v=>!v)} aria-pressed={breath}><Icon name="wind"/>{M.breathe}</button>}{intentId==='focus' && <button onClick={()=>openPanel('timer')}><Icon name="clock"/>{focusLabel || M.focus}</button>}<button onClick={toggleMotion} aria-pressed={!motion}><Icon name={motion?'pause':'motion'}/><span>{scene.filmMotionType==='natural-water'?(locale==='zh'?(motion?'暂停动态影像':'播放流水影像'):(motion?'Pause garden footage':'Play garden footage')):(motion?C.motionOn:C.motionOff)}</span></button><button onClick={()=>openPanel('info')} aria-label={C.info}><Icon name="info"/></button><button className="sc-fullscreen" onClick={toggleFullscreen} aria-label={full?C.exitFull:C.full}><Icon name="expand"/></button></div></div>
     </div>}
     {videoUnavailable && <span className="sc-video-status">{scene.video ? C.videoFallback : M.noFilm}</span>}
     {audio.status==='error' && <div className="sc-error" role="alert"><span>{C.error}</span><button onClick={()=>void player.current?.play()}>{C.retry}<Icon name="arrow"/></button></div>}
@@ -419,7 +419,7 @@ export default function SceneExperience() {
           <p>{C.inspiredText}</p>
           <h3>{C.musicCredit.replace('V3.2','V'+audioVersion)}</h3>
           <p>{audioVersion==='3.1' ? (locale==='zh'?'这是保留作对照的早期三分钟编曲。':'An earlier three-minute composition retained for listening comparisons.') : C.continuousNote}</p>
-          <h3>{locale==='zh'?'实景移动镜头与授权':'Actual moving film and licensed source'}</h3>
+          <h3>{locale==='zh'?'实景视频与授权':'Live-action film and licensing'}</h3>
           <p><strong>{T(scene.filmPlace)}</strong></p>
           <p>{locale==='zh'?'音乐情境以该地为灵感；画面来自实景视频素材，并非本团队当地实录。':'Music is place-inspired. The moving scene uses licensed location-described footage, not our own on-location recording.'}</p>
           <p><a href={scene.filmSourcePage} target="_blank" rel="noreferrer">{scene.filmCreator}</a> · <a href={filmLicenseUrl} target="_blank" rel="noreferrer">{scene.filmLicense}</a></p>
