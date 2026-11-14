@@ -23,3 +23,13 @@ probe() {
 probe 'kyoto' 'https://www.pexels.com/download/video/11834439/'
 probe 'lisbon' 'https://www.pexels.com/download/video/27404886/'
 probe 'chiang-mai' 'https://upload.wikimedia.org/wikipedia/commons/transcoded/3/3d/Drone_footage_of_temple_in_Chiang_Mai%2C_Thailand.webm/Drone_footage_of_temple_in_Chiang_Mai%2C_Thailand.webm.720p.vp9.webm'
+
+probe 'kyoto-zen-garden' 'https://www.pexels.com/download/video/32309074/'
+probe 'kyoto-arashiyama-waterfall' 'https://www.pexels.com/download/video/17982744/'
+for name in kyoto-zen-garden kyoto-arashiyama-waterfall; do
+  for second in 12 22; do
+    ffmpeg -hide_banner -loglevel error -nostdin -y -ss "$second" \
+      -i "/tmp/soundcocktail-footage/$name.source" -frames:v 1 -vf 'scale=960:-2' \
+      "/tmp/soundcocktail-footage/$name-$second.jpg"
+  done
+done
