@@ -106,7 +106,7 @@ try {
   await places.getByRole('button',{name:/适合当前状态/}).click();
   assert.equal(await places.locator('.sc-gallery-card').count(),2);
   await places.screenshot({path:'preview-qa/desktop-meditation-journeys.png'});
-  await places.getByRole('button', {name:/山林静心/}).click();
+  await places.getByRole('button', {name:/茶室静水/}).click();
   await page.locator('[data-scene="kyoto"]').waitFor();
   await page.locator('.sc-poster').evaluate(img=>img.decode());
   assert.match(await page.locator('.sc-poster').getAttribute('src'),/kyoto-travel/);
@@ -116,7 +116,7 @@ try {
   await page.screenshot({ path: 'preview-qa/desktop-kyoto-immersive.png', fullPage: true });
   await page.locator('.sc-leave').click();
   await page.locator('.sc-film-caption').waitFor({state:'visible'});
-  assert.match(await page.locator('.sc-film-caption').innerText(), /京都.*爱宕山/);
+  assert.match(await page.locator('.sc-film-caption').innerText(), /京都.*苔庭/);
   const kyotoTitle=await page.locator('.sc-copy h1').innerText();
   assert.equal(kyotoTitle.split('\n').length,2,'Kyoto headline must not break into 3 distracting rows');
   const filmFrame=await page.locator('.sc-copy h1').boundingBox();
@@ -139,7 +139,7 @@ try {
   await mobile.locator('.sc-change-goal').click();
   await mobile.getByRole('button', { name:/冥想/ }).first().click();
   await mobile.locator('[data-intent="meditate"]').waitFor();
-  await mobile.locator('.sc-place-chips button').filter({hasText:/山林静心/}).click();
+  await mobile.locator('.sc-place-chips button').filter({hasText:/茶室静水/}).click();
   await mobile.locator('[data-scene="kyoto"]').waitFor();
   await mobile.locator('.sc-poster').evaluate(img=>img.decode());
   // Wait for the browser to composite the decoded frame after switching source.
@@ -155,10 +155,10 @@ try {
     videoOpacity:getComputedStyle(img.closest('.sc-landscape').querySelector('video')).opacity,
   }));
   console.log('KYOTO MOBILE VISUAL DIAGNOSTICS',JSON.stringify(mobileFilmState));
-  assert.match(await mobile.locator('.sc-film-caption').innerText(),/京都.*爱宕山/);
+  assert.match(await mobile.locator('.sc-film-caption').innerText(),/京都.*苔庭/);
   const mobileKyotoBox=await mobile.locator('.sc-copy h1').boundingBox();
   assert.ok(mobileKyotoBox && mobileKyotoBox.width <= 345,'Kyoto mobile title should not occupy the entire scene width');
-  await mobile.screenshot({path:'preview-qa/mobile-kyoto-mountain.png',fullPage:true});
+  await mobile.screenshot({path:'preview-qa/mobile-kyoto-garden.png',fullPage:true});
   await mobile.locator('.sc-change-goal').click();
   await mobile.getByRole('button',{name:/专注/}).first().click();
   await mobile.locator('[data-intent="focus"]').waitFor();
@@ -210,7 +210,7 @@ try {
     ['da-lat','晨雾书页'],
     ['lisbon','午后灵感'],
     ['bali','乌布颂钵声浴'],
-    ['kyoto','山林静心'],
+    ['kyoto','茶室静水'],
     ['hoi-an','灯笼河畔'],
   ]) {
     await review.locator('.sc-nav-active').click();
