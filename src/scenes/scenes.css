@@ -554,3 +554,56 @@ html[lang="zh-CN"] .scene-experience .sc-copy h1 {
   .scene-experience[data-scene="kyoto"] .sc-copy { bottom:254px; }
   .scene-experience[data-scene="kyoto"] .sc-copy > p { max-width:320px; }
 }
+
+/* Scenic composition revision: give the film a clear, readable center; title lives
+   in the side margin, not across the destination's focal point. */
+@media (min-width: 761px) {
+  .scene-experience:not([data-intent="choose"]) .sc-copy {
+    left:5.5%;
+    max-width:min(430px,34vw);
+    bottom:28%;
+  }
+  .scene-experience:not([data-intent="choose"]) .sc-copy h1 {
+    font-size:clamp(44px,4.15vw,60px);
+    line-height:1.17;
+    text-shadow:0 4px 18px #07180ec4;
+  }
+  html[lang="zh-CN"] .scene-experience:not([data-intent="choose"]) .sc-copy h1 {
+    font-size:clamp(40px,3.5vw,51px);
+    line-height:1.33;
+    letter-spacing:.15px;
+  }
+  .scene-experience:not([data-intent="choose"]) .sc-copy > p {
+    font-size:12.5px;
+    max-width:375px;
+    line-height:1.75;
+    margin:14px 0 19px;
+  }
+  .scene-experience:not([data-intent="choose"]) .sc-hand-note {
+    display:none;
+  }
+  .scene-experience[data-scene="kyoto"] .sc-copy {
+    left:5%;
+    max-width:min(325px,28vw);
+    bottom:28.5%;
+  }
+  html[lang="zh-CN"] .scene-experience[data-scene="kyoto"] .sc-copy h1 {
+    font-size:clamp(39px,3.4vw,49px);
+  }
+}
+@media(max-width:760px) {
+  .scene-experience:not([data-intent="choose"]) .sc-hand-note { display:none; }
+  .scene-experience:not([data-intent="choose"]) .sc-copy > p { line-height:1.62; }
+}
+@media(max-width:680px) {
+  .scene-experience:not([data-intent="choose"]) .sc-copy {
+    left:23px; right:22px; bottom:248px; max-width:calc(100% - 45px);
+  }
+  html[lang="zh-CN"] .scene-experience:not([data-intent="choose"]) .sc-copy h1 {
+    font-size:clamp(32px,8.5vw,40px);
+    line-height:1.36;
+  }
+  .scene-experience[data-scene="kyoto"] .sc-copy { bottom:251px; }
+  .scene-experience[data-scene="kyoto"] .sc-copy > p { max-width:290px; }
+  .scene-experience[data-scene="kyoto"] .sc-film-caption { max-width:none; }
+}
