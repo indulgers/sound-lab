@@ -103,7 +103,7 @@ def export_frame(src, target, at):
          "-ss",str(at),"-i",str(src),"-frames:v","1",
          "-vf","scale=960:-2","-q:v","3",str(target)])
 
-def render(src, target, duration, width, height, saturation, exposure):
+def render(src, target, start, duration, width, height, saturation, exposure):
     # Cinematic color continuity without erasing the authentic picture. 24fps
     # with a small crossfade from tail to head for a soft visual return.
     flt=(f"fps=24,scale={width}:{height}:force_original_aspect_ratio=increase,"
@@ -116,7 +116,7 @@ def render(src, target, duration, width, height, saturation, exposure):
            f"[start_in]trim=duration={overlap},setpts=PTS-STARTPTS[head];"
            f"[body][head]xfade=transition=fade:duration={overlap}:offset={duration-overlap}[out]")
     run(["ffmpeg","-hide_banner","-loglevel","error","-nostdin","-y",
-         "-i",str(src),"-filter_complex",graph,
+         "-ss",str(start),"-i",str(src),"-filter_complex",graph,
          "-map","[out]","-an","-pix_fmt","yuv420p",
          "-c:v","libx264","-preset","veryfast","-crf","24",
          "-maxrate","2500k" if width >= 1000 else "1000k",
@@ -153,16 +153,10 @@ def main():
             requested=s["duration"]
             chosen=min(requested,math.floor((duration-s["start"]-.4)*24)/24)
             if chosen<9.5: raise ValueError(f"Short input for {slug}: {duration}")
-            with_source=root / f"{slug}-working.mp4"
-            # This trim makes the exact time span available to the cinematic loop builder.
-            run(["ffmpeg","-hide_banner","-loglevel","error","-nostdin","-y",
-                 "-ss",str(s["start"]),"-i",str(source),"-t",str(chosen),
-                 "-an","-c:v","libx264","-preset","ultrafast","-crf","23",
-                 "-pix_fmt","yuv420p",str(with_source)])
             files={}
             for suffix,(w,h) in (("travel",(1280,720)),("travel-mobile",(540,960))):
                 dest=OUT / f"{slug}-{suffix}.mp4"
-                render(with_source,dest,chosen,w,h,s["saturation"],s["exposure"])
+                render(source,dest,s["start"],chosen,w,h,s["saturation"],s["exposure"])
                 files[dest.name]={"sizeBytes":dest.stat().st_size,"sha256":sha(dest),"dimensions":[w,h]}
             for suffix,videoSuffix in (("travel","travel"),("travel-mobile","travel-mobile")):
                 target=OUT / f"{slug}-{suffix}.jpg"
