@@ -136,5 +136,8 @@ test('all six destinations use attributed moving film instead of Yangshuo or con
  const chiang=SCENES.find(s=>s.id==='chiang-mai');
  assert.match(chiang.filmPlace.zh,/皇家花园/);
  assert.doesNotMatch(chiang.video,/cafe|yangshuo/);
- assert.match(SCENES.find(s=>s.id==='kyoto').location.zh,/爱宕山/);
+ const kyoto=SCENES.find(s=>s.id==='kyoto');
+ assert.match(kyoto.location.zh,/苔庭/);
+ assert.equal(kyoto.filmCreator,'Brian Zhang');
+ assert.ok(kyoto.filmExtraSourcePage.includes('32272459'));
 });
