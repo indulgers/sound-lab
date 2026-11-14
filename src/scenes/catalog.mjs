@@ -76,7 +76,7 @@ export const SCENES = [
   {
     id:'kyoto', filmPlace:label("Kyoto · shrine grounds","京都 · 神社庭院"), filmCreator:"Sezaki Hiroyuki", filmLicense:"Pexels License", filmSourcePage:"https://www.pexels.com/video/shrine-in-kyoto-11834439/", filmLocationEvidence:'uploader-described', number:'04', name:label('Kyoto','京都'),
     location:label('Kyoto shrine · real movement','京都神社 · 实景镜头'),
-    title:label('A quiet visit\nin Kyoto.','京都，\n在庭院里静下来。'),
+    title:label('Kyoto,\nby the water.','京都，\n听水声流过。'),
     description:label('A real Kyoto shrine setting, with a slower soundtrack to match.','京都神社的真实影像，配上一段缓慢展开的音乐。'),
     note:label('Inspired by the place, not recorded there.','以当地氛围为灵感，并非当地实录。'),
     tag:label('MEDITATE · STILLNESS','冥想 · 静心'),trackTitle:label('Kyoto Still Water','京都 · 静水茶室'),
