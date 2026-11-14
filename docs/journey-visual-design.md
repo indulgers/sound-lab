@@ -57,7 +57,7 @@ Links:
 ## Authenticity tiers
 
 1. **Recognizable landmark + licensed original footage:** Chiang Mai Royal Park Rajapruek/Ho Kham Luang, original Free Stock Vids CC BY 3.0. The video has real aerial motion but is *not* a coffee shop interior. The focus track remains titled Café Flow, while the visible place label tells the truth.
-2. **Geolocated creator footage:** Kyoto’s Mount Atago aerial travel video is by Benlisquare on Wikimedia Commons, with original creator-provided GPS, date and CC BY-SA 4.0 terms. Its cropped, colour-adjusted, silent-loop derivatives must carry the same license and attribution.
+2. **Two location-labelled Kyoto garden videos:** Brian Zhang’s Pexels moss garden and bamboo fountain shots were reviewed for crowd-free composition and combined into a ~72.5-second meditative sequence. This is uploader-described Kyoto footage; camera GPS was not independently verified.
 3. **Uploader-described destination, licensed original footage:** Bali rice terraces, Da Lat pine forest, Lisbon rooftops and Hoi An lantern river. Pexels creator/source links identify the region; exact geolocation has not been independently camera-GPS-verified.
 4. **Unverified or unrelated footage:** never show under a destination label. Use a plainly marked original concept illustration until verified material is available.
 
@@ -78,13 +78,16 @@ Publish no film without named creator, source page, license, actual duration, de
 
 The first release uses individual sourced real-motion clips (15–48s source-backed segments). These can repeat visually during a 45-minute listening session. The long-term cinematic Journey should contain **three or more coordinated, geography-verified shots per place** with arrival/path/stay/return sequencing, natural lighting and shot continuity. Do not fake continuous movement by reversing video or scaling a static picture. Rights clearance and on-location geography verification must precede future commercial production.
 
-## V4.1 visual finding: calm Kyoto and subject-safe typography
+## V4.2 visual finding: calm Kyoto in the actual garden
 
-The earlier Kyoto shrine shot showed multiple visitors and warning/information signs; it contradicted the visual promise of stillness. Replaced with a real camera-moving flyover above Mount Atago in Kyoto Prefecture, source coordinates 35.042564 N / 135.661303 E. The title is now two short lines, with a narrower hero block on desktop so the ridge remains readable.
+**Visual selection after reviewing real frames**: crowded, sign-heavy Kyoto shrine was rejected; the earlier geotagged Mount Atago drone alternative lacked the intimate garden/water atmosphere promised by the meditation music. The current choice is two **Brian Zhang / Pexels** Kyoto-labelled garden videos: [moss garden](https://www.pexels.com/video/tranquil-japanese-garden-in-kyoto-32309074/) and [bamboo fountain](https://www.pexels.com/video/tranquil-kyoto-temple-bamboo-fountain-32272459/). Both were independently frame-inspected at multiple timestamps and in both landscape and phone crops.
 
-**Screen-composition contract:**
-- In normal listening view, destination and license caption must remain available but must not cover the visual subject or be confused with music provenance.
-- In full immersive mode, temporarily hide caption and chapter overlay to let the film breathe; the source credits remain reachable in the About panel.
-- Use a two-line Chinese headline for Kyoto at most, max ~380px width desktop, ~330px on phone.
-- Respect `prefers-reduced-motion` by displaying the frame extracted from the actual source clip. Do not substitute synthetic motion.
-- A location can be geographically verified without matching a tea room, café or other musical inspiration: tell the truth about the **film setting** and the **music concept** as separate objects.
+- **Two scenes, one quiet place**: 52 seconds of water and moss followed by 22 seconds of bamboo fountain, with a soft 1.5-second dissolve. A longer scene reduces the perceived frequency of repeats; it is not a claim of 72 seconds of single-take traveling camera.
+- **Truthful license**: both are Pexels License by Brian Zhang. Photographer labels them Kyoto, but exact GPS/site identity is unverified.
+- **Less overlay**: the Kyoto headline is exactly two lines; constrain text to the left ~28% of the landscape, with a discreet actionable CTA underneath. On phones, place the text below the main film focal zone.
+- **Water in motion** is what creates tranquility, not static-image zoom. No decorative floating effects or fake footage.
+- **Immersive mode** hides header, chapter note and source overlay while keeping controls and source links available on exit.
+
+Review gates: six-place audio unaffected, video render/sha/duration validated, gallery/meditation/focus switch preserved, 390px and desktop screenshot compared to V4.1, real source movement verified. If desktop portrait source crops too tightly, do not stretch; either accept and label a close-up or commission 16:9 Kyoto garden footage.
+
+**Still unresolved**: no real-device long-session eye comfort assessment, no independent GPS verification for these Pexels sources, and no commissioned multi-camera travel footage yet.
