@@ -142,6 +142,19 @@ try {
   await mobile.locator('.sc-place-chips button').filter({hasText:/山林静心/}).click();
   await mobile.locator('[data-scene="kyoto"]').waitFor();
   await mobile.locator('.sc-poster').evaluate(img=>img.decode());
+  // Wait for the browser to composite the decoded frame after switching source.
+  await mobile.waitForTimeout(850);
+  const mobileFilmState=await mobile.locator('.sc-poster').evaluate(img=>({
+    src:img.currentSrc,complete:img.complete,
+    natural:[img.naturalWidth,img.naturalHeight],
+    opacity:getComputedStyle(img).opacity,
+    visible:getComputedStyle(img).visibility,
+    rect:{w:img.getBoundingClientRect().width,h:img.getBoundingClientRect().height},
+    motion:img.closest('.sc-landscape')?.dataset.motion,
+    bg:getComputedStyle(img.closest('.sc-landscape')).backgroundImage,
+    videoOpacity:getComputedStyle(img.closest('.sc-landscape').querySelector('video')).opacity,
+  }));
+  console.log('KYOTO MOBILE VISUAL DIAGNOSTICS',JSON.stringify(mobileFilmState));
   assert.match(await mobile.locator('.sc-film-caption').innerText(),/京都.*爱宕山/);
   const mobileKyotoBox=await mobile.locator('.sc-copy h1').boundingBox();
   assert.ok(mobileKyotoBox && mobileKyotoBox.width <= 345,'Kyoto mobile title should not occupy the entire scene width');
