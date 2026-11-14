@@ -1,49 +1,40 @@
-# Scene footage sources
+# Moving travel footage — source and rights inventory
 
-These are silent, edited stock-video backgrounds for the Sound Cocktail soundscape app. They are not recordings made by Sound Cocktail, and neither scene claims to be filmed at its music destination. Audio is supplied separately.
+The live PR #5 Journey experience now uses **actual video files from six destination-described locations**, NOT AI-generated geography, stock footage of unrelated towns, or animated still pictures. A moving video has its own desktop 16:9 and phone 9:16 encode, a still frame extracted from that video for reduced-motion / loading fallback, and a source reference. The long 15-minute audio programme is independent and these shorter travel clips repeat.
 
-## Bali-inspired forest retreat
+## Six film sources in the review experience
 
-- Creator: **I Am Sorin**
-- Original title: **View of the Flowing Water in the Forest**
-- Source page: https://www.pexels.com/video/view-of-the-flowing-water-in-the-forest-8310457/
-- Original video: https://videos.pexels.com/video-files/8310457/8310457-uhd_3840_2160_30fps.mp4
-- Source location: **not specified by the source page; not verified as Bali**.
-- Scene files: `bali-rainforest.mp4`, `bali-rainforest-mobile.mp4` and their matching `.jpg` posters.
-- Edits: selected a 30-second segment beginning at 2 seconds; reduced saturation slightly, darkened slightly, and blended its end into its beginning over 1.5 seconds. No reverse playback. Silent H.264. Deliberate mobile crop keeps the stream centered.
+| Place | Source / creator | Source of location identification | License |
+|---|---|---|---|
+| Chiang Mai · Royal Park Rajapruek, Ho Kham Luang pavilion | [Free Stock Vids / Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Drone_footage_of_temple_in_Chiang_Mai,_Thailand.webm) | Distinct landmark and video title identify Chiang Mai. **This is aerial garden footage, not a café interior.** | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| Bali · rice terraces | [Florian Delée / Pexels](https://www.pexels.com/video/stunning-aerial-view-of-balinese-rice-terraces-36492277/) | Source author names Bali; precise coordinates not independently GPS-verified | [Pexels](https://www.pexels.com/license/) |
+| Da Lat · pine forest | [Hữu Thịnh 79 / Pexels](https://www.pexels.com/video/4k-aerial-view-of-pine-forest-in-vietnam-31597905/) | Source description names Da Lat; GPS not independently verified | Pexels |
+| Kyoto · shrine grounds | [Sezaki Hiroyuki / Pexels](https://www.pexels.com/video/shrine-in-kyoto-11834439/) | Source author names Kyoto; exact shrine not independently identified | Pexels |
+| Lisbon · aerial rooftops | [Aaron Hairston / Pexels](https://www.pexels.com/video/lisbon-aerial-19909760/) | Source author names Lisbon; GPS not independently verified | Pexels |
+| Hoi An · lantern-lit river | [Khanh Hoang Minh / Pexels](https://www.pexels.com/video/nightlife-on-lantern-lit-river-in-hoi-an-37510579/) | Source author names Hoi An; GPS not independently verified | Pexels |
 
-## Chiang Mai-inspired garden cafe
+This product's custom score is **place-inspired original procedural music**; the new video licence does not make its music an actual field recording. For Chiang Mai, Café Flow describes the *music's inspiration*, not a false claim that a real café is shown. For Kyoto, Still Water is the *music*, not a claim that the visual shows a rainy tea room.
 
-- Creator: **LayG Traveller**
-- Original title: **Charming Cafe with Lush Garden View**
-- Source page: https://www.pexels.com/video/charming-cafe-with-lush-garden-view-40913579/
-- Original video: https://videos.pexels.com/video-files/40913579/17492527_3840_2160_50fps.mp4
-- Source location: **Yangshuo, China**, as described on the source page. This is not Chiang Mai footage.
-- Scene files: `chiang-mai-cafe.mp4`, `chiang-mai-cafe-mobile.mp4` and their matching `.jpg` posters.
-- Edits: virtual-tripod stabilization and slight fixed crop, small brightness adjustment, reduced saturation, one-second crossfade at the loop boundary. No reverse playback. Silent H.264. Deliberate mobile crop preserves the wood table, wicker seating, window frame and garden.
-- Suggested visible source label: **Chiang Mai-inspired soundscape · filmed in Yangshuo** / **清迈灵感声景 · 影像摄于阳朔**.
+## Attribution and derivative notices
 
-## License
+For the Wikimedia Commons Chiang Mai source, retain credit to **Free Stock Vids**, the original file page, a link to [Creative Commons Attribution 3.0](https://creativecommons.org/licenses/by/3.0/), and clearly state the video was **cropped, color-graded, converted to silent MP4, and loop-blended**. Pexels allows commercial use of video as part of a larger designed product under the Pexels License; it forbids redistribution as unchanged stock/wallpaper or any suggestion of endorsement.
 
-Both original clips are offered under the **Pexels License**, checked on 2026-11-13:
-https://www.pexels.com/license/
+Source metadata for all six appears in `credits.json` (static authored catalogue) and the generated `real-travel-films.json` (runtime SHA hashes, actual video durations, dimensions, cameras and licenses). The UI credits each individual moving film through the `About this place` sheet and unobtrusive on-screen author link.
 
-The official license allows free use and modification, including use in a website or app. Attribution is optional, but this project credits the creators. The license prohibits selling unaltered copies, implying endorsement, redistributing as stock/wallpaper content, and using imagery as a trademark. These files form background scenes in an interactive audio product; do not add standalone stock/video download or wallpaper-resale functionality.
+## Asset generation — no huge uncompressed original videos in Git
 
-## Validation scope
+`scripts/build-travel-films.py` downloads the source, verifies it, exports **H.264 silent** desktop/phone variants and matching posters from the exact same source. For each scene:
+- `<slug>-travel.mp4` 1280 × 720
+- `<slug>-travel-mobile.mp4` 540 × 960
+- `<slug>-travel.jpg` and `<slug>-travel-mobile.jpg` — extracted poster
+- output provenance, duration, SHA256 in `real-travel-films.json`
 
-- ffprobe confirmed H.264 video-only files, constant 25 fps, and correct desktop/mobile dimensions.
-- MP4 metadata is placed before media data for progressive playback.
-- Selected source frames and stabilized frames were visually inspected for camera drift and subject suitability.
-- Frame-to-frame motion and seam differences were measured; metadata and measurements are in [video-validation.json](../../../docs/video-validation.json).
-- A ten-iteration accelerated decode check exercises encoded loop boundaries. It is not a claim of ten real-time browser loops or audio synchronization; the app must verify those separately.
-- The cafeteria clip is a short 6.8-second scene loop. It is suitable for a working first version; a custom longer Chiang Mai composition is still a future visual-content improvement.
+The PR review workflow caches validated outputs and publishes them with the app, so users are not downloading hundreds of MB of original 4K footage. `scripts/validate-travel-films.py` fails the preview build if any source or derivative is missing, mismatched, oversize or contains an audio track. Two films may share visual styles but not a fake geographical label.
 
-## Four new destinations — original concept artwork (not video or photographs)
+## Archived / no longer active
 
-- `da-lat-concept.svg`: original vector illustration evoking mist, pines and a small café cabin.
-- `kyoto-concept.svg`: original stylized illustration of rain and a quiet tea room.
-- `lisbon-concept.svg`: original illustration of warm hillside façades in afternoon light.
-- `hoi-an-concept.svg`: original illustration of riverfront lanterns at night.
+- Old `chiang-mai-cafe.mp4` was **filmed in Yangshuo, China**, not Chiang Mai. It is retained as an **archived stock asset only** in the PR while the migration is tested. No active `SCENES` entry or preview page references it.
+- Old `bali-rainforest.mp4` is a real Pexels forest clip but its filming location could not be verified as Bali; also archived and no longer used.
+- Four previous `*-concept.svg` files were **original illustrations**, not documentary footage. They are retained as historical design references but are no longer the active moving scene source.
 
-These assets are designed for the prototype and drawn in-code; they **do not depict verified photography or documentary video of the named cities**. Their optional animation is a slow CSS pan and can be paused. Do not market them as local films. Real location footage (and associated licensing/location verification) remains a separate future content deliverable.
+The cinematic scene overhaul is documented in `docs/journey-visual-design.md`. Source pages establish a stronger provenance than generic travel tags, but **not a proof of camera GPS for every clip**. For eventual professional product, commission properly licensed multi-shot location videos and record permits, shot lists and co-ordinates.
