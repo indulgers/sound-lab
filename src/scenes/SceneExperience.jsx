@@ -427,7 +427,7 @@ export default function SceneExperience() {
             : (locale==='zh'?'地名由上传者素材描述支持，尚未独立核实相机 GPS。片段经过裁剪、调色与柔和循环处理。':'The original uploader identifies this destination; camera GPS has not been independently verified. Footage has been cropped, graded and loop-blended.')}</p>
           <p>{locale==='zh'?'镜头片段会循环，15 分钟以上的音乐不代表 15 分钟不重复的视频。':'The travel film loops; the longer music session does not imply equally long non-repeating film.'}</p>
           <Link to={localizePath('/sources',locale)} onClick={closePanel}>{C.sources}<Icon name="arrow"/></Link>
-        </div>
+        </div>}
       </div>
     </dialog>
   </section>;
