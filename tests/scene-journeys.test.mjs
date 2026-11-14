@@ -130,11 +130,11 @@ test('all six destinations use attributed moving film instead of Yangshuo or con
    }
    assert.ok(scene.filmSourcePage?.startsWith('https://'));
    assert.ok(scene.filmCreator?.length > 2);
-   assert.ok(['Pexels License','CC BY 3.0'].includes(scene.filmLicense));
+   assert.ok(['Pexels License','CC BY 3.0','CC BY-SA 4.0'].includes(scene.filmLicense));
    assert.ok(scene.filmPlace.en && scene.filmPlace.zh);
  }
  const chiang=SCENES.find(s=>s.id==='chiang-mai');
  assert.match(chiang.filmPlace.zh,/皇家花园/);
  assert.doesNotMatch(chiang.video,/cafe|yangshuo/);
- assert.match(SCENES.find(s=>s.id==='kyoto').location.zh,/神社/);
+ assert.match(SCENES.find(s=>s.id==='kyoto').location.zh,/爱宕山/);
 });
