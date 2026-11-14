@@ -31,16 +31,19 @@ function Icon({ name, ...props }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>{iconPaths[name] || iconPaths.leaf}</svg>;
 }
 function Brand() {
-  return <span className="sc-brand"><svg viewBox="0 0 38 42" aria-hidden="true"><path d="M8 8c1 12 7 18 12 18S31 19 31 8ZM20 26v10m-6 1h12M12 13h15M21 9c1-5 4-7 8-6-1 4-4 6-8 6Z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg><span>Sound Cocktail<small>AN EVERYDAY ESCAPE</small></span></span>;
+  return <span className="sc-brand">
+    <svg viewBox="0 0 42 42" aria-hidden="true"><circle cx="21" cy="21" r="17.5" fill="none" stroke="currentColor" strokeWidth="1.2"/><path d="M8 24.5c6-5.8 12.5-7 18.5-7s7.6 2 9 3.8M9 28.5c6-2.5 11.5-2.4 17-1 4.8 1.2 7 2.6 8.4 3.8M21 6v4" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
+    <span>Sound Cocktail<small>TRAVEL BY SOUND</small></span>
+  </span>;
 }
 const copy = {
-  en: { places:'Places', studio:'Sound studio', saved:'Saved mixes', listen:'Enter & listen', pause:'Pause listening', resume:'Resume listening', loading:'Finding your rhythm…', sound:'Sound', timer:'Sleep timer', continuous:'No timer', immersive:'Immerse', leave:'Back to the room', motionOn:'Pause motion', motionOff:'Play motion', change:'More in this mood', foot:'A small escape. A little more you.', choose:'Where shall we go?', chooseSub:'Choose a journey that fits this moment; explore all when you want a different mood.', here:'You are here', go:'Stay here', soundTitle:'Make it yours.', soundSub:'A little more of what you need.', reset:'Reset', save:'Save this mix', savedToast:'Your mix is saved for this journey.', storageError:'Your browser could not save this mix. You can keep listening.', resetToast:'Back to the original balance.', timerTitle:'Drift away, on your time.', timerSub:'Music gently stops when the timer ends. Leave it off to keep listening.', minutes:'min', timerDone:'Your listening timer has ended.', ready:'Ready when you are', listening:'A LITTLE ROOM TO EXHALE', paused:'Take your time', videoFallback:'Still view · music is available', retry:'Try listening again', error:'The sound could not load. Check your connection and try again.', info:'About this place', close:'Close', volume:'Master volume', savedTitle:'Your familiar places.', savedSub:'Your saved sound balance, ready for your next visit.', noneSaved:'Make a place yours. Open Sound, adjust the layers, and save your mix.', loadSaved:'Return to this mix', savedBadge:'Your saved mix', sources:'Sound sources', inspired:'A place-inspired listening room', inspiredText:'These are place-inspired sound journeys, not verified local recordings. New 15-minute pieces are original procedural compositions; earlier 3-minute references are available for A/B listening. Films and concept illustrations have separately credited sources.', musicCredit:'Music · Sound Cocktail V3.2', continuousNote:'Each place has a fifteen-minute original programme. Longer sessions continue with gentle repetitions, not hours of unique composition.', videoCredit:'Film credits', full:'Full screen', exitFull:'Exit full screen' },
-  zh: { places:'去往哪里', studio:'声音调制室', saved:'我的收藏', listen:'进入，慢慢听', pause:'暂停聆听', resume:'继续聆听', loading:'让声音慢慢到来…', sound:'调音', timer:'定时停止', continuous:'不限时', immersive:'沉浸', leave:'回到房间', motionOn:'暂停画面', motionOff:'播放画面', change:'同一种状态，换个地方', foot:'一场小小的逃离，找回自己的节奏。', choose:'这次，想去哪里？', chooseSub:'优先展示适合当前状态的旅程，也可以探索其他状态。', here:'你在这里', go:'在这里待一会儿', soundTitle:'调成你的样子。', soundSub:'多一点此刻需要的声音。', reset:'恢复默认', save:'保存这份配比', savedToast:'已保存这段声音旅程的配比。', storageError:'浏览器暂时无法保存，你仍可以继续聆听。', resetToast:'已恢复这个场景的原始配比。', timerTitle:'按自己的时间，慢慢来。', timerSub:'时间到了，音乐会轻柔停止。选择不限时即可持续聆听。', minutes:'分钟', timerDone:'本次定时聆听已结束。', ready:'准备好了，就开始吧', listening:'给自己一点呼吸的空间', paused:'慢慢来，时间还在', videoFallback:'静态画面 · 仍可聆听音乐', retry:'重新加载声音', error:'声音加载失败，请检查网络后重试。', info:'关于这个地方', close:'关闭', volume:'总音量', savedTitle:'回到熟悉的地方。', savedSub:'带着你保存的声音配比，开始下一次小旅行。', noneSaved:'打开调音，调整声音层，再保存一份属于你的配比。', loadSaved:'回到这份配比', savedBadge:'已保存配比', sources:'声音来源', inspired:'以目的地为灵感的聆听空间', inspiredText:'这些声音旅程以世界各地为灵感，不代表经核实的当地采音。新版 15 分钟音乐为原创程序编排，旧版 3 分钟音轨可用于 A/B 对比；实景素材和概念插画的来源分别注明。', musicCredit:'音乐 · Sound Cocktail V3.2', continuousNote:'每个地点拥有约十五分钟原创音景。更长会话通过柔和循环延续，并非每小时都有完全不同的音乐。', videoCredit:'视频来源', full:'全屏显示', exitFull:'退出全屏' },
+  en: { places:'Places', studio:'Sound studio', saved:'Saved mixes', listen:'Enter & listen', pause:'Pause listening', resume:'Resume listening', loading:'Finding your rhythm…', sound:'Sound', timer:'Sleep timer', continuous:'No timer', immersive:'Immerse', leave:'Back to the room', motionOn:'Still frame', motionOff:'Travel motion', change:'More in this mood', foot:'A small escape. A little more you.', choose:'Where shall we go?', chooseSub:'Choose a journey that fits this moment; explore all when you want a different mood.', here:'You are here', go:'Stay here', soundTitle:'Make it yours.', soundSub:'A little more of what you need.', reset:'Reset', save:'Save this mix', savedToast:'Your mix is saved for this journey.', storageError:'Your browser could not save this mix. You can keep listening.', resetToast:'Back to the original balance.', timerTitle:'Drift away, on your time.', timerSub:'Music gently stops when the timer ends. Leave it off to keep listening.', minutes:'min', timerDone:'Your listening timer has ended.', ready:'Ready when you are', listening:'A LITTLE ROOM TO EXHALE', paused:'Take your time', videoFallback:'Still view · music is available', retry:'Try listening again', error:'The sound could not load. Check your connection and try again.', info:'About this place', close:'Close', volume:'Master volume', savedTitle:'Your familiar places.', savedSub:'Your saved sound balance, ready for your next visit.', noneSaved:'Make a place yours. Open Sound, adjust the layers, and save your mix.', loadSaved:'Return to this mix', savedBadge:'Your saved mix', sources:'Sound sources', inspired:'A place-inspired listening room', inspiredText:'These are place-inspired sound journeys, not verified local recordings. New 15-minute pieces are original procedural compositions; earlier 3-minute references are available for A/B listening. Films and concept illustrations have separately credited sources.', musicCredit:'Music · Sound Cocktail V3.2', continuousNote:'Each place has a fifteen-minute original programme. Longer sessions continue with gentle repetitions, not hours of unique composition.', videoCredit:'Film credits', full:'Full screen', exitFull:'Exit full screen' },
+  zh: { places:'去往哪里', studio:'声音调制室', saved:'我的收藏', listen:'进入，慢慢听', pause:'暂停聆听', resume:'继续聆听', loading:'让声音慢慢到来…', sound:'调音', timer:'定时停止', continuous:'不限时', immersive:'沉浸', leave:'回到房间', motionOn:'静止画面', motionOff:'动态旅行', change:'同一种状态，换个地方', foot:'一场小小的逃离，找回自己的节奏。', choose:'这次，想去哪里？', chooseSub:'优先展示适合当前状态的旅程，也可以探索其他状态。', here:'你在这里', go:'在这里待一会儿', soundTitle:'调成你的样子。', soundSub:'多一点此刻需要的声音。', reset:'恢复默认', save:'保存这份配比', savedToast:'已保存这段声音旅程的配比。', storageError:'浏览器暂时无法保存，你仍可以继续聆听。', resetToast:'已恢复这个场景的原始配比。', timerTitle:'按自己的时间，慢慢来。', timerSub:'时间到了，音乐会轻柔停止。选择不限时即可持续聆听。', minutes:'分钟', timerDone:'本次定时聆听已结束。', ready:'准备好了，就开始吧', listening:'给自己一点呼吸的空间', paused:'慢慢来，时间还在', videoFallback:'静态画面 · 仍可聆听音乐', retry:'重新加载声音', error:'声音加载失败，请检查网络后重试。', info:'关于这个地方', close:'关闭', volume:'总音量', savedTitle:'回到熟悉的地方。', savedSub:'带着你保存的声音配比，开始下一次小旅行。', noneSaved:'打开调音，调整声音层，再保存一份属于你的配比。', loadSaved:'回到这份配比', savedBadge:'已保存配比', sources:'声音来源', inspired:'以目的地为灵感的聆听空间', inspiredText:'这些声音旅程以世界各地为灵感，不代表经核实的当地采音。新版 15 分钟音乐为原创程序编排，旧版 3 分钟音轨可用于 A/B 对比；实景素材和概念插画的来源分别注明。', musicCredit:'音乐 · Sound Cocktail V3.2', continuousNote:'每个地点拥有约十五分钟原创音景。更长会话通过柔和循环延续，并非每小时都有完全不同的音乐。', videoCredit:'视频来源', full:'全屏显示', exitFull:'退出全屏' },
 };
 
 const goalCopy = {
-  en: { kicker:'SOUND COCKTAIL · YOUR NEXT ESCAPE', title:'How would you like to feel?', intro:'Start with a feeling. Find a place to stay for a while.', action:'Change intention', suggestion:'Recommended journey', minutes:'Suggested', hint:'Choose a state, then enter the music. No timer or paywall during this preview.' },
-  zh: { kicker:'SOUND COCKTAIL · 由此出发', title:'此刻，想进入什么状态？', intro:'先选择你需要的状态，再去世界某个角落待一会儿。', action:'换一种状态', suggestion:'为此刻推荐的声音旅程', minutes:'建议', hint:'选择状态后就能开始音乐旅行。体验期不限时、不设付费墙。' },
+  en: { kicker:'SOUND JOURNEYS · TRAVEL BY SOUND', title:'How would you like to feel?', intro:'Start with a feeling. Find a place to stay for a while.', action:'Change intention', suggestion:'Recommended journey', minutes:'Suggested', hint:'Choose a state, then enter the music. No timer or paywall during this preview.' },
+  zh: { kicker:'声音旅行 · TRAVEL BY SOUND', title:'此刻，想进入什么状态？', intro:'先选择你需要的状态，再去世界某个角落待一会儿。', action:'换一种状态', suggestion:'为此刻推荐的声音旅程', minutes:'建议', hint:'选择状态后就能开始音乐旅行。体验期不限时、不设付费墙。' },
 };
 
 const moodCopy = {
@@ -60,7 +63,6 @@ function SceneVideo({ scene, motion, onUnavailable }) {
   const src = mobile && scene.mobileVideo ? scene.mobileVideo : scene.video;
   const poster = mobile && scene.mobilePoster ? scene.mobilePoster : scene.poster;
   useEffect(() => {
-    // Missing video is expected for illustrated destinations; only report real failures.
     onUnavailable(false);
     if (!src || !video.current) return;
     if (motion) video.current.play().catch(() => onUnavailable(true));
@@ -274,7 +276,7 @@ export default function SceneExperience() {
   }, [focusSession, focusSecondsRemaining, M.break]);
 
   return <section ref={root} className={`scene-experience ${immersive?'sc-immersive':''} ${entered?'sc-entered':''}`} data-scene={sceneId} data-intent={intentId||'choose'} data-chapter={audio.chapter??0} data-audio-state={audio.status}>
-    <SceneVideo scene={scene} motion={motion} onUnavailable={setVideoUnavailable}/>
+    <SceneVideo key={scene.id} scene={scene} motion={motion} onUnavailable={setVideoUnavailable}/>
     {intentId && playing && <div className="sc-chapter-hint" aria-live="off">{M.chapter} · {scene.chapters?.[audio.chapter || 0] || ''}</div>}
     {intentId === 'meditate' && breath && playing && <div className="sc-breath-guide" role="status"><div className="sc-breath-circle"/><span>{locale==='zh'?'缓缓吸气 · 缓缓呼气':'Breathe in · breathe out'}</span><button onClick={()=>setBreath(false)} aria-label={locale==='zh'?'关闭呼吸引导':'Close breathing guide'}>×</button></div>}
     <header className="sc-header">
@@ -288,6 +290,10 @@ export default function SceneExperience() {
     </header>
 
     {intentId && <div className="sc-scene-top"><span className="sc-live-dot"/><span>{T(scene.name)} · {T(scene.location)}</span></div>}
+    {intentId && scene.filmSourcePage && <div className="sc-film-caption">
+      <span className="sc-film-identity">{T(scene.filmPlace)}</span>
+      <span>{locale==='zh'?'实景移动镜头':'Real motion footage'} <span aria-hidden="true">·</span> <a href={scene.filmSourcePage} target="_blank" rel="noreferrer" title={scene.filmLicense}>{scene.filmCreator} · {scene.filmLicense}</a></span>
+    </div>}
     {!intentId && <div className="sc-intent-entry">
       <span className="sc-kicker">{G.kicker}</span>
       <h1>{G.title}</h1>
@@ -410,16 +416,18 @@ export default function SceneExperience() {
         {panel==='info' && <div className="sc-credits">
           <span className="sc-credit-tag">{C.inspired}</span>
           <p>{C.inspiredText}</p>
-          <h3>{C.musicCredit.replace('V3.2', 'V'+audioVersion)}</h3>
-          <p>{audioVersion==='3.1'
-            ? (locale==='zh'?'当前是较早的三分钟编曲，采用平滑重复。':'This is the older three-minute composition, gently looped.')
-            : C.continuousNote}</p>
-          <h3>{C.videoCredit}</h3>
-          {sceneId==='bali' && <p><a href="https://www.pexels.com/video/view-of-the-flowing-water-in-the-forest-8310457/" target="_blank" rel="noreferrer">Forest stream · I Am Sorin / Pexels</a><br/>{locale==='zh'?'森林视频取景地未核实为巴厘岛。':'The film location is not verified as Bali.'}</p>}
-          {sceneId==='chiang-mai' && <p><a href="https://www.pexels.com/video/charming-cafe-with-lush-garden-view-40913579/" target="_blank" rel="noreferrer">Garden café · LayG Traveller / Pexels</a><br/>{locale==='zh'?'清迈灵感声景 · 影像实际摄于中国阳朔；咖啡馆人声是独立素材且默认关闭。':'Chiang Mai-inspired scene · film actually shot in Yangshuo, China. The separate conversation recording is off by default.'}</p>}
-          {!scene.video && <p>{locale==='zh'?'此地采用原创概念插画而非旅行实拍。当前音乐是原创程序合成实验，不是当地采样。':'Original illustrated concept art, not travel film. The soundtrack is a procedural experiment rather than a local field recording.'}</p>}
+          <h3>{C.musicCredit.replace('V3.2','V'+audioVersion)}</h3>
+          <p>{audioVersion==='3.1' ? (locale==='zh'?'这是保留作对照的早期三分钟编曲。':'An earlier three-minute composition retained for listening comparisons.') : C.continuousNote}</p>
+          <h3>{locale==='zh'?'实景移动镜头与授权':'Actual moving film and licensed source'}</h3>
+          <p><strong>{T(scene.filmPlace)}</strong></p>
+          <p>{locale==='zh'?'音乐情境以该地为灵感；画面来自实景视频素材，并非本团队当地实录。':'Music is place-inspired. The moving scene uses licensed location-described footage, not our own on-location recording.'}</p>
+          <p><a href={scene.filmSourcePage} target="_blank" rel="noreferrer">{scene.filmCreator} · {scene.filmLicense}</a></p>
+          <p>{scene.filmLocationEvidence==='recognizable-landmark'
+            ? (locale==='zh'?'清迈皇家花园的可识别地标；并非咖啡馆内部。原视频按 CC BY 3.0 授权，已裁剪、调色并做循环接缝处理。':'Recognizable Royal Park Rajapruek landmark, not a café interior. Original CC BY 3.0 footage, cropped, colour-graded and loop-blended.')
+            : (locale==='zh'?'地名由上传者素材描述支持，尚未独立核实相机 GPS。片段经过裁剪、调色与柔和循环处理。':'The original uploader identifies this destination; camera GPS has not been independently verified. Footage has been cropped, graded and loop-blended.')}</p>
+          <p>{locale==='zh'?'镜头片段会循环，15 分钟以上的音乐不代表 15 分钟不重复的视频。':'The travel film loops; the longer music session does not imply equally long non-repeating film.'}</p>
           <Link to={localizePath('/sources',locale)} onClick={closePanel}>{C.sources}<Icon name="arrow"/></Link>
-        </div>}
+        </div>
       </div>
     </dialog>
   </section>;
