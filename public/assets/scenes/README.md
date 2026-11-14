@@ -9,11 +9,11 @@ The live PR #5 Journey experience now uses **actual video files from six destina
 | Chiang Mai · Royal Park Rajapruek, Ho Kham Luang pavilion | [Free Stock Vids / Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Drone_footage_of_temple_in_Chiang_Mai,_Thailand.webm) | Distinct landmark and video title identify Chiang Mai. **This is aerial garden footage, not a café interior.** | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
 | Bali · rice terraces | [Florian Delée / Pexels](https://www.pexels.com/video/stunning-aerial-view-of-balinese-rice-terraces-36492277/) | Source author names Bali; precise coordinates not independently GPS-verified | [Pexels](https://www.pexels.com/license/) |
 | Da Lat · pine forest | [Hữu Thịnh 79 / Pexels](https://www.pexels.com/video/4k-aerial-view-of-pine-forest-in-vietnam-31597905/) | Source description names Da Lat; GPS not independently verified | Pexels |
-| Kyoto · shrine grounds | [Sezaki Hiroyuki / Pexels](https://www.pexels.com/video/shrine-in-kyoto-11834439/) | Source author names Kyoto; exact shrine not independently identified | Pexels |
+| Kyoto · Mount Atago forest ridges | [Benlisquare / Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Drone_flyover_video_of_Mount_Atago.webm) | Creator-supplied camera GPS: 35.042564 N, 135.661303 E, filmed 2024-08-21; a real, calm moving mountain flight, not a shrine | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
 | Lisbon · aerial rooftops | [Aaron Hairston / Pexels](https://www.pexels.com/video/lisbon-aerial-19909760/) | Source author names Lisbon; GPS not independently verified | Pexels |
 | Hoi An · lantern-lit river | [Khanh Hoang Minh / Pexels](https://www.pexels.com/video/nightlife-on-lantern-lit-river-in-hoi-an-37510579/) | Source author names Hoi An; GPS not independently verified | Pexels |
 
-This product's custom score is **place-inspired original procedural music**; the new video licence does not make its music an actual field recording. For Chiang Mai, Café Flow describes the *music's inspiration*, not a false claim that a real café is shown. For Kyoto, Still Water is the *music*, not a claim that the visual shows a rainy tea room.
+This product's custom score is **place-inspired original procedural music**; the new video licence does not make its music an actual field recording. For Chiang Mai, Café Flow describes the *music's inspiration*, not a false claim that a real café is shown. For Kyoto, Mountain Stillness describes the *music and travel mood*, with original geolocated footage of Mount Atago in Kyoto Prefecture, not a temple courtyard.
 
 ## Attribution and derivative notices
 
@@ -30,6 +30,14 @@ Source metadata for all six appears in `credits.json` (static authored catalogue
 - output provenance, duration, SHA256 in `real-travel-films.json`
 
 The PR review workflow caches validated outputs and publishes them with the app, so users are not downloading hundreds of MB of original 4K footage. `scripts/validate-travel-films.py` fails the preview build if any source or derivative is missing, mismatched, oversize or contains an audio track. Two films may share visual styles but not a fake geographical label.
+
+## Kyoto Mount Atago derivative and ShareAlike
+
+The active Kyoto travel clips are based on **Benlisquare, Drone flyover video of Mount Atago.webm**, a geolocated Commons video under **Creative Commons Attribution-ShareAlike 4.0 International**. Original source: https://commons.wikimedia.org/wiki/File:Drone_flyover_video_of_Mount_Atago.webm . License: https://creativecommons.org/licenses/by-sa/4.0/ .
+
+Derivative transformations: 720p VP9 transcode is used as source; the review app's soundless H.264 desktop/portrait copies have been time-trimmed, cropped, colour adjusted and tail-to-head loop-blended. **The derivative film outputs and poster frames are licensed under CC BY-SA 4.0**, with attribution and change notice. This license applies to those video/photo derivatives; it does not assert that independently authored music or software is a derivative of the source video. The original includes author-published camera coordinates, making this stronger geographic evidence than an uploader tag.
+
+The former `Shrine in Kyoto` film by Sezaki Hiroyuki remains in provenance history only; its people and signage were too visually busy for meditation and the active catalogue no longer points at it. No still-image animation was substituted for travel motion.
 
 ## Archived / no longer active
 
