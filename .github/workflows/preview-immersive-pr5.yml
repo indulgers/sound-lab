@@ -16,7 +16,7 @@ permissions:
 jobs:
   verify-and-preview:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 65
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -51,6 +51,32 @@ jobs:
           key: pr5-journeys-v3-${{ hashFiles('scripts/render_journeys.py', 'public/assets/audio/scenes/manifest.json') }}
       - name: Export editorial listening comparisons
         run: bash scripts/export-listening-samples.sh
+      - name: Restore destination-specific moving films
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            public/assets/scenes/*-travel.mp4
+            public/assets/scenes/*-travel-mobile.mp4
+            public/assets/scenes/*-travel.jpg
+            public/assets/scenes/*-travel-mobile.jpg
+            public/assets/scenes/real-travel-films.json
+          key: pr5-real-travel-v1-${{ hashFiles('scripts/build-travel-films.py') }}
+      - name: Create actual licensed travel videos and matching posters
+        run: |
+          if [ ! -s public/assets/scenes/real-travel-films.json ]; then
+            python3 scripts/build-travel-films.py
+          fi
+          python3 scripts/validate-travel-films.py
+      - name: Cache verified travel video
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            public/assets/scenes/*-travel.mp4
+            public/assets/scenes/*-travel-mobile.mp4
+            public/assets/scenes/*-travel.jpg
+            public/assets/scenes/*-travel-mobile.jpg
+            public/assets/scenes/real-travel-films.json
+          key: pr5-real-travel-v1-${{ hashFiles('scripts/build-travel-films.py') }}
       - name: Run tests
         run: npm test
       - name: Build TanStack Start application
