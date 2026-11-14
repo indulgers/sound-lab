@@ -9,7 +9,8 @@ const events = [];
 async function verifyPage(page, locale = 'zh') {
   const response = await page.goto(`${origin}/${locale}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
   assert.ok(response?.ok(), `page HTTP ${response?.status()}`);
-  await page.locator('.scene-experience').waitFor({ state: 'visible', timeout: 30000 });
+  await page.locator('.scene-experience[data-hydrated="true"]').waitFor({ state: 'visible', timeout: 30000 });
+  assert.equal(await page.locator('.sc-intent-options button:not([disabled])').count(),3,'All initial choices must become interactive after session setup');
   assert.equal(await page.locator('.scene-experience').getAttribute('data-intent'), 'choose');
   assert.equal(await page.locator('.scene-experience').getAttribute('data-audio-state'), 'idle');
   const headingColor = await page.locator('.sc-intent-entry h1').evaluate(el => getComputedStyle(el).color);
@@ -186,6 +187,7 @@ try {
   moving.on('pageerror', error=>events.push(error.message));
   const movingResponse=await moving.goto(origin+'/zh',{waitUntil:'domcontentloaded',timeout:45000});
   assert.ok(movingResponse?.ok());
+  await moving.locator('[data-hydrated="true"]').waitFor();
   await moving.getByRole('button',{name:/专注/}).first().click();
   await moving.locator('[data-scene="chiang-mai"]').waitFor();
   await moving.waitForFunction(() => {
@@ -204,6 +206,7 @@ try {
   // Travel catalogue screenshot series: six source-matched visual identities.
   const review=await browser.newPage({viewport:{width:1400,height:900},reducedMotion:'reduce'});
   await review.goto(origin+'/zh',{waitUntil:'domcontentloaded'});
+  await review.locator('[data-hydrated="true"]').waitFor();
   await review.getByRole('button',{name:/专注/}).first().click();
   await review.locator('[data-scene="chiang-mai"]').waitFor();
   for(const [slug,label] of [
