@@ -81,6 +81,7 @@ export default function SceneExperience() {
   const G = goalCopy[locale] || goalCopy.en;
   const M = moodCopy[locale] || moodCopy.en;
   const T = value => sceneText(value, locale);
+  const filmLicenseUrl = scene?.filmLicenseUrl || (scene?.filmLicense === 'CC BY 3.0' ? 'https://creativecommons.org/licenses/by/3.0/' : 'https://www.pexels.com/license/');
   const navigate = useNavigate();
   const [prefs, setPrefs] = useState(() => readScenePreferences(null));
   const [intentId, setIntentId] = useState(null);
@@ -292,7 +293,7 @@ export default function SceneExperience() {
     {intentId && <div className="sc-scene-top"><span className="sc-live-dot"/><span>{T(scene.name)} · {T(scene.location)}</span></div>}
     {intentId && scene.filmSourcePage && <div className="sc-film-caption">
       <span className="sc-film-identity">{T(scene.filmPlace)}</span>
-      <span>{locale==='zh'?'实景移动镜头':'Real motion footage'} <span aria-hidden="true">·</span> <a href={scene.filmSourcePage} target="_blank" rel="noreferrer" title={scene.filmLicense}>{scene.filmCreator} · {scene.filmLicense}</a></span>
+      <span>{locale==='zh'?'实景移动镜头':'Real motion footage'} <span aria-hidden="true">·</span> <a href={scene.filmSourcePage} target="_blank" rel="noreferrer">{scene.filmCreator}</a> · <a href={filmLicenseUrl} target="_blank" rel="noreferrer">{scene.filmLicense}</a></span>
     </div>}
     {!intentId && <div className="sc-intent-entry">
       <span className="sc-kicker">{G.kicker}</span>
@@ -421,10 +422,12 @@ export default function SceneExperience() {
           <h3>{locale==='zh'?'实景移动镜头与授权':'Actual moving film and licensed source'}</h3>
           <p><strong>{T(scene.filmPlace)}</strong></p>
           <p>{locale==='zh'?'音乐情境以该地为灵感；画面来自实景视频素材，并非本团队当地实录。':'Music is place-inspired. The moving scene uses licensed location-described footage, not our own on-location recording.'}</p>
-          <p><a href={scene.filmSourcePage} target="_blank" rel="noreferrer">{scene.filmCreator} · {scene.filmLicense}</a></p>
+          <p><a href={scene.filmSourcePage} target="_blank" rel="noreferrer">{scene.filmCreator}</a> · <a href={filmLicenseUrl} target="_blank" rel="noreferrer">{scene.filmLicense}</a></p>
           <p>{scene.filmLocationEvidence==='recognizable-landmark'
             ? (locale==='zh'?'清迈皇家花园的可识别地标；并非咖啡馆内部。原视频按 CC BY 3.0 授权，已裁剪、调色并做循环接缝处理。':'Recognizable Royal Park Rajapruek landmark, not a café interior. Original CC BY 3.0 footage, cropped, colour-graded and loop-blended.')
-            : (locale==='zh'?'地名由上传者素材描述支持，尚未独立核实相机 GPS。片段经过裁剪、调色与柔和循环处理。':'The original uploader identifies this destination; camera GPS has not been independently verified. Footage has been cropped, graded and loop-blended.')}</p>
+            : scene.filmLocationEvidence==='geolocated-commons'
+              ? (locale==='zh'?'京都爱宕山实景航拍；原作者公开拍摄坐标为 35.042564°N, 135.661303°E。静音、裁剪、调色和循环处理后的派生视频仍按 CC BY-SA 4.0 授权。':'Mount Atago, Kyoto Prefecture. The original author provides coordinates 35.042564°N, 135.661303°E. The muted, cropped, colour-graded and loop-blended video derivative remains licensed under CC BY-SA 4.0.')
+              : (locale==='zh'?'地名由上传者素材描述支持，尚未独立核实相机 GPS。片段经过裁剪、调色与柔和循环处理。':'The original uploader identifies this destination; camera GPS has not been independently verified. Footage has been cropped, graded and loop-blended.')}</p>
           <p>{locale==='zh'?'镜头片段会循环，15 分钟以上的音乐不代表 15 分钟不重复的视频。':'The travel film loops; the longer music session does not imply equally long non-repeating film.'}</p>
           <Link to={localizePath('/sources',locale)} onClick={closePanel}>{C.sources}<Icon name="arrow"/></Link>
         </div>}
