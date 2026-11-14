@@ -81,7 +81,6 @@ export default function SceneExperience() {
   const G = goalCopy[locale] || goalCopy.en;
   const M = moodCopy[locale] || moodCopy.en;
   const T = value => sceneText(value, locale);
-  const filmLicenseUrl = scene?.filmLicenseUrl || (scene?.filmLicense === 'CC BY 3.0' ? 'https://creativecommons.org/licenses/by/3.0/' : 'https://www.pexels.com/license/');
   const navigate = useNavigate();
   const [prefs, setPrefs] = useState(() => readScenePreferences(null));
   const [intentId, setIntentId] = useState(null);
@@ -91,6 +90,7 @@ export default function SceneExperience() {
   const journey = journeyById(journeyId);
   const intent = intentById(intentId);
   const scene = journey ? sceneForJourney(journey, audioVersion) : sceneById(sceneId);
+  const filmLicenseUrl = scene?.filmLicenseUrl || (scene?.filmLicense === 'CC BY 3.0' ? 'https://creativecommons.org/licenses/by/3.0/' : 'https://www.pexels.com/license/');
   const [levels, setLevels] = useState(() => levelsForScene(SCENES[0]));
   const [controls, setControls] = useState({warmth:.55,space:.35,energy:.40,nature:.35});
   const [advanced, setAdvanced] = useState(false);
