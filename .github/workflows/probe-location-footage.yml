@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - scripts/probe-location-footage.sh
+      - scripts/build-travel-films.py
       - .github/workflows/probe-location-footage.yml
     branches: [codex/immersive-video-scenes]
 
