@@ -221,7 +221,7 @@ try {
     await review.locator(`[data-scene="${slug}"]`).waitFor();
     await review.locator('.sc-poster').evaluate(img=>img.decode());
     assert.equal(await review.locator('.sc-video').getAttribute('src'),`/assets/scenes/${slug}-travel.mp4`);
-    assert.match(await review.locator('.sc-film-caption').innerText(), /实景移动镜头/);
+    assert.match(await review.locator('.sc-film-caption').innerText(), slug==='kyoto' ? /实景流水影像/ : /实景移动镜头/);
     await review.screenshot({path:`preview-qa/real-place-${slug}.png`,fullPage:true});
   }
   console.log('PASS: all six actual destination films and identity captions');
