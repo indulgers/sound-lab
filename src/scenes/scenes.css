@@ -373,3 +373,142 @@ html[lang="zh-CN"] .sc-intent-options button > span { font-family:Manrope,system
   .scene-experience .sc-quick-save { display:inline-flex; border:1px solid #b7c8b4; border-radius:24px; padding:6px 10px; font-weight:600; font-size:10px; background:#e9f0e4; color:#48684d; }
   .sc-quick-save svg { width:13px;height:13px; }
 }
+
+/* Cinematic Editorial Journey V4 — restrained typography, actual travel film, music first. */
+.scene-experience {
+  --sc-ivory:#f7f3e9; --sc-ink:#142821; --sc-muted:#d4ded0; --sc-rust:#d7bd8c;
+  --sc-line:#d9dfd2; background:#142821;
+  font-family:Manrope,system-ui,sans-serif;
+}
+.sc-landscape, .sc-video, .sc-poster { background-color:#142821; }
+.scene-experience .sc-shade {
+  background:linear-gradient(90deg,rgba(9,25,22,.70) 0%,rgba(9,25,22,.32) 40%,rgba(9,25,22,.04) 82%),
+  linear-gradient(180deg,rgba(8,22,20,.4),transparent 26%,transparent 54%,rgba(7,18,18,.69) 100%);
+}
+.scene-experience[data-scene="chiang-mai"] .sc-shade {
+  background:linear-gradient(90deg,rgba(15,23,20,.69),rgba(15,23,20,.25) 46%,rgba(15,23,20,.05) 88%),
+  linear-gradient(180deg,rgba(8,17,17,.38),transparent 30%,transparent 58%,rgba(8,16,14,.73));
+}
+.scene-experience .sc-header { padding:27px 5%; gap:30px; }
+.sc-brand { gap:12px; }
+.scene-experience .sc-brand svg { width:32px;height:32px; }
+.scene-experience .sc-brand > span { font-size:23px;letter-spacing:-.5px;font-weight:500; }
+.scene-experience .sc-brand small { margin-top:5px;font-size:9px;letter-spacing:2.2px;opacity:.84; }
+.sc-tiny-flower { display:none; }
+.scene-experience .sc-nav { gap:29px;font-size:12px;font-weight:500; }
+.scene-experience .sc-nav button,
+.scene-experience .sc-nav a { color:#f7f3e9ca; padding:10px 0; }
+.scene-experience .sc-nav button:hover,
+.scene-experience .sc-nav a:hover { color:#fff; }
+.scene-experience .sc-scene-top { left:6.4%;top:120px;color:#f0f0e3e5;letter-spacing:1.4px;font-size:10px; }
+.scene-experience .sc-copy { left:7%;bottom:27.5%;max-width:510px; }
+.scene-experience .sc-copy h1 { font-size:clamp(57px,5vw,81px);letter-spacing:-2.2px;line-height:1.04;font-weight:500;text-shadow:0 3px 22px #081b16ab; }
+.scene-experience .sc-copy > p { font-size:14px;line-height:1.7;max-width:435px;margin:18px 0 22px;color:#f4f0e7ec;text-shadow:0 2px 13px #0d1d1bd0; }
+html[lang="zh-CN"] .scene-experience .sc-copy h1 {
+  font-family:'Noto Serif SC','Songti SC',serif;
+  font-size:clamp(42px,4.5vw,63px);line-height:1.34;letter-spacing:1px;
+}
+.scene-experience .sc-eyebrow { margin-bottom:14px;font-size:10px;letter-spacing:1.35px;color:#f2ede2e0; }
+.scene-experience .sc-hand-note { font-family:Manrope,system-ui,sans-serif;transform:none;font-size:11px;letter-spacing:.3px;margin-top:14px;color:#f5efdfc7; }
+.scene-experience .sc-hand-note svg { width:15px;transform:none; }
+.scene-experience .sc-enter { background:#f7f3e9;border:1px solid #f7f3e9;border-radius:40px;box-shadow:0 5px 22px #03171135;padding:8px 17px 8px 8px;font-size:12px;min-height:49px; }
+.scene-experience .sc-enter:hover { background:white;transform:translateY(-1px); }
+.scene-experience .sc-enter-icon { background:#d6c49f;color:#183529; }
+.sc-film-caption { position:absolute;z-index:4;right:5%;top:123px;display:flex;flex-direction:column;align-items:flex-end;gap:5px;max-width:350px;padding:11px 14px;border-right:2px solid #d7bd8c99;background:linear-gradient(90deg,transparent,#11272055);color:#fcf8f0c9;font-size:10px;line-height:1.5;text-align:right;letter-spacing:.15px;text-shadow:0 1px 6px #0c1b18ad; }
+.sc-film-caption .sc-film-identity { font-weight:600;font-size:12px;color:#fffaf0; }
+.sc-film-caption a { text-underline-offset:3px; text-decoration:underline;text-decoration-color:#f7f3e975; }
+.sc-film-caption a:hover { color:#fff; }
+.scene-experience .sc-place-preview { right:5%;bottom:25%; }
+.scene-experience .sc-place-chip { width:192px;padding:7px;border:1px solid #eee8d855;border-radius:8px;background:#132d2582;backdrop-filter:blur(6px); }
+.scene-experience .sc-place-chip.is-current { background:#f4eee327;border-color:#e8d8b9ad; }
+.scene-experience .sc-place-chip img { width:45px;height:45px;border-radius:3px; }
+.scene-experience .sc-bottom { width:min(782px,87%);bottom:26px; }
+.scene-experience .sc-player,
+.scene-experience.sc-immersive .sc-player { background:#142922d9;color:#f7f3e9;border:1px solid #f7f3e938;box-shadow:0 16px 46px #07170a4e;backdrop-filter:blur(17px);border-radius:16px;min-height:73px;padding:11px 17px 11px 12px; }
+.scene-experience .sc-play { background:#e5d7b7;color:#162c22; }
+.scene-experience .sc-now strong { color:#fbf6e9;font-size:12px;letter-spacing:.1px; }
+.scene-experience .sc-now > span { color:#d1dcce;font-size:9px;letter-spacing:.5px; }
+.scene-experience .sc-master { color:#f7f3e9c7; }
+.scene-experience .sc-master input[type=range] { background:linear-gradient(to right,#d6c395 0%,#d6c395 var(--range-value,50%),#718078 var(--range-value,50%),#718078 100%); }
+.scene-experience .sc-player-actions { border-left:1px solid #e9e9d84f;gap:12px; }
+.scene-experience .sc-player-actions button { padding:7px;border-radius:7px;min-height:40px;min-width:35px;color:#f7f3e9df; }
+.scene-experience .sc-player-actions button:hover { color:#fff;background:#e5eed418; }
+.scene-experience .sc-bottom-line { margin-top:11px;color:#eff2e1ad;font-size:10px; }
+.scene-experience .sc-bottom-line button {font-size:10px;}
+.scene-experience .sc-chapter-hint { right:5%;top:194px;color:#faf4e6e0;background:#10291b50;font-size:10px; }
+.scene-experience .sc-intent-entry { left:7%;bottom:24.5%;width:min(640px,79%); }
+.scene-experience .sc-intent-entry > .sc-kicker { font-size:10px;letter-spacing:1.5px;color:#e8dcbf; }
+.scene-experience .sc-intent-entry h1 { font-size:clamp(51px,5.3vw,74px);max-width:670px;font-weight:500;letter-spacing:-1.8px;line-height:1.1; }
+.scene-experience .sc-intent-entry > p { font-size:14px;color:#f3eee7;line-height:1.7; }
+.scene-experience .sc-intent-options button { border-radius:8px;background:#10281eb5;border:1px solid #f8eddd54;min-height:101px; }
+.scene-experience .sc-intent-options button:hover { background:#244337ce;border-color:#ead9b3; }
+.scene-experience .sc-intent-options button > span { font-size:24px; }
+.scene-experience .sc-intent-options button > small { font-size:11px; }
+.scene-experience .sc-intent-hint { color:#e5ecda;font-size:10px; }
+.scene-experience .sc-dialog { border-radius:15px;box-shadow:0 25px 75px #061c1670; }
+.scene-experience .sc-gallery-card { border-radius:7px; }
+.scene-experience .sc-dialog h2 { font-weight:500; }
+.scene-experience .sc-gallery-card h3 { font-size:34px; }
+.scene-experience .sc-change-goal { border-color:#f0e9d5a1;min-height:34px; }
+.scene-experience button:focus-visible,
+.scene-experience a:focus-visible,
+.scene-experience input:focus-visible {outline:2px solid #e6d3aa;outline-offset:3px;}
+@media(max-width:1000px) and (min-width:681px) {
+ .scene-experience .sc-copy { left:6%;max-width:470px; }
+ .scene-experience .sc-copy h1 { font-size:61px; }
+ .scene-experience .sc-film-caption { right:4%;max-width:290px;top:118px; }
+ .scene-experience .sc-place-preview {right:4%;}
+}
+@media(max-width:680px) {
+ .scene-experience .sc-header {padding:21px 20px;}
+ .scene-experience .sc-brand > span {font-size:21px;}
+ .scene-experience .sc-brand svg {width:27px;height:27px;}
+ .scene-experience .sc-brand small {font-size:7px;letter-spacing:1.25px;}
+ .scene-experience .sc-scene-top {left:23px;top:99px;font-size:9px;max-width:86%;line-height:1.4;}
+ .scene-experience .sc-film-caption {top:138px;right:19px;left:19px;max-width:none;align-items:flex-start;text-align:left;padding:4px 0 4px 10px;border-left:2px solid #e2cfa787;border-right:none;background:none;font-size:9px;gap:3px;}
+ .scene-experience .sc-film-caption .sc-film-identity {font-size:10px;}
+ .scene-experience .sc-copy {left:23px;right:19px;bottom:245px;max-width:none;}
+ .scene-experience .sc-copy h1 {font-size:49px;line-height:1.11;letter-spacing:-1.1px;}
+ html[lang="zh-CN"] .scene-experience .sc-copy h1 {font-size:39px;line-height:1.35;letter-spacing:.2px;}
+ .scene-experience .sc-copy > p {font-size:11px;line-height:1.55;margin:11px 0 13px;max-width:335px;}
+ .scene-experience .sc-eyebrow {margin-bottom:7px;font-size:8px;}
+ .scene-experience .sc-journey-context {margin-bottom:9px;}
+ .scene-experience .sc-hand-note {font-size:9px;margin-top:8px;}
+ .scene-experience .sc-place-preview {left:23px;right:19px;bottom:161px;}
+ .scene-experience .sc-place-chip {width:165px !important;min-width:155px;flex:0 0 165px!important;padding:6px;gap:7px;}
+ .scene-experience .sc-place-chip img {width:36px;height:36px;}
+ .scene-experience .sc-place-chips {display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;gap:8px;}
+ .scene-experience .sc-bottom {left:16px;right:16px;transform:none;width:auto;bottom:max(18px,env(safe-area-inset-bottom));}
+ .scene-experience .sc-player {min-height:70px;padding:10px 11px;gap:9px;border-radius:13px;}
+ .scene-experience .sc-play {width:42px;height:42px;flex:0 0 42px;}
+ .scene-experience .sc-now {min-width:64px;}
+ .scene-experience .sc-now strong {font-size:10px;}
+ .scene-experience .sc-now > span {font-size:8px;letter-spacing:0;white-space:normal;}
+ .scene-experience .sc-player-actions {gap:2px;padding-left:4px;}
+ .scene-experience .sc-player-actions button {min-width:31px;min-height:40px;padding:4px;}
+ .scene-experience .sc-player-actions button > span {display:none;}
+ .scene-experience .sc-bottom-line {margin-top:8px;font-size:8px;}
+ .scene-experience .sc-chapter-hint {left:23px;right:auto;top:196px;max-width:72%;font-size:8px;}
+ .scene-experience .sc-intent-entry {left:23px;right:23px;top:26%;bottom:auto;width:auto;}
+ .scene-experience .sc-intent-entry h1 {font-size:clamp(40px,10vw,53px);}
+ html[lang="zh-CN"] .scene-experience .sc-intent-entry h1 {font-size:clamp(34px,8vw,45px);}
+ .scene-experience .sc-intent-entry > p {font-size:11px;line-height:1.55;margin:14px 0 17px;}
+ .scene-experience .sc-intent-options {gap:7px;}
+ .scene-experience .sc-intent-options button {min-height:87px;padding:9px 8px;}
+ .scene-experience .sc-intent-options button > span {font-size:19px;}
+ html[lang="zh-CN"] .scene-experience .sc-intent-options button > span {font-size:16px;}
+ .scene-experience .sc-intent-options button > small {font-size:9px;line-height:1.45;}
+ .scene-experience .sc-intent-hint {font-size:9px;}
+ .scene-experience .sc-gallery-card {height:260px;}
+ .scene-experience .sc-dialog h2 {font-size:25px;}
+}
+@media(max-height:730px) and (min-width:681px) {
+ .scene-experience .sc-copy {bottom:26%; }
+ .scene-experience .sc-copy h1 {font-size:56px;}
+ .scene-experience .sc-intent-entry {bottom:23%;}
+ .scene-experience .sc-intent-entry h1 {font-size:54px;}
+ .scene-experience .sc-intent-options button {min-height:80px;}
+}
+@media(prefers-reduced-motion:reduce) {
+ .scene-experience .sc-shade,.scene-experience .sc-copy,.scene-experience .sc-intent-entry {animation:none!important;transition:none!important;}
+}
