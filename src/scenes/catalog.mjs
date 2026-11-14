@@ -79,6 +79,7 @@ export const SCENES = [
     filmLicenseUrl:"https://www.pexels.com/license/",
     filmSourcePage:"https://www.pexels.com/video/tranquil-japanese-garden-in-kyoto-32309074/",
     filmExtraSourcePage:"https://www.pexels.com/video/tranquil-kyoto-temple-bamboo-fountain-32272459/",
+    filmMotionType:'natural-water',
     filmLocationEvidence:'uploader-described', number:'04', name:label('Kyoto','京都'),
     location:label('Moss garden · flowing water','京都苔庭 · 竹筒清泉'),
     title:label('Kyoto,\nin the garden.','京都，\n苔庭听泉。'),
