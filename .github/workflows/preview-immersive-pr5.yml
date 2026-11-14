@@ -77,6 +77,11 @@ jobs:
             public/assets/scenes/*-travel-mobile.jpg
             public/assets/scenes/real-travel-films.json
           key: pr5-real-travel-v1-${{ hashFiles('scripts/build-travel-films.py') }}
+      - name: Preserve raw scene framing for screenshot review
+        run: |
+          mkdir -p preview-qa/film-frames
+          cp public/assets/scenes/*-travel-mobile.jpg preview-qa/film-frames/
+          cp public/assets/scenes/kyoto-travel.jpg preview-qa/film-frames/
       - name: Run tests
         run: npm test
       - name: Build TanStack Start application
