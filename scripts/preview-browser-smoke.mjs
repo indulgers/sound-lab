@@ -29,6 +29,8 @@ try {
   await page.getByRole('button', { name: /专注/ }).first().click();
   await page.locator('[data-intent="focus"]').waitFor();
   assert.match(await page.locator('.sc-copy h1').innerText(), /清迈/);
+  assert.match(await page.locator('.sc-film-caption').innerText(), /清迈皇家花园/);
+  assert.match(await page.locator('.sc-video').getAttribute('src'), /chiang-mai-travel/);
   await page.locator('.sc-poster').evaluate(img=>img.decode());
   assert.match(await page.locator('.sc-poster').getAttribute('src'),/chiang-mai/,'focus title and visible poster must agree');
   assert.equal(await page.locator('.sc-place-chips button').count(),3,'focus shortcuts must only show focus Journeys');
@@ -83,6 +85,8 @@ try {
   await page.getByRole('button', { name: /冥想/ }).first().click();
   await page.locator('[data-intent="meditate"]').waitFor();
   assert.match(await page.locator('.sc-copy h1').innerText(), /巴厘岛/);
+  assert.match(await page.locator('.sc-film-caption').innerText(), /巴厘岛梯田/);
+  assert.match(await page.locator('.sc-video').getAttribute('src'), /bali-travel/);
   await page.locator('.sc-poster').evaluate(img=>img.decode());
   assert.match(await page.locator('.sc-poster').getAttribute('src'),/bali/);
   await page.locator('.sc-copy .sc-enter').click();
@@ -105,7 +109,9 @@ try {
   await places.getByRole('button', {name:/茶室静水/}).click();
   await page.locator('[data-scene="kyoto"]').waitFor();
   await page.locator('.sc-poster').evaluate(img=>img.decode());
-  assert.match(await page.locator('.sc-poster').getAttribute('src'),/kyoto/);
+  assert.match(await page.locator('.sc-poster').getAttribute('src'),/kyoto-travel/);
+  assert.match(await page.locator('.sc-film-caption').innerText(), /京都/);
+  assert.match(await page.locator('.sc-video').getAttribute('src'), /kyoto-travel/);
   await page.waitForFunction(() => document.querySelector('.scene-experience')?.dataset.audioState==='playing',null,{timeout:60000});
   await page.screenshot({ path: 'preview-qa/desktop-kyoto-playing.png', fullPage: true });
   console.log('PASS: immersive journey switch and Kyoto long-form playback');
@@ -143,6 +149,52 @@ try {
   await english.getByRole('button', { name: /Focus/ }).first().click();
   assert.match(await english.locator('.sc-copy h1').innerText(), /Chiang Mai/i);
   console.log('PASS: English intention flow');
+
+  // Verify real camera motion, rather than mistaking a static poster pan for travel footage.
+  const moving=await browser.newPage({viewport:{width:1440,height:900},reducedMotion:'no-preference'});
+  moving.on('pageerror', error=>events.push(error.message));
+  const movingResponse=await moving.goto(origin+'/zh',{waitUntil:'domcontentloaded',timeout:45000});
+  assert.ok(movingResponse?.ok());
+  await moving.getByRole('button',{name:/专注/}).first().click();
+  await moving.locator('[data-scene="chiang-mai"]').waitFor();
+  await moving.waitForFunction(() => {
+    const v=document.querySelector('.sc-video');
+    return v && !v.paused && v.readyState>=2 && v.currentTime>0.6;
+  },null,{timeout:30000});
+  const movieTimes=await moving.locator('.sc-video').evaluate(async v=>{
+    const initial=v.currentTime;
+    await new Promise(resolve=>setTimeout(resolve,1300));
+    return {before:initial,after:v.currentTime,readyState:v.readyState};
+  });
+  assert.ok(movieTimes.after>movieTimes.before+.35,'Actual Chiang Mai moving film must advance');
+  await moving.screenshot({path:'preview-qa/desktop-real-motion-chiang-mai.png',fullPage:true});
+  console.log('PASS: real Chiang Mai video advancing, not a static illustration');
+
+  // Travel catalogue screenshot series: six source-matched visual identities.
+  const review=await browser.newPage({viewport:{width:1400,height:900},reducedMotion:'reduce'});
+  await review.goto(origin+'/zh',{waitUntil:'domcontentloaded'});
+  await review.getByRole('button',{name:/专注/}).first().click();
+  await review.locator('[data-scene="chiang-mai"]').waitFor();
+  for(const [slug,label] of [
+    ['da-lat','晨雾书页'],
+    ['lisbon','午后灵感'],
+    ['bali','乌布颂钵声浴'],
+    ['kyoto','茶室静水'],
+    ['hoi-an','灯笼河畔'],
+  ]) {
+    await review.locator('.sc-nav-active').click();
+    await review.locator('.sc-dialog[open]').waitFor();
+    const all=review.locator('.sc-explore-filters button').filter({hasText:/探索所有状态/});
+    if(await all.count()) await all.click();
+    await review.locator('.sc-gallery-card').filter({hasText:label}).click();
+    await review.locator(`[data-scene="${slug}"]`).waitFor();
+    await review.locator('.sc-poster').evaluate(img=>img.decode());
+    assert.equal(await review.locator('.sc-video').getAttribute('src'),`/assets/scenes/${slug}-travel.mp4`);
+    assert.match(await review.locator('.sc-film-caption').innerText(), /实景移动镜头/);
+    await review.screenshot({path:`preview-qa/real-place-${slug}.png`,fullPage:true});
+  }
+  console.log('PASS: all six actual destination films and identity captions');
+
   assert.deepEqual(events, [], 'No uncaught JavaScript errors');
   console.log('PASS: all browser checks');
 } finally {
