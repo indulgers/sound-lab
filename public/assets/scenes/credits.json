@@ -54,21 +54,27 @@
     },
     {
       "scene": "kyoto",
-      "creator": "Benlisquare",
-      "title": "Drone flyover video of Mount Atago, Kyoto Prefecture",
-      "url": "https://commons.wikimedia.org/wiki/File:Drone_flyover_video_of_Mount_Atago.webm",
-      "license": "CC BY-SA 4.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-      "location": "Mount Atago, Kyoto Prefecture, Japan; 35.042564 N, 135.661303 E",
-      "locationEvidence": "Creator-published GPS position; DJI Mavic Air 2 aerial flight, 21 August 2024",
+      "creator": "Brian Zhang",
+      "title": "Tranquil Japanese Garden in Kyoto & Tranquil Kyoto Temple Bamboo Fountain",
+      "url": "https://www.pexels.com/video/tranquil-japanese-garden-in-kyoto-32309074/",
+      "license": "Pexels License",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "location": "Kyoto, Japan (creator-described garden and bamboo fountain; GPS unverified)",
+      "locationEvidence": "Both original Pexels videos explicitly describe Kyoto; GPS not independently checked",
       "files": [
         "kyoto-travel.mp4",
         "kyoto-travel-mobile.mp4",
         "kyoto-travel.jpg",
         "kyoto-travel-mobile.jpg"
       ],
-      "modifiedVideoLicense": "CC BY-SA 4.0; cropped, color adjusted, silenced and crossfade-looped film derivative licensed under same terms",
-      "changesNotice": "Adapted from original via silent H.264 conversion, landscape/portrait crops, gentle color grading and loop blend"
+      "changesNotice": "Two 9:16 source videos edited into a calm continuous scene, 16:9 and 9:16 silent H.264 renders, color matching and dissolves",
+      "additionalSources": [
+        {
+          "creator": "Brian Zhang",
+          "url": "https://www.pexels.com/video/tranquil-kyoto-temple-bamboo-fountain-32272459/",
+          "license": "Pexels License"
+        }
+      ]
     },
     {
       "scene": "lisbon",
