@@ -106,12 +106,17 @@ try {
   await places.getByRole('button',{name:/适合当前状态/}).click();
   assert.equal(await places.locator('.sc-gallery-card').count(),2);
   await places.screenshot({path:'preview-qa/desktop-meditation-journeys.png'});
-  await places.getByRole('button', {name:/茶室静水/}).click();
+  await places.getByRole('button', {name:/山林静心/}).click();
   await page.locator('[data-scene="kyoto"]').waitFor();
   await page.locator('.sc-poster').evaluate(img=>img.decode());
   assert.match(await page.locator('.sc-poster').getAttribute('src'),/kyoto-travel/);
   assert.match(await page.locator('.sc-film-caption').innerText(), /京都/);
   assert.match(await page.locator('.sc-video').getAttribute('src'), /kyoto-travel/);
+  assert.match(await page.locator('.sc-film-caption').innerText(), /爱宕山/);
+  const kyotoTitle=await page.locator('.sc-copy h1').innerText();
+  assert.equal(kyotoTitle.split('\n').length,2,'Kyoto headline must not break into 3 distracting rows');
+  const filmFrame=await page.locator('.sc-copy h1').boundingBox();
+  assert.ok(filmFrame && filmFrame.width<=430,'Kyoto headline must preserve at least 60% of landscape for the subject');
   await page.waitForFunction(() => document.querySelector('.scene-experience')?.dataset.audioState==='playing',null,{timeout:60000});
   await page.screenshot({ path: 'preview-qa/desktop-kyoto-playing.png', fullPage: true });
   console.log('PASS: immersive journey switch and Kyoto long-form playback');
@@ -179,7 +184,7 @@ try {
     ['da-lat','晨雾书页'],
     ['lisbon','午后灵感'],
     ['bali','乌布颂钵声浴'],
-    ['kyoto','茶室静水'],
+    ['kyoto','山林静心'],
     ['hoi-an','灯笼河畔'],
   ]) {
     await review.locator('.sc-nav-active').click();
