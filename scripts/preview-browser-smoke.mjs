@@ -106,7 +106,7 @@ try {
   await places.getByRole('button',{name:/适合当前状态/}).click();
   assert.equal(await places.locator('.sc-gallery-card').count(),2);
   await places.screenshot({path:'preview-qa/desktop-meditation-journeys.png'});
-  await places.getByRole('button', {name:/茶室静水/}).click();
+  await places.getByRole('button', {name:/苔庭静水/}).click();
   await page.locator('[data-scene="kyoto"]').waitFor();
   await page.locator('.sc-poster').evaluate(img=>img.decode());
   assert.match(await page.locator('.sc-poster').getAttribute('src'),/kyoto-travel/);
@@ -139,7 +139,7 @@ try {
   await mobile.locator('.sc-change-goal').click();
   await mobile.getByRole('button', { name:/冥想/ }).first().click();
   await mobile.locator('[data-intent="meditate"]').waitFor();
-  await mobile.locator('.sc-place-chips button').filter({hasText:/茶室静水/}).click();
+  await mobile.locator('.sc-place-chips button').filter({hasText:/苔庭静水/}).click();
   await mobile.locator('[data-scene="kyoto"]').waitFor();
   await mobile.locator('.sc-poster').evaluate(img=>img.decode());
   // Wait for the browser to composite the decoded frame after switching source.
@@ -210,7 +210,7 @@ try {
     ['da-lat','晨雾书页'],
     ['lisbon','午后灵感'],
     ['bali','乌布颂钵声浴'],
-    ['kyoto','茶室静水'],
+    ['kyoto','苔庭静水'],
     ['hoi-an','灯笼河畔'],
   ]) {
     await review.locator('.sc-nav-active').click();
