@@ -57,8 +57,9 @@ Links:
 ## Authenticity tiers
 
 1. **Recognizable landmark + licensed original footage:** Chiang Mai Royal Park Rajapruek/Ho Kham Luang, original Free Stock Vids CC BY 3.0. The video has real aerial motion but is *not* a coffee shop interior. The focus track remains titled Café Flow, while the visible place label tells the truth.
-2. **Uploader-described destination, licensed original footage:** Bali rice terraces, Da Lat pine forest, Kyoto shrine, Lisbon rooftops, Hoi An lantern river. Pexels creator/source links identify the region; exact geolocation has not been independently camera-GPS-verified.
-3. **Unverified or unrelated footage:** never show under a destination label. Use a plainly marked original concept illustration until verified material is available.
+2. **Geolocated creator footage:** Kyoto’s Mount Atago aerial travel video is by Benlisquare on Wikimedia Commons, with original creator-provided GPS, date and CC BY-SA 4.0 terms. Its cropped, colour-adjusted, silent-loop derivatives must carry the same license and attribution.
+3. **Uploader-described destination, licensed original footage:** Bali rice terraces, Da Lat pine forest, Lisbon rooftops and Hoi An lantern river. Pexels creator/source links identify the region; exact geolocation has not been independently camera-GPS-verified.
+4. **Unverified or unrelated footage:** never show under a destination label. Use a plainly marked original concept illustration until verified material is available.
 
 Publish no film without named creator, source page, license, actual duration, desktop/mobile dimensions, source-type caption and proof of clean silent export.
 
@@ -76,3 +77,14 @@ Publish no film without named creator, source page, license, actual duration, de
 ## Future asset-quality threshold
 
 The first release uses individual sourced real-motion clips (15–48s source-backed segments). These can repeat visually during a 45-minute listening session. The long-term cinematic Journey should contain **three or more coordinated, geography-verified shots per place** with arrival/path/stay/return sequencing, natural lighting and shot continuity. Do not fake continuous movement by reversing video or scaling a static picture. Rights clearance and on-location geography verification must precede future commercial production.
+
+## V4.1 visual finding: calm Kyoto and subject-safe typography
+
+The earlier Kyoto shrine shot showed multiple visitors and warning/information signs; it contradicted the visual promise of stillness. Replaced with a real camera-moving flyover above Mount Atago in Kyoto Prefecture, source coordinates 35.042564 N / 135.661303 E. The title is now two short lines, with a narrower hero block on desktop so the ridge remains readable.
+
+**Screen-composition contract:**
+- In normal listening view, destination and license caption must remain available but must not cover the visual subject or be confused with music provenance.
+- In full immersive mode, temporarily hide caption and chapter overlay to let the film breathe; the source credits remain reachable in the About panel.
+- Use a two-line Chinese headline for Kyoto at most, max ~380px width desktop, ~330px on phone.
+- Respect `prefers-reduced-motion` by displaying the frame extracted from the actual source clip. Do not substitute synthetic motion.
+- A location can be geographically verified without matching a tea room, café or other musical inspiration: tell the truth about the **film setting** and the **music concept** as separate objects.
