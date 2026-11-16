@@ -87,8 +87,18 @@ export function periodEndFrom(paidAtMs, productId) {
 }
 
 /**
+ * 免费试用（limer 2026-11-16 确认）：只给海外（Waffo/USD）订阅开，
+ * 7 天。国内支付宝月卡/年卡是一次性购买，不设试用。
+ * 试用在创建 Waffo 产品时配 metadata.trialDays: 7（见
+ * subscription-products-spec.md §A）；代码里 trialing 已算有效订阅。
+ */
+export const TRIAL_DAYS = 7;
+
+/**
  * 按语言取计划的展示文案、按币种取价格——两者独立（2026-11-12 解耦规则）。
  * locale 只决定 name/desc 用中文还是英文；currency 只决定金额。
+ * trialDays 跟币种走：USD（Waffo 订阅）7 天试用，CNY（支付宝月卡/
+ * 年卡）0 天——一次性购买，不设试用。
  */
 export function planDisplay(plan, locale, currency) {
   if (!plan) return null;
@@ -104,6 +114,7 @@ export function planDisplay(plan, locale, currency) {
     periodLabel: useEn ? (plan.periodLabelEn || plan.periodLabel) : plan.periodLabel,
     currency: usd ? 'USD' : 'CNY',
     durationDays: plan.durationDays,
+    trialDays: usd ? TRIAL_DAYS : 0,
   };
 }
 

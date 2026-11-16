@@ -7,10 +7,14 @@
  */
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import {
   SUBSCRIPTION_PLANS,
   SUBSCRIPTION_PLAN_IDS,
   FREE_SCENES,
+  TRIAL_DAYS,
   findPlan,
   isFreeScene,
   isFreeJourney,
@@ -110,6 +114,7 @@ test('subscription plans: planDisplay takes name/desc from locale, price from cu
     periodLabel: '每月',
     currency: 'USD',
     durationDays: 30,
+    trialDays: 7,
   });
   assert.deepEqual(planDisplay(monthly, 'en', 'CNY'), {
     name: 'Subscription · Monthly',
@@ -119,6 +124,7 @@ test('subscription plans: planDisplay takes name/desc from locale, price from cu
     periodLabel: 'per month',
     currency: 'CNY',
     durationDays: 30,
+    trialDays: 0,
   });
   assert.equal(planDisplay(findPlan('subscription-yearly'), 'en', 'USD').priceLabel, '$79.90');
   assert.equal(planDisplay(findPlan('subscription-yearly'), 'zh', 'CNY').priceLabel, '¥180');
@@ -126,6 +132,46 @@ test('subscription plans: planDisplay takes name/desc from locale, price from cu
   assert.equal(periodEndFrom(Date.parse('2026-11-16T00:00:00.000Z'), 'subscription-monthly'), Date.parse('2026-12-16T00:00:00.000Z'));
   assert.equal(periodEndFrom(Date.parse('2026-11-16T00:00:00.000Z'), 'subscription-yearly'), Date.parse('2027-11-16T00:00:00.000Z'));
   assert.equal(periodEndFrom(Date.now(), 'focus-pack'), null);
+});
+
+// --- 免费试用（limer 2026-11-16 确认）：只给海外开 ---
+
+test('trial: 7-day free trial on overseas (USD) subscriptions only, no trial on CNY cards', () => {
+  assert.equal(TRIAL_DAYS, 7);
+  for (const plan of SUBSCRIPTION_PLANS) {
+    assert.equal(planDisplay(plan, 'zh', 'USD').trialDays, 7, `${plan.id} USD has a 7-day trial`);
+    assert.equal(planDisplay(plan, 'en', 'USD').trialDays, 7);
+    assert.equal(planDisplay(plan, 'zh', 'CNY').trialDays, 0, `${plan.id} CNY has no trial`);
+    assert.equal(planDisplay(plan, 'en', 'CNY').trialDays, 0);
+  }
+  // 试用期也算有效订阅（trialing 状态已在 isSubscriptionActive 里）。
+  const now = Date.now();
+  assert.equal(
+    isSubscriptionActive({ status: 'trialing', currentPeriodEnd: now + 7 * 24 * 60 * 60 * 1000 }, now),
+    true,
+    'a trialing subscription is active during its trial',
+  );
+});
+
+test('trial UI: Plus page shows the trial on overseas plan cards, checkout notes it for Waffo only', () => {
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const plus = readFileSync(join(root, 'src/PlusPage.jsx'), 'utf8');
+  const checkout = readFileSync(join(root, 'src/CheckoutView.jsx'), 'utf8');
+  const locale = readFileSync(join(root, 'src/locale.mjs'), 'utf8');
+  // 试用行只在 trialDays > 0 时出现（USD 有，CNY 没有）。
+  assert.ok(plus.includes('display.trialDays'), 'Plus page gates the trial line on trialDays');
+  assert.ok(plus.includes("'plus.trialNote'"), 'Plus page uses the trial copy key');
+  assert.ok(checkout.includes('display.trialDays'), 'checkout gates the trial note on trialDays');
+  assert.ok(checkout.includes("'checkout.trialNoteWaffo'"), 'checkout uses the trial copy key');
+  // 两种语言各有一份文案，且不混语言。
+  const trialNotes = [...locale.matchAll(/trialNote: '([^']*)'/g)].map((m) => m[1]);
+  assert.equal(trialNotes.length, 2, 'plus.trialNote exists in both languages');
+  assert.ok(trialNotes.some((s) => /[\u4e00-\u9fff]/.test(s)), 'zh trial note is Chinese');
+  assert.ok(trialNotes.some((s) => !/[\u4e00-\u9fff]/.test(s)), 'en trial note has no Chinese');
+  const trialWaffo = [...locale.matchAll(/trialNoteWaffo: '([^']*)'/g)].map((m) => m[1]);
+  assert.equal(trialWaffo.length, 2, 'checkout.trialNoteWaffo exists in both languages');
+  assert.ok(trialWaffo.some((s) => /[\u4e00-\u9fff]/.test(s)), 'zh checkout trial note is Chinese');
+  assert.ok(trialWaffo.some((s) => !/[\u4e00-\u9fff]/.test(s)), 'en checkout trial note has no Chinese');
 });
 
 // --- 免费目的地 ---

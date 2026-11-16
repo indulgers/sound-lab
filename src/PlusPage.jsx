@@ -11,6 +11,10 @@
  * 在中国的英文界面显示 ¥ 价。CNY 展示时年卡在前（国内用户更
  * 偏年付/一次性；不设终身档）。
  *
+ * 免费试用（limer 2026-11-16 确认）：只给海外（Waffo/USD）订阅开，
+ * 7 天，计划卡片上显示；国内支付宝月卡/年卡是一次性购买，不设试用，
+ * 不显示试用字样。
+ *
  * 订阅状态：当前计划卡片显示有效期与续费方式；Waffo 订阅在客户
  * 中心自助取消/换计划（POST /api/waffo/portal），支付宝月卡/
  * 年卡是一次性购买、到期不自动续费，买新卡即续费。
@@ -95,6 +99,7 @@ export default function PlusPage() {
               <h3>{display.name} <span className="tag">{isCurrent ? t(locale, 'plus.current') : isYearly ? t(locale, 'plus.yearlyTag') : display.priceLabel}</span></h3>
               <p>{display.desc}</p>
               <p className="plus-unlocks">{t(locale, 'plus.unlocks')}</p>
+              {display.trialDays ? <p className="plus-trial">{t(locale, 'plus.trialNote')}</p> : null}
               <div className="row">
                 <span className="price">{display.priceLabel}<small> / {display.periodLabel}</small></span>
                 <span style={{ flex: 1 }}></span>

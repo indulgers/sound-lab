@@ -11,6 +11,8 @@ import { localizePath, t, useLocale } from './locale.mjs';
  * 订阅结账（2026-11-16）：月付 / 年付两个计划。海外走 Waffo 订阅
  * （自动续费，客户中心可取消/换计划），国内走支付宝 Vibe Pay
  * 月卡/年卡（一次性购买，30 天/365 天，到期不自动续费，买新卡续费）。
+ * 免费试用（limer 2026-11-16 确认）：只给海外 Waffo 订阅开，7 天，
+ * 结账页会注明；国内支付宝月卡/年卡不设试用，不显示试用字样。
  * 文案语言与支付选择已解耦（2026-11-12 用户明确规则）：
  * - 文案只看 locale（浏览器语言自动判断，导航栏手动切换覆盖）；
  * - 支付渠道和金额只看支付地区 region（服务端 Cloudflare 国家，
@@ -205,6 +207,7 @@ export default function CheckoutView() {
             <div className="sum-row"><span className="k">{t(locale, 'checkout.method')}</span><span>{isWaffo ? t(locale, 'checkout.waffo') : t(locale, 'checkout.alipay')}</span></div>
             {priceNote ? <p className="fine">{priceNote}</p> : null}
             <p className="fine">{isWaffo ? t(locale, 'checkout.noteWaffo') : t(locale, 'checkout.note')}</p>
+            {display.trialDays ? <p className="fine">{t(locale, 'checkout.trialNoteWaffo')}</p> : null}
 
             {status === 'error' && error ? (
               needsLogin ? (

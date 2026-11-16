@@ -179,6 +179,7 @@ test('plans: planDisplay takes name/desc from locale and price from currency ind
     periodLabel: '每月',
     currency: 'USD',
     durationDays: 30,
+    trialDays: 7,
   });
   // 英文界面 + 人民币地区：在中国的英文用户看到英文名、¥ 价。
   assert.deepEqual(planDisplay(monthly, 'en', 'CNY'), {
@@ -189,6 +190,7 @@ test('plans: planDisplay takes name/desc from locale and price from currency ind
     periodLabel: 'per month',
     currency: 'CNY',
     durationDays: 30,
+    trialDays: 0,
   });
   // 兼容旧行为：不传币种时从语言推导（en → USD，zh → CNY）。
   assert.equal(planDisplay(monthly, 'en').currency, 'USD');
