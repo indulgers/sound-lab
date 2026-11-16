@@ -2,6 +2,7 @@ import { AUDIO_LICENSES, SOUND_AUDIO } from './audio/catalog.mjs'
 import { prepareRecording, playInstrumentNote } from './audio/playback.mjs'
 import { SOUNDS, autoRecipeName, formatRecipeDate, mixSummaryText, recipeDisplay, soundDisplayName } from './catalog.mjs'
 import { createSession, freeMix, isFreeSound } from './listening-session.mjs'
+import { SLEEP_TIMER_FADE_SECONDS, applyFadeSchedule, fadeSchedule, formatSleepRemaining, sleepRemainingMs } from './sleep-timer.mjs'
 import { getLocale, t } from './locale.mjs'
 import { PACKS } from './packs.mjs'
 import { createRuntimeScope } from './runtime-scope.mjs'
@@ -172,7 +173,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   }
 
   /* ============================== audio engine ============================== */
-  var AC=null, master=null, transport=null, sessionGain=null, masterAnalyser=null;
+  var AC=null, master=null, transport=null, sessionGain=null, sleepGain=null, masterAnalyser=null;
   var buffers={};
   var chans={};
   var recordings={};
@@ -185,7 +186,12 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     comp.threshold.value=-18; comp.knee.value=14; comp.ratio.value=8;
     comp.attack.value=.005; comp.release.value=.25;
     master = AC.createGain(); master.gain.value=masterVol*masterVol;
-    sessionGain=AC.createGain(); sessionGain.gain.value=0; sessionGain.connect(master);
+    sessionGain=AC.createGain(); sessionGain.gain.value=0;
+    // Sleep timer's own gain, after the session gain: transport ->
+    // sessionGain -> sleepGain -> master. It sits at 1 and only fades
+    // when a sleep timer is armed (see armSleepGain).
+    sleepGain=AC.createGain(); sleepGain.gain.value=1;
+    sessionGain.connect(sleepGain); sleepGain.connect(master);
     transport=AC.createGain(); transport.gain.value=0; transport.connect(sessionGain);
     masterAnalyser = AC.createAnalyser(); masterAnalyser.fftSize=256;
     master.connect(comp); comp.connect(masterAnalyser); masterAnalyser.connect(AC.destination);
@@ -1132,9 +1138,36 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     var minutes=Math.floor(seconds/60), rest=seconds%60;
     return String(minutes).padStart(2,"0")+":"+String(rest).padStart(2,"0");
   }
+  // Sleep timer state: a wall-clock deadline (null = no timer) and the
+  // choice shown in the mixer-bar select (0 = off, minutes). The timer
+  // is wall-clock, like the journey timer: pausing does not extend it.
+  var sleepDeadline=null, sleepFadeSeconds=SLEEP_TIMER_FADE_SECONDS, sleepChoice=0;
+  function armSleepGain(){
+    if(!sleepGain || !AC) return;
+    var now=AC.currentTime;
+    var schedule=fadeSchedule({deadlineMs:sleepDeadline, nowMs:Date.now(), audioNow:now, fadeSeconds:sleepFadeSeconds});
+    if(!schedule){ sleepGain.gain.cancelScheduledValues(now); sleepGain.gain.setValueAtTime(1,now); return; }
+    applyFadeSchedule(sleepGain.gain, schedule, 1, now);
+  }
+  // Arm (or clear) the mixer's sleep timer. Returns the deadline, or null.
+  function setSleepTimer(ms, fadeSeconds){
+    sleepFadeSeconds=Number.isFinite(fadeSeconds) && fadeSeconds>0 ? fadeSeconds : SLEEP_TIMER_FADE_SECONDS;
+    sleepDeadline=Number.isFinite(ms) && ms>0 ? Date.now()+ms : null;
+    armSessionGain();
+    paintSession();
+    return sleepDeadline;
+  }
   function armSessionGain(){
+    // The sleep fade is armed together with the session gain so the two
+    // can never drift apart (both are re-armed on resume/visibility).
+    armSleepGain();
     if(!sessionGain) return;
     var remaining=session.remaining()||0, now=AC.currentTime;
+    // While a sleep timer is active it governs: the 10-minute free window
+    // must not cut a 30/60/90-minute sleep timer short, so the session
+    // gain follows the later of the two deadlines.
+    var sleepMs=sleepRemainingMs(sleepDeadline, Date.now());
+    if(sleepMs!==null) remaining=Math.max(remaining, sleepMs);
     var gain=sessionGain.gain;
     gain.cancelScheduledValues(now);
     gain.setValueAtTime(Math.min(1,remaining/5000),now);
@@ -1143,15 +1176,38 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   }
   function paintSession(){
     var remaining=session.remaining();
-    var display=fmtTime(remaining===null ? 600 : Math.ceil(remaining/1000));
+    var sleepMs=sleepRemainingMs(sleepDeadline, Date.now());
+    // The effective listening window is the later of the session and the
+    // sleep timer; when a sleep timer is active it is the one that counts.
+    var effective=remaining===null ? (sleepMs===null ? 600000 : sleepMs) : (sleepMs===null ? remaining : Math.max(remaining, sleepMs));
+    var display=fmtTime(Math.ceil(effective/1000));
     ["focusRead","immFocus"].forEach(function(id){
       var el=$(id);
       if(!el) return;
       if(el.textContent!==display) el.textContent=display;
     });
+    var sleepEl=$("sleepTimerRead");
+    if(sleepEl){
+      var sleepDisplay=sleepMs===null ? "" : formatSleepRemaining(sleepMs);
+      if(sleepEl.textContent!==sleepDisplay) sleepEl.textContent=sleepDisplay;
+    }
   }
   function tickSession(){
     paintSession();
+    var sleepMs=sleepRemainingMs(sleepDeadline, Date.now());
+    if(sleepDeadline!==null){
+      if(sleepMs>0) return; // Sleep timer governs; the session window is subsumed.
+      // The timer has run out: the fade is complete (sleepGain is 0).
+      // Stop quietly — no paywall dialog for someone who fell asleep.
+      sleepDeadline=null; sleepChoice=0;
+      if(AC && sleepGain){ var now=AC.currentTime; sleepGain.gain.cancelScheduledValues(now); sleepGain.gain.setValueAtTime(1,now); }
+      if(playing) setPlaying(false);
+      Object.keys(bedNodes).forEach(stopBed);
+      toast(t(L(),'mixer.sleepDone'));
+      var sel=$("sleepTimerSelect"); if(sel) sel.value="off";
+      paintSession();
+      return;
+    }
     if(session.remaining()!==0 || (!playing && !Object.keys(bedNodes).length)) return;
     replayMix=playing;
     replayBeds=Object.keys(bedNodes);
@@ -1741,10 +1797,18 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       });
       track(mixerRemovers, $("immersiveBtn"), "click", enterImmersive);
       track(mixerRemovers, $("ctaImmersive"), "click", enterImmersive);
+      track(mixerRemovers, $("sleepTimerSelect"), "change", function(){
+        sleepChoice=this.value==="off" ? 0 : Number(this.value);
+        setSleepTimer(sleepChoice ? sleepChoice*60000 : null);
+      });
     }
     buildFaders();
     SOUNDS.forEach(function(s){ paintFader(s.id); });
     renderGlass();
+    // The select always shows the armed timer (or off), including after
+    // the timer was cleared by entering a journey.
+    var sleepSel=$("sleepTimerSelect");
+    if(sleepSel) sleepSel.value=sleepChoice ? String(sleepChoice) : "off";
     paintSession();
   }
   function unbindMixer(){
@@ -1899,6 +1963,15 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
         sessionGain.gain.cancelScheduledValues(AC.currentTime);
         sessionGain.gain.setValueAtTime(0,AC.currentTime);
       }
+      // A mixer sleep timer belongs to the mixer session: clear it when
+      // the journey player takes over (it has its own timer).
+      sleepDeadline=null; sleepChoice=0;
+      if(sleepGain){
+        sleepGain.gain.cancelScheduledValues(AC.currentTime);
+        sleepGain.gain.setValueAtTime(1,AC.currentTime);
+      }
+      var sleepSel=$("sleepTimerSelect"); if(sleepSel) sleepSel.value="off";
+      paintSession();
       SOUNDS.forEach(function(sound){ stopGen(sound.id); });
       Object.keys(bedNodes).forEach(stopBed);
     },
@@ -1906,6 +1979,12 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     playRecipe,
     showPremium,
     setOwnedPacks,
+    // Mixer sleep timer: setSleepTimer(ms) arms it (null clears), the
+    // fade is the last 2 minutes; getSleepTimerRemaining() is ms or null.
+    setSleepTimer,
+    getSleepTimerRemaining() {
+      return sleepRemainingMs(sleepDeadline, Date.now());
+    },
     setFocus(open) {
       if(open) showImmersive();
       else exitImmersive(false);

@@ -14,6 +14,7 @@
 import { useEffect, useLayoutEffect } from 'react';
 import { Link } from '@tanstack/react-router';
 import { getLabController } from './sound-lab.mjs';
+import { SLEEP_TIMER_OPTIONS_MINUTES } from './sleep-timer.mjs';
 import { useLab } from './lab-context.jsx';
 import { recipeDisplay } from './catalog.mjs';
 import { localizePath, t, useLocale } from './locale.mjs';
@@ -228,6 +229,16 @@ function Mixer() {
           <div className="mb-group">
             <span className="mb-label">{t(locale, 'mixer.remaining')}</span>
             <span className="timer-read" id="focusRead" role="timer">10:00</span>
+          </div>
+          <div className="mb-group">
+            <label className="mb-label" htmlFor="sleepTimerSelect">{t(locale, 'mixer.sleepTimer')}</label>
+            <span className="sleep-timer-wrap">
+              <select className="sleep-timer-select" id="sleepTimerSelect" aria-label={t(locale, 'mixer.sleepTimer')}>
+                <option value="off">{t(locale, 'mixer.sleepOff')}</option>
+                {SLEEP_TIMER_OPTIONS_MINUTES.map(minutes => <option key={minutes} value={minutes}>{minutes} {t(locale, 'mixer.sleepMinutes')}</option>)}
+              </select>
+              <span className="timer-read" id="sleepTimerRead" role="timer"></span>
+            </span>
           </div>
           <div className="spacer"></div>
           <button className="text-btn" id="immersiveBtn">{t(locale, 'mixer.immersive')}</button>
