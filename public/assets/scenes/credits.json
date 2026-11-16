@@ -1,6 +1,6 @@
 {
   "checkedOn": "2026-11-16",
-  "status": "Review preview assets; source-described locations, no independent GPS guarantee",
+  "status": "Review preview assets; source-described locations, no independent GPS guarantee. Frame-checked 2026-11-16 (see locationEvidence per scene). Pexels publishes no camera GPS (confirmed via its API docs 2026-11-16).",
   "usage": "Actual location-described moving video. Not original Sound Cocktail field footage. Music is separately procedurally produced.",
   "sources": [
     {
@@ -11,7 +11,7 @@
       "license": "CC BY 3.0",
       "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
       "location": "Royal Park Rajapruek / Ho Kham Luang, Chiang Mai, Thailand",
-      "locationEvidence": "recognizable landmark; creator identifies location",
+      "locationEvidence": "Landmark-verified by frame check 2026-11-16: Ho Kham Luang pavilion and 'RAJAPRUEK' garden lettering visible at 5s/24s. Commons file carries no coordinates; no camera GPS.",
       "edit": "Silent MP4 render, 16:9 and 9:16 crops, color grading, tail-to-head dissolve",
       "files": [
         "chiang-mai-travel.mp4",
@@ -28,7 +28,7 @@
       "license": "Pexels License",
       "licenseUrl": "https://www.pexels.com/license/",
       "location": "Bali, Indonesia",
-      "locationEvidence": "source uploader describes Bali; camera GPS not independently verified",
+      "locationEvidence": "Uploader statement only. Frame-checked 2026-11-16 (5s/12s): aerial rice terraces, palms, village and a pink heart-shaped pond feature — consistent with Bali but no unique landmark; the specific place is not independently verifiable. No camera GPS.",
       "files": [
         "bali-travel.mp4",
         "bali-travel-mobile.mp4",
@@ -44,7 +44,7 @@
       "license": "Pexels License",
       "licenseUrl": "https://www.pexels.com/license/",
       "location": "Da Lat, Vietnam",
-      "locationEvidence": "source uploader describes Da Lat; camera GPS not independently verified",
+      "locationEvidence": "Uploader statement only. Frame-checked 2026-11-16 (5s/10s): generic pine forest on a dry hillside, tiny people, greenhouse-like building — no identifying feature. No camera GPS.",
       "files": [
         "da-lat-travel.mp4",
         "da-lat-travel-mobile.mp4",
@@ -60,7 +60,7 @@
       "license": "Pexels License",
       "licenseUrl": "https://www.pexels.com/license/",
       "location": "Kyoto, Japan (creator-described garden and bamboo fountain; GPS unverified)",
-      "locationEvidence": "Three Kyoto-labelled Pexels sources: Kinkaku-ji arrival pan by Stephan Leuzinger plus Brian Zhang garden and bamboo fountain; GPS not independently checked",
+      "locationEvidence": "Arrival landmark-verified by frame check 2026-11-16: the gold pavilion is unique to Kinkaku-ji (frames at 1s/7s/14s, no people or signage). Garden and bamboo-fountain parts are uploader-described Kyoto only. No camera GPS for any part.",
       "files": [
         "kyoto-travel.mp4",
         "kyoto-travel-mobile.mp4",
@@ -92,7 +92,7 @@
       "license": "Pexels License",
       "licenseUrl": "https://www.pexels.com/license/",
       "location": "Lisbon, Portugal",
-      "locationEvidence": "source uploader describes Lisbon; camera GPS not independently verified",
+      "locationEvidence": "Uploader statement only. Frame-checked 2026-11-16 (5s/12s): golden-hour aerial over red-tiled rooftops, pastel facades and a tree-lined avenue — consistent with Lisbon but no unique landmark (no Tagus, bridge or castle visible). No camera GPS.",
       "files": [
         "lisbon-travel.mp4",
         "lisbon-travel-mobile.mp4",
@@ -108,7 +108,7 @@
       "license": "Pexels License",
       "licenseUrl": "https://www.pexels.com/license/",
       "location": "Hoi An, Vietnam",
-      "locationEvidence": "source uploader describes Hoi An; camera GPS not independently verified",
+      "locationEvidence": "Strong visual match, frame-checked 2026-11-16 (5s/12s): lantern boats on the Thu Bon river with 'HA' boat registrations, yellow old-town shophouses and the Cargo Club riverside — a distinctive Hoi An old-town scene. No camera GPS. Note: this is a crowded riverside night scene (people visible), by design for the lantern-night mood.",
       "files": [
         "hoi-an-travel.mp4",
         "hoi-an-travel-mobile.mp4",

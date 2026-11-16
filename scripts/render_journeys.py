@@ -25,12 +25,19 @@ SCENES = {
  'chiang-mai': dict(title='清迈 · 花园咖啡馆', mood='专注 / 写作', seed=13, style='cafe',
    chords=[[50,57,61,64],[47,54,57,62],[43,50,54,59],[45,52,57,62],
            [50,57,59,64],[52,57,61,66],[43,50,57,62],[45,52,59,64]],
-   scene_rms=(.034,.009,.0025), chord_sec=41, lead_sec=25, palette=[69,71,73,74,76,78,81],
+   # scene_rms raised 2026-11-16 (x1.23, +1.8 dB): the V3.1-derived head
+   # (0-146s) measured -27.5 LUFS but the new continuation (225-800s) only
+   # -29.3 LUFS at default mix levels, so the journey faded down audibly
+   # after ~2:40. Targets now match the head; see docs/loudness-parity.md.
+   scene_rms=(.0418,.0111,.0031), chord_sec=41, lead_sec=25, palette=[69,71,73,74,76,78,81],
    moments=['花园开门','暖色琴键','树影摇动','一封未写完的信','回到第一杯咖啡']),
  'bali': dict(title='乌布 · 颂钵长廊', mood='冥想 / 放松', seed=37, style='bowl',
    chords=[[50,57,60,65],[46,53,57,62],[48,55,60,64],[43,50,57,62],
            [50,57,60,64],[45,52,57,60]],
-   scene_rms=(.032,.009,.0018), chord_sec=67, lead_sec=36, palette=[50,53,55,57,60,62,65],
+   # scene_rms raised 2026-11-16 (x1.27, +2.1 dB): same V3.1-head vs
+   # continuation gap as Chiang Mai (head -27.5 LUFS, new part -29.6 LUFS).
+   # See docs/loudness-parity.md.
+   scene_rms=(.0408,.0115,.0023), chord_sec=67, lead_sec=36, palette=[50,53,55,57,60,62,65],
    moments=['木门后的安静','第一道回响','光落在地面','更深的留白','余音慢慢退去']),
  'da-lat': dict(title='大叻 · 晨雾与咖啡', mood='阅读 / 慢下来', seed=63, style='mist',
    chords=[[50,57,61,66],[43,50,57,62],[47,54,57,62],[45,52,59,64],
