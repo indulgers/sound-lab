@@ -73,6 +73,70 @@ jobs:
           grep "$PROD_ID" wrangler.jsonc
           grep "$PREVIEW_ID" wrangler.jsonc
 
+      # The immersive journeys' audio stems and travel films are generated
+      # artifacts, not committed files: render them here (from cache when
+      # available, from scratch on the first main run) before the build,
+      # or the deployed site serves 404s for every journey video/audio.
+      # Cache keys match preview-immersive-pr5.yml; main creates its own
+      # entries on the first run (PR-branch caches are not visible here).
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Restore long-form audio stems
+        uses: actions/cache/restore@v4
+        with:
+          path: public/assets/audio/journeys
+          key: pr5-journeys-v3-${{ hashFiles('scripts/render_journeys.py', 'public/assets/audio/scenes/manifest.json') }}
+
+      - name: Install audio codec tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Render original 15-minute stems (only when cache is missing)
+        run: |
+          if [ ! -s public/assets/audio/journeys/manifest.json ]; then
+            python -m pip install --disable-pip-version-check --quiet 'numpy==2.0.2' 'scipy==1.14.1'
+            python scripts/render_journeys.py
+          fi
+          python scripts/validate_journey_audio.py
+
+      - name: Cache verified audio immediately
+        uses: actions/cache/save@v4
+        with:
+          path: public/assets/audio/journeys
+          key: pr5-journeys-v3-${{ hashFiles('scripts/render_journeys.py', 'public/assets/audio/scenes/manifest.json') }}
+
+      - name: Restore destination-specific moving films
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            public/assets/scenes/*-travel.mp4
+            public/assets/scenes/*-travel-mobile.mp4
+            public/assets/scenes/*-travel.jpg
+            public/assets/scenes/*-travel-mobile.jpg
+            public/assets/scenes/real-travel-films.json
+          key: pr5-real-travel-v1-${{ hashFiles('scripts/build-travel-films.py') }}
+
+      - name: Create actual licensed travel videos and matching posters
+        run: |
+          if [ ! -s public/assets/scenes/real-travel-films.json ]; then
+            python3 scripts/build-travel-films.py
+          fi
+          python3 scripts/validate-travel-films.py
+
+      - name: Cache verified travel video
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            public/assets/scenes/*-travel.mp4
+            public/assets/scenes/*-travel-mobile.mp4
+            public/assets/scenes/*-travel.jpg
+            public/assets/scenes/*-travel-mobile.jpg
+            public/assets/scenes/real-travel-films.json
+          key: pr5-real-travel-v1-${{ hashFiles('scripts/build-travel-films.py') }}
+
       - name: Build and deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -98,3 +162,8 @@ jobs:
           echo
           curl -sf "$URL/health"
           echo
+          # The immersive journeys are generated assets: fail the deploy
+          # if they are missing instead of shipping silent black pages.
+          curl -sf "$URL/assets/scenes/kyoto-travel.mp4" -o /dev/null
+          curl -sf "$URL/assets/audio/journeys/bali-harmony.mp3" -o /dev/null
+          echo "journey assets ok"
