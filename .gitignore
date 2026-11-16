@@ -14,3 +14,13 @@ dist-ssr/
 .alipay-sandbox.json
 # 本地生成的支付宝正式密钥，永不提交
 .secrets/
+
+# Issue #6 DIY organic sources: downloaded audio is never committed, but
+# the inventory (sources/organic/sources.json) IS tracked — the deploy
+# pipeline needs it to fetch the sources. Pilot outputs are generated.
+sources/organic/*.mp3
+sources/organic/*.ogg
+sources/organic/*.wav
+sources/organic/*.flac
+sources/organic/*.m4a
+pilot/
