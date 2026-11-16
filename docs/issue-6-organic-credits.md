@@ -7,6 +7,12 @@
 > `sources/organic/sources.json` (38 entries, 31 accepted, 7 rejected).
 > Pilot outputs are generated artifacts, never committed — see
 > `pilot/organic/qa.json` for durations, LUFS and peaks.
+>
+> **Round 2 (2026-11-16, limer's verdict on the v1 pilots):** Chiang Mai v1
+> REJECTED as-is — "too weird, doesn't feel like sound therapy" (piano +
+> café reads as background music). Bali v1 KEPT — explore more variants,
+> strikes a bit heavier and brighter. Two new Chiang Mai attempts + two
+> Bali iterations were rendered (see below); same branch, same pipeline.
 
 ## What "organic" means here
 
@@ -40,6 +46,50 @@ coherent, and the A/B is loudness-matched, not key-matched).
 **Not used:** Sikarskie crystal bowls as a tuned chord — their IA labels
 are unreliable (measured partials share C4/A#4 across all six bowls, so
 no clean triad exists); they remain backup individual strikes only.
+
+## Round 2 — iteration on limer's verdict (2026-11-16)
+
+**Chiang Mai variant A — "drone + kalimba"** (90s, F major). The most
+therapy-like attempt: tibetan-bowl warm pad drone (slice 60–150s) as the
+bed, 7 sparse coco-kalimba plucks (F-major notes only — E4/F4/G4/C4/D4/C5,
+pitches verified by spectral analysis; B4 excluded as the #4), faint
+Taipei birds only. No piano, no café, no guitar.
+
+**Chiang Mai variant B — "sparse piano, no café"** (90s, F major). Same
+Long Dark piano as v1 but the quietest (opening) 0–90s slice, only 2
+guitar phrases, faint birds only (café removed). Tests whether the café
+was the problem, or the piano itself.
+
+**Bali v2 — heavier + brighter, same spacing** (90s, D natural minor).
+Same three strikes (F4@2, B4@24, E5@48) + chimes@66; strike gain 0.9→1.2
+(+2.5 dB) and a gentle +2 dB high shelf above 6 kHz on the details stem
+(measured HF 4–12 kHz share 27.6% → 29.8%). Sparse sound-bath character
+unchanged.
+
+**Bali v3 — denser + one extra deep bowl** (90s, D natural minor). Five
+strikes (F4@2, B4@18, deep 11-inch bowl G2@36, E5@54, F4@72) + chimes@82;
+same +2.5 dB / +2 dB shelf as v2, so v2 vs v3 differ only in spacing and
+the extra low tone.
+
+| Variant | Mix | V3.2 ref | Peak | Stems H / D / A (LUFS) |
+|---|---|---|---|---|
+| Chiang Mai A | −27.3 LUFS | −27.3 | −16.5 dBFS | −25.2 / −38.2 / −40.5 |
+| Chiang Mai B | −27.3 LUFS | −27.3 | −11.0 dBFS | −25.5 / −30.5 / −40.4 |
+| Bali v2 | −27.5 LUFS | −27.5 | −13.6 dBFS | −26.2 / −28.1 / −34.3 |
+| Bali v3 | −27.5 LUFS | −27.5 | −12.4 dBFS | −26.4 / −28.0 / −34.5 |
+
+All four are 90.000s, loudness-matched to their journey's V3.2 reference.
+Bugs caught in round 2 and fixed in `render_organic_pilot.py`: `slice_at`
+truncated float sample positions (21.4×48000 = 1027199.999… → a 48001-sample
+slice for a 48000-sample output — now rounds + guards the copy length);
+the CM-A pad slice 100–190s ran past the 161s pad file and left the last
+~29s silent (now 60–150s, mix RMS steady −29 to −31 dB across all 90s);
+the CM-A/B birds bed at ×0.25 measured −55.6/−51.5 LUFS (inaudible —
+rebalanced to ×1.5/×0.9, now −40.2/−40.4 LUFS, faint but present).
+
+Listening samples: `pilot/organic/chiang-mai-a-mix-90s.mp3`,
+`chiang-mai-b-mix-90s.mp3`, `bali-v2-mix-90s.mp3`, `bali-v3-mix-90s.mp3`
+(plus the V3.2 references, unchanged from round 1).
 
 ## Pilot results (90s, default levels .78/.54/.47)
 
@@ -89,12 +139,14 @@ belong on the app's Sources page (`/sources`) if the organic stems ship.
 | "The sound of a singing bowl" | Valera N. Trubin | CC-BY 4.0 | Bali details |
 | "Windglockenspiel.Koshi" (Koshi chimes) | Membeth | CC0 1.0 | Bali details |
 | "Singing Bowls And Birds Chirping" | Alexander Blu | CC-BY 3.0 | Bali atmosphere (low) |
+| "Kalimba de coco (notas sueltas) 02" | Luis Alvaz | CC-BY-SA 4.0 | Chiang Mai A details (7 plucks) |
+| "Tibetan Singing Bowl hit 11inch" | דג בלי מלח | CC-BY-SA 4.0 | Bali v3 details (deep strike @36s) |
 
-**ShareAlike note:** the Hasenchat guitar, Cassa342 bowl and Юкатан bowl
-are CC-BY-SA. If the soundtrack counts as an adaptation, share-alike may
-require sharing the adapted audio under the same license — CC0/CC-BY
-picks are the cleanest where a choice exists. (Legal review is limer's
-call; this file records the facts, not legal advice.)
+**ShareAlike note:** the Hasenchat guitar, Cassa342 bowl, Юкатан bowl,
+kalimba de coco and 11-inch bowl are CC-BY-SA. If the soundtrack counts
+as an adaptation, share-alike may require sharing the adapted audio under
+the same license — CC0/CC-BY picks are the cleanest where a choice exists.
+(Legal review is limer's call; this file records the facts, not legal advice.)
 
 **Public Domain Mark note:** the Taipei birdsong is labelled Public
 Domain Mark 1.0 on Internet Archive — a label, not a license. Treat as

@@ -43,6 +43,23 @@ Arrangement (keys verified by spectral analysis 2026-11-16):
     D natural minor — small tibetan bowl F4 (CC-BY-SA 4.0), yukatan bowl
     B4 (CC-BY-SA 3.0), trubin bowl E5 (CC-BY 4.0) — plus Koshi chimes
     (CC0). Atmosphere: Taipei birds + faint Alexander Blu bowls+birds.
+  Iteration round 2 (limer's verdict 2026-11-16): Chiang Mai v1 REJECTED
+    ("too weird, doesn't feel like sound therapy" — piano + café reads
+    as background music); Bali v1 KEPT, strikes to be heavier + brighter.
+    - chiang-mai-a "drone + kalimba": tibetan-bowl warm pad drone (slice
+      100–190s) + 7 sparse coco-kalimba plucks (F-major notes only) +
+      faint birds only. No piano, no café, no guitar — the most minimal,
+      therapy-first attempt.
+    - chiang-mai-b "sparse piano, no café": Long Dark piano, quietest
+      (opening) 0–90s slice + 2 guitar phrases + faint birds only.
+      Tests whether the café was the problem, or the piano itself.
+    - bali-v2: same strike spacing as v1, strikes +2.5 dB (gain 0.9→1.2)
+      + gentle +2 dB high shelf above 6 kHz on the details stem.
+    - bali-v3: denser strikes (F4@2, B4@18, deep 11-inch G2@36, E5@54,
+      F4@72) + chimes@82, same +2.5 dB / +2 dB shelf as v2 — v2 vs v3
+      differ only in spacing and the extra low tone.
+    Variants share their journey's V3.2 target LUFS and reference excerpt
+    (REF_SLUG), so every A/B stays loudness-matched.
   NOT used: Sikarskie crystal bowls as a tuned chord — their labels are
     unreliable (measured partials share C4/A#4 across all six bowls, so
     no clean triad); they remain as backup individual strikes only.
@@ -62,7 +79,13 @@ PILOT_SECONDS = 90
 LEVELS = (0.78, 0.54, 0.47)  # harmony / details / atmosphere, app defaults
 STEM_BITRATES = {'harmony': '72k', 'details': '56k', 'atmosphere': '40k'}
 # V3.2 0–90s integrated LUFS at default levels (measured 2026-11-16).
-TARGET_LUFS = {'chiang-mai': -27.3, 'bali': -27.5}
+# Variants share their journey's target so every A/B is loudness-matched.
+TARGET_LUFS = {'chiang-mai': -27.3, 'bali': -27.5,
+               'chiang-mai-a': -27.3, 'chiang-mai-b': -27.3,
+               'bali-v2': -27.5, 'bali-v3': -27.5}
+# Variant slug -> base journey slug (for the V3.2 reference excerpt).
+REF_SLUG = {'chiang-mai-a': 'chiang-mai', 'chiang-mai-b': 'chiang-mai',
+            'bali-v2': 'bali', 'bali-v3': 'bali'}
 
 
 def run(cmd, **kw):
@@ -115,12 +138,16 @@ def src(inv, entry_id):
 
 
 def slice_at(audio, sr, start, dur):
-    """Extract [start, start+dur) seconds; zero-pad if the source is shorter."""
-    a, b = int(start * sr), int((start + dur) * sr)
-    out = np.zeros((int(dur * sr), 2), dtype='f4')
+    """Extract [start, start+dur) seconds; zero-pad if the source is shorter.
+    Uses round() (not int() truncation): 21.4*48000 is 1027199.999… in
+    float, and truncating it gave a 48001-sample slice for a 48000-sample
+    output — a crash the v1 round-number slices never hit."""
+    a, b = int(round(start * sr)), int(round((start + dur) * sr))
+    out = np.zeros((int(round(dur * sr)), 2), dtype='f4')
     s0, s1 = max(a, 0), min(b, len(audio))
     if s1 > s0:
-        out[s0 - a:s1 - a] = audio[s0:s1]
+        n = min(s1 - s0, len(out) - (s0 - a))
+        out[s0 - a:s0 - a + n] = audio[s0:s0 + n]
     return out
 
 
@@ -136,6 +163,33 @@ def pitch_shift(audio, sr, semitones):
     if p.returncode:
         raise RuntimeError(p.stderr.decode()[-2000:])
     return np.frombuffer(p.stdout, dtype='<f4').reshape(-1, 2).copy()
+
+
+def eq_highshelf(audio, sr, freq=6000, gain_db=2.0):
+    """Gentle high shelf (ffmpeg highshelf) — brightness without harshness.
+    Used on the Bali details stem only, so the pad/birds stay untouched."""
+    p = subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'error',
+                        '-f', 'f32le', '-ar', str(sr), '-ac', '2', '-i', 'pipe:0',
+                        '-af', f'highshelf=f={freq}:g={gain_db}',
+                        '-f', 'f32le', 'pipe:1'],
+                       input=np.asarray(audio, dtype='<f4').tobytes(),
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if p.returncode:
+        raise RuntimeError(p.stderr.decode()[-2000:])
+    return np.frombuffer(p.stdout, dtype='<f4').reshape(-1, 2).copy()
+
+
+def kalimba_note(kal, onset, dur=1.0, peak_db=-12.0):
+    """One isolated kalimba note from the coco-notes file, normalized to
+    `peak_db` dBFS with a short fade-out (keeps the next note's bleed out).
+    `kal` is the decoded file array at SR_MASTER; `onset` in seconds.
+    Only F-major notes are ever requested (E4/F4/G4/C4/D4/C5 — B4, the #4,
+    is excluded; pitches verified by spectral analysis 2026-11-16)."""
+    note = slice_at(kal, SR_MASTER, onset, dur)
+    fo = int(0.35 * SR_MASTER)
+    note[-fo:] *= np.linspace(1, 0, fo, dtype='f4')[:, None]
+    pk = np.max(np.abs(note)) + 1e-12
+    return note * (10 ** (peak_db / 20.0) / pk)
 
 
 def fade_edges(audio, sr, fade_in=3.0, fade_out=3.0):
@@ -312,9 +366,123 @@ def build_bali(inv, sr):
     return {'harmony': harmony, 'details': details, 'atmosphere': atmosphere}
 
 
-def render_journey(slug, stems, inv):
+def build_chiang_mai_a(inv, sr):
+    """90s Chiang Mai variant A — 'drone + kalimba' (most therapy-like).
+    Limer rejected v1 (piano + café reads as background music, not therapy).
+    Harmony: tibetan-bowl warm pad drone (F major), slice 100–190s.
+    Details: coco kalimba single notes (F-major only), 7 sparse plucks.
+    Atmosphere: faint Taipei birds only — NO café, NO piano, NO guitar."""
+    dur = PILOT_SECONDS
+    pad, _ = src(inv, 'tibetan-bowl-meditation')
+    # NOTE: the pad file is only 161s long — slice 60–150s, NOT 100–190s
+    # (the first attempt ran past the end and the last ~29s went silent).
+    harmony = fade_edges(slice_at(pad, sr, 60, dur), sr, 3.0, 3.0)
+
+    kal, _ = src(inv, 'kalimba-coco-notes02')
+    details = np.zeros((int(dur * sr), 2), dtype='f4')
+    # (source onset s, note) — F-major only; B4 (#4) excluded.
+    notes = [(5.5, 'E4'), (8.3, 'E4'), (11.1, 'F4'), (21.4, 'C5'),
+             (23.0, 'G4'), (25.3, 'G4'), (27.4, 'E4')]
+    pans = [-0.25, 0.2, -0.15, 0.25, -0.2, 0.15, -0.25]
+    for (onset, _name), at, pan in zip(notes, [4, 16, 30, 44, 57, 70, 83], pans):
+        place_event(details, kalimba_note(kal, onset), at, sr,
+                    gain=1.0, pan=pan, fade_in=0.02, fade_out=0.05)
+
+    birds, _ = src(inv, 'birds-taipei-botanical')
+    atmosphere = fade_edges(slice_at(birds, sr, 30, dur), sr, 3.0, 3.0) * 1.5
+    return {'harmony': harmony, 'details': details, 'atmosphere': atmosphere}
+
+
+def build_chiang_mai_b(inv, sr):
+    """90s Chiang Mai variant B — 'sparse piano, no café'.
+    Same Long Dark piano as v1, but the quietest (opening) 0–90s slice
+    (sparsest 90s window in the piece, −20.6 dB RMS), only 2 guitar
+    phrases, atmosphere = faint birds only (café removed). Tests whether
+    the café was the problem, or the piano itself."""
+    dur = PILOT_SECONDS
+    piano, _ = src(inv, 'piano-long-dark-scott-buckley')
+    harmony = fade_edges(slice_at(piano, sr, 0, dur), sr, 3.0, 3.0)
+
+    guitar, _ = src(inv, 'guitar-chill-hasenchat')
+    guitar_f = pitch_shift(guitar, sr, +2)  # Eb major -> F major
+    details = np.zeros((int(dur * sr), 2), dtype='f4')
+    for (g0, glen), at, pan in [((0, 25), 10, -0.2), ((240, 25), 55, 0.2)]:
+        place_event(details, slice_at(guitar_f, sr, g0, glen), at, sr,
+                    gain=0.8, pan=pan, fade_in=0.8, fade_out=0.8)
+
+    birds, _ = src(inv, 'birds-taipei-botanical')
+    atmosphere = fade_edges(slice_at(birds, sr, 30, dur), sr, 3.0, 3.0) * 0.9
+    return {'harmony': harmony, 'details': details, 'atmosphere': atmosphere}
+
+
+def _bali_details(inv, sr, events, chimes_at, strike_gain=1.2, shelf_db=2.0):
+    """Bali details stem for the v2/v3 iterations.
+    `events`: (source_id, start_s, pan, fade_out_s, gain) per bowl strike.
+    Strikes are +2.5 dB vs v1 (gain 1.2 vs 0.9) and the stem gets a gentle
+    +2 dB high shelf above 6 kHz — heavier and a touch brighter, per limer.
+    Chimes keep their v1 level (already bright)."""
+    details = np.zeros((int(PILOT_SECONDS * sr), 2), dtype='f4')
+    for entry_id, at, pan, fo, gain in events:
+        clip, _ = src(inv, entry_id)
+        place_event(details, clip, at, sr, gain=gain, pan=pan,
+                    fade_in=0.1, fade_out=fo)
+    chimes, _ = src(inv, 'chimes-koshi-membeth')
+    place_event(details, chimes, chimes_at, sr, gain=0.8, pan=0.25,
+                fade_in=0.5, fade_out=8.0)
+    if shelf_db:
+        details = eq_highshelf(details, sr, freq=6000, gain_db=shelf_db)
+    return details
+
+
+def _bali_harmony_atmosphere(inv, sr):
+    """Bali harmony + atmosphere, unchanged from v1."""
+    dur = PILOT_SECONDS
+    pad, _ = src(inv, 'tibetan-bowl-meditation')
+    bells, _ = src(inv, 'bell-meditation-doc')
+    harmony = fade_edges(slice_at(pad, sr, 10, dur), sr, 3.0, 3.0)
+    harmony += slice_at(bells, sr, 60, dur) * 0.30
+    birds, _ = src(inv, 'birds-taipei-botanical')
+    bowls_birds, _ = src(inv, 'bowls-birds-alexander-blu')
+    atmosphere = slice_at(birds, sr, 120, dur) * 0.70
+    atmosphere += slice_at(bowls_birds, sr, 60, dur) * 0.50
+    atmosphere = fade_edges(atmosphere, sr, 3.0, 3.0)
+    return harmony, atmosphere
+
+
+def build_bali_v2(inv, sr):
+    """90s Bali variant v2 — same spacing as v1, strikes heavier + brighter.
+    Same three strikes (F4@2, B4@24, E5@48) + chimes@66; strike gain 0.9→1.2
+    (+2.5 dB) and a gentle +2 dB high shelf above 6 kHz on the details stem.
+    Sparse sound-bath character unchanged."""
+    ha, at = _bali_harmony_atmosphere(inv, sr)
+    events = [('bowl-small-tibetan-cassa342', 2, -0.3, 6.0, 1.2),
+              ('bowl-singing-yukatan', 24, 0.3, 6.0, 1.2),
+              ('bowl-sound-trubin', 48, -0.2, 5.0, 1.2)]
+    return {'harmony': ha, 'details': _bali_details(inv, sr, events, 66),
+            'atmosphere': at}
+
+
+def build_bali_v3(inv, sr):
+    """90s Bali variant v3 — denser strikes + one extra deep bowl tone.
+    Five strikes (F4@2, B4@18, deep 11-inch G2@36, E5@54, F4@72) + chimes@82.
+    Same +2.5 dB strike gain and +2 dB high shelf as v2, so v2 vs v3 differ
+    only in spacing and the extra low tone. The 11-inch bowl (fundamental
+    ~101 Hz G2, in D natural minor) is the 'heavier' voice."""
+    ha, at = _bali_harmony_atmosphere(inv, sr)
+    events = [('bowl-small-tibetan-cassa342', 2, -0.3, 6.0, 1.2),
+              ('bowl-singing-yukatan', 18, 0.3, 6.0, 1.2),
+              ('bowl-hit-11inch', 36, 0.0, 8.0, 1.0),
+              ('bowl-sound-trubin', 54, -0.2, 5.0, 1.2),
+              ('bowl-small-tibetan-cassa342', 72, 0.25, 6.0, 1.2)]
+    return {'harmony': ha, 'details': _bali_details(inv, sr, events, 82),
+            'atmosphere': at}
+
+
+def render_journey(slug, stems, inv, ref_slug=None):
     """Normalize the mix to the V3.2 target LUFS, write stems + excerpts,
-    and return a QA record."""
+    and return a QA record. `ref_slug` is the base journey whose V3.2
+    0–90s mix is the reference (variants share their journey's reference)."""
+    ref_slug = ref_slug or slug
     target = TARGET_LUFS[slug]
     h, d, a = stems['harmony'], stems['details'], stems['atmosphere']
     mix = h * LEVELS[0] + d * LEVELS[1] + a * LEVELS[2]
@@ -349,7 +517,7 @@ def render_journey(slug, stems, inv):
     # V3.2 reference excerpt: same 0–90s window, same levels, same target.
     v32 = {}
     for name in ('harmony', 'details', 'atmosphere'):
-        v32[name] = slice_at(decode(V32_DIR / f'{slug}-{name}.mp3', SR_MASTER),
+        v32[name] = slice_at(decode(V32_DIR / f'{ref_slug}-{name}.mp3', SR_MASTER),
                              SR_MASTER, 0, PILOT_SECONDS)
     ref = (v32['harmony'] * LEVELS[0] + v32['details'] * LEVELS[1]
            + v32['atmosphere'] * LEVELS[2])
@@ -374,7 +542,9 @@ def main():
     inv = fetch_sources()
     print('sources OK:', len([s for s in inv['sources']
                               if s.get('status') in ('accepted', 'accepted-with-caveats')]))
-    builders = {'chiang-mai': build_chiang_mai, 'bali': build_bali}
+    builders = {'chiang-mai': build_chiang_mai, 'bali': build_bali,
+                'chiang-mai-a': build_chiang_mai_a, 'chiang-mai-b': build_chiang_mai_b,
+                'bali-v2': build_bali_v2, 'bali-v3': build_bali_v3}
     qa_path = OUT / 'qa.json'
     if qa_path.exists():
         qa_all = json.loads(qa_path.read_text())
@@ -388,7 +558,8 @@ def main():
             continue
         print(f'building {slug}...')
         stems = fn(inv, SR_MASTER)
-        qa_all['journeys'][slug] = render_journey(slug, stems, inv)
+        qa_all['journeys'][slug] = render_journey(
+            slug, stems, inv, ref_slug=REF_SLUG.get(slug))
     qa_path.write_text(json.dumps(qa_all, indent=2, ensure_ascii=False))
     print('pilot render finished ->', OUT)
 
