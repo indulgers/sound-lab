@@ -603,7 +603,71 @@
    "status": "accepted",
    "role": "bali details (backup)",
    "notes": "Full file, 44.1kHz stereo MP3, 26.7s. Single long temple-bell decay. Sparse Bali accent. PD Mark (flagged, label not license)."
+  },
+  {
+   "id": "water-stream-jackthemurray",
+   "file": "water-stream-jackthemurray.wav",
+   "title": "stream-river-water-up-close",
+   "author": "jackthemurray",
+   "license": "CC0 1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://upload.wikimedia.org/wikipedia/commons/5/54/433589_jackthemurray_stream-river-water-up-close.wav",
+   "source_page": "https://commons.wikimedia.org/wiki/File:433589_jackthemurray_stream-river-water-up-close.wav",
+   "duration_s": 69,
+   "sample_rate": 48000,
+   "channels": 2,
+   "status": "accepted",
+   "role": "kyoto + hoi-an harmony (water bed)",
+   "notes": "Full file, 48kHz/24-bit stereo WAV, 68.9s. Quiet steady stream (RMS ~-54 dB), spectrally flat with only a mild ~116 Hz low bump (-5.8 dB rel) — cleanest water bed found. Needs ~+18 dB gain in the arrangement; 24-bit source keeps the boosted noise floor acceptable. Kyoto bed (full file tiled) + Hoi An bed (10-68.9s slice)."
+  },
+  {
+   "id": "water-trickling-stephan",
+   "file": "water-trickling-stephan.ogg",
+   "title": "Water flowing pouring trickling",
+   "author": "stephan",
+   "license": "Public domain",
+   "license_url": "https://commons.wikimedia.org/wiki/File:Water_flowing_pouring_trickling.ogg",
+   "url": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Water_flowing_pouring_trickling.ogg",
+   "source_page": "https://commons.wikimedia.org/wiki/File:Water_flowing_pouring_trickling.ogg",
+   "duration_s": 96,
+   "sample_rate": 44100,
+   "channels": 2,
+   "status": "rejected",
+   "role": "kyoto water (candidate, not used)",
+   "notes": "Full file, 44.1kHz stereo Ogg, 96.3s. REJECTED on content (spectrogram): episodic — quiet 10-20s window is clean high-frequency trickle (-46.9 dB RMS) but loud sections (40-50s) carry a narrow ~321 Hz whistle at 0 dB rel, likely a resonant pipe. Too uneven + tonal to tile as a bed; the clean window is too short (10s) to loop alone."
+  },
+  {
+   "id": "water-creek-broad",
+   "file": "water-creek-broad.ogg",
+   "title": "En-Broad-Creek-North-Carolina",
+   "author": "Incledon",
+   "license": "CC BY-SA 4.0",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "url": "https://upload.wikimedia.org/wikipedia/commons/0/0b/En-Broad-Creek-North-Carolina.ogg",
+   "source_page": "https://commons.wikimedia.org/wiki/File:En-Broad-Creek-North-Carolina.ogg",
+   "duration_s": 274,
+   "sample_rate": 44100,
+   "channels": 2,
+   "status": "rejected",
+   "role": "hoi-an river (candidate, not used)",
+   "notes": "Full file, 44.1kHz stereo Ogg, 273.6s. REJECTED on content (spectrogram): a persistent narrow ~113 Hz tone is the spectral maximum (0 dB rel) in every 20s window checked (0s, 100s, 200s, 250s) — reads as a low hum/drone under the water, not clean river. Steady level (-22 dB RMS) was attractive, but the tone rules it out as a bed. Kept on disk as a documented backup only."
+  },
+  {
+   "id": "ocean-tropical-beach",
+   "file": "ocean-tropical-beach.ogg",
+   "title": "Ocean Waves on a Tropical Beach",
+   "author": "Jarrod Stanley",
+   "license": "CC0 1.0",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "url": "https://upload.wikimedia.org/wikipedia/commons/6/64/Ocean_Waves_on_a_Tropical_Beach.ogg",
+   "source_page": "https://commons.wikimedia.org/wiki/File:Ocean_Waves_on_a_Tropical_Beach.ogg",
+   "duration_s": 384,
+   "sample_rate": 44100,
+   "channels": 2,
+   "status": "accepted",
+   "role": "da-nang harmony (ocean bed)",
+   "notes": "Full file, 44.1kHz stereo Ogg, 384.3s. Steady tropical ocean waves (RMS -10 to -12 dB in every 10s window checked, 0-310s); spectrally broad and low (centroid ~494 Hz, energy 50-1000 Hz), no narrow tones, no voices/music. Hot mastering (decoded peaks +2.1 to +2.7 dBFS) — gained down hard in the mix, so no clipping is introduced by the pipeline. Da Nang bed, slice 60-150s."
   }
  ],
- "version": 2
+ "version": 3
 }

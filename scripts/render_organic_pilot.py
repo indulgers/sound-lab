@@ -60,9 +60,25 @@ Arrangement (keys verified by spectral analysis 2026-11-16):
       differ only in spacing and the extra low tone.
     Variants share their journey's V3.2 target LUFS and reference excerpt
     (REF_SLUG), so every A/B stays loudness-matched.
-  NOT used: Sikarskie crystal bowls as a tuned chord — their labels are
-    unreliable (measured partials share C4/A#4 across all six bowls, so
-    no clean triad); they remain as backup individual strikes only.
+  Round 3 (2026-11-16): the other four cities, one 90s pilot each.
+    Kyoto (target -36.4 LUFS, the quietest): real stream bed + two very
+    soft temple-bell strikes + windchimes and faint birds — the sparsest
+    pilot. Da Nang (-32.5, REPLACES Da Lat per limer's scope change
+    2026-11-16 — no Da Lat pilot is built): real tropical ocean waves
+    (CC0) + two warm nylon-guitar phrases (E/A major) + faint birds;
+    no pad (F major would clash with E major). Da Nang has no V3.2
+    reference of its own, so its target is the Da Lat slot's V3.2
+    level and its reference excerpt is built from Da Lat's V3.2 stems.
+    Lisbon (-31.7, warmest): nylon guitar (E/A major) + two low Meekness
+    piano phrases + faint birds.
+    Hoi An (-33.6): stream bed (different slice from Kyoto) + Koshi
+    chimes + one soft yukatan bowl B4 + low tibetan pad (D minor /
+    F major). Water comes from one CC0 close-up stream recording
+    (jackthemurray); a second water source was rejected — the Broad
+    Creek file carries a persistent ~113 Hz tonal drone, and the
+    trickling file is episodic with a ~321 Hz whistle in its loud
+    sections. No real bamboo-fountain (shishi-odoshi) recording was
+    found; the Kyoto bell is a distant temple bell, disclosed as such.
 """
 from __future__ import annotations
 import json, math, os, re, subprocess, sys, tempfile
@@ -82,10 +98,17 @@ STEM_BITRATES = {'harmony': '72k', 'details': '56k', 'atmosphere': '40k'}
 # Variants share their journey's target so every A/B is loudness-matched.
 TARGET_LUFS = {'chiang-mai': -27.3, 'bali': -27.5,
                'chiang-mai-a': -27.3, 'chiang-mai-b': -27.3,
-               'bali-v2': -27.5, 'bali-v3': -27.5}
+               'bali-v2': -27.5, 'bali-v3': -27.5,
+               # Round 3 — V3.2 0-90s integrated LUFS at default levels,
+               # measured 2026-11-16 with scripts/measure_loudness.py.
+               # Da Nang has no V3.2 reference of its own (it replaces
+               # Da Lat); its target is the Da Lat slot's level, and
+               # REF_SLUG below points its reference at Da Lat's V3.2.
+               'da-nang': -32.5, 'kyoto': -36.4, 'lisbon': -31.7, 'hoi-an': -33.6}
 # Variant slug -> base journey slug (for the V3.2 reference excerpt).
 REF_SLUG = {'chiang-mai-a': 'chiang-mai', 'chiang-mai-b': 'chiang-mai',
-            'bali-v2': 'bali', 'bali-v3': 'bali'}
+            'bali-v2': 'bali', 'bali-v3': 'bali',
+            'da-nang': 'da-lat'}
 
 
 def run(cmd, **kw):
@@ -478,6 +501,150 @@ def build_bali_v3(inv, sr):
             'atmosphere': at}
 
 
+def build_kyoto(inv, sr):
+    """90s Kyoto pilot — the quietest, sparsest journey by design.
+    Moss garden, flowing water, bamboo fountain (catalog: 'Meditate ·
+    water & moss', chapters: enter the garden / spring whispers / linger
+    by the water / bamboo fountain / a stretch of quiet). Target -36.4
+    LUFS, the quietest of the six. Harmony: the stream itself — a real
+    close-up stream recording (CC0), tiled and gained up (it was recorded
+    very quiet, RMS ~-54 dB). Details: two very soft temple-bell strikes
+    (a distant garden bell, not a bamboo knock — no real shishi-odoshi
+    recording was found; nothing is faked). Atmosphere: real windchimes
+    (a Japanese furin is a garden sound) + very faint birds."""
+    dur = PILOT_SECONDS
+    stream, _ = src(inv, 'water-stream-jackthemurray')
+    harmony = loop_bed(stream, dur, sr) * 8.0
+    harmony = fade_edges(harmony, sr, 3.0, 3.0)
+
+    bell, _ = src(inv, 'temple-bell-long')
+    details = np.zeros((int(dur * sr), 2), dtype='f4')
+    # Bell gain 0.10, not 0.30: the bell file is loud (RMS -10.5 dB) and
+    # at 0.30 the strikes set the mix level, pushing the water bed down.
+    # At 0.10 the strikes are soft accents over the water, as intended.
+    place_event(details, bell, 25, sr, gain=0.10, pan=-0.2,
+                fade_in=0.1, fade_out=8.0)
+    place_event(details, bell, 65, sr, gain=0.10, pan=0.2,
+                fade_in=0.1, fade_out=8.0)
+
+    wind, _ = src(inv, 'windchime-stephan')
+    birds, _ = src(inv, 'birds-taipei-botanical')
+    atmosphere = loop_bed(slice_at(wind, sr, 20, 47), dur, sr) * 0.20
+    atmosphere += slice_at(birds, sr, 30, dur) * 0.20
+    atmosphere = fade_edges(atmosphere, sr, 3.0, 3.0)
+    return {'harmony': harmony, 'details': details, 'atmosphere': atmosphere}
+
+
+def build_da_nang(inv, sr):
+    """90s Da Nang pilot — coastal evening. (Scope change 2026-11-16:
+    Da Nang REPLACES Da Lat in the catalog; the full catalog/video
+    swap follows the pilot. Da Nang is a coastal city — beaches,
+    Marble Mountains, Han River — so the mood is a beach evening,
+    not Da Lat's misty mountain morning. Target -32.5 LUFS: Da Nang
+    has no V3.2 reference of its own, so the pilot is loudness-
+    matched to the Da Lat slot's V3.2 level and its reference excerpt
+    is built from Da Lat's V3.2 stems (REF_SLUG). Harmony: real
+    tropical ocean waves (CC0, 6.4 min, steady -10 to -12 dB RMS, no
+    voices/music, broad low spectrum) — the waves themselves, slice
+    60-150s. Details: nylon guitar, two warm phrases (E major / A
+    major — the evening melody over the sea), gain 0.9 so the melody
+    registers over the loud waves. Atmosphere: faint birds only — no
+    pad (the tibetan pad is F major, which clashes with the guitar's
+    E major)."""
+    dur = PILOT_SECONDS
+    waves, _ = src(inv, 'ocean-tropical-beach')
+    harmony = fade_edges(slice_at(waves, sr, 60, dur), sr, 3.0, 3.0)
+
+    guitar, _ = src(inv, 'guitar-nylon-relaxing')
+    details = np.zeros((int(dur * sr), 2), dtype='f4')
+    for (g0, glen), at, pan in [((0, 25), 10, -0.2), ((120, 25), 55, 0.2)]:
+        place_event(details, slice_at(guitar, sr, g0, glen), at, sr,
+                    gain=0.9, pan=pan, fade_in=0.8, fade_out=0.8)
+
+    birds, _ = src(inv, 'birds-taipei-botanical')
+    atmosphere = fade_edges(slice_at(birds, sr, 30, dur), sr, 3.0, 3.0) * 0.4
+    return {'harmony': harmony, 'details': details, 'atmosphere': atmosphere}
+
+
+def build_lisbon(inv, sr):
+    """90s Lisbon pilot — rooftop aerial, afternoon sunlight, warm
+    strings, writing (catalog: 'Create · flow', chapters: sunlight
+    slants in / distant footsteps / a melody passes the corner / writing
+    just begins / last light on the desk). Target -31.7 LUFS, the
+    warmest journey. Harmony: relaxing nylon guitar (E major / A major,
+    4.7 min WAV — the warm strings, continuous and gentle). Details:
+    Meekness piano, two low phrases (A major / E major — coherent with
+    the guitar), quiet enough to feel like a melody passing the corner.
+    Atmosphere: faint birds only."""
+    dur = PILOT_SECONDS
+    guitar, _ = src(inv, 'guitar-nylon-relaxing')
+    harmony = fade_edges(slice_at(guitar, sr, 0, dur), sr, 3.0, 3.0)
+
+    piano, _ = src(inv, 'piano-meekness-kai-engel')
+    details = np.zeros((int(dur * sr), 2), dtype='f4')
+    # Gain 1.2, not 0.35: the piano file is quiet (RMS -22 to -27 dB)
+    # against the loud guitar bed (-13 to -17 dB), and at 0.35 the
+    # phrases were 18 LU below the harmony — inaudible. At 1.2 they
+    # sit ~7 LU below the guitar: a melody passing the corner, as
+    # the catalog intends, not a whisper and not a lead.
+    for (g0, glen), at, pan in [((60, 25), 15, -0.2), ((90, 25), 55, 0.2)]:
+        place_event(details, slice_at(piano, sr, g0, glen), at, sr,
+                    gain=1.2, pan=pan, fade_in=0.8, fade_out=0.8)
+
+    birds, _ = src(inv, 'birds-taipei-botanical')
+    atmosphere = fade_edges(slice_at(birds, sr, 30, dur), sr, 3.0, 3.0) * 0.4
+    return {'harmony': harmony, 'details': details, 'atmosphere': atmosphere}
+
+
+def build_hoi_an(inv, sr):
+    """90s Hoi An pilot — lantern-lit river, evening, unwind (catalog:
+    'Unwind · evening', chapters: lanterns lit / water under the bridge
+    / the street quiets / evening wind through wooden windows / last
+    light on the river). Target -33.6 LUFS. Harmony: the same close-up
+    stream as Kyoto but a different slice (10-68.9s) and a warmer mix —
+    a river settling down. Details: Koshi chimes (lanterns) at 15s/60s
+    + one soft yukatan bowl B4 at 40s. Atmosphere: tibetan-bowl warm
+    pad at low gain (F major = D-minor relative, coherent with the B4
+    bowl) + faint evening birds. Key: D natural minor / F major.
+    Note: the same stream source as Kyoto, different slice and
+    treatment — flagged honestly; the full 15-min version wants a
+    second water source."""
+    dur = PILOT_SECONDS
+    stream, _ = src(inv, 'water-stream-jackthemurray')
+    # Stream gain x24, not x8: the stream is a very quiet recording
+    # (RMS ~-54 dB) and at x8 the river bed was 17 LU below the chimes
+    # and pad — the foundation was the quietest stem. At x24 the river
+    # leads again. The noise floor rises with it, but the mix gain
+    # (0.32x) keeps the final level low, and the chimes/pad/birds
+    # mask the hiss in the mix.
+    harmony = loop_bed(slice_at(stream, sr, 10, 58.9), dur, sr) * 24.0
+    harmony = fade_edges(harmony, sr, 3.0, 3.0)
+
+    chimes, _ = src(inv, 'chimes-koshi-membeth')
+    bowl_b, _ = src(inv, 'bowl-singing-yukatan')          # B4
+    details = np.zeros((int(dur * sr), 2), dtype='f4')
+    # Chimes 0.4 / bowl 0.35, not 0.9 / 0.7: at the old gains the
+    # chimes were the loudest thing in the mix (the 60-70s window
+    # jumped +7 dB over its neighbours). They are lantern accents,
+    # not the lead.
+    place_event(details, slice_at(chimes, sr, 0, 12), 15, sr,
+                gain=0.4, pan=-0.25, fade_in=0.5, fade_out=4.0)
+    place_event(details, bowl_b, 40, sr, gain=0.35, pan=0.0,
+                fade_in=0.1, fade_out=6.0)
+    place_event(details, slice_at(chimes, sr, 20, 12), 60, sr,
+                gain=0.4, pan=0.25, fade_in=0.5, fade_out=4.0)
+
+    pad, _ = src(inv, 'tibetan-bowl-meditation')
+    birds, _ = src(inv, 'birds-taipei-botanical')
+    # Pad 0.25 / birds 0.15, not 0.5 / 0.3: the atmosphere was the
+    # loudest stem (-29.6 LUFS) — a continuous drone must not outrun
+    # the river bed.
+    atmosphere = fade_edges(slice_at(pad, sr, 60, dur), sr, 3.0, 3.0) * 0.25
+    atmosphere += slice_at(birds, sr, 30, dur) * 0.15
+    atmosphere = fade_edges(atmosphere, sr, 3.0, 3.0)
+    return {'harmony': harmony, 'details': details, 'atmosphere': atmosphere}
+
+
 def render_journey(slug, stems, inv, ref_slug=None):
     """Normalize the mix to the V3.2 target LUFS, write stems + excerpts,
     and return a QA record. `ref_slug` is the base journey whose V3.2
@@ -544,7 +711,9 @@ def main():
                               if s.get('status') in ('accepted', 'accepted-with-caveats')]))
     builders = {'chiang-mai': build_chiang_mai, 'bali': build_bali,
                 'chiang-mai-a': build_chiang_mai_a, 'chiang-mai-b': build_chiang_mai_b,
-                'bali-v2': build_bali_v2, 'bali-v3': build_bali_v3}
+                'bali-v2': build_bali_v2, 'bali-v3': build_bali_v3,
+                'da-nang': build_da_nang, 'kyoto': build_kyoto,
+                'lisbon': build_lisbon, 'hoi-an': build_hoi_an}
     qa_path = OUT / 'qa.json'
     if qa_path.exists():
         qa_all = json.loads(qa_path.read_text())
