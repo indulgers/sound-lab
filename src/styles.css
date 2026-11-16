@@ -221,6 +221,14 @@ input[type="range"].master-vol::-moz-range-thumb{
 }
 .chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .timer-read{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ember-deep)}
+/* 睡眠定时器（调音台播放条）：原生 select 做成与 chip 同款的圆角药丸，
+   倒计时复用 .timer-read；无定时器时倒计时为空，不占多余视觉。 */
+.sleep-timer-wrap{display:flex;align-items:center;gap:8px}
+.sleep-timer-select{
+  border:1.5px solid var(--line-strong);background:transparent;color:var(--ink-2);
+  border-radius:99px;padding:5px 8px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;
+}
+.sleep-timer-select:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
 .mixer-bar .spacer{flex:1}
 .text-btn{
   background:none;border:none;color:var(--ink-2);font-size:13.5px;font-weight:600;

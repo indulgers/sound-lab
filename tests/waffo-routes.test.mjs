@@ -16,7 +16,7 @@ register('./waffo-hooks.mjs', import.meta.url);
 
 const { env } = await import('./stubs/cloudflare-workers-stub.mjs');
 const sdkStub = await import('./stubs/waffo-sdk-stub.mjs');
-const { registerUser, createSession, getPacks } = await import('../src/server/auth.ts');
+const { registerUser, createSession, getPacks, getSubscription, isSubscriptionActive } = await import('../src/server/auth.ts');
 const { createKvOrderStore } = await import('../src/server/store.ts');
 const createRoute = (await import('../src/routes/api/waffo/create.ts')).Route;
 const pendingRoute = (await import('../src/routes/api/waffo/pending.ts')).Route;
@@ -70,22 +70,22 @@ async function makeAuthedCaller(kv, email) {
   };
 }
 
-test('waffo create route: second create for the same user+pack resumes the same order', async () => {
+test('waffo create route: second create for the same user+plan resumes the same order', async () => {
   const kv = new FakeKV();
   env.ORDERS_KV = kv;
   sdkStub.resetStubCheckoutCalls();
   const caller = await makeAuthedCaller(kv, 'resume-test@example.com');
   const store = createKvOrderStore(kv);
 
-  const res1 = await createRoute.options.server.handlers.POST({ request: caller.post('/api/waffo/create', { productId: 'focus-pack' }) });
+  const res1 = await createRoute.options.server.handlers.POST({ request: caller.post('/api/waffo/create', { productId: 'subscription-monthly' }) });
   assert.equal(res1.status, 200);
   const data1 = await res1.json();
   assert.equal(data1.resumed, false);
   assert.equal(data1.checkoutUrl, 'https://checkout.example/cs_stub_1');
-  assert.equal(data1.productId, 'focus-pack');
+  assert.equal(data1.productId, 'subscription-monthly');
 
-  // 第二次下单同一个包：不建新订单、不建新会话，返回原来的收银台。
-  const res2 = await createRoute.options.server.handlers.POST({ request: caller.post('/api/waffo/create', { productId: 'focus-pack' }) });
+  // 第二次下单同一个计划：不建新订单、不建新会话，返回原来的收银台。
+  const res2 = await createRoute.options.server.handlers.POST({ request: caller.post('/api/waffo/create', { productId: 'subscription-monthly' }) });
   assert.equal(res2.status, 200);
   const data2 = await res2.json();
   assert.equal(data2.resumed, true);
@@ -97,8 +97,8 @@ test('waffo create route: second create for the same user+pack resumes the same 
   assert.equal(orders[0].waffoCheckoutUrl, data1.checkoutUrl);
   assert.ok(orders[0].waffoSessionExpiresAt, 'session expiry is stored');
 
-  // 换一个包不受影响：新订单。
-  const res3 = await createRoute.options.server.handlers.POST({ request: caller.post('/api/waffo/create', { productId: 'sleep-pack' }) });
+  // 换一个计划不受影响：新订单。
+  const res3 = await createRoute.options.server.handlers.POST({ request: caller.post('/api/waffo/create', { productId: 'subscription-yearly' }) });
   assert.equal(res3.status, 200);
   const data3 = await res3.json();
   assert.equal(data3.resumed, false);
@@ -115,7 +115,7 @@ test('waffo create route: expired session allows a fresh order', async () => {
 
   const seeded = await store.createOrder({
     outTradeNo: 'SC9001',
-    productId: 'sleep-pack',
+    productId: 'subscription-yearly',
     subject: 's',
     totalAmount: '2.99',
     userId: caller.userId,
@@ -126,7 +126,7 @@ test('waffo create route: expired session allows a fresh order', async () => {
   });
   assert.equal(seeded.status, 'CREATED');
 
-  const res = await createRoute.options.server.handlers.POST({ request: caller.post('/api/waffo/create', { productId: 'sleep-pack' }) });
+  const res = await createRoute.options.server.handlers.POST({ request: caller.post('/api/waffo/create', { productId: 'subscription-yearly' }) });
   assert.equal(res.status, 200);
   const data = await res.json();
   assert.equal(data.resumed, false, 'expired session is not resumed');
@@ -141,7 +141,7 @@ test('waffo pending route: lists only the caller’s live orders, 401 when logge
   const caller = await makeAuthedCaller(kv, 'pending-route-test@example.com');
   const other = await makeAuthedCaller(kv, 'pending-other@example.com');
 
-  const created = await createRoute.options.server.handlers.POST({ request: caller.post('/api/waffo/create', { productId: 'rain-night-pack' }) });
+  const created = await createRoute.options.server.handlers.POST({ request: caller.post('/api/waffo/create', { productId: 'subscription-monthly' }) });
   assert.equal(created.status, 200);
   const createdData = await created.json();
 
@@ -150,7 +150,7 @@ test('waffo pending route: lists only the caller’s live orders, 401 when logge
   const mineData = await mine.json();
   assert.equal(mineData.orders.length, 1);
   assert.equal(mineData.orders[0].outTradeNo, createdData.outTradeNo);
-  assert.equal(mineData.orders[0].productId, 'rain-night-pack');
+  assert.equal(mineData.orders[0].productId, 'subscription-monthly');
   assert.equal(mineData.orders[0].checkoutUrl, createdData.checkoutUrl);
 
   // 别人的进行中订单看不到。
@@ -170,14 +170,14 @@ test('waffo order-status route: fast path grants on a succeeded payment, stays p
   const other = await makeAuthedCaller(kv, 'status-other@example.com');
   const store = createKvOrderStore(kv);
 
-  const created = await createRoute.options.server.handlers.POST({ request: caller.post('/api/waffo/create', { productId: 'focus-pack' }) });
+  const created = await createRoute.options.server.handlers.POST({ request: caller.post('/api/waffo/create', { productId: 'subscription-monthly' }) });
   const { outTradeNo } = await created.json();
 
   // Waffo 侧还没有成功的付款：PENDING，不发权益。
   sdkStub.setStubGraphqlPayments([]);
   const pendingRes = await orderStatusRoute.options.server.handlers.GET({ request: caller.get(`/api/waffo/order-status?order=${outTradeNo}`) });
   assert.equal(pendingRes.status, 200);
-  assert.deepEqual(await pendingRes.json(), { status: 'PENDING', outTradeNo, productId: 'focus-pack' });
+  assert.deepEqual(await pendingRes.json(), { status: 'PENDING', outTradeNo, productId: 'subscription-monthly' });
   assert.deepEqual(await getPacks(kv, caller.userId), []);
 
   // Waffo 侧出现 succeeded 付款：立刻标记已付并发权益（与 webhook 同一份逻辑）。
@@ -189,13 +189,16 @@ test('waffo order-status route: fast path grants on a succeeded payment, stays p
   const paidData = await paidRes.json();
   assert.equal(paidData.status, 'PAID');
   assert.equal(paidData.granted, true);
-  assert.deepEqual(await getPacks(kv, caller.userId), ['focus-pack']);
+  const sub = await getSubscription(kv, caller.userId);
+  assert.equal(sub?.plan, 'subscription-monthly');
+  assert.equal(sub?.provider, 'waffo');
+  assert.equal(isSubscriptionActive(sub), true);
   assert.equal((await store.findOrder(outTradeNo)).status, 'PAID');
 
   // 再查一次：已是 PAID，直接返回，不再调 Waffo（granted 不再出现）。
   sdkStub.setStubGraphqlPayments([]);
   const again = await orderStatusRoute.options.server.handlers.GET({ request: caller.get(`/api/waffo/order-status?order=${outTradeNo}`) });
-  assert.deepEqual(await again.json(), { status: 'PAID', outTradeNo, productId: 'focus-pack' });
+  assert.deepEqual(await again.json(), { status: 'PAID', outTradeNo, productId: 'subscription-monthly' });
 
   // 不是本人的订单：403；不存在的订单：404。
   const forbidden = await orderStatusRoute.options.server.handlers.GET({ request: other.get(`/api/waffo/order-status?order=${outTradeNo}`) });

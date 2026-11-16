@@ -413,13 +413,13 @@ test('p1: about page states the creator, the 18 real recordings, and the medical
   assert.match(en, /FluidR3 GM soundfont \(CC BY 3\.0\)/);
   assert.match(en, /not a medical product/);
   assert.match(en, /does not treat insomnia, anxiety or tinnitus/);
-  assert.match(en, /no subscription/);
+  assert.match(en, /Plus \(\$7\.99\/month, \$79\.90\/year/);
   const zh = ABOUT_PAGE.content.zh.lead + ABOUT_PAGE.content.zh.sections.map((s) => s.body).join('');
   assert.match(zh, /作者只有一个人——limer，一名独立全栈开发者/);
   assert.match(zh, /18 种是真实的野外录音/);
   assert.match(zh, /不是医疗产品/);
   assert.match(zh, /不治疗失眠、焦虑或耳鸣/);
-  assert.match(zh, /没有订阅/);
+  assert.match(zh, /进阶版订阅（月付 \$7\.99 \/ ¥18，年付 \$79\.90 \/ ¥180）/);
   // About 页 head 与首页 About 区块不矛盾：都说免费、22 种声音、不用注册。
   const aboutEnAll = ABOUT_PAGE.content.en.lead + ' ' + ABOUT_PAGE.content.en.sections.map((s) => s.body).join(' ');
   assert.match(aboutEnAll, /free/i);
@@ -439,8 +439,8 @@ test('p1: legal pages have complete EN+ZH content, no mixed languages, checklist
   assert.equal(LEGAL_OPERATOR.nameEn, 'Zhu Weiye');
   assert.equal(LEGAL_OPERATOR.nameZh, '朱伟晔');
   assert.equal(LEGAL_OPERATOR.email, 'weiyezhu180@gmail.com');
-  assert.ok(LEGAL_UPDATED.en.includes('13 November 2026'));
-  assert.ok(LEGAL_UPDATED.zh.includes('2026年11月13日'));
+  assert.ok(LEGAL_UPDATED.en.includes('16 November 2026'));
+  assert.ok(LEGAL_UPDATED.zh.includes('2026年11月16日'));
   for (const [key, page] of [['terms', TERMS_PAGE], ['privacy', PRIVACY_PAGE]]) {
     for (const loc of ['en', 'zh']) {
       const c = page.content[loc];
@@ -453,10 +453,12 @@ test('p1: legal pages have complete EN+ZH content, no mixed languages, checklist
       // 联系邮箱在双语都出现（审核清单：客服邮箱须真实、已监控）。
       assert.ok(legalText(page, loc).includes('weiyezhu180@gmail.com'), `${key} ${loc}: support email`);
     }
-    // 英文版 600–1000 词、无 CJK；中文版实质长度（>1000 汉字）。
+    // 英文版 600–1200 词、无 CJK；中文版实质长度（>1000 汉字）。
+    // 上限从 1000 放到 1200：订阅计费需要续费、取消、两条支付通道的
+    // 说明（一次性包的 ToS 没有这些），仍防无意义膨胀。
     const enText = legalText(page, 'en');
     const enWords = enText.split(/\s+/).filter(Boolean).length;
-    assert.ok(enWords >= 600 && enWords <= 1000, `${key} en words: ${enWords}`);
+    assert.ok(enWords >= 600 && enWords <= 1200, `${key} en words: ${enWords}`);
     assert.doesNotMatch(enText, CJK, `${key} en: no CJK`);
     const zhText = legalText(page, 'zh');
     assert.ok((zhText.match(new RegExp(CJK.source, 'g')) || []).length > 1000, `${key} zh: substantial`);
@@ -464,11 +466,11 @@ test('p1: legal pages have complete EN+ZH content, no mixed languages, checklist
   // ToS 清单要点（审核清单 + ToS 模板）：产品描述、价格与计费周期、
   // 退款政策、免责、违规/停用、支付处理方、医疗免责。
   const tosEn = legalText(TERMS_PAGE, 'en');
-  for (const phrase of ['Zhu Weiye', 'Focus ($1.99', 'Sleep ($2.99', 'Rain Night ($3.99', 'Waffo Pancake', 'No subscription', '7 days', '90 days', '12 months', '14 days', 'not a medical product', 'PCI-DSS']) {
+  for (const phrase of ['Zhu Weiye', '$7.99 per month', '$79.90 per year', '¥18 per month', 'Waffo Pancake', 'Waffo Customer Portal', '7 days', '90 days', '12 months', '14 days', 'not a medical product', 'PCI-DSS']) {
     assert.ok(tosEn.includes(phrase), `terms en: ${phrase}`);
   }
   const tosZh = legalText(TERMS_PAGE, 'zh');
-  for (const phrase of ['朱伟晔', '专注包', '助眠包', '雨夜包', 'Waffo Pancake', '没有订阅', '7 天', '90 天', '12 个月', '14 天', '不是医疗产品', '不治疗失眠、焦虑或耳鸣']) {
+  for (const phrase of ['朱伟晔', '月付 $7.99', '年付 $79.90', '月卡 ¥18', '年卡 ¥180', 'Waffo Pancake', '客户中心', '7 天', '90 天', '12 个月', '14 天', '不是医疗产品', '不治疗失眠、焦虑或耳鸣']) {
     assert.ok(tosZh.includes(phrase), `terms zh: ${phrase}`);
   }
   // Privacy 清单要点（Privacy 模板 14 节）：收集什么、如何使用与

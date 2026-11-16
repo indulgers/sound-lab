@@ -6,7 +6,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { env } from 'cloudflare:workers'
 import { resolvePayConfig } from '../../../server/config'
 import { alipayApiCall } from '../../../server/alipay-fetch'
-import { grantPack } from '../../../server/auth'
+import { grantOrderEntitlement } from '../../../server/auth'
 import { getStore, isStore, jsonError, paymentNotConfiguredResponse } from '../../../server/pay-shared'
 
 export const Route = createFileRoute('/api/pay/query/$outTradeNo')({
@@ -54,10 +54,11 @@ export const Route = createFileRoute('/api/pay/query/$outTradeNo')({
 
         if (businessState === 'PAID') {
           await store.markPaidIdempotently(outTradeNo, String(result.trade_no))
-          // 查询确认支付成功 → 给订单所属用户发放权益（集合语义，重复查询无副作用；
-          // 归属为空的老订单不发放）。回跳页靠这个查询结果展示“已解锁”。
+          // 查询确认支付成功 → 给订单所属用户发放权益（幂等语义，重复查询无副作用；
+          // 归属为空的老订单不发放）。订阅商品发时效性订阅授权，
+          // 旧包商品发 legacy 包授权。回跳页靠这个查询结果展示“已解锁”。
           if (order.userId) {
-            await grantPack(env.ORDERS_KV, order.userId, order.productId)
+            await grantOrderEntitlement(env.ORDERS_KV, order.userId, order.productId, { provider: 'alipay' })
           }
         } else if (businessState === 'CLOSED') {
           await store.recordNonPaidTradeEvent(outTradeNo, 'TRADE_CLOSED')

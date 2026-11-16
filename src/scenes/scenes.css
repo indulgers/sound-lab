@@ -136,6 +136,14 @@
 .sc-gallery-card:hover img { transform:scale(1.035); }
 .scene-experience .sc-gallery-card.is-current { border-color:#9dba84; }
 .sc-gallery-number { position:absolute; z-index:1; top:18px; left:18px; font-family:'Cormorant Garamond',serif; font-size:24px; font-style:italic; }
+/* 订阅锁：被锁旅程右上角的 Plus 徽章 + 面板里的升级提示条。 */
+.sc-gallery-lock { position:absolute; z-index:1; top:18px; right:18px; display:inline-flex; align-items:center; gap:4px; background:#16130c; color:#faf8f3; font-size:10.5px; font-weight:700; padding:4px 9px; border-radius:99px; }
+.sc-gallery-lock svg { width:11px; height:11px; }
+.sc-gallery-card.is-locked img { filter:saturate(.75) brightness(.92); }
+.sc-chip-lock { margin-left:auto; flex:none; font-size:9px; font-weight:700; letter-spacing:.04em; padding:3px 7px; border-radius:99px; background:#16130c; color:#faf8f3; }
+.sc-locked-banner { margin-top:20px; padding:14px 16px; border-radius:12px; background:#f6f0df; color:#16130c; font-size:13px; line-height:1.7; }
+.sc-locked-banner a { display:inline-flex; align-items:center; gap:5px; font-weight:700; color:#16130c; text-decoration:underline; }
+.sc-locked-banner a svg { width:14px; height:14px; }
 .sc-gallery-card > div { position:absolute; z-index:1; left:20px; right:20px; bottom:23px; }
 .sc-gallery-card small { font-size:8px; letter-spacing:1.2px; text-transform:uppercase; }
 .sc-gallery-card h3 { margin:6px 0 14px; font-family:'Cormorant Garamond',Georgia,serif; font-size:38px; font-weight:500; line-height:1.1; color:inherit; }

@@ -150,6 +150,8 @@ interface LabController {
   setMix: (mix: Record<string, number>) => boolean
   playRecipe: (recipe: { name: string; mix: Record<string, number>; params?: unknown }) => boolean
   setOwnedPacks: (packIds: string[]) => void
+  /** 订阅状态：订阅用户解锁全部通道、不限时、能用睡眠定时与保存配方。 */
+  setSubscriber: (value: boolean) => void
   setFocus: (open: boolean) => void
   /** 页面挂载时接 DOM（首页/落地页 Hero + 调音台、我的配方、音源清单）。 */
   bindHero: () => void
@@ -197,6 +199,14 @@ function SoundLab() {
   // Waffo 进行中订单；PLUS 卡片的“继续付款”也只在海外地区出现）。
   const [authUser, setAuthUser] = useState<{ userId: string; email: string } | null>(null)
   const [ownedPacks, setOwnedPacks] = useState<string[]>([])
+  const [subscription, setSubscription] = useState<{
+    active: boolean
+    plan: string
+    provider: string
+    status: string
+    currentPeriodEnd: number
+  } | null>(null)
+  const isSubscriber = subscription?.active === true
   const [pendingWaffoOrders, setPendingWaffoOrders] = useState<
     Array<{ outTradeNo: string; productId: string; checkoutUrl: string; expiresAt: string | null }>
   >([])
@@ -207,6 +217,7 @@ function SoundLab() {
       setAuthUser(me)
       const ent = await fetchEntitlements()
       setOwnedPacks(Array.isArray(ent.packs) ? ent.packs : [])
+      setSubscription(ent.subscription ?? null)
       if (region === 'overseas') {
         try {
           const pending = await fetchWaffoPending()
@@ -220,6 +231,7 @@ function SoundLab() {
     } catch {
       setAuthUser(null)
       setOwnedPacks([])
+      setSubscription(null)
       setPendingWaffoOrders([])
     }
   }, [region])
@@ -247,6 +259,12 @@ function SoundLab() {
   useEffect(() => {
     controller.current?.setOwnedPacks(ownedPacks)
   }, [ownedPacks])
+
+  // 订阅状态变化时告诉音频引擎：订阅用户解锁全部通道、不限时收听、
+  // 能用睡眠定时与保存配方；到期/退出时重新上锁。
+  useEffect(() => {
+    controller.current?.setSubscriber(isSubscriber)
+  }, [isSubscriber])
 
   useLayoutEffect(() => {
     const effects = mountVisualEffects()
@@ -337,6 +355,8 @@ function SoundLab() {
           showPremium,
           user: authUser,
           ownedPacks,
+          subscription,
+          isSubscriber,
           pendingWaffoOrders,
           onAuthChange: refreshAuth,
         }}

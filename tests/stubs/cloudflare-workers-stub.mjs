@@ -9,8 +9,8 @@ export const env = {
   ORDERS_KV: undefined,
   WAFFO_MERCHANT_ID: 'MER_test_stub',
   WAFFO_PRIVATE_KEY: 'stub-key',
-  WAFFO_PRODUCT_FOCUS_PACK: 'PROD_focus',
-  WAFFO_PRODUCT_SLEEP_PACK: 'PROD_sleep',
-  WAFFO_PRODUCT_RAIN_NIGHT_PACK: 'PROD_rain',
+  WAFFO_SUBSCRIPTION_MONTHLY: 'PROD_monthly',
+  WAFFO_SUBSCRIPTION_YEARLY: 'PROD_yearly',
+  WAFFO_STORE_ID: 'STO_test_stub',
   WAFFO_ENV: 'test',
 };

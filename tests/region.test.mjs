@@ -17,7 +17,7 @@ register('./waffo-hooks.mjs', import.meta.url);
 
 const region = await import('../src/region.mjs');
 const { detectUiLocale } = await import('../src/locale.mjs');
-const { findPack, packDisplay } = await import('../src/packs.mjs');
+const { findPlan, planDisplay } = await import('../src/subscription.mjs');
 const regionRoute = (await import('../src/routes/api/region.ts')).Route;
 const productsRoute = (await import('../src/routes/api/products.ts')).Route;
 
@@ -166,32 +166,36 @@ test('locale: detectUiLocale follows the browser language, zh* maps to zh', () =
   assert.equal(detectUiLocale(undefined), 'en');
 });
 
-// --- 包展示：文案看语言，价格看币种（解耦的核心） ---
+// --- 计划展示：文案看语言，价格看币种（解耦的核心） ---
 
-test('packs: packDisplay takes name/desc from locale and price from currency independently', () => {
-  const focus = findPack('focus-pack');
+test('plans: planDisplay takes name/desc from locale and price from currency independently', () => {
+  const monthly = findPlan('subscription-monthly');
   // 中文界面 + 美元地区：在国外的中文用户看到中文名、$ 价。
-  assert.deepEqual(packDisplay(focus, 'zh', 'USD'), {
-    name: '专注包',
-    desc: '解锁「市井专注」等进阶配方，专注时间更长。',
-    price: '1.99',
-    priceLabel: '$1.99',
+  assert.deepEqual(planDisplay(monthly, 'zh', 'USD'), {
+    name: '订阅（月付）',
+    desc: '按月订阅，随时取消。到期前 3 天会收到续费提醒。',
+    price: '7.99',
+    priceLabel: '$7.99',
+    periodLabel: '每月',
     currency: 'USD',
+    durationDays: 30,
   });
   // 英文界面 + 人民币地区：在中国的英文用户看到英文名、¥ 价。
-  assert.deepEqual(packDisplay(focus, 'en', 'CNY'), {
-    name: 'Focus Pack',
-    desc: 'Unlocks Plus recipes like “Street Focus” — stay focused for longer.',
-    price: '6.00',
-    priceLabel: '¥6',
+  assert.deepEqual(planDisplay(monthly, 'en', 'CNY'), {
+    name: 'Subscription · Monthly',
+    desc: 'Billed monthly. Cancel anytime; access runs to the end of the paid period.',
+    price: '18.00',
+    priceLabel: '¥18',
+    periodLabel: 'per month',
     currency: 'CNY',
+    durationDays: 30,
   });
   // 兼容旧行为：不传币种时从语言推导（en → USD，zh → CNY）。
-  assert.equal(packDisplay(focus, 'en').currency, 'USD');
-  assert.equal(packDisplay(focus, 'en').price, '1.99');
-  assert.equal(packDisplay(focus, 'zh').currency, 'CNY');
-  assert.equal(packDisplay(focus, 'zh').price, '6.00');
-  assert.equal(packDisplay(null, 'en', 'USD'), null);
+  assert.equal(planDisplay(monthly, 'en').currency, 'USD');
+  assert.equal(planDisplay(monthly, 'en').price, '7.99');
+  assert.equal(planDisplay(monthly, 'zh').currency, 'CNY');
+  assert.equal(planDisplay(monthly, 'zh').price, '18.00');
+  assert.equal(planDisplay(null, 'en', 'USD'), null);
 });
 
 // --- GET /api/region 路由 ---
@@ -229,22 +233,22 @@ test('route: GET /api/products splits copy (locale) from amounts (currency/regio
   // 旧行为兼容：只传 locale=en 仍返回美元价、英文名。
   const enOnly = await getProducts('?locale=en');
   assert.equal(enOnly.currency, 'USD');
-  assert.equal(enOnly.products.find((p) => p.productId === 'focus-pack').totalAmount, '1.99');
-  assert.equal(enOnly.products.find((p) => p.productId === 'focus-pack').name, 'Focus Pack');
+  assert.equal(enOnly.products.find((p) => p.productId === 'subscription-monthly').totalAmount, '7.99');
+  assert.equal(enOnly.products.find((p) => p.productId === 'subscription-monthly').name, 'Subscription · Monthly');
 
   // 中文界面 + 美元地区：中文名、$ 价。
   const zhUsd = await getProducts('?locale=zh&currency=USD');
   assert.equal(zhUsd.currency, 'USD');
-  const zhFocus = zhUsd.products.find((p) => p.productId === 'focus-pack');
-  assert.equal(zhFocus.name, '专注包');
-  assert.equal(zhFocus.totalAmount, '1.99');
+  const zhMonthly = zhUsd.products.find((p) => p.productId === 'subscription-monthly');
+  assert.equal(zhMonthly.name, '订阅（月付）');
+  assert.equal(zhMonthly.totalAmount, '7.99');
 
   // 英文界面 + 人民币地区：英文名、¥ 价。
   const enCny = await getProducts('?locale=en&currency=CNY');
   assert.equal(enCny.currency, 'CNY');
-  const enFocus = enCny.products.find((p) => p.productId === 'focus-pack');
-  assert.equal(enFocus.name, 'Focus Pack');
-  assert.equal(enFocus.totalAmount, '6.00');
+  const enMonthly = enCny.products.find((p) => p.productId === 'subscription-monthly');
+  assert.equal(enMonthly.name, 'Subscription · Monthly');
+  assert.equal(enMonthly.totalAmount, '18.00');
 
   // region 参数同样决定币种。
   assert.equal((await getProducts('?region=cn')).currency, 'CNY');
@@ -255,6 +259,6 @@ test('route: GET /api/products splits copy (locale) from amounts (currency/regio
   // 默认：人民币价、中文名。
   const def = await getProducts('');
   assert.equal(def.currency, 'CNY');
-  assert.equal(def.products.find((p) => p.productId === 'sleep-pack').totalAmount, '9.00');
-  assert.equal(def.products.find((p) => p.productId === 'sleep-pack').name, '助眠包');
+  assert.equal(def.products.find((p) => p.productId === 'subscription-yearly').totalAmount, '180.00');
+  assert.equal(def.products.find((p) => p.productId === 'subscription-yearly').name, '订阅（年付）');
 });

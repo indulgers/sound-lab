@@ -47,9 +47,8 @@ class FakeKV {
 const FULL_ENV = {
   WAFFO_MERCHANT_ID: 'MER_aaaaaaaaaaaaaaaaaaaaaa',
   WAFFO_PRIVATE_KEY: 'unused-here',
-  WAFFO_PRODUCT_FOCUS_PACK: 'PROD_focus',
-  WAFFO_PRODUCT_SLEEP_PACK: 'PROD_sleep',
-  WAFFO_PRODUCT_RAIN_NIGHT_PACK: 'PROD_rain',
+  WAFFO_SUBSCRIPTION_MONTHLY: 'PROD_monthly',
+  WAFFO_SUBSCRIPTION_YEARLY: 'PROD_yearly',
 };
 
 test('waffo config: missing vars are listed, full vars configure, env defaults to test', () => {
@@ -59,17 +58,15 @@ test('waffo config: missing vars are listed, full vars configure, env defaults t
   assert.deepEqual(empty.missing, [
     'WAFFO_MERCHANT_ID',
     'WAFFO_PRIVATE_KEY',
-    'WAFFO_PRODUCT_FOCUS_PACK',
-    'WAFFO_PRODUCT_SLEEP_PACK',
-    'WAFFO_PRODUCT_RAIN_NIGHT_PACK',
+    'WAFFO_SUBSCRIPTION_MONTHLY',
+    'WAFFO_SUBSCRIPTION_YEARLY',
   ]);
 
   const partial = resolveWaffoConfig({ WAFFO_MERCHANT_ID: 'MER_x', WAFFO_PRIVATE_KEY: 'k' });
   assert.equal(partial.configured, false);
   assert.deepEqual(partial.missing, [
-    'WAFFO_PRODUCT_FOCUS_PACK',
-    'WAFFO_PRODUCT_SLEEP_PACK',
-    'WAFFO_PRODUCT_RAIN_NIGHT_PACK',
+    'WAFFO_SUBSCRIPTION_MONTHLY',
+    'WAFFO_SUBSCRIPTION_YEARLY',
   ]);
 
   const full = resolveWaffoConfig(FULL_ENV);
@@ -84,12 +81,12 @@ test('waffo config: missing vars are listed, full vars configure, env defaults t
   assert.equal(normalizeWaffoEnv(undefined), 'test');
 });
 
-test('waffo product ids: pack id maps to the configured product, unknown pack is null', () => {
+test('waffo product ids: subscription plan maps to the configured product, unknown plan is null', () => {
   const cfg = resolveWaffoConfig(FULL_ENV);
   assert.equal(cfg.configured, true);
-  assert.equal(getWaffoProductId(cfg, 'focus-pack'), 'PROD_focus');
-  assert.equal(getWaffoProductId(cfg, 'sleep-pack'), 'PROD_sleep');
-  assert.equal(getWaffoProductId(cfg, 'rain-night-pack'), 'PROD_rain');
+  assert.equal(getWaffoProductId(cfg, 'subscription-monthly'), 'PROD_monthly');
+  assert.equal(getWaffoProductId(cfg, 'subscription-yearly'), 'PROD_yearly');
+  assert.equal(getWaffoProductId(cfg, 'focus-pack'), null, 'old pack product ids are gone');
   assert.equal(getWaffoProductId(cfg, 'nope'), null);
 });
 
@@ -97,22 +94,23 @@ test('usd pricing: server catalog has USD amounts, CNY unchanged', () => {
   assert.deepEqual(
     listProducts('USD').map((p) => [p.productId, p.totalAmount, p.currency]),
     [
-      ['sleep-pack', '2.99', 'USD'],
-      ['focus-pack', '1.99', 'USD'],
-      ['rain-night-pack', '3.99', 'USD'],
+      ['subscription-monthly', '7.99', 'USD'],
+      ['subscription-yearly', '79.90', 'USD'],
     ],
   );
   assert.deepEqual(
     listProducts('CNY').map((p) => [p.productId, p.totalAmount]),
     [
-      ['sleep-pack', '9.00'],
-      ['focus-pack', '6.00'],
-      ['rain-night-pack', '12.00'],
+      ['subscription-monthly', '18.00'],
+      ['subscription-yearly', '180.00'],
     ],
   );
-  assert.deepEqual(listProducts().map((p) => p.totalAmount), ['9.00', '6.00', '12.00'], 'default is CNY');
-  assert.equal(productAmount(getProduct('focus-pack'), 'USD'), '1.99');
-  assert.equal(productAmount(getProduct('focus-pack'), 'CNY'), '6.00');
+  assert.deepEqual(listProducts().map((p) => p.totalAmount), ['18.00', '180.00'], 'default is CNY');
+  assert.equal(productAmount(getProduct('subscription-monthly'), 'USD'), '7.99');
+  assert.equal(productAmount(getProduct('subscription-monthly'), 'CNY'), '18.00');
+  assert.equal(productAmount(getProduct('subscription-yearly'), 'USD'), '79.90');
+  assert.equal(productAmount(getProduct('subscription-yearly'), 'CNY'), '180.00');
+  assert.equal(getProduct('focus-pack'), null, 'old packs are not in the catalog');
   assert.equal(normalizeCurrency('usd'), 'USD');
   assert.equal(normalizeCurrency('USD'), 'USD');
   assert.equal(normalizeCurrency('cny'), 'CNY');

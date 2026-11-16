@@ -65,6 +65,17 @@ test('per-journey sound levels and emotional controls persist independently', ()
     ['warmth','space','energy','nature','bass','mid','treble','width','reverb']);
 });
 
+test('the sleep timer choice persists and is restored, never auto-armed', () => {
+  const state = { sceneId:'bali',master:.6,motion:true,sleepMinutes:30,mixes:{} };
+  let stored;
+  assert.equal(writeScenePreferences({setItem(key,value){stored=value;}},state),true);
+  assert.equal(readScenePreferences(storage(stored)).sleepMinutes,30);
+  assert.equal(readScenePreferences(storage(JSON.stringify({sleepMinutes:'journey'}))).sleepMinutes,'journey');
+  assert.equal(readScenePreferences(storage(JSON.stringify({sleepMinutes:0}))).sleepMinutes,0);
+  assert.equal(readScenePreferences(storage(JSON.stringify({sleepMinutes:'wrong'}))).sleepMinutes,null);
+  assert.equal(readScenePreferences(storage(JSON.stringify({}))).sleepMinutes,null);
+});
+
 test('the original 3-minute stems remain available only as labeled A/B references', () => {
   for (const id of ['meditate-bali','focus-chiang-mai']) {
     const scene=sceneForJourney(journeyById(id),'3.1');

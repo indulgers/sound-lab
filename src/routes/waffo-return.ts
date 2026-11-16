@@ -6,20 +6,19 @@
  * 再轮询确认：每轮先调 GET /api/waffo/order-status（快查——直接
  * 向 Waffo 查这笔订单有没有成功的付款，查到就立刻标记已付并发
  * 权益，不用干等 webhook），再查 GET /api/entitlements（同账号的
- * 服务端权益记录）兜底；一旦包出现在权益列表里，就展示“已解锁”
+ * 服务端权益记录）兜底；一旦订阅出现在权益记录里，就展示“已解锁”
  * 并给出去调音台的链接；轮询约 60 秒仍未出现时，说明 webhook
  * 还没到或支付未完成，如实展示“仍在处理”，不伪装成功。
- * ?pack= 只用于展示包名（显示用，不作为发放依据）。
+ * ?plan= 只用于展示计划名（显示用，不作为发放依据）。
  * 回跳页明确提示“不要重复付款”：webhook 慢到时用户容易回去
  * 再付一笔——进行中订单续付才是正确路径（见结账页与 PLUS 卡片）。
  */
 import { createFileRoute } from '@tanstack/react-router'
 import { escapeHtml } from '../server/pay-shared'
 
-const PACK_NAMES: Record<string, { zh: string; en: string }> = {
-  'focus-pack': { zh: '专注包', en: 'Focus Pack' },
-  'sleep-pack': { zh: '助眠包', en: 'Sleep Pack' },
-  'rain-night-pack': { zh: '雨夜包', en: 'Rain Night Pack' },
+const PLAN_NAMES: Record<string, { zh: string; en: string }> = {
+  'subscription-monthly': { zh: '订阅（月付）', en: 'Subscription · Monthly' },
+  'subscription-yearly': { zh: '订阅（年付）', en: 'Subscription · Yearly' },
 }
 
 export const Route = createFileRoute('/waffo-return')({
@@ -27,10 +26,10 @@ export const Route = createFileRoute('/waffo-return')({
     handlers: {
       GET: async ({ request }) => {
         const url = new URL(request.url)
-        const packId = url.searchParams.get('pack') || ''
+        const planId = url.searchParams.get('plan') || url.searchParams.get('pack') || ''
         const orderNo = url.searchParams.get('order') || ''
-        const pack = PACK_NAMES[packId] || null
-        const safePack = escapeHtml(packId)
+        const plan = PLAN_NAMES[planId] || null
+        const safePlan = escapeHtml(planId)
         const safeOrder = escapeHtml(orderNo)
         const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Payment result · Sound Cocktail</title>
@@ -54,7 +53,7 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
       title: 'Payment result',
       checking: 'Payment received — confirming with Waffo, this usually takes a few seconds. Please don’t pay again.',
       unlocked: function (name) { return 'Unlocked: ' + name + '. It is ready in the mixer on this account.'; },
-      processing: 'Still processing — the payment confirmation has not arrived yet. Please don’t pay again; check the mixer in a moment — your pack will appear there once it is confirmed.',
+      processing: 'Still processing — the payment confirmation has not arrived yet. Please don’t pay again; check the mixer in a moment — your subscription will appear there once it is confirmed.',
       needLogin: 'Please sign in with the same account you bought with, then check the mixer.',
       failed: 'Could not confirm the payment. Please refresh and try again.',
       goMixer: 'Go to the mixer',
@@ -64,7 +63,7 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
       title: '支付结果',
       checking: '已收到付款，正在向 Waffo 确认，通常几秒内完成。请不要重复付款。',
       unlocked: function (name) { return '已解锁：' + name + '。登录同一账号即可在调音台使用。'; },
-      processing: '仍在处理：支付确认还没到。请不要重复付款，稍后去调音台看看，确认后包会自动出现。',
+      processing: '仍在处理：支付确认还没到。请不要重复付款，稍后去调音台看看，确认后订阅会自动出现。',
       needLogin: '请用购买时用的账号登录，再去调音台查看。',
       failed: '确认失败，请稍后刷新重试。',
       goMixer: '去调音台',
@@ -80,11 +79,11 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
   // 中文用户直接给 /zh，少一次跳转、语言也不闪一下英文）。
   document.getElementById('goMixer').href = '/' + locale;
   document.getElementById('backHome').href = '/' + locale;
-  var packId = ${JSON.stringify(safePack)};
+  var planId = ${JSON.stringify(safePlan)};
   var orderNo = ${JSON.stringify(safeOrder)};
-  var packNames = ${JSON.stringify(Object.fromEntries(Object.entries(PACK_NAMES).map(([id, v]) => [id, v.en])))};;
-  var packNamesZh = ${JSON.stringify(Object.fromEntries(Object.entries(PACK_NAMES).map(([id, v]) => [id, v.zh])))};
-  var packName = packId ? (locale === 'zh' ? (packNamesZh[packId] || packId) : (packNames[packId] || packId)) : '';
+  var planNames = ${JSON.stringify(Object.fromEntries(Object.entries(PLAN_NAMES).map(([id, v]) => [id, v.en])))};;
+  var planNamesZh = ${JSON.stringify(Object.fromEntries(Object.entries(PLAN_NAMES).map(([id, v]) => [id, v.zh])))};
+  var planName = planId ? (locale === 'zh' ? (planNamesZh[planId] || planId) : (planNames[planId] || planId)) : '';
   var status = document.getElementById('status');
   var unlocked = document.getElementById('unlocked');
   var actions = document.getElementById('actions');
@@ -92,7 +91,7 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
   var maxAttempts = 30; // 约 60 秒
   status.textContent = T.checking;
   function showUnlocked() {
-    status.textContent = packName ? T.unlocked(packName) : T.unlocked(packId || 'your pack');
+    status.textContent = planName ? T.unlocked(planName) : T.unlocked(planId || 'your subscription');
     unlocked.hidden = true;
     actions.hidden = false;
   }
@@ -125,8 +124,8 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
       })
       .then(function (d) {
         if (d === true) return true;
-        var packs = Array.isArray(d.packs) ? d.packs : [];
-        if (!packId || packs.indexOf(packId) !== -1) {
+        var sub = d && d.subscription;
+        if (sub && sub.active && (!planId || sub.plan === planId)) {
           showUnlocked();
           return true;
         }

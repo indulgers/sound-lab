@@ -10,7 +10,13 @@
  * - event.mode 必须与配置的 WAFFO_ENV 一致（test 事件不触发生产逻辑）。
  * - 只处理 order.completed：按 data.orderMerchantExternalId
  *   （下单时传的 outTradeNo）找到我们的订单，金额核对后标记已支付、
- *   给订单所属用户发放权益（grantPack 集合语义，重复发放无副作用）。
+ *   给订单所属用户发放权益（订阅商品发时效性订阅授权，旧包商品
+ *   发 legacy 包授权；grantPack / grantSubscription 都是幂等语义）。
+ * - 订阅事件（subscription.activated / renewed / recovered /
+ *   plan_changed / past_due / canceling / uncanceled / canceled）：
+ *   由 server/waffo.ts 的 applyWaffoSubscriptionEvent 处理——
+ *   授予、延长、恢复、标记取消或到期撤销订阅。subscription.
+ *   payment_succeeded 是纯扣费事件（无周期/状态），不处理。
  * - 验签失败回 401；其他事件回 200（已确认收到，不重试）。
  *
  * 金额核对：chargedAmount（实收）优先，其次 listPrice.total（应收），
@@ -20,7 +26,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { env } from 'cloudflare:workers'
 import { verifyWebhook } from '@waffo/pancake-ts'
-import { confirmWaffoOrderPaid, normalizeWaffoEnv } from '../../../server/waffo.ts'
+import { applyWaffoSubscriptionEvent, confirmWaffoOrderPaid, normalizeWaffoEnv, SUBSCRIPTION_EVENT_TYPES } from '../../../server/waffo.ts'
 import { getStore, isStore, textResponse } from '../../../server/pay-shared.ts'
 
 export const Route = createFileRoute('/api/waffo/webhook')({
@@ -57,6 +63,16 @@ export const Route = createFileRoute('/api/waffo/webhook')({
         // 幂等：同一 delivery id 只处理一次。
         const firstSeen = await store.insertWaffoEventOnce(event.id)
         if (!firstSeen) return textResponse('OK')
+
+        // 订阅事件：授予 / 延长 / 恢复 / 标记取消 / 到期撤销。
+        if ((SUBSCRIPTION_EVENT_TYPES as readonly string[]).includes(event.eventType)) {
+          const result = await applyWaffoSubscriptionEvent(store, env.ORDERS_KV, event.eventType, event.data || {})
+          if (!result.handled) {
+            // eslint-disable-next-line no-console
+            console.warn('[waffo webhook] subscription event could not be applied', { eventId: event.id, eventType: event.eventType })
+          }
+          return textResponse('OK')
+        }
 
         if (event.eventType !== 'order.completed') {
           return textResponse('OK')

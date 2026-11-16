@@ -2,8 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { localizePath, setLocale, useLocale } from '../locale.mjs';
 import { getLabController } from '../sound-lab.mjs';
+import { useLab } from '../lab-context.jsx';
+import { isFreeJourney } from '../subscription.mjs';
 import { SCENES, sceneById, sceneText } from './catalog.mjs';
 import { levelsForScene, readScenePreferences, writeScenePreferences } from './preferences.mjs';
+import { SLEEP_TIMER_OPTIONS_MINUTES, sleepChoiceToMs } from '../sleep-timer.mjs';
 import { INTENTS, JOURNEYS, intentById, journeyById, journeysForIntent, recommendedJourneyForIntent, levelsForJourney, controlsForJourney, sceneForJourney } from './journeys.mjs';
 import { createStreamingJourneyPlayer } from './stream-player.mjs';
 
@@ -23,6 +26,7 @@ const iconPaths = {
   spark: <><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/></>,
   wind: <><path d="M3 8h12a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 17h7"/></>,
   bookmark: <path d="M7 3h10v18l-5-4-5 4Z" />,
+  lock: <><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></>,
   check: <path d="m5 12 4 4L19 6" />,
   info: <><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.3"/></>,
   motion: <><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3Z"/></>,
@@ -37,13 +41,13 @@ function Brand() {
   </span>;
 }
 const copy = {
-  en: { places:'Places', studio:'Sound studio', saved:'Saved mixes', listen:'Enter & listen', pause:'Pause listening', resume:'Resume listening', loading:'Finding your rhythm…', sound:'Sound', timer:'Sleep timer', continuous:'No timer', immersive:'Immerse', leave:'Back to the room', motionOn:'Still frame', motionOff:'Travel motion', change:'More in this mood', foot:'A small escape. A little more you.', choose:'Where shall we go?', chooseSub:'Choose a journey that fits this moment; explore all when you want a different mood.', here:'You are here', go:'Stay here', soundTitle:'Make it yours.', soundSub:'A little more of what you need.', reset:'Reset', save:'Save this mix', savedToast:'Your mix is saved for this journey.', storageError:'Your browser could not save this mix. You can keep listening.', resetToast:'Back to the original balance.', timerTitle:'Drift away, on your time.', timerSub:'Music gently stops when the timer ends. Leave it off to keep listening.', minutes:'min', timerDone:'Your listening timer has ended.', ready:'Ready when you are', listening:'A LITTLE ROOM TO EXHALE', paused:'Take your time', videoFallback:'Still view · music is available', retry:'Try listening again', error:'The sound could not load. Check your connection and try again.', info:'About this place', close:'Close', volume:'Master volume', savedTitle:'Your familiar places.', savedSub:'Your saved sound balance, ready for your next visit.', noneSaved:'Make a place yours. Open Sound, adjust the layers, and save your mix.', loadSaved:'Return to this mix', savedBadge:'Your saved mix', sources:'Sound sources', inspired:'A place-inspired listening room', inspiredText:'These are place-inspired sound journeys, not verified local recordings. New 15-minute pieces are original procedural compositions; earlier 3-minute references are available for A/B listening. Films and concept illustrations have separately credited sources.', musicCredit:'Music · Sound Cocktail V3.2', continuousNote:'Each place has a fifteen-minute original programme. Longer sessions continue with gentle repetitions, not hours of unique composition.', videoCredit:'Film credits', full:'Full screen', exitFull:'Exit full screen' },
-  zh: { places:'去往哪里', studio:'声音调制室', saved:'我的收藏', listen:'进入，慢慢听', pause:'暂停聆听', resume:'继续聆听', loading:'让声音慢慢到来…', sound:'调音', timer:'定时停止', continuous:'不限时', immersive:'沉浸', leave:'回到房间', motionOn:'静止画面', motionOff:'动态旅行', change:'同一种状态，换个地方', foot:'一场小小的逃离，找回自己的节奏。', choose:'这次，想去哪里？', chooseSub:'优先展示适合当前状态的旅程，也可以探索其他状态。', here:'你在这里', go:'在这里待一会儿', soundTitle:'调成你的样子。', soundSub:'多一点此刻需要的声音。', reset:'恢复默认', save:'保存这份配比', savedToast:'已保存这段声音旅程的配比。', storageError:'浏览器暂时无法保存，你仍可以继续聆听。', resetToast:'已恢复这个场景的原始配比。', timerTitle:'按自己的时间，慢慢来。', timerSub:'时间到了，音乐会轻柔停止。选择不限时即可持续聆听。', minutes:'分钟', timerDone:'本次定时聆听已结束。', ready:'准备好了，就开始吧', listening:'给自己一点呼吸的空间', paused:'慢慢来，时间还在', videoFallback:'静态画面 · 仍可聆听音乐', retry:'重新加载声音', error:'声音加载失败，请检查网络后重试。', info:'关于这个地方', close:'关闭', volume:'总音量', savedTitle:'回到熟悉的地方。', savedSub:'带着你保存的声音配比，开始下一次小旅行。', noneSaved:'打开调音，调整声音层，再保存一份属于你的配比。', loadSaved:'回到这份配比', savedBadge:'已保存配比', sources:'声音来源', inspired:'以目的地为灵感的聆听空间', inspiredText:'这些声音旅程以世界各地为灵感，不代表经核实的当地采音。新版 15 分钟音乐为原创程序编排，旧版 3 分钟音轨可用于 A/B 对比；实景素材和概念插画的来源分别注明。', musicCredit:'音乐 · Sound Cocktail V3.2', continuousNote:'每个地点拥有约十五分钟原创音景。更长会话通过柔和循环延续，并非每小时都有完全不同的音乐。', videoCredit:'视频来源', full:'全屏显示', exitFull:'退出全屏' },
+  en: { places:'Places', studio:'Sound studio', saved:'Saved mixes', listen:'Enter & listen', pause:'Pause listening', resume:'Resume listening', loading:'Finding your rhythm…', sound:'Sound', timer:'Sleep timer', continuous:'No timer', immersive:'Immerse', leave:'Back to the room', motionOn:'Still frame', motionOff:'Travel motion', change:'More in this mood', foot:'A small escape. A little more you.', choose:'Where shall we go?', chooseSub:'Choose a journey that fits this moment; explore all when you want a different mood.', here:'You are here', go:'Stay here', soundTitle:'Make it yours.', soundSub:'A little more of what you need.', reset:'Reset', save:'Save this mix', savedToast:'Your mix is saved for this journey.', storageError:'Your browser could not save this mix. You can keep listening.', resetToast:'Back to the original balance.', timerTitle:'Drift away, on your time.', timerSub:'Music fades out gently over the last 2 minutes, then stops. Leave it off to keep listening.', timerJourney:'End of journey', minutes:'min', timerDone:'Your listening timer has ended.', ready:'Ready when you are', listening:'A LITTLE ROOM TO EXHALE', paused:'Take your time', videoFallback:'Still view · music is available', retry:'Try listening again', error:'The sound could not load. Check your connection and try again.', info:'About this place', close:'Close', volume:'Master volume', savedTitle:'Your familiar places.', savedSub:'Your saved sound balance, ready for your next visit.', noneSaved:'Make a place yours. Open Sound, adjust the layers, and save your mix.', loadSaved:'Return to this mix', savedBadge:'Your saved mix', sources:'Sound sources', inspired:'A place-inspired listening room', inspiredText:'These are place-inspired sound journeys, not verified local recordings. New 15-minute pieces are original procedural compositions; earlier 3-minute references are available for A/B listening. Films and concept illustrations have separately credited sources.', musicCredit:'Music · Sound Cocktail V3.2', continuousNote:'Each place has a fifteen-minute original programme. Longer sessions continue with gentle repetitions, not hours of unique composition.', videoCredit:'Film credits', full:'Full screen', exitFull:'Exit full screen', lockedToast:'This journey is part of Plus — subscribe to unlock all six destinations.', lockedHint:'This journey is part of Plus. Subscribe to unlock all six destinations, unlimited listening, the full tuner and the sleep timer.', lockedGo:'See Plus', timerLocked:'Sleep timer is a Plus feature — subscribe to use it.', saveLocked:'Saving mixes is a Plus feature — subscribe to keep your mixes.', plusBadge:'Plus' },
+  zh: { places:'去往哪里', studio:'声音调制室', saved:'我的收藏', listen:'进入，慢慢听', pause:'暂停聆听', resume:'继续聆听', loading:'让声音慢慢到来…', sound:'调音', timer:'定时停止', continuous:'不限时', immersive:'沉浸', leave:'回到房间', motionOn:'静止画面', motionOff:'动态旅行', change:'同一种状态，换个地方', foot:'一场小小的逃离，找回自己的节奏。', choose:'这次，想去哪里？', chooseSub:'优先展示适合当前状态的旅程，也可以探索其他状态。', here:'你在这里', go:'在这里待一会儿', soundTitle:'调成你的样子。', soundSub:'多一点此刻需要的声音。', reset:'恢复默认', save:'保存这份配比', savedToast:'已保存这段声音旅程的配比。', storageError:'浏览器暂时无法保存，你仍可以继续聆听。', resetToast:'已恢复这个场景的原始配比。', timerTitle:'按自己的时间，慢慢来。', timerSub:'最后两分钟，音乐会慢慢淡出，然后停下。选择不限时即可持续聆听。', timerJourney:'播完这段旅程', minutes:'分钟', timerDone:'本次定时聆听已结束。', ready:'准备好了，就开始吧', listening:'给自己一点呼吸的空间', paused:'慢慢来，时间还在', videoFallback:'静态画面 · 仍可聆听音乐', retry:'重新加载声音', error:'声音加载失败，请检查网络后重试。', info:'关于这个地方', close:'关闭', volume:'总音量', savedTitle:'回到熟悉的地方。', savedSub:'带着你保存的声音配比，开始下一次小旅行。', noneSaved:'打开调音，调整声音层，再保存一份属于你的配比。', loadSaved:'回到这份配比', savedBadge:'已保存配比', sources:'声音来源', inspired:'以目的地为灵感的聆听空间', inspiredText:'这些声音旅程以世界各地为灵感，不代表经核实的当地采音。新版 15 分钟音乐为原创程序编排，旧版 3 分钟音轨可用于 A/B 对比；实景素材和概念插画的来源分别注明。', musicCredit:'音乐 · Sound Cocktail V3.2', continuousNote:'每个地点拥有约十五分钟原创音景。更长会话通过柔和循环延续，并非每小时都有完全不同的音乐。', videoCredit:'视频来源', full:'全屏显示', exitFull:'退出全屏', lockedToast:'这段旅程属于进阶版，订阅后解锁全部六个目的地。', lockedHint:'这段旅程属于进阶版。订阅后解锁全部六个目的地、不限时收听、完整调音器与睡眠定时。', lockedGo:'看看进阶版', timerLocked:'定时停止是进阶版功能，订阅后可用。', saveLocked:'保存配比是进阶版功能，订阅后可保存。', plusBadge:'进阶' },
 };
 
 const goalCopy = {
-  en: { kicker:'SOUND JOURNEYS · TRAVEL BY SOUND', title:'How would you like to feel?', intro:'Start with a feeling. Find a place to stay for a while.', action:'Change intention', suggestion:'Recommended journey', minutes:'Suggested', hint:'Choose a state, then enter the music. No timer or paywall during this preview.' },
-  zh: { kicker:'声音旅行 · TRAVEL BY SOUND', title:'此刻，想进入什么状态？', intro:'先选择你需要的状态，再去世界某个角落待一会儿。', action:'换一种状态', suggestion:'为此刻推荐的声音旅程', minutes:'建议', hint:'选择状态后就能开始音乐旅行。体验期不限时、不设付费墙。' },
+  en: { kicker:'SOUND JOURNEYS · TRAVEL BY SOUND', title:'How would you like to feel?', intro:'Start with a feeling. Find a place to stay for a while.', action:'Change intention', suggestion:'Recommended journey', minutes:'Suggested', hint:'Choose a state, then enter the music. Chiang Mai and Bali are free; the other journeys are part of Plus.' },
+  zh: { kicker:'声音旅行 · TRAVEL BY SOUND', title:'此刻，想进入什么状态？', intro:'先选择你需要的状态，再去世界某个角落待一会儿。', action:'换一种状态', suggestion:'为此刻推荐的声音旅程', minutes:'建议', hint:'选择状态后就能开始音乐旅行。清迈和巴厘岛免费开放，其他旅程属于进阶版。' },
 };
 
 const moodCopy = {
@@ -107,6 +111,14 @@ export default function SceneExperience() {
   const [toast, setToast] = useState('');
   const [deadline, setDeadline] = useState(null);
   const [remaining, setRemaining] = useState(0);
+  // 订阅状态（外壳从 /api/entitlements 传入）：免费用户只能进
+  // 清迈 / 巴厘岛旅程，其余旅程、定时停止、保存配比都要订阅。
+  const { isSubscriber } = useLab();
+  // 免费用户点中的被锁旅程：在“去往哪里”面板里展示升级提示。
+  const [lockedJourney, setLockedJourney] = useState(null);
+  // The last timer choice (0 = off, minutes, or 'journey'): remembered
+  // and pre-selected next time, never auto-armed.
+  const [chosen, setChosen] = useState(0);
   const [full, setFull] = useState(false);
   const player = useRef(null);
   const preferences = useRef(prefs);
@@ -126,6 +138,7 @@ export default function SceneExperience() {
     let saved;
     try { saved = readScenePreferences(window.localStorage); } catch { saved = readScenePreferences(null); }
     preferences.current = saved; setPrefs(saved); setSceneId(SCENES[0].id);
+    setChosen(saved.sleepMinutes === null || saved.sleepMinutes === undefined ? 0 : saved.sleepMinutes);
     const initial = SCENES[0];
     const initialLevels = levelsForScene(initial,saved.mixes[initial.id]);
     setLevels(initialLevels);
@@ -180,13 +193,21 @@ export default function SceneExperience() {
   }, [deadline, C.timerDone]);
 
   function openPanel(name) { opener.current = document.activeElement; if (name==='places') setShowAllJourneys(!intentId); setPanel(name); }
-  function closePanel() { setPanel(null); dialog.current?.close(); opener.current?.focus?.(); }
+  function closePanel() { setPanel(null); setLockedJourney(null); dialog.current?.close(); opener.current?.focus?.(); }
   function openStudio() {
     if (!intentId) { void navigate({to:localizePath('/studio',locale)}); return; }
     setAdvanced(true); setPanel('mix');
   }
   function selectJourney(next) {
     if (!next) return;
+    // 订阅门：清迈 / 巴厘岛免费，其余旅程要订阅。被锁时不切换，
+    // 在面板里展示升级提示（不跳转、不弹全屏遮罩）。
+    if (!isSubscriber && !isFreeJourney(next)) {
+      setLockedJourney(next);
+      setToast(C.lockedToast);
+      return;
+    }
+    setLockedJourney(null);
     const place = sceneForJourney(next);
     const saved = preferences.current.mixes[next.id];
     const nextLevels = levelsForJourney(next, saved);
@@ -222,6 +243,8 @@ export default function SceneExperience() {
   function changeMaster(value) { const master=Number(value); player.current?.setMaster(master); persist({...preferences.current,master}); }
   function saveMix() {
     if (!journey) return;
+    // 保存配比是订阅功能。
+    if (!isSubscriber) { setToast(C.saveLocked); return; }
     const saved = persist({ ...preferences.current, mixes: { ...preferences.current.mixes, [journey.id]: {
       ...levels, ...controls,
       ...(journey.id==='focus-chiang-mai' ? {cafeVoicesOptIn:(levels.ambience??0)>0} : {}),
@@ -258,8 +281,15 @@ export default function SceneExperience() {
   function toggleMotion() {
     const next=!motion; setMotion(next); persist({...preferences.current,motion:next});
   }
-  function chooseTimer(minutes) {
-    setDeadline(player.current?.setSleepTimer(minutes ? minutes*60000 : null) ?? null);
+  function chooseTimer(choice) {
+    // 定时停止是订阅功能（不限时 = 0 免费；分钟数与“播完这段旅程”都要订阅）。
+    if (!isSubscriber && choice !== 0) { setToast(C.timerLocked); return; }
+    setChosen(choice);
+    persist({ ...preferences.current, sleepMinutes: choice });
+    const journeyRemainingMs = player.current && Number.isFinite(scene.durationSeconds)
+      ? Math.max(0, (scene.durationSeconds - player.current.getPosition()) * 1000) : null;
+    const ms = sleepChoiceToMs(choice, journeyRemainingMs);
+    setDeadline(player.current?.setSleepTimer(ms ?? null) ?? null);
     closePanel();
   }
   async function toggleFullscreen() {
@@ -323,7 +353,7 @@ export default function SceneExperience() {
 
     {intentId && <div className="sc-place-preview">
       <span className="sc-kicker">{C.change}</span>
-      <div className="sc-place-chips">{journeysForIntent(intentId).map(next=>{const place=sceneById(next.sceneId);return <button key={next.id} className={`sc-place-chip ${journeyId===next.id?'is-current':''}`} onClick={()=>selectJourney(next)} aria-pressed={journeyId===next.id} aria-label={`${T(next.name)} · ${T(place.name)}`}><img src={place.poster} alt=""/><span><small>{T(place.name)}</small>{T(next.name)}</span>{journeyId===next.id?<span className="sc-chip-dot"/>:<Icon name="arrow"/>}</button>;})}</div>
+      <div className="sc-place-chips">{journeysForIntent(intentId).map(next=>{const place=sceneById(next.sceneId);const locked=!isSubscriber && !isFreeJourney(next);return <button key={next.id} className={`sc-place-chip ${journeyId===next.id?'is-current':''} ${locked?'is-locked':''}`} onClick={()=>selectJourney(next)} aria-pressed={journeyId===next.id} aria-label={`${T(next.name)} · ${T(place.name)}`}><img src={place.poster} alt=""/><span><small>{T(place.name)}</small>{T(next.name)}</span>{locked?<span className="sc-chip-lock">{C.plusBadge}</span>:journeyId===next.id?<span className="sc-chip-dot"/>:<Icon name="arrow"/>}</button>;})}</div>
     </div>}
 
     {immersive && <button className="sc-leave sc-glass-button" onClick={()=>setImmersive(false)}><Icon name="back"/>{C.leave}</button>}
@@ -395,8 +425,10 @@ export default function SceneExperience() {
           <div className="sc-gallery">
             {(panel==='saved'?JOURNEYS.filter(next=>prefs.mixes[next.id]):!intentId||showAllJourneys?JOURNEYS:journeysForIntent(intentId)).map(next=>{
               const place=sceneById(next.sceneId);
-              return <button className={`sc-gallery-card ${journey?.id===next.id?'is-current':''}`} onClick={()=>selectJourney(next)} key={next.id}>
+              const locked=!isSubscriber && !isFreeJourney(next);
+              return <button className={`sc-gallery-card ${journey?.id===next.id?'is-current':''} ${locked?'is-locked':''}`} onClick={()=>selectJourney(next)} key={next.id}>
                 <img src={place.poster} alt=""/><span className="sc-gallery-number">{place.number}</span>
+                {locked && <span className="sc-gallery-lock"><Icon name="lock"/>{C.plusBadge}</span>}
                 <div><small>{T(intentById(next.intentId)?.name)} · {T(place.location)}</small>
                   <h3>{T(next.name)}</h3>
                   <span>{panel==='saved'?C.loadSaved:journey?.id===next.id?C.here:C.go}<Icon name={journey?.id===next.id?'check':'arrow'}/></span>
@@ -404,6 +436,9 @@ export default function SceneExperience() {
               </button>;
             })}
           </div>
+          {lockedJourney && <div className="sc-locked-banner" role="status">
+            <strong>{T(lockedJourney.name)}</strong> · {C.lockedHint} <Link to={localizePath('/plus',locale)} onClick={closePanel}>{C.lockedGo}<Icon name="arrow"/></Link>
+          </div>}
           {panel==='saved'&&!JOURNEYS.some(next=>prefs.mixes[next.id])&&<p className="sc-empty">{C.noneSaved}</p>}
           <div className="sc-gallery-links">
             <button onClick={openStudio}>{M.studio}<Icon name="arrow"/></button>
@@ -415,7 +450,7 @@ export default function SceneExperience() {
           {intentId==='focus' && <div className="sc-focus-options"><h3>{M.focus}</h3><p className="sc-panel-sub">{locale==='zh'?'专注计时仅作提醒，音乐不会被打断。暂停播放也会暂停计时。':'A gentle focus reminder; music never cuts off. Pausing sound pauses the clock.'}</p>
             <div className="sc-timer-options">{[0,25,45,60].map(minutes=><button key={minutes} onClick={()=>startFocus(minutes)}>{minutes?`${minutes} ${C.minutes}`:C.continuous}<Icon name={minutes?'clock':'wind'}/></button>)}</div>
           </div>}
-          <h3>{C.timer}</h3><div className="sc-timer-options">{[0,20,30,45,60,90].map(minutes=><button key={minutes} onClick={()=>chooseTimer(minutes)} className={!deadline&&minutes===0?'is-selected':''}>{minutes?`${minutes} ${C.minutes}`:C.continuous}<Icon name={minutes?'clock':'wind'}/></button>)}</div>
+          <h3>{C.timer}</h3><div className="sc-timer-options">{[0,...SLEEP_TIMER_OPTIONS_MINUTES,'journey'].map(choice=><button key={String(choice)} onClick={()=>chooseTimer(choice)} className={chosen===choice?'is-selected':''}>{choice===0?C.continuous:choice==='journey'?C.timerJourney:`${choice} ${C.minutes}`}<Icon name={choice?'clock':'wind'}/></button>)}</div>
         </>}
         {panel==='info' && <div className="sc-credits">
           <span className="sc-credit-tag">{C.inspired}</span>

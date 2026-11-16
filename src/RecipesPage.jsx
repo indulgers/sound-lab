@@ -34,12 +34,14 @@ function RecipeMix({ mix, soundsById, locale }) {
 }
 
 export default function RecipesPage() {
-  const { recipes, sounds, playRecipe, showPremium, ownedPacks } = useLab();
+  const { recipes, sounds, playRecipe, showPremium, ownedPacks, isSubscriber } = useLab();
   const [locale] = useLocale();
   const soundsById = new Map(sounds.map((sound) => [sound.id, sound]));
-  // 能用的通道 = 免费通道 + 已拥有包的通道；进阶配方按这个集合判定是否可听。
+  // 能用的通道 = 免费通道 + 已拥有包的通道；订阅用户解锁全部通道。
+  // 进阶配方按这个集合判定是否可听。
   const unlockedSounds = new Set(sounds.filter((sound) => isFreeSound(sound.id)).map((sound) => sound.id));
   soundsForPacks(ownedPacks).forEach((id) => unlockedSounds.add(id));
+  if (isSubscriber) sounds.forEach((sound) => unlockedSounds.add(sound.id));
   return (
     <section className="blk" id="recipes">
       <div className="sec-head"><h2>{t(locale, 'recipes.title')}</h2>{locale === 'en' ? <span className="en">{t(locale, 'recipes.en')}</span> : null}</div>
