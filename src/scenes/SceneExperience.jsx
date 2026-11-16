@@ -296,7 +296,7 @@ export default function SceneExperience() {
     {intentId && <div className="sc-scene-top"><span className="sc-live-dot"/><span>{T(scene.name)} · {T(scene.location)}</span></div>}
     {intentId && scene.filmSourcePage && <div className="sc-film-caption">
       <span className="sc-film-identity">{T(scene.filmPlace)}</span>
-      <span>{scene.filmMotionType==='natural-water'?(locale==='zh'?'实景流水影像':'Real garden water footage'):(locale==='zh'?'实景移动镜头':'Real moving-camera footage')} <span aria-hidden="true">·</span> <a href={scene.filmSourcePage} target="_blank" rel="noreferrer">{scene.filmCreator}</a> · <a href={filmLicenseUrl} target="_blank" rel="noreferrer">{scene.filmLicense}</a></span>
+      <span>{scene.filmMotionType==='arrival-pan-water'?(locale==='zh'?'金阁寺抵达镜头 + 苔庭流水实景':'Kinkaku-ji arrival pan + garden water'):scene.filmMotionType==='natural-water'?(locale==='zh'?'实景流水影像':'Real garden water footage'):(locale==='zh'?'实景移动镜头':'Real moving-camera footage')} <span aria-hidden="true">·</span> <a href={scene.filmSourcePage} target="_blank" rel="noreferrer">{scene.filmCreator}</a> · <a href={filmLicenseUrl} target="_blank" rel="noreferrer">{scene.filmLicense}</a></span>
     </div>}
     {!intentId && <div className="sc-intent-entry">
       <span className="sc-kicker">{G.kicker}</span>
@@ -426,7 +426,8 @@ export default function SceneExperience() {
           <p><strong>{T(scene.filmPlace)}</strong></p>
           <p>{locale==='zh'?'音乐情境以该地为灵感；画面来自实景视频素材，并非本团队当地实录。':'Music is place-inspired. The moving scene uses licensed location-described footage, not our own on-location recording.'}</p>
           <p><a href={scene.filmSourcePage} target="_blank" rel="noreferrer">{scene.filmCreator}</a> · <a href={filmLicenseUrl} target="_blank" rel="noreferrer">{scene.filmLicense}</a></p>
-          {scene.filmExtraSourcePage && <p><a href={scene.filmExtraSourcePage} target="_blank" rel="noreferrer">{locale==='zh'?'第二段实景：京都竹筒清泉 · Brian Zhang':'Second Kyoto location shot: bamboo fountain · Brian Zhang'}</a></p>}
+          {scene.filmArrivalSourcePage && <p><a href={scene.filmArrivalSourcePage} target="_blank" rel="noreferrer">{locale==='zh'?'抵达镜头：金阁寺全景慢移 · Stephan Leuzinger':'Arrival: slow pan across Kinkaku-ji · Stephan Leuzinger'}</a></p>}
+          {scene.filmExtraSourcePage && <p><a href={scene.filmExtraSourcePage} target="_blank" rel="noreferrer">{locale==='zh'?'收尾：京都竹筒清泉 · Brian Zhang':'Closing: bamboo fountain · Brian Zhang'}</a></p>}
           <p>{scene.filmLocationEvidence==='recognizable-landmark'
             ? (locale==='zh'?'清迈皇家花园的可识别地标；并非咖啡馆内部。原视频按 CC BY 3.0 授权，已裁剪、调色并做循环接缝处理。':'Recognizable Royal Park Rajapruek landmark, not a café interior. Original CC BY 3.0 footage, cropped, colour-graded and loop-blended.')
             : scene.filmLocationEvidence==='geolocated-commons'

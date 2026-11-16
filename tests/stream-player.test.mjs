@@ -80,6 +80,24 @@ test('transport can crossfade near 15-minute boundary without decoding entire tr
   h.player.dispose();
 });
 
+test('programme repeats through three 15-minute crossfade cycles without leaking decks', async () => {
+  const h=setup();await h.player.setScene(scene);await h.player.play();
+  for (let cycle=0; cycle<3; cycle++) {
+    const live=h.media.slice(-3);
+    live.forEach(m=>m.currentTime=890);
+    h.timers[0]();await Promise.resolve();await Promise.resolve();
+    assert.equal(h.media.length,3*(cycle+2),'cycle '+(cycle+1)+' must schedule a fresh deck');
+    assert.ok(h.media.slice(-3).every(m=>m.events.includes('play')),'replacement deck must start');
+    h.media.slice(-3).forEach(m=>m.currentTime=10);
+    h.timers[0]();
+    assert.ok(live.every(m=>m.paused),'cycle '+(cycle+1)+' old deck must be retired');
+    assert.equal(h.player.getPlaying(),true);
+  }
+  assert.equal(h.media.length,12);
+  assert.ok(h.states.every(s=>s.status!=='error'),'no error across three cycles');
+  h.player.dispose();
+});
+
 test('elapsed focus time pauses with listening while sleep timer does not extend', async () => {
   const h=setup();await h.player.setScene(scene);await h.player.play();
   h.time(1_025_000);

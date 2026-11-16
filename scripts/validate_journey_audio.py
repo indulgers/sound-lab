@@ -42,10 +42,13 @@ def main():
             durations.append(seconds)
         assert max(durations) - min(durations) < .12, (slug, durations)
         assert math.isfinite(scene['peakDbFS']) and scene['peakDbFS'] < -1.0, slug
+        assert math.isfinite(scene.get('rmsDbFS', float('nan'))), (slug, 'missing rmsDbFS in render report')
         result['scenes'][slug] = {'durations': durations, 'peakDbFS': scene['peakDbFS'],
+                                  'rmsDbFS': scene['rmsDbFS'],
                                   'bytes': sum((ASSET_DIR / x).stat().st_size for x in scene['stems'].values())}
     result['checks'] = ['six scene groups', 'three independently encoded stereo stems per scene',
-                        'near 900-second aligned durations', 'file sizes', 'peak below 0 dBFS by render report']
+                        'near 900-second aligned durations', 'file sizes', 'peak below 0 dBFS by render report',
+                        'per-scene RMS loudness recorded for cross-scene comparison']
     out = ROOT / 'journey-audio-qa.json'; out.write_text(json.dumps(result, indent=2))
     print('PASS six 15-minute streamed journey groups', ' '.join(result['scenes']))
 

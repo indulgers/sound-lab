@@ -1,5 +1,5 @@
 {
-  "checkedOn": "2026-11-14",
+  "checkedOn": "2026-11-16",
   "status": "Review preview assets; source-described locations, no independent GPS guarantee",
   "usage": "Actual location-described moving video. Not original Sound Cocktail field footage. Music is separately procedurally produced.",
   "sources": [
@@ -60,19 +60,27 @@
       "license": "Pexels License",
       "licenseUrl": "https://www.pexels.com/license/",
       "location": "Kyoto, Japan (creator-described garden and bamboo fountain; GPS unverified)",
-      "locationEvidence": "Both original Pexels videos explicitly describe Kyoto; GPS not independently checked",
+      "locationEvidence": "Three Kyoto-labelled Pexels sources: Kinkaku-ji arrival pan by Stephan Leuzinger plus Brian Zhang garden and bamboo fountain; GPS not independently checked",
       "files": [
         "kyoto-travel.mp4",
         "kyoto-travel-mobile.mp4",
         "kyoto-travel.jpg",
         "kyoto-travel-mobile.jpg"
       ],
-      "changesNotice": "Two 9:16 source videos edited into a calm continuous scene, 16:9 and 9:16 silent H.264 renders, color matching and dissolves",
+      "changesNotice": "Three-part sequence (V4.3): 13s slow panoramic reveal of Kinkaku-ji across Mirror Pond, then 52s moss-garden water and 22s bamboo fountain, 1.5s dissolves. The arrival is a slow pan, not a walking/dolly shot; poster is taken from the calm garden section (20s) so the gallery keeps the quiet-garden identity.",
       "additionalSources": [
+        {
+          "creator": "Stephan Leuzinger",
+          "title": "Stunning View of Kinkaku-ji Temple in Kyoto",
+          "url": "https://www.pexels.com/video/stunning-view-of-kinkaku-ji-temple-in-kyoto-37901319/",
+          "license": "Pexels License",
+          "role": "Arrival: slow pan across Kinkaku-ji Mirror Pond"
+        },
         {
           "creator": "Brian Zhang",
           "url": "https://www.pexels.com/video/tranquil-kyoto-temple-bamboo-fountain-32272459/",
-          "license": "Pexels License"
+          "license": "Pexels License",
+          "role": "Closing: bamboo fountain"
         }
       ]
     },

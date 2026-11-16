@@ -140,4 +140,7 @@ test('all six destinations use attributed moving film instead of Yangshuo or con
  assert.match(kyoto.location.zh,/苔庭/);
  assert.equal(kyoto.filmCreator,'Brian Zhang');
  assert.ok(kyoto.filmExtraSourcePage.includes('32272459'));
+ assert.equal(kyoto.filmMotionType,'arrival-pan-water');
+ assert.equal(kyoto.filmArrivalCreator,'Stephan Leuzinger');
+ assert.ok(kyoto.filmArrivalSourcePage.includes('37901319'));
 });
