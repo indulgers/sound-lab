@@ -1,0 +1,27 @@
+name: Kyoto calm location footage candidates
+on:
+  push:
+    branches: [codex/immersive-video-scenes]
+    paths:
+      - scripts/probe-kyoto-calm.sh
+      - .github/workflows/probe-kyoto-calm.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  candidates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Download source-labelled Kyoto footage and review crops
+        run: bash scripts/probe-kyoto-calm.sh
+      - name: Upload visual contact shots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyoto-quiet-film-comparisons
+          path: preview-qa/kyoto-candidates/
+          if-no-files-found: ignore

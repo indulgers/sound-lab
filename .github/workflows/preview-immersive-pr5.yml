@@ -1,0 +1,149 @@
+name: Verify and preview Sound Cocktail PR 5
+
+on:
+  push:
+    branches:
+      - codex/immersive-video-scenes
+  workflow_dispatch:
+
+concurrency:
+  group: sound-cocktail-pr5-preview
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Restore long-form audio stems
+        uses: actions/cache/restore@v4
+        with:
+          path: public/assets/audio/journeys
+          key: pr5-journeys-v3-${{ hashFiles('scripts/render_journeys.py', 'public/assets/audio/scenes/manifest.json') }}
+      - name: Install audio codec tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Render original 15-minute stems (only when cache is missing)
+        run: |
+          if [ ! -s public/assets/audio/journeys/manifest.json ]; then
+            python -m pip install --disable-pip-version-check --quiet 'numpy==2.0.2' 'scipy==1.14.1'
+            python scripts/render_journeys.py
+          fi
+          python scripts/validate_journey_audio.py
+      - name: Cache verified audio immediately
+        uses: actions/cache/save@v4
+        with:
+          path: public/assets/audio/journeys
+          key: pr5-journeys-v3-${{ hashFiles('scripts/render_journeys.py', 'public/assets/audio/scenes/manifest.json') }}
+      - name: Export editorial listening comparisons
+        run: bash scripts/export-listening-samples.sh
+      - name: Restore destination-specific moving films
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            public/assets/scenes/*-travel.mp4
+            public/assets/scenes/*-travel-mobile.mp4
+            public/assets/scenes/*-travel.jpg
+            public/assets/scenes/*-travel-mobile.jpg
+            public/assets/scenes/real-travel-films.json
+          key: pr5-real-travel-v1-${{ hashFiles('scripts/build-travel-films.py') }}
+      - name: Create actual licensed travel videos and matching posters
+        run: |
+          if [ ! -s public/assets/scenes/real-travel-films.json ]; then
+            python3 scripts/build-travel-films.py
+          fi
+          python3 scripts/validate-travel-films.py
+      - name: Cache verified travel video
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            public/assets/scenes/*-travel.mp4
+            public/assets/scenes/*-travel-mobile.mp4
+            public/assets/scenes/*-travel.jpg
+            public/assets/scenes/*-travel-mobile.jpg
+            public/assets/scenes/real-travel-films.json
+          key: pr5-real-travel-v1-${{ hashFiles('scripts/build-travel-films.py') }}
+      - name: Preserve raw scene framing for screenshot review
+        run: |
+          mkdir -p preview-qa/film-frames
+          cp public/assets/scenes/*-travel-mobile.jpg preview-qa/film-frames/
+          cp public/assets/scenes/kyoto-travel.jpg preview-qa/film-frames/
+      - name: Run tests
+        run: npm test
+      - name: Build TanStack Start application
+        run: npm run build
+      - name: Deploy only isolated review Worker (if secrets are configured)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "Cloudflare secrets unavailable; tests and build completed, preview was not deployed." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # The review Worker deliberately uses a different name and KV namespace.
+          # No routes or domains from the production configuration are attached.
+          REVIEW_KV="SOUND_COCKTAIL_PR5_REVIEW_KV"
+          npx wrangler kv namespace list > /tmp/kv-list.json
+          KV_ID=$(jq -r --arg title "$REVIEW_KV" '.[] | select(.title == $title) | .id' /tmp/kv-list.json | head -n 1)
+          if [ -z "$KV_ID" ] || [ "$KV_ID" = "null" ]; then
+            npx wrangler kv namespace create "$REVIEW_KV"
+            npx wrangler kv namespace list > /tmp/kv-list.json
+            KV_ID=$(jq -r --arg title "$REVIEW_KV" '.[] | select(.title == $title) | .id' /tmp/kv-list.json | head -n 1)
+          fi
+          test -n "$KV_ID" && test "$KV_ID" != "null"
+          python3 - "$KV_ID" <<'PY'
+          import sys
+          from pathlib import Path
+          cfg = Path('wrangler.jsonc').read_text()
+          old = '"name": "sound-cocktail"'
+          assert cfg.count(old) == 1
+          cfg = cfg.replace(old, '"name": "sound-cocktail-pr5-review",\n\t"workers_dev": true')
+          assert 'routes' not in cfg and 'custom_domains' not in cfg
+          for placeholder in ('4519ca13-85c1-4751-b0e9-5c714be17964', '9da35d08-bad2-4f32-9278-e1952b020496'):
+              assert placeholder in cfg
+              cfg = cfg.replace(placeholder, sys.argv[1])
+          Path('wrangler.jsonc').write_text(cfg)
+          PY
+          npm run build
+          npx wrangler deploy 2>&1 | tee /tmp/review-deploy.log
+          URL=$(grep -oE 'https://[a-z0-9.-]+[.]workers[.]dev' /tmp/review-deploy.log | head -n 1 || true)
+          if [ -z "$URL" ]; then
+            echo "Deploy completed without a workers.dev URL in logs; inspect Wrangler output." >> "$GITHUB_STEP_SUMMARY"
+          else
+            printf "PR #5 isolated preview: %s\\n" "$URL" | tee -a "$GITHUB_STEP_SUMMARY"
+            curl --max-time 20 -fsSL "$URL/zh" -o /tmp/preview-home.html
+            echo "PREVIEW_DEPLOYED=true" >> "$GITHUB_ENV"
+            echo "PREVIEW_URL=$URL" >> "$GITHUB_ENV"
+          fi
+      - name: Install Chromium for end-to-end checks
+        if: env.PREVIEW_DEPLOYED == 'true'
+        run: |
+          npm install --no-save --package-lock=false playwright@1.65.0
+          npx playwright install --with-deps chromium
+      - name: Verify live player and desktop/mobile journeys
+        if: env.PREVIEW_DEPLOYED == 'true'
+        run: node scripts/preview-browser-smoke.mjs
+      - name: Upload browser review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sound-cocktail-pr5-browser-qa
+          path: preview-qa/
+          if-no-files-found: ignore

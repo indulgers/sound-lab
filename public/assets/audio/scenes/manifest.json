@@ -1,0 +1,52 @@
+{
+  "version": "3.1",
+  "sourceBundle": "Sound-Cocktail-v3.1-World-Atlas",
+  "sampleRate": 32000,
+  "decodedDurationSeconds": 180,
+  "channels": 2,
+  "provenance": "Original programmatic arrangements made for Sound Cocktail. The score stems retain the previous project-generated V2 music; additional texture and air stems are algorithmic synthesis. No third-party commercial music or destination field recordings.",
+  "files": [
+    {
+      "file": "bali-score.mp3",
+      "scene": "bali",
+      "layer": "score",
+      "sizeBytes": 2881196,
+      "sha256": "41ad5135d84febcca47030d0453b4f173b680ed6c03cae833d134d771fd019a2"
+    },
+    {
+      "file": "bali-resonance.mp3",
+      "scene": "bali",
+      "layer": "resonance",
+      "sizeBytes": 2881196,
+      "sha256": "a6c95c64c62f9d189cda7fd84af02e115fd434390b807f4a8a6e1399d52b130b"
+    },
+    {
+      "file": "bali-air.mp3",
+      "scene": "bali",
+      "layer": "air",
+      "sizeBytes": 2881196,
+      "sha256": "66c60a8b1e9fd9ab96194457242e696fe0be082b60e28d838911b96a6f41fba9"
+    },
+    {
+      "file": "chiang-mai-score.mp3",
+      "scene": "chiang-mai",
+      "layer": "score",
+      "sizeBytes": 2881196,
+      "sha256": "1177241a6d52abd7a0b9ac5983f14650dcf2d9b5ed0262da54306653d1718499"
+    },
+    {
+      "file": "chiang-mai-wood.mp3",
+      "scene": "chiang-mai",
+      "layer": "wood",
+      "sizeBytes": 2881196,
+      "sha256": "3d40e0b8832c2ef79b57cac8fc968aeafb3859cdf51a8ebd31b450c8dab37041"
+    },
+    {
+      "file": "chiang-mai-air.mp3",
+      "scene": "chiang-mai",
+      "layer": "air",
+      "sizeBytes": 2881196,
+      "sha256": "c827ca1ba6341e31407f41ee41dd6d78bf157afc1cb70a7e291a7af44f504b31"
+    }
+  ]
+}

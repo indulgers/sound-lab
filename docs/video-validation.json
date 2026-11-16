@@ -1,0 +1,112 @@
+[
+  {
+    "file": "bali-rainforest-mobile.mp4",
+    "metadata": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 540,
+          "height": 960,
+          "r_frame_rate": "25/1"
+        }
+      ],
+      "format": {
+        "duration": "28.520000",
+        "size": "3073328"
+      }
+    },
+    "sha256": "f68eb30fda16774e27f326cd722347613a717bdc6fe1f2056c9d106e7e6c86c7",
+    "frames": 713,
+    "adjacent_frame_mean_difference_median": 1.3054166666666667,
+    "adjacent_frame_mean_difference_p99": 2.0892375,
+    "last_to_first_mean_difference": 3.084861111111111,
+    "faststart": true
+  },
+  {
+    "file": "bali-rainforest.mp4",
+    "metadata": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1280,
+          "height": 720,
+          "r_frame_rate": "25/1"
+        }
+      ],
+      "format": {
+        "duration": "28.520000",
+        "size": "5634140"
+      }
+    },
+    "sha256": "2464cf8670645047b6aebea5d4147df24a573d7d4fe5474f0cfd927fb9f52e6e",
+    "frames": 713,
+    "adjacent_frame_mean_difference_median": 0.48086805555555556,
+    "adjacent_frame_mean_difference_p99": 0.8240562499999999,
+    "last_to_first_mean_difference": 1.4880555555555555,
+    "faststart": true,
+    "accelerated_decode_loops": 10,
+    "decode_returncode": 0,
+    "decode_stderr": ""
+  },
+  {
+    "file": "chiang-mai-cafe-mobile.mp4",
+    "metadata": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 540,
+          "height": 960,
+          "r_frame_rate": "25/1"
+        }
+      ],
+      "format": {
+        "duration": "6.800000",
+        "size": "566132"
+      }
+    },
+    "sha256": "02776c9970f74b7dbe228ed26f2e24ecf5e17fff95155bf4167dde3d9c711568",
+    "frames": 170,
+    "adjacent_frame_mean_difference_median": 0.18465277777777778,
+    "adjacent_frame_mean_difference_p99": 0.4528388888888887,
+    "last_to_first_mean_difference": 1.1080555555555556,
+    "faststart": true
+  },
+  {
+    "file": "chiang-mai-cafe.mp4",
+    "metadata": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1600,
+          "height": 900,
+          "r_frame_rate": "25/1"
+        }
+      ],
+      "format": {
+        "duration": "6.800000",
+        "size": "1227138"
+      }
+    },
+    "sha256": "e3eef4664c8227ad6867a25d05edfbe985b80e3cdedcf37a112da2ce0771889a",
+    "frames": 170,
+    "adjacent_frame_mean_difference_median": 0.16159722222222223,
+    "adjacent_frame_mean_difference_p99": 0.3121944444444442,
+    "last_to_first_mean_difference": 0.7031944444444445,
+    "faststart": true,
+    "accelerated_decode_loops": 10,
+    "decode_returncode": 0,
+    "decode_stderr": ""
+  }
+]

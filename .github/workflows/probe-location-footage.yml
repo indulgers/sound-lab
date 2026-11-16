@@ -1,0 +1,39 @@
+name: Probe licensed destination footage
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/probe-location-footage.sh
+      - scripts/build-travel-films.py
+      - .github/workflows/probe-location-footage.yml
+    branches: [codex/immersive-video-scenes]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - name: FFmpeg available
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Probe Pexels and Commons assets
+        run: bash scripts/probe-location-footage.sh
+      - name: Render genuine Chiang Mai travel footage
+        env:
+          PLACE_ONLY: chiang-mai
+        run: python3 scripts/build-travel-films.py
+      - name: Upload verified source contact shots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: location-source-previews
+          path: |
+            /tmp/soundcocktail-footage/*.jpg
+            public/assets/scenes/chiang-mai-travel*.mp4
+            public/assets/scenes/chiang-mai-travel*.jpg
+            public/assets/scenes/real-travel-films.json
+          if-no-files-found: ignore

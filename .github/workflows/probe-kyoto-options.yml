@@ -1,0 +1,31 @@
+name: Inspect calm Kyoto video candidates
+on:
+  push:
+    branches: [codex/immersive-video-scenes]
+    paths:
+      - scripts/probe-kyoto-options.sh
+      - .github/workflows/probe-kyoto-options.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up FFmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Download and inspect exact Kyoto videos
+        run: bash scripts/probe-kyoto-options.sh
+      - name: Upload actual frames and media metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kyoto-candidate-contact-sheets
+          path: |
+            preview-kyoto/*.jpg
+            preview-kyoto/*.json
+            preview-kyoto/*.csv
+            preview-kyoto/*.log
+          if-no-files-found: warn
