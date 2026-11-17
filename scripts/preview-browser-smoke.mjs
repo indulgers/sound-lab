@@ -206,8 +206,13 @@ try {
     ['kyoto','苔庭静水'],
     ['hoi-an','灯笼河畔'],
   ]) {
-    await review.locator('.sc-nav-active').click();
-    await review.locator('.sc-dialog[open]').waitFor();
+    // The dialog stays open after a locked card (no scene switch, no close),
+    // so only open it when it is not already open — otherwise the open
+    // dialog's overlay intercepts the nav click and Playwright times out.
+    if (!(await review.locator('.sc-dialog[open]').count())) {
+      await review.locator('.sc-nav-active').click();
+      await review.locator('.sc-dialog[open]').waitFor();
+    }
     const all=review.locator('.sc-explore-filters button').filter({hasText:/探索所有状态/});
     if(await all.count()) await all.click();
     const card=review.locator('.sc-gallery-card').filter({hasText:label});
