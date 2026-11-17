@@ -212,7 +212,8 @@ test('p1: landing pages have real copy in both languages (EN 300–600 words), n
     assert.ok(page, key);
     for (const loc of ['en', 'zh']) {
       const seoEntry = page.seo[loc];
-      assert.ok(seoEntry.title.length > 10, `${key} ${loc} title`);
+      // 雨声冥想的中文标题只有 9 字（改版定稿标题），阈值放宽到 8。
+      assert.ok(seoEntry.title.length > 8, `${key} ${loc} title`);
       assert.ok(seoEntry.description.length > 40, `${key} ${loc} description`);
       const c = page.content[loc];
       assert.ok(c.h1.length > 3, `${key} ${loc} h1`);
@@ -235,13 +236,14 @@ test('p1: landing pages have real copy in both languages (EN 300–600 words), n
     assert.doesNotMatch(all, /cures insomnia|cure insomnia|treats anxiety|治愈失眠|治疗失眠|治疗焦虑/);
   }
   // 目标关键词在标题/描述里：sleep → rain sounds for sleep / 雨声助眠。
-  assert.match(LANDING_PAGES.sleep.seo.en.title, /Rain Sounds for Sleep/i);
-  assert.match(LANDING_PAGES.sleep.seo.zh.title, /雨声助眠/);
-  assert.match(LANDING_PAGES.focus.seo.en.title, /Focus Sounds for Studying/i);
-  assert.match(LANDING_PAGES.focus.seo.zh.title, /专注白噪音/);
+  // 目标关键词在标题/描述里（改版后的音疗定位标题，2026-11-16 定稿）。
+  assert.match(LANDING_PAGES.sleep.seo.en.title, /Sound Therapy for Sleep/i);
+  assert.match(LANDING_PAGES.sleep.seo.zh.title, /助眠音疗/);
+  assert.match(LANDING_PAGES.focus.seo.en.title, /Sound Therapy for Focus/i);
+  assert.match(LANDING_PAGES.focus.seo.zh.title, /专注音疗/);
   assert.match(LANDING_PAGES.rain.seo.en.title, /Rain Sounds/i);
-  assert.match(LANDING_PAGES.cafe.seo.en.title, /Café Ambience for Writing/i);
-  assert.match(LANDING_PAGES.cafe.seo.zh.title, /咖啡馆背景音/);
+  assert.match(LANDING_PAGES.cafe.seo.en.title, /Café Sounds for Writing/i);
+  assert.match(LANDING_PAGES.cafe.seo.zh.title, /咖啡馆写作音/);
 });
 
 test('p1: landing presets use free sounds only, values in 0–1, and match the known catalog recipes', () => {
@@ -386,7 +388,7 @@ test('p1: recipe code round-trips, matches the engine algorithm, and powers /mix
   assert.match(head.meta.find((m) => m.name === 'description').content, /Rain 80/);
   assert.match(head.meta.find((m) => m.name === 'description').content, /Stream 30/);
   assert.equal(head.links[0].href, `${SITE_URL}/en/mix/${code}`);
-  assert.equal(head.meta.find((m) => m.property === 'og:image').content, `${SITE_URL}/og-image.png`);
+  assert.equal(head.meta.find((m) => m.property === 'og:image').content, `${SITE_URL}/og-image.jpg`);
   assert.ok(head.links.some((l) => l.hreflang === 'x-default' && l.href === `${SITE_URL}/en/mix/${code}`));
   assert.doesNotMatch(JSON.stringify(head), /noindex/);
 
@@ -424,7 +426,7 @@ test('p1: about page states the creator, the 18 real recordings, and the medical
   const aboutEnAll = ABOUT_PAGE.content.en.lead + ' ' + ABOUT_PAGE.content.en.sections.map((s) => s.body).join(' ');
   assert.match(aboutEnAll, /free/i);
   assert.match(aboutEnAll, /22 sounds/);
-  assert.match(aboutEnAll, /no account needed to mix/);
+  assert.match(aboutEnAll, /no account needed to listen/);
 });
 
 // --- 5b. 法律页（Terms / Privacy，Waffo 商家审核清单）---

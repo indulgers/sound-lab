@@ -19,7 +19,7 @@
  *    60 秒内请求页面超过 120 次 → 429。
  * 3. 想留的爬虫（Googlebot / Bingbot / OAI-SearchBot / PerplexityBot /
  *    ClaudeBot）永远不进 UA 封禁；支付、认证、/api/* 与 robots.txt /
- *    sitemap.xml / llms.txt / og-image.png / 健康检查一律豁免。
+ *    sitemap.xml / llms.txt / og-image.jpg / 健康检查一律豁免。
  * 4. KV 不可用时失败放行（fail open）：UA 与限速仍生效，IP 封禁暂不
  *    生效；KV 读写失败只记数，不抛错、不影响正常请求。
  *
@@ -98,7 +98,7 @@ const EXEMPT_PREFIXES = ['/api/', '/__', '/_serverFn']
 /** 静态资源：只查 IP 封禁（不断数据传输才是目的），不查 UA、不限速
  *（真实用户一次加载要取 20 多个音频文件，不能按页面限速算）。 */
 const ASSET_PREFIXES = ['/assets/']
-const ASSET_EXACT = new Set(['/og-image.png'])
+const ASSET_EXACT = new Set(['/og-image.jpg'])
 
 /**
  * 路径分类：'exempt'（不检查）、'honeypot'（陷阱，直通处理函数）、

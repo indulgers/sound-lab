@@ -5,7 +5,7 @@
  * - 英文界面不出现任何中文（CJK）；中文界面不出现英文界面标签。
  *   例外只有品牌名（Sound Cocktail / Google / Apple Pay / Google Pay）、
  *   配方码前缀（SYL-）、协议名（HTTP）、路由与存储标识（/api、ORDERS_KV 等），
- *   以及只在英文界面渲染的装饰性英文副标题（mixer.en 等，中文界面不渲染）。
+ *   以及只在英文界面渲染的装饰性英文副标题（recipes.en 等，中文界面不渲染）。
  * - 自动配方名、配比汇总、配方卡片日期都按当前语言生成；
  *   用户自己输入的配方名不在这里翻译——存下来的名字原样展示。
  * - 语言只改文案，不改价格：packDisplay 的金额只看币种（支付地区），
@@ -30,12 +30,10 @@ const LATIN = /[A-Za-z]/;
 
 // 只在英文界面出现的装饰性英文副标题（中文界面不渲染，见 SoundLabView/CheckoutView 的条件渲染）。
 const EN_ONLY_SUBTITLES = new Set([
-  'mixer.en',
   'recipes.en',
   'plus.en',
   'mine.en',
   'sources.en',
-  'about.en',
   'checkout.en',
 ]);
 // 中文文案里允许出现的非中文记号：品牌名、支付品牌、配方码前缀、协议名、
@@ -90,10 +88,8 @@ test('locale: CN strings have no leftover English UI labels', () => {
 test('locale: t() replaces {placeholders} and falls back to the key', () => {
   assert.equal(t('en', 'mine.saved', { name: 'Rain' }), 'Saved “Rain”');
   assert.equal(t('zh', 'mine.saved', { name: '雨' }), '已保存「雨」');
-  assert.equal(
-    t('en', 'mixer.groupCount', { n: 8 }),
-    '8 sounds · open “Tuning” to fine-tune each one',
-  );
+  assert.equal(t('en', 'nowPlaying.remaining', { time: '09:32' }), '09:32 left');
+  assert.equal(t('zh', 'nowPlaying.remaining', { time: '09:32' }), '还剩 09:32');
   assert.equal(t('en', 'does.not.exist'), 'does.not.exist');
 });
 
@@ -156,8 +152,8 @@ test('catalog: mix summary follows locale', () => {
   ];
   assert.equal(mixSummaryText(active, 'en'), 'Current mix: Rain 80 · Fire 52 · Piano 40');
   assert.equal(mixSummaryText(active, 'zh'), '当前配比：雨 80 · 篝火 52 · 钢琴 40');
-  assert.equal(mixSummaryText([], 'en'), 'Current mix: no fader moved yet.');
-  assert.equal(mixSummaryText([], 'zh'), '当前配比：还没有拉动任何推子。');
+  assert.equal(mixSummaryText([], 'en'), 'Current mix: no sound tuned yet.');
+  assert.equal(mixSummaryText([], 'zh'), '当前配比：还没有调过任何声音。');
 });
 
 test('catalog: saved-recipe dates follow locale', () => {

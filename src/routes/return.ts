@@ -27,7 +27,7 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
 <h1 id="title">支付结果</h1>
 <p id="status">正在确认支付结果……</p>
 <p id="unlocked" hidden></p>
-<div id="actions" hidden><a href="/" class="go" id="goMixer">去调音台</a></div>
+<div id="actions" hidden><a href="/" class="go" id="goJourneys">去听旅程</a></div>
 <p><a href="/" id="backHome">返回 Sound Cocktail</a></p>
 <script>
 (function () {
@@ -39,12 +39,12 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
       checking: 'Confirming the payment result…',
       noOrder: 'No order information found.',
       paid: function (no) { return 'Payment confirmed: order ' + no + '.'; },
-      unlocked: function (name) { return 'Unlocked: ' + name + '. Sign in with the same account to use it in the mixer.'; },
+      unlocked: function (name) { return 'Unlocked: ' + name + '. Sign in with the same account to use it in your journeys.'; },
       pending: 'Waiting for payment: this order has not been paid yet.',
       closed: 'This transaction is closed.',
       unknown: 'Payment status unknown. Please refresh and try again, or contact support.',
       failed: 'Confirmation failed. Please refresh and try again.',
-      goMixer: 'Go to the mixer',
+      goJourneys: 'Go to journeys',
       backHome: 'Back to Sound Cocktail'
     },
     zh: {
@@ -52,23 +52,23 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
       checking: '正在确认支付结果……',
       noOrder: '未找到订单信息。',
       paid: function (no) { return '支付成功：订单 ' + no + ' 已确认。'; },
-      unlocked: function (name) { return '已解锁：' + name + '。登录同一账号即可在调音台使用。'; },
+      unlocked: function (name) { return '已解锁：' + name + '。登录同一账号即可在旅程里使用。'; },
       pending: '等待付款：订单尚未完成支付。',
       closed: '交易已关闭。',
       unknown: '支付状态未知，请稍后刷新重试或联系客服。',
       failed: '确认失败，请稍后刷新重试。',
-      goMixer: '去调音台',
+      goJourneys: '去听旅程',
       backHome: '返回 Sound Cocktail'
     }
   }[locale];
   document.documentElement.lang = locale === 'en' ? 'en' : 'zh-CN';
   document.title = T.title + ' · Sound Cocktail';
   document.getElementById('title').textContent = T.title;
-  document.getElementById('goMixer').textContent = T.goMixer;
+  document.getElementById('goJourneys').textContent = T.goJourneys;
   document.getElementById('backHome').textContent = T.backHome;
-  // 回调音台的链接按用户语言走 /en 或 /zh（P1：裸 / 会 308 到 /en，
+  // 回旅程的链接按用户语言走 /en 或 /zh（P1：裸 / 会 308 到 /en，
   // 中文用户直接给 /zh，少一次跳转、语言也不闪一下英文）。
-  document.getElementById('goMixer').href = '/' + locale;
+  document.getElementById('goJourneys').href = '/' + locale;
   document.getElementById('backHome').href = '/' + locale;
   var status = document.getElementById('status');
   if (!${safeNo ? 'true' : 'false'}) { status.textContent = T.noOrder; return; }

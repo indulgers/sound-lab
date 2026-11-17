@@ -1,5 +1,5 @@
 /**
- * Shared sleep-timer helpers for the journey player and the mixer.
+ * Shared sleep-timer helpers for the journey player and the recipe engine.
  *
  * Pure functions only: the fade schedule, the remaining-time format, and
  * the option parsing. Both engines apply the schedule to their own gain

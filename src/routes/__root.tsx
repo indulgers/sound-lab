@@ -11,7 +11,6 @@ import { OG_IMAGE_URL, seoForRoute, verificationFromContext, verificationMeta } 
 import { botGuardMiddleware } from '../server/bot-guard-middleware'
 import { verificationMiddleware } from '../server/verification-middleware'
 import { mountSoundLab } from '../sound-lab.mjs'
-import { mountVisualEffects } from '../visual-effects.mjs'
 import appCss from '../styles.css?url'
 import scenesCss from '../scenes/scenes.css?url'
 
@@ -37,7 +36,7 @@ import '@fontsource/cormorant-garamond/700.css'
 const View = memo(SoundLabView)
 
 const FAVICON =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FFF3D6'/%3E%3Cpath d='M7 8h18c0 5.4-3.6 9.2-7.8 10.1V24h3.6v2.6H11.2V24h3.6v-5.9C10.6 17.2 7 13.4 7 8z' fill='none' stroke='%2343301E' stroke-width='1.7' stroke-linejoin='round'/%3E%3Cpath d='M11.5 11.5h9' stroke='%23C08A4E' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E"
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23F6F0E4'/%3E%3Cpath d='M5 16h3.5l2.5-6 3.5 11 2.5-8 1.5 3H27' fill='none' stroke='%23273B30' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
 
 export const Route = createRootRoute({
   /**
@@ -152,20 +151,15 @@ interface LabController {
   setOwnedPacks: (packIds: string[]) => void
   /** 订阅状态：订阅用户解锁全部通道、不限时、能用睡眠定时与保存配方。 */
   setSubscriber: (value: boolean) => void
-  setFocus: (open: boolean) => void
-  /** 页面挂载时接 DOM（首页/落地页 Hero + 调音台、我的配方、音源清单）。 */
-  bindHero: () => void
-  unbindHero: () => void
-  bindMixer: () => void
-  unbindMixer: () => void
+  /** Now-playing 条的暂停/继续。 */
+  togglePlaying: () => boolean
+  /** 页面挂载时接 DOM（我的配方、音源清单）。 */
   bindMine: () => void
   unbindMine: () => void
   bindSources: () => void
   unbindSources: () => void
-  /** 落地页“存下这杯”：直接存当前配比，不依赖保存框 DOM。 */
+  /** 落地页“存下配方”：直接存当前配比，不依赖保存框 DOM。 */
   saveMixAs: (name: string) => boolean
-  /** 卸载时把杯子从沉浸遮罩搬回 Hero。 */
-  restoreCupStage: () => void
   dispose: () => void
 }
 
@@ -184,7 +178,6 @@ function SoundLab() {
   const router = useRouter()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const pathLocale = localeFromPath(pathname)
-  const focusRoute = stripLocalePrefix(pathname).replace(/\/$/, '') === '/focus'
   const controller = useRef<LabController | null>(null)
   const playRecipe = useCallback(
     (recipe: { name: string; mix: Record<string, number>; params?: unknown }) =>
@@ -267,25 +260,15 @@ function SoundLab() {
   }, [isSubscriber])
 
   useLayoutEffect(() => {
-    const effects = mountVisualEffects()
-    const lab = mountSoundLab({
-      onMixChange: effects.onMixChange,
-      onFocusChange(open: boolean) {
-        const path = router.state.location.pathname
-        const locale = localeFromPath(path) ?? getLocale()
-        const to = localizePath(open ? '/focus' : '/studio', locale) as '/en/studio' | '/zh/studio' | '/en/focus' | '/zh/focus'
-        if (stripLocalePrefix(path).replace(/\/$/, '') !== (open ? '/focus' : '/studio')) {
-          void router.navigate({ to, resetScroll: false })
-        }
-      },
-    })
+    const lab = mountSoundLab()
     controller.current = lab
     // 落地页 / 混音页预设事件（P1）：LandingCopy 与 MixPage 发事件，
     // 外壳转交音频引擎。监听器注册在 mount useLayoutEffect 里，
     // 先于子组件的 useEffect 执行，所以落地页挂载时发出的预设不会丢。
-    // apply-preset：只摆推子，不播放、不进沉浸模式。
-    // play-mix：播放整杯（用户手势触发，音频可初始化）。
+    // apply-preset：只摆配比，不播放。
+    // play-mix：播放这个配方（用户手势触发，音频可初始化）。
     // save-mix：直接存当前配比（拆页后保存框只在 /mine，不再填框点保存）。
+    // toggle-play：now-playing 条的暂停/继续。
     function onApplyPreset(event: Event) {
       const mix = (event as CustomEvent)?.detail?.mix
       if (mix) controller.current?.setMix(mix)
@@ -300,17 +283,16 @@ function SoundLab() {
       const name = (event as CustomEvent)?.detail?.name
       if (typeof name === 'string' && name) controller.current?.saveMixAs(name)
     }
-    // 引擎在没有调音台的页面上触发了“去调音台/我的配方/进阶”：
-    // playSavedMix（/mine 调出配方、/mix 打开这杯）、会话结束对话框
-    // 的“存下这杯”、进阶弹窗的“了解进阶”。当前已在目标页就不跳。
+    function onTogglePlay() {
+      controller.current?.togglePlaying()
+    }
+    // 引擎触发了“去我的配方/进阶”：会话结束对话框的“存下配方”、
+    // 进阶弹窗的“了解进阶”。当前已在目标页就不跳。
     function showRoute(seg: string) {
       const path = router.state.location.pathname
       const locale = localeFromPath(path) ?? getLocale()
       if (stripLocalePrefix(path).replace(/\/$/, '') === seg) return
       void router.navigate({ to: localizePath(seg, locale) as '/en' | '/zh' | '/en/recipes' | '/zh/recipes' | '/en/plus' | '/zh/plus' | '/en/mine' | '/zh/mine' | '/en/sources' | '/zh/sources' })
-    }
-    function onShowMixer() {
-      showRoute('/studio')
     }
     function onShowMine() {
       showRoute('/mine')
@@ -325,25 +307,20 @@ function SoundLab() {
     window.addEventListener('soundcocktail:apply-preset', onApplyPreset)
     window.addEventListener('soundcocktail:play-mix', onPlayMix)
     window.addEventListener('soundcocktail:save-mix', onSaveMix)
-    window.addEventListener('soundcocktail:show-mixer', onShowMixer)
+    window.addEventListener('soundcocktail:toggle-play', onTogglePlay)
     window.addEventListener('soundcocktail:show-mine', onShowMine)
     window.addEventListener('soundcocktail:show-plus', onShowPlus)
     return () => {
       window.removeEventListener('soundcocktail:apply-preset', onApplyPreset)
       window.removeEventListener('soundcocktail:play-mix', onPlayMix)
       window.removeEventListener('soundcocktail:save-mix', onSaveMix)
-      window.removeEventListener('soundcocktail:show-mixer', onShowMixer)
+      window.removeEventListener('soundcocktail:toggle-play', onTogglePlay)
       window.removeEventListener('soundcocktail:show-mine', onShowMine)
       window.removeEventListener('soundcocktail:show-plus', onShowPlus)
       lab.dispose()
-      effects.dispose()
       controller.current = null
     }
   }, [router])
-
-  useLayoutEffect(() => {
-    controller.current?.setFocus(focusRoute)
-  }, [focusRoute])
 
   return (
     <LocaleContext.Provider value={shellLocale}>

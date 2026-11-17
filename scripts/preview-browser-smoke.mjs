@@ -107,23 +107,20 @@ try {
   await places.getByRole('button',{name:/适合当前状态/}).click();
   assert.equal(await places.locator('.sc-gallery-card').count(),2);
   await places.screenshot({path:'preview-qa/desktop-meditation-journeys.png'});
+  // Locked journeys cannot switch the scene for anonymous visitors (the
+  // subscription gate in selectJourney): clicking Kyoto must show the
+  // upgrade banner instead. Kyoto immersive visuals need a subscriber
+  // session and are not covered by this anonymous run.
+  await places.locator('.sc-gallery-card').filter({hasText:/苔庭静水/}).locator('img').evaluate(img=>img.decode());
   await places.getByRole('button', {name:/苔庭静水/}).click();
-  await page.locator('[data-scene="kyoto"]').waitFor();
-  await page.locator('.sc-poster').evaluate(img=>img.decode());
-  assert.match(await page.locator('.sc-poster').getAttribute('src'),/kyoto-travel/);
-  assert.match(await page.locator('.sc-video').getAttribute('src'), /kyoto-travel/);
-  await page.waitForFunction(() => document.querySelector('.scene-experience')?.dataset.audioState==='playing',null,{timeout:60000});
-  assert.equal(await page.locator('.sc-film-caption').evaluate(el=>getComputedStyle(el).visibility),'hidden','full immersion hides credit overlay, but About still exposes source');
-  await page.screenshot({ path: 'preview-qa/desktop-kyoto-immersive.png', fullPage: true });
-  await page.locator('.sc-leave').click();
-  await page.locator('.sc-film-caption').waitFor({state:'visible'});
-  assert.match(await page.locator('.sc-film-caption').innerText(), /京都.*苔庭/);
-  const kyotoTitle=await page.locator('.sc-copy h1').innerText();
-  assert.equal(kyotoTitle.split('\n').length,2,'Kyoto headline must not break into 3 distracting rows');
-  const filmFrame=await page.locator('.sc-copy h1').boundingBox();
-  assert.ok(filmFrame && filmFrame.width<=430,'Kyoto headline must preserve at least 60% of landscape for the subject');
-  await page.screenshot({ path: 'preview-qa/desktop-kyoto-playing.png', fullPage: true });
-  console.log('PASS: immersive switch, hidden immersive subtitles and readable Kyoto editorial composition');
+  const lockedBanner = places.locator('.sc-locked-banner');
+  await lockedBanner.waitFor({ state: 'visible' });
+  assert.match(await lockedBanner.innerText(), /苔庭静水/);
+  assert.match(await lockedBanner.innerText(), /进阶版/);
+  assert.equal(await page.locator('.scene-experience').getAttribute('data-scene'), 'bali', 'locked journey must not switch the scene');
+  await places.screenshot({ path: 'preview-qa/desktop-kyoto-locked.png' });
+  console.log('PASS: locked journey shows upgrade prompt instead of switching');
+  await places.locator('button[aria-label="关闭"]').first().click();
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
   mobile.on('pageerror', error => events.push(error.message));
@@ -131,35 +128,24 @@ try {
   const overflow = await mobile.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   assert.ok(overflow <= 1, `Mobile horizontal overflow: ${overflow}px`);
   await mobile.screenshot({ path: 'preview-qa/mobile-intent-zh.png', fullPage: true });
+  // Free visitors enter relax through its free journey (Rainforest Exhale, Bali):
+  // the intent's first journey (Da Lat) is locked, so it is no longer the default.
+  // The headline shows the scene title (Bali), not the journey name.
   await mobile.getByRole('button', { name: /放松/ }).first().click();
   await mobile.locator('[data-intent="relax"]').waitFor();
-  assert.match(await mobile.locator('.sc-copy h1').innerText(), /大叻/);
+  assert.match(await mobile.locator('.sc-copy h1').innerText(), /巴厘岛/);
   await mobile.locator('.sc-poster').evaluate(img=>img.decode());
   await mobile.screenshot({ path: 'preview-qa/mobile-relax-ready.png', fullPage: true });
   console.log('PASS: mobile layout and relaxing journey');
   await mobile.locator('.sc-change-goal').click();
   await mobile.getByRole('button', { name:/冥想/ }).first().click();
   await mobile.locator('[data-intent="meditate"]').waitFor();
+  // Locked chip: anonymous visitors stay on Bali, the chip shows as locked.
+  await mobile.locator('.sc-place-chips button').filter({hasText:/苔庭静水/}).locator('img').evaluate(img=>img.decode());
   await mobile.locator('.sc-place-chips button').filter({hasText:/苔庭静水/}).click();
-  await mobile.locator('[data-scene="kyoto"]').waitFor();
-  await mobile.locator('.sc-poster').evaluate(img=>img.decode());
-  // Wait for the browser to composite the decoded frame after switching source.
-  await mobile.waitForTimeout(850);
-  const mobileFilmState=await mobile.locator('.sc-poster').evaluate(img=>({
-    src:img.currentSrc,complete:img.complete,
-    natural:[img.naturalWidth,img.naturalHeight],
-    opacity:getComputedStyle(img).opacity,
-    visible:getComputedStyle(img).visibility,
-    rect:{w:img.getBoundingClientRect().width,h:img.getBoundingClientRect().height},
-    motion:img.closest('.sc-landscape')?.dataset.motion,
-    bg:getComputedStyle(img.closest('.sc-landscape')).backgroundImage,
-    videoOpacity:getComputedStyle(img.closest('.sc-landscape').querySelector('video')).opacity,
-  }));
-  console.log('KYOTO MOBILE VISUAL DIAGNOSTICS',JSON.stringify(mobileFilmState));
-  assert.match(await mobile.locator('.sc-film-caption').innerText(),/京都.*苔庭/);
-  const mobileKyotoBox=await mobile.locator('.sc-copy h1').boundingBox();
-  assert.ok(mobileKyotoBox && mobileKyotoBox.width <= 345,'Kyoto mobile title should not occupy the entire scene width');
-  await mobile.screenshot({path:'preview-qa/mobile-kyoto-garden.png',fullPage:true});
+  assert.equal(await mobile.locator('.sc-place-chips button.is-locked').filter({hasText:/苔庭静水/}).count(), 1, 'Kyoto chip must show as locked');
+  assert.equal(await mobile.locator('.scene-experience').getAttribute('data-scene'), 'bali', 'locked chip must not switch the scene');
+  console.log('PASS: locked chip stays on the free journey');
   await mobile.locator('.sc-change-goal').click();
   await mobile.getByRole('button',{name:/专注/}).first().click();
   await mobile.locator('[data-intent="focus"]').waitFor();
@@ -167,10 +153,12 @@ try {
   await mobile.locator('.sc-dialog[open] .sc-voices-control').waitFor();
   const quickSave=mobile.locator('.sc-dialog[open] .sc-quick-save');
   assert.equal(await quickSave.isVisible(),true,'Save should be reachable on phones without scrolling to the footer');
+  // Saving mixes is a Plus feature: anonymous visitors get the upgrade toast
+  // and nothing is persisted (subscription gate in saveMix).
   await quickSave.click();
+  await mobile.waitForFunction(() => document.querySelector('.sc-toast')?.textContent.includes('进阶版'), null, { timeout: 5000 });
   const mobileMix=await mobile.evaluate(()=>JSON.parse(window.localStorage.getItem('sound-cocktail.places.v1')||'{}').mixes?.['focus-chiang-mai']);
-  assert.ok(mobileMix,'top Save must actually persist the current Journey');
-  assert.equal(mobileMix.ambience,0,'quiet default must remain muted when saved');
+  assert.equal(mobileMix, undefined, 'anonymous save must not persist a mix');
   await mobile.screenshot({path:'preview-qa/mobile-quiet-cafe-mixer.png',fullPage:true});
   const narrowOverflow=await mobile.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
   assert.ok(narrowOverflow<=1,'mobile mixer and quiet control must not overflow');
@@ -209,6 +197,8 @@ try {
   await review.locator('[data-hydrated="true"]').waitFor();
   await review.getByRole('button',{name:/专注/}).first().click();
   await review.locator('[data-scene="chiang-mai"]').waitFor();
+  // Only Bali is free for anonymous visitors; locked cards must show the
+  // upgrade banner instead of switching the scene (subscription gate).
   for(const [slug,label] of [
     ['da-lat','晨雾书页'],
     ['lisbon','午后灵感'],
@@ -216,18 +206,36 @@ try {
     ['kyoto','苔庭静水'],
     ['hoi-an','灯笼河畔'],
   ]) {
-    await review.locator('.sc-nav-active').click();
-    await review.locator('.sc-dialog[open]').waitFor();
+    // The dialog stays open after a locked card (no scene switch, no close),
+    // so only open it when it is not already open — otherwise the open
+    // dialog's overlay intercepts the nav click and Playwright times out.
+    if (!(await review.locator('.sc-dialog[open]').count())) {
+      await review.locator('.sc-nav-active').click();
+      await review.locator('.sc-dialog[open]').waitFor();
+    }
     const all=review.locator('.sc-explore-filters button').filter({hasText:/探索所有状态/});
     if(await all.count()) await all.click();
-    await review.locator('.sc-gallery-card').filter({hasText:label}).click();
-    await review.locator(`[data-scene="${slug}"]`).waitFor();
-    await review.locator('.sc-poster').evaluate(img=>img.decode());
-    assert.equal(await review.locator('.sc-video').getAttribute('src'),`/assets/scenes/${slug}-travel.mp4`);
-    assert.match(await review.locator('.sc-film-caption').innerText(), slug==='kyoto' ? /金阁寺抵达镜头/ : /实景移动镜头/);
-    await review.screenshot({path:`preview-qa/real-place-${slug}.png`,fullPage:true});
+    const card=review.locator('.sc-gallery-card').filter({hasText:label});
+    await card.locator('img').evaluate(img=>img.decode());
+    const sceneBefore=await review.locator('.scene-experience').getAttribute('data-scene');
+    await card.click();
+    if (slug==='bali') {
+      await review.locator(`[data-scene="${slug}"]`).waitFor();
+      await review.locator('.sc-poster').evaluate(img=>img.decode());
+      assert.equal(await review.locator('.sc-video').getAttribute('src'),`/assets/scenes/${slug}-travel.mp4`);
+      assert.match(await review.locator('.sc-film-caption').innerText(), /实景移动镜头/);
+      await review.screenshot({path:`preview-qa/real-place-${slug}.png`,fullPage:true});
+    } else {
+      // The banner stays mounted across cards, so wait for it to show THIS
+      // journey's name instead of trusting the already-visible stale one.
+      await review.waitForFunction((label) => document.querySelector('.sc-dialog[open] .sc-locked-banner')?.textContent.includes(label), label, { timeout: 5000 });
+      const banner=review.locator('.sc-dialog[open] .sc-locked-banner');
+      assert.match(await banner.innerText(), new RegExp(label));
+      assert.equal(await review.locator('.scene-experience').getAttribute('data-scene'), sceneBefore, 'locked card must not switch the scene');
+      await review.screenshot({path:`preview-qa/real-place-${slug}-locked.png`,fullPage:true});
+    }
   }
-  console.log('PASS: all six actual destination films and identity captions');
+  console.log('PASS: free destination film verified; locked destinations show upgrade prompt');
 
   assert.deepEqual(events, [], 'No uncaught JavaScript errors');
   console.log('PASS: all browser checks');

@@ -1,5 +1,7 @@
-/* The listening room is scoped so the original studio and commerce pages keep their own UI. */
-.scene-home > .topbar-wrap, .scene-home > main > footer, .scene-home > .grain, .scene-home > .aurora-fallback, .scene-home > #auroraCanvas { display:none !important; }
+/* The listening room hides the shell chrome (the journey has its own
+   header); commerce pages use the same sound-therapy system via
+   .studio-shell in styles.css. */
+.scene-home > .topbar-wrap, .scene-home > main > footer { display:none !important; }
 .scene-home > main { padding:0; margin:0; max-width:none; width:100%; }
 .scene-experience { --sc-ivory:#f6f0e4; --sc-ink:#354139; --sc-muted:#7b8176; --sc-rust:#ab6f50; --sc-line:#d8d9cc; position:relative; isolation:isolate; width:100%; height:100svh; min-height:690px; overflow:hidden; background:#273b30; color:var(--sc-ivory); font-family:Manrope,system-ui,sans-serif; font-size:14px; font-weight:400; letter-spacing:0; }
 .scene-experience *, .scene-experience *::before, .scene-experience *::after { box-sizing:border-box; }
@@ -615,3 +617,17 @@ html[lang="zh-CN"] .scene-experience .sc-copy h1 {
   .scene-experience[data-scene="kyoto"] .sc-copy > p { max-width:290px; }
   .scene-experience[data-scene="kyoto"] .sc-film-caption { max-width:none; }
 }
+
+/* 免费 10 分钟上限弹窗（旅程播放）：复用 .sc-error 的卡片样式——
+   米白磨砂卡片，居中；主按钮复用 .sc-primary（深绿），进阶链接与
+   关闭按钮为文字按钮。 */
+.sc-limit{position:absolute; z-index:6; left:50%; bottom:170px; transform:translateX(-50%); width:min(470px,90%);}
+.sc-limit-card{padding:18px 22px; border-radius:14px; color:#4f4435; background:#fbf0dfee; font-size:12px; box-shadow:0 12px 32px rgba(9,22,16,.25);}
+.sc-limit-card h2{margin:0 0 8px; font-family:'Cormorant Garamond',Georgia,serif; font-size:24px; font-weight:600; line-height:1.2; color:#273b30;}
+.sc-limit-card p{margin:0; line-height:1.7;}
+.sc-limit-actions{display:flex; align-items:center; flex-wrap:wrap; gap:8px 18px; margin-top:14px;}
+.sc-limit-actions .sc-primary{font-size:12px;}
+.sc-limit-actions a{font-size:12px; text-decoration:underline; display:inline-flex; align-items:center; gap:6px;}
+.sc-limit-actions a svg{width:14px; height:14px;}
+.sc-limit-actions button:not(.sc-primary){font-size:12px; text-decoration:underline; background:none; border:0; padding:0; cursor:pointer; color:inherit;}
+@media (max-width:700px){ .sc-limit{bottom:150px;} }

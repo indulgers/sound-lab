@@ -9,6 +9,7 @@ import { levelsForScene, readScenePreferences, writeScenePreferences } from './p
 import { SLEEP_TIMER_OPTIONS_MINUTES, sleepChoiceToMs } from '../sleep-timer.mjs';
 import { INTENTS, JOURNEYS, intentById, journeyById, journeysForIntent, recommendedJourneyForIntent, levelsForJourney, controlsForJourney, sceneForJourney } from './journeys.mjs';
 import { createStreamingJourneyPlayer } from './stream-player.mjs';
+import { createSession } from '../listening-session.mjs';
 
 const iconPaths = {
   play: <path d="m9 5 11 7-11 7Z" fill="currentColor" stroke="none" />,
@@ -21,7 +22,6 @@ const iconPaths = {
   arrow: <path d="M4 12h15m-5-5 5 5-5 5" />,
   back: <path d="M20 12H5m5-5-5 5 5 5" />,
   leaf: <><path d="M19 3C6 3 3 8 5 14c2 6 12 7 14-11ZM5 20c1-7 5-10 10-13"/></>,
-  cup: <><path d="M5 9h12v5a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5Zm12 1h2a3 3 0 1 1 0 6h-2M7 22h11M9 3v2m5-3v3"/></>,
   music: <><path d="M10 17V5l10-2v12M10 8l10-2"/><ellipse cx="7" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/></>,
   spark: <><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/></>,
   wind: <><path d="M3 8h12a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 17h7"/></>,
@@ -41,8 +41,8 @@ function Brand() {
   </span>;
 }
 const copy = {
-  en: { places:'Places', studio:'Sound studio', saved:'Saved mixes', listen:'Enter & listen', pause:'Pause listening', resume:'Resume listening', loading:'Finding your rhythm…', sound:'Sound', timer:'Sleep timer', continuous:'No timer', immersive:'Immerse', leave:'Back to the room', motionOn:'Still frame', motionOff:'Travel motion', change:'More in this mood', foot:'A small escape. A little more you.', choose:'Where shall we go?', chooseSub:'Choose a journey that fits this moment; explore all when you want a different mood.', here:'You are here', go:'Stay here', soundTitle:'Make it yours.', soundSub:'A little more of what you need.', reset:'Reset', save:'Save this mix', savedToast:'Your mix is saved for this journey.', storageError:'Your browser could not save this mix. You can keep listening.', resetToast:'Back to the original balance.', timerTitle:'Drift away, on your time.', timerSub:'Music fades out gently over the last 2 minutes, then stops. Leave it off to keep listening.', timerJourney:'End of journey', minutes:'min', timerDone:'Your listening timer has ended.', ready:'Ready when you are', listening:'A LITTLE ROOM TO EXHALE', paused:'Take your time', videoFallback:'Still view · music is available', retry:'Try listening again', error:'The sound could not load. Check your connection and try again.', info:'About this place', close:'Close', volume:'Master volume', savedTitle:'Your familiar places.', savedSub:'Your saved sound balance, ready for your next visit.', noneSaved:'Make a place yours. Open Sound, adjust the layers, and save your mix.', loadSaved:'Return to this mix', savedBadge:'Your saved mix', sources:'Sound sources', inspired:'A place-inspired listening room', inspiredText:'These are place-inspired sound journeys, not verified local recordings. New 15-minute pieces are original procedural compositions; earlier 3-minute references are available for A/B listening. Films and concept illustrations have separately credited sources.', musicCredit:'Music · Sound Cocktail V3.2', continuousNote:'Each place has a fifteen-minute original programme. Longer sessions continue with gentle repetitions, not hours of unique composition.', videoCredit:'Film credits', full:'Full screen', exitFull:'Exit full screen', lockedToast:'This journey is part of Plus — subscribe to unlock all six destinations.', lockedHint:'This journey is part of Plus. Subscribe to unlock all six destinations, unlimited listening, the full tuner and the sleep timer.', lockedGo:'See Plus', timerLocked:'Sleep timer is a Plus feature — subscribe to use it.', saveLocked:'Saving mixes is a Plus feature — subscribe to keep your mixes.', plusBadge:'Plus' },
-  zh: { places:'去往哪里', studio:'声音调制室', saved:'我的收藏', listen:'进入，慢慢听', pause:'暂停聆听', resume:'继续聆听', loading:'让声音慢慢到来…', sound:'调音', timer:'定时停止', continuous:'不限时', immersive:'沉浸', leave:'回到房间', motionOn:'静止画面', motionOff:'动态旅行', change:'同一种状态，换个地方', foot:'一场小小的逃离，找回自己的节奏。', choose:'这次，想去哪里？', chooseSub:'优先展示适合当前状态的旅程，也可以探索其他状态。', here:'你在这里', go:'在这里待一会儿', soundTitle:'调成你的样子。', soundSub:'多一点此刻需要的声音。', reset:'恢复默认', save:'保存这份配比', savedToast:'已保存这段声音旅程的配比。', storageError:'浏览器暂时无法保存，你仍可以继续聆听。', resetToast:'已恢复这个场景的原始配比。', timerTitle:'按自己的时间，慢慢来。', timerSub:'最后两分钟，音乐会慢慢淡出，然后停下。选择不限时即可持续聆听。', timerJourney:'播完这段旅程', minutes:'分钟', timerDone:'本次定时聆听已结束。', ready:'准备好了，就开始吧', listening:'给自己一点呼吸的空间', paused:'慢慢来，时间还在', videoFallback:'静态画面 · 仍可聆听音乐', retry:'重新加载声音', error:'声音加载失败，请检查网络后重试。', info:'关于这个地方', close:'关闭', volume:'总音量', savedTitle:'回到熟悉的地方。', savedSub:'带着你保存的声音配比，开始下一次小旅行。', noneSaved:'打开调音，调整声音层，再保存一份属于你的配比。', loadSaved:'回到这份配比', savedBadge:'已保存配比', sources:'声音来源', inspired:'以目的地为灵感的聆听空间', inspiredText:'这些声音旅程以世界各地为灵感，不代表经核实的当地采音。新版 15 分钟音乐为原创程序编排，旧版 3 分钟音轨可用于 A/B 对比；实景素材和概念插画的来源分别注明。', musicCredit:'音乐 · Sound Cocktail V3.2', continuousNote:'每个地点拥有约十五分钟原创音景。更长会话通过柔和循环延续，并非每小时都有完全不同的音乐。', videoCredit:'视频来源', full:'全屏显示', exitFull:'退出全屏', lockedToast:'这段旅程属于进阶版，订阅后解锁全部六个目的地。', lockedHint:'这段旅程属于进阶版。订阅后解锁全部六个目的地、不限时收听、完整调音器与睡眠定时。', lockedGo:'看看进阶版', timerLocked:'定时停止是进阶版功能，订阅后可用。', saveLocked:'保存配比是进阶版功能，订阅后可保存。', plusBadge:'进阶' },
+  en: { places:'Places', saved:'Saved mixes', listen:'Enter & listen', pause:'Pause listening', resume:'Resume listening', loading:'Finding your rhythm…', sound:'Sound', timer:'Sleep timer', continuous:'No timer', immersive:'Immerse', leave:'Back to the room', motionOn:'Still frame', motionOff:'Travel motion', change:'More in this mood', foot:'A small escape. A little more you.', choose:'Where shall we go?', chooseSub:'Choose a journey that fits this moment; explore all when you want a different mood.', here:'You are here', go:'Stay here', soundTitle:'Make it yours.', soundSub:'A little more of what you need.', reset:'Reset', save:'Save this mix', savedToast:'Your mix is saved for this journey.', storageError:'Your browser could not save this mix. You can keep listening.', resetToast:'Back to the original balance.', timerTitle:'Drift away, on your time.', timerSub:'Music fades out gently over the last 2 minutes, then stops. Leave it off to keep listening.', timerJourney:'End of journey', minutes:'min', timerDone:'Your listening timer has ended.', ready:'Ready when you are', listening:'A LITTLE ROOM TO EXHALE', paused:'Take your time', videoFallback:'Still view · music is available', retry:'Try listening again', error:'The sound could not load. Check your connection and try again.', info:'About this place', close:'Close', volume:'Master volume', savedTitle:'Your familiar places.', savedSub:'Your saved sound balance, ready for your next visit.', noneSaved:'Make a place yours. Open Sound, adjust the layers, and save your mix.', loadSaved:'Return to this mix', savedBadge:'Your saved mix', sources:'Sound sources', inspired:'A place-inspired listening room', inspiredText:'These are place-inspired sound journeys, not verified local recordings. New 15-minute pieces are original procedural compositions; earlier 3-minute references are available for A/B listening. Films and concept illustrations have separately credited sources.', musicCredit:'Music · Sound Cocktail V3.2', continuousNote:'Each place has a fifteen-minute original programme. Longer sessions continue with gentle repetitions, not hours of unique composition.', videoCredit:'Film credits', full:'Full screen', exitFull:'Exit full screen', lockedToast:'This journey is part of Plus — subscribe to unlock all six destinations.', lockedHint:'This journey is part of Plus. Subscribe to unlock all six destinations, unlimited listening, the full tuner and the sleep timer.', lockedGo:'See Plus', limitTitle:'Ten minutes, gently up', limitText:'Free listening runs in 10-minute sessions. Take another 10 minutes, or subscribe to Plus for unlimited listening.', limitAgain:'Listen 10 more minutes', timerLocked:'Sleep timer is a Plus feature — subscribe to use it.', saveLocked:'Saving mixes is a Plus feature — subscribe to keep your mixes.', plusBadge:'Plus' },
+  zh: { places:'去往哪里', saved:'我的收藏', listen:'进入，慢慢听', pause:'暂停聆听', resume:'继续聆听', loading:'让声音慢慢到来…', sound:'调音', timer:'定时停止', continuous:'不限时', immersive:'沉浸', leave:'回到房间', motionOn:'静止画面', motionOff:'动态旅行', change:'同一种状态，换个地方', foot:'一场小小的逃离，找回自己的节奏。', choose:'这次，想去哪里？', chooseSub:'优先展示适合当前状态的旅程，也可以探索其他状态。', here:'你在这里', go:'在这里待一会儿', soundTitle:'调成你的样子。', soundSub:'多一点此刻需要的声音。', reset:'恢复默认', save:'保存这份配比', savedToast:'已保存这段声音旅程的配比。', storageError:'浏览器暂时无法保存，你仍可以继续聆听。', resetToast:'已恢复这个场景的原始配比。', timerTitle:'按自己的时间，慢慢来。', timerSub:'最后两分钟，音乐会慢慢淡出，然后停下。选择不限时即可持续聆听。', timerJourney:'播完这段旅程', minutes:'分钟', timerDone:'本次定时聆听已结束。', ready:'准备好了，就开始吧', listening:'给自己一点呼吸的空间', paused:'慢慢来，时间还在', videoFallback:'静态画面 · 仍可聆听音乐', retry:'重新加载声音', error:'声音加载失败，请检查网络后重试。', info:'关于这个地方', close:'关闭', volume:'总音量', savedTitle:'回到熟悉的地方。', savedSub:'带着你保存的声音配比，开始下一次小旅行。', noneSaved:'打开调音，调整声音层，再保存一份属于你的配比。', loadSaved:'回到这份配比', savedBadge:'已保存配比', sources:'声音来源', inspired:'以目的地为灵感的聆听空间', inspiredText:'这些声音旅程以世界各地为灵感，不代表经核实的当地采音。新版 15 分钟音乐为原创程序编排，旧版 3 分钟音轨可用于 A/B 对比；实景素材和概念插画的来源分别注明。', musicCredit:'音乐 · Sound Cocktail V3.2', continuousNote:'每个地点拥有约十五分钟原创音景。更长会话通过柔和循环延续，并非每小时都有完全不同的音乐。', videoCredit:'视频来源', full:'全屏显示', exitFull:'退出全屏', lockedToast:'这段旅程属于进阶版，订阅后解锁全部六个目的地。', lockedHint:'这段旅程属于进阶版。订阅后解锁全部六个目的地、不限时收听、完整调音与睡眠定时。', lockedGo:'看看进阶版', limitTitle:'十分钟，到了', limitText:'免费收听每次 10 分钟。可以再听 10 分钟，或订阅进阶版，不限时收听。', limitAgain:'再听 10 分钟', timerLocked:'定时停止是进阶版功能，订阅后可用。', saveLocked:'保存配比是进阶版功能，订阅后可保存。', plusBadge:'进阶' },
 };
 
 const goalCopy = {
@@ -51,8 +51,8 @@ const goalCopy = {
 };
 
 const moodCopy = {
-  en:{warmth:'Warmth',space:'Space',energy:'Musical activity',nature:'Nature & air',simple:'Feel the sound',advanced:'Advanced mixing',compare:'Compare original V3.1',newVersion:'Return to V3.2',focus:'Focus session',break:'Your work block is complete. Take a gentle break.',breathe:'Breathing guide',journey:'Switch journey',studio:'Open studio',bass:'Bass EQ',mid:'Mid EQ',treble:'Treble EQ',width:'Stereo width',reverb:'Room reverb',chapter:'Now in the journey',noFilm:'Illustrated place concept · no local footage',save:'Save this journey',inMood:'For this mood',allMoods:'Explore all states',quiet:'No conversations · recommended',someVoices:'Light café voices',voices:'Café conversation',voicesHint:'For focused work, conversations are off by default.'},
-  zh:{warmth:'温暖感',space:'空间深度',energy:'音乐活跃度',nature:'自然环境',simple:'调节你想要的感受',advanced:'高级混音',compare:'对比原版 V3.1',newVersion:'返回 V3.2',focus:'专注时段',break:'这段专注结束了，可以休息一下。',breathe:'呼吸引导',journey:'切换旅程',studio:'进入调音室',bass:'低频',mid:'中频',treble:'高频',width:'立体声宽度',reverb:'空间混响',chapter:'此刻的旅程',noFilm:'原创概念插画 · 非当地实拍',save:'保存这段旅程',inMood:'适合当前状态',allMoods:'探索所有状态',quiet:'无交谈声 · 推荐',someVoices:'少量咖啡馆人声',voices:'咖啡馆交谈',voicesHint:'专注时默认静音，想保留一点生活感可以手动开启。'},
+  en:{warmth:'Warmth',space:'Space',energy:'Musical activity',nature:'Nature & air',simple:'Feel the sound',advanced:'Advanced mixing',compare:'Compare original V3.1',newVersion:'Return to V3.2',focus:'Focus session',break:'Your work block is complete. Take a gentle break.',breathe:'Breathing guide',journey:'Switch journey',studio:'Tune',bass:'Bass EQ',mid:'Mid EQ',treble:'Treble EQ',width:'Stereo width',reverb:'Room reverb',chapter:'Now in the journey',noFilm:'Illustrated place concept · no local footage',save:'Save this journey',inMood:'For this mood',allMoods:'Explore all states',quiet:'No conversations · recommended',someVoices:'Light café voices',voices:'Café conversation',voicesHint:'For focused work, conversations are off by default.'},
+  zh:{warmth:'温暖感',space:'空间深度',energy:'音乐活跃度',nature:'自然环境',simple:'调节你想要的感受',advanced:'高级混音',compare:'对比原版 V3.1',newVersion:'返回 V3.2',focus:'专注时段',break:'这段专注结束了，可以休息一下。',breathe:'呼吸引导',journey:'切换旅程',studio:'调音',bass:'低频',mid:'中频',treble:'高频',width:'立体声宽度',reverb:'空间混响',chapter:'此刻的旅程',noFilm:'原创概念插画 · 非当地实拍',save:'保存这段旅程',inMood:'适合当前状态',allMoods:'探索所有状态',quiet:'无交谈声 · 推荐',someVoices:'少量咖啡馆人声',voices:'咖啡馆交谈',voicesHint:'专注时默认静音，想保留一点生活感可以手动开启。'},
 };
 
 function SceneVideo({ scene, motion, onUnavailable }) {
@@ -116,6 +116,12 @@ export default function SceneExperience() {
   const { isSubscriber } = useLab();
   // 免费用户点中的被锁旅程：在“去往哪里”面板里展示升级提示。
   const [lockedJourney, setLockedJourney] = useState(null);
+  // 免费收听的 10 分钟窗口：与配方播放共用同一个 listening-session
+  // （同一 localStorage key，先到先得）。订阅用户不限时。
+  // 惰性创建：guardFreeListening 在需要时才建（SSR 时 window 不存在）。
+  const limitSession = useRef(null);
+  // 免费窗口到期时展示的升级提示（再听 10 分钟 / 看看进阶版）。
+  const [limitOpen, setLimitOpen] = useState(false);
   // The last timer choice (0 = off, minutes, or 'journey'): remembered
   // and pre-selected next time, never auto-armed.
   const [chosen, setChosen] = useState(0);
@@ -191,11 +197,24 @@ export default function SceneExperience() {
     document.addEventListener('visibilitychange',tick);
     return () => { window.clearInterval(interval); document.removeEventListener('visibilitychange',tick); };
   }, [deadline, C.timerDone]);
+  // 免费窗口到期：正在播就停下并弹升级提示（与配方播放共用窗口；
+  // 配方那边的 tickSession 发现窗口到期时若没有配方在播会直接返回，
+  // 不会重复弹框）。
+  useEffect(() => {
+    if (!playing || isSubscriber) return undefined;
+    const interval = window.setInterval(() => {
+      if (limitSession.current && limitSession.current.remaining() === 0) {
+        player.current?.pause();
+        setLimitOpen(true);
+      }
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, [playing, isSubscriber]);
 
   function openPanel(name) { opener.current = document.activeElement; if (name==='places') setShowAllJourneys(!intentId); setPanel(name); }
   function closePanel() { setPanel(null); setLockedJourney(null); dialog.current?.close(); opener.current?.focus?.(); }
-  function openStudio() {
-    if (!intentId) { void navigate({to:localizePath('/studio',locale)}); return; }
+  // 调音面板：直接打开当前场景的调音（调音台已下线，不再跳 /studio）。
+  function openTuner() {
     setAdvanced(true); setPanel('mix');
   }
   function selectJourney(next) {
@@ -224,19 +243,52 @@ export default function SceneExperience() {
     void player.current?.setScene(place, nextLevels, { play: playing || loading });
     closePanel();
   }
-  function chooseIntent(id) { selectJourney(recommendedJourneyForIntent(id)); }
+  // 意图入口：免费用户优先进该意图下的免费旅程（放松→雨林慢呼吸），
+  // 否则推荐旅程被锁时只剩一条 toast、进不去（订阅门在 selectJourney 里）。
+  // 订阅用户仍进各意图的首选旅程。
+  function chooseIntent(id) {
+    const options = journeysForIntent(id);
+    const next = (!isSubscriber ? options.find(journey => isFreeJourney(journey)) : null) || options[0];
+    selectJourney(next);
+  }
   function changeIntent() {
     player.current?.pause();
     setIntentId(null);
     setImmersive(false);
   }
+  // 免费用户的 10 分钟窗口：开始播放前检查，窗口用完则弹升级提示、
+  // 不播放；订阅用户直接放行。
+  function guardFreeListening() {
+    if (isSubscriber) return true;
+    if (!limitSession.current) {
+      try {
+        limitSession.current = createSession({
+          getItem: key => window.localStorage.getItem(key),
+          setItem: (key, value) => window.localStorage.setItem(key, value),
+        });
+      } catch {
+        limitSession.current = createSession({ getItem: () => null, setItem: () => {} });
+      }
+    }
+    if (!limitSession.current.begin()) { setLimitOpen(true); return false; }
+    return true;
+  }
   function toggleListening() {
-    if (playing || loading) { player.current?.pause(); return; }
+    if (playing || loading) { player.current?.pause(); return true; }
+    if (!guardFreeListening()) return false;
     getLabController()?.pauseForScene?.();
     setEntered(true);
     void player.current?.play();
+    return true;
   }
-  function enter() { if (!playing && !loading) toggleListening(); setImmersive(true); }
+  function enter() { if (!playing && !loading && !toggleListening()) return; setImmersive(true); }
+  // 免费窗口到期后的“再听 10 分钟”：重启窗口并继续播放。
+  function resumeAfterLimit() {
+    if (!limitSession.current?.restart()) return;
+    setLimitOpen(false);
+    setEntered(true);
+    void player.current?.play();
+  }
   function changeLevel(id, value) {
     const next = Number(value); setLevels(previous => ({...previous,[id]:next})); player.current?.setLevel(id,next);
   }
@@ -317,7 +369,7 @@ export default function SceneExperience() {
       <a href={localizePath('/',locale)} className="sc-brand-link" aria-label="Sound Cocktail"><Brand/></a>
       <nav className="sc-nav" aria-label={locale==='zh'?'场景导航':'Scene navigation'}>
         <button className="sc-nav-active" onClick={()=>openPanel('places')}>{C.places}</button>
-        <button onClick={openStudio}>{M.studio}</button>
+        <button onClick={openTuner}>{M.studio}</button>
         <button onClick={()=>openPanel('saved')}>{C.saved}</button>
       </nav>
       <div className="sc-header-end"><span className="sc-tiny-flower">✳</span><select value={locale} onChange={changeLanguage} aria-label={locale==='zh'?'语言':'Language'}><option value="en">EN</option><option value="zh">中</option></select></div>
@@ -373,6 +425,17 @@ export default function SceneExperience() {
     </div>}
     {videoUnavailable && <span className="sc-video-status">{scene.video ? C.videoFallback : M.noFilm}</span>}
     {audio.status==='error' && <div className="sc-error" role="alert"><span>{C.error}</span><button onClick={()=>void player.current?.play()}>{C.retry}<Icon name="arrow"/></button></div>}
+    {limitOpen && <div className="sc-limit" role="alertdialog" aria-labelledby="sc-limit-title">
+      <div className="sc-limit-card">
+        <h2 id="sc-limit-title">{C.limitTitle}</h2>
+        <p>{C.limitText}</p>
+        <div className="sc-limit-actions">
+          <button className="sc-primary" onClick={resumeAfterLimit}>{C.limitAgain}</button>
+          <Link to={localizePath('/plus',locale)} onClick={()=>setLimitOpen(false)}>{C.lockedGo}<Icon name="arrow"/></Link>
+          <button onClick={()=>setLimitOpen(false)}>{C.close}</button>
+        </div>
+      </div>
+    </div>}
     <div className="sc-toast" role="status" aria-live="polite">{toast}</div>
 
     <dialog ref={dialog} className={`sc-dialog sc-dialog--${panel||'closed'}`} aria-labelledby="sc-dialog-title" onCancel={event=>{event.preventDefault();closePanel();}} onClick={event=>{if(event.target===dialog.current)closePanel();}}>
@@ -441,7 +504,7 @@ export default function SceneExperience() {
           </div>}
           {panel==='saved'&&!JOURNEYS.some(next=>prefs.mixes[next.id])&&<p className="sc-empty">{C.noneSaved}</p>}
           <div className="sc-gallery-links">
-            <button onClick={openStudio}>{M.studio}<Icon name="arrow"/></button>
+            <button onClick={openTuner}>{M.studio}<Icon name="arrow"/></button>
             <button onClick={()=>setPanel(panel==='saved'?'places':'saved')}>{panel==='saved'?C.places:C.saved}<Icon name="bookmark"/></button>
           </div>
         </>}

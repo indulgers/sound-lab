@@ -152,7 +152,7 @@ test('bot-guard: payment/auth/api/SEO/health paths are exempt; honeypot and asse
   assert.equal(classifyPath('/honeypot/'), 'honeypot');
   assert.equal(classifyPath('/assets/audio/rain.mp3'), 'asset');
   assert.equal(classifyPath('/assets/index-abc123.js'), 'asset');
-  assert.equal(classifyPath('/og-image.png'), 'asset');
+  assert.equal(classifyPath('/og-image.jpg'), 'asset');
   for (const p of ['/', '/en', '/zh', '/en/sleep', '/zh/focus', '/en/checkout', '/en/mix/SYL-ABC']) {
     assert.equal(classifyPath(p), 'page', p);
   }
