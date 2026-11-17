@@ -130,9 +130,10 @@ try {
   await mobile.screenshot({ path: 'preview-qa/mobile-intent-zh.png', fullPage: true });
   // Free visitors enter relax through its free journey (Rainforest Exhale, Bali):
   // the intent's first journey (Da Lat) is locked, so it is no longer the default.
+  // The headline shows the scene title (Bali), not the journey name.
   await mobile.getByRole('button', { name: /放松/ }).first().click();
   await mobile.locator('[data-intent="relax"]').waitFor();
-  assert.match(await mobile.locator('.sc-copy h1').innerText(), /雨林慢呼吸/);
+  assert.match(await mobile.locator('.sc-copy h1').innerText(), /巴厘岛/);
   await mobile.locator('.sc-poster').evaluate(img=>img.decode());
   await mobile.screenshot({ path: 'preview-qa/mobile-relax-ready.png', fullPage: true });
   console.log('PASS: mobile layout and relaxing journey');
