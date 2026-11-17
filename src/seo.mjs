@@ -22,7 +22,7 @@ import { SOUNDS, soundDisplayName } from './catalog.mjs';
 const SOUND_BY_ID = new Map(SOUNDS.map((s) => [s.id, s]));
 
 export const SITE_URL = 'https://soundcocktail.app'
-export const OG_IMAGE_URL = `${SITE_URL}/og-image.png`
+export const OG_IMAGE_URL = `${SITE_URL}/og-image.jpg`
 
 /** 语言列表与默认语言（x-default 指向英文版）。 */
 export const LOCALES = ['en', 'zh']
@@ -53,7 +53,6 @@ export const PUBLIC_PAGES = [
 
 /** 不进 sitemap、但有 head 的页面（法律页）：key → URL 段。 */
 export const NON_INDEXED_PAGES = [
-  ['studio', '/studio'],
   ['terms', '/terms'],
   ['privacy', '/privacy'],
 ]
@@ -73,57 +72,21 @@ export function canonicalUrl(key, locale) {
   return `${SITE_URL}${canonicalPath(key, locale)}`
 }
 
-/** 首页与 focus 页的双语标题/描述（P0 的英文 + P1 补中文）。 */
+/** 首页的双语标题/描述（P0 的英文 + P1 补中文）；落地页取自 landing.mjs。 */
 export const ROUTE_SEO = {
   home: {
     path: '',
     en: {
       title: 'Sound Cocktail · Somewhere slower',
-      description: 'Step into Bali rainforest and Chiang Mai inspired listening rooms. Original music, real looping video, adjustable sound layers and continuous listening for a slower moment.',
+      description: 'Sound therapy, mixed for the moment you’re in — focus, sleep, meditation — with real places to look at while you listen.',
       ogTitle: 'Sound Cocktail · Somewhere slower',
       ogDescription: 'Two little corners of the world. Original music, immersive video and a sound balance of your own.',
     },
     zh: {
       title: 'Sound Cocktail · 在某个地方，慢下来',
-      description: '进入以巴厘岛雨林和清迈咖啡馆为灵感的聆听空间。原创音乐、真实循环视频、独立分轨调音与持续播放，陪你慢慢放松，找回自己的节奏。',
+      description: '为你此刻的状态配一段声音——专注、睡眠、冥想——边听边看真实的风景。',
       ogTitle: 'Sound Cocktail · 在某个地方，慢下来',
       ogDescription: '世界的两个小角落。沉浸画面、原创音乐，还有属于你的声音配比。',
-    },
-  },
-  studio: {
-    path: '',
-    en: {
-      title: 'Sound Cocktail · Mix a cup of sound',
-      description:
-        'Sound Cocktail is a free ambient sound mixer — mix 22 white noise and ambient sounds like rain, fire, café voices and piano, and save your cup for sleep or focus.',
-      ogTitle: 'Sound Cocktail · Mix a cup of sound',
-      ogDescription:
-        'Live recordings, instrument samples and live synthesis. Pick a few sounds and mix a soundscape of your own.',
-    },
-    zh: {
-      title: 'Sound Cocktail · 调一杯属于你的声音',
-      description:
-        'Sound Cocktail 是一款免费的环境音混音器——22 种白噪音与环境音，雨声、篝火、咖啡馆人声、钢琴，随意混搭、存成一杯，助眠或专注都用得上。',
-      ogTitle: 'Sound Cocktail · 调一杯属于你的声音',
-      ogDescription: '真实录音、乐器采样与实时合成。挑几种声音，调出属于你的声音风景。',
-    },
-  },
-  focus: {
-    path: '/focus',
-    en: {
-      title: 'Focus Mode · Sound Cocktail — ambient sounds for deep focus',
-      description:
-        'Immersive focus mode: mix rain, brown noise and café ambience for deep work and studying. One timer, one cup of sound, nothing else on screen.',
-      ogTitle: 'Focus Mode · Sound Cocktail',
-      ogDescription:
-        'Rain, café ambience and brown noise for deep focus — one timer, one cup of sound, nothing else on screen.',
-    },
-    zh: {
-      title: '专注模式 · Sound Cocktail — 深度工作的环境音',
-      description:
-        '沉浸专注模式：用雨声、棕色噪音和咖啡馆氛围调一杯深度工作与学习的声音。一个计时器，一杯声音，屏幕上什么都没有。',
-      ogTitle: '专注模式 · Sound Cocktail',
-      ogDescription: '雨声、咖啡馆氛围与棕色噪音，陪你深度专注——一个计时器，一杯声音，屏幕上什么都没有。',
     },
   },
   recipes: {
@@ -131,17 +94,17 @@ export const ROUTE_SEO = {
     en: {
       title: 'Recipes · Sound Cocktail — free ambient sound mixes for sleep, focus and rain',
       description:
-        'Browse free ambient sound recipes — rain, fire, café voices, piano and more — mixed for sleep, focus and relaxation. Open any recipe in the mixer and make it yours.',
+        'Browse free ambient sound recipes — rain, fire, café voices, piano and more — mixed for sleep, focus and relaxation. Open any recipe and make it yours.',
       ogTitle: 'Recipes · Sound Cocktail',
       ogDescription:
-        'Free ambient sound recipes for sleep, focus and rain — open any one in the mixer and make it yours.',
+        'Free ambient sound recipes for sleep, focus and rain — open any one and make it yours.',
     },
     zh: {
       title: '配方 · Sound Cocktail — 助眠、专注与雨声的免费声音配方',
       description:
-        '浏览免费的环境音配方：雨声、篝火、咖啡馆人声、钢琴……为助眠、专注与放松而调。在调音台打开任意配方，调成你的。',
+        '浏览免费的环境音配方：雨声、篝火、咖啡馆人声、钢琴……为助眠、专注与放松而调。打开任意配方，调成你的。',
       ogTitle: '配方 · Sound Cocktail',
-      ogDescription: '助眠、专注与雨声的免费声音配方——在调音台打开任意配方，调成你的。',
+      ogDescription: '助眠、专注与雨声的免费声音配方——打开任意配方，调成你的。',
     },
   },
   plus: {
@@ -157,9 +120,9 @@ export const ROUTE_SEO = {
     zh: {
       title: 'Sound Cocktail 进阶 · 订阅',
       description:
-        '进阶版订阅：全部六个目的地、不限时收听、完整调音器与睡眠定时。月付 $7.99 / ¥18，年付 $79.90 / ¥180。随时取消。',
+        '进阶版订阅：全部六个目的地、不限时收听、完整调音与睡眠定时。月付 $7.99 / ¥18，年付 $79.90 / ¥180。随时取消。',
       ogTitle: 'Sound Cocktail 进阶 · 订阅',
-      ogDescription: '进阶版：全部六个目的地、不限时收听、完整调音器、保存配方与睡眠定时。',
+      ogDescription: '进阶版：全部六个目的地、不限时收听、完整调音、保存配方与睡眠定时。',
     },
   },
   sources: {
@@ -185,14 +148,14 @@ export const ROUTE_SEO = {
     en: {
       title: 'My recipes · Sound Cocktail',
       description:
-        'Your saved sound recipes — open any cup in the mixer, or import a shared recipe code.',
+        'Your saved sound recipes — open any mix, or import a shared recipe code.',
       ogTitle: 'My recipes · Sound Cocktail',
       ogDescription: 'Your saved sound recipes.',
     },
     zh: {
       title: '我的配方 · Sound Cocktail',
       description:
-        '你存下的声音配方——在调音台打开任意一杯，或导入朋友分享的配方码。',
+        '你存下的声音配方——打开任意一份配方，或导入朋友分享的配方码。',
       ogTitle: '我的配方 · Sound Cocktail',
       ogDescription: '你存下的声音配方。',
     },
@@ -290,7 +253,7 @@ export function headForNoindex(key, locale = 'en') {
  * 分享混音页 /:locale/mix/:code 的 head。
  * recipe 为 null（码无效）时：通用标题 + noindex，不编造内容。
  * 有效时：标题用配方名（用户起的名字，原样展示），描述列出配料；
- * OG 图用默认 og-image.png。双语版本互为 hreflang（同一杯、两种界面语言）。
+ * OG 图用默认 og-image.jpg。双语版本互为 hreflang（同一份配方、两种界面语言）。
  */
 export function headForMix(recipe, locale = 'en', code = '') {
   if (!LOCALES.includes(locale)) throw new Error(`unknown locale: ${locale}`);
@@ -304,7 +267,7 @@ export function headForMix(recipe, locale = 'en', code = '') {
   if (!recipe) {
     return {
       meta: [
-        { title: 'Sound Cocktail · Mix a cup of sound' },
+        { title: 'Sound Cocktail · Sound Therapy' },
         { name: 'description', content: 'A shared Sound Cocktail mix.' },
         { name: 'robots', content: 'noindex' },
         { property: 'og:title', content: 'Sound Cocktail' },
@@ -326,8 +289,8 @@ export function headForMix(recipe, locale = 'en', code = '') {
   const title = `${recipe.name || 'Sound Cocktail'} · Sound Cocktail`;
   const description =
     locale === 'en'
-      ? `A shared Sound Cocktail mix: ${ingredients.join(' · ')}. Open it in the mixer and make it yours.`
-      : `朋友分享的 Sound Cocktail 配方：${ingredients.join(' · ')}。在调音台打开这杯，调成你的。`;
+      ? `A shared Sound Cocktail mix: ${ingredients.join(' · ')}. Open it and make it yours.`
+      : `朋友分享的 Sound Cocktail 配方：${ingredients.join(' · ')}。打开这份配方，调成你的。`;
   return {
     meta: [
       { title },

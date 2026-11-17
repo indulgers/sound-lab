@@ -142,12 +142,12 @@ test('packs: USD prices and English names/descs are present', () => {
 });
 
 test('locale: translate lookups, zh fallback, normalize', () => {
-  assert.equal(t('en', 'nav.mixer'), 'Mixer');
-  assert.equal(t('zh', 'nav.mixer'), '调音台');
+  assert.equal(t('en', 'nav.recipes'), 'Recipes');
+  assert.equal(t('zh', 'nav.recipes'), '配方');
   assert.equal(t('en', 'checkout.payWaffo'), 'Continue to payment');
   assert.equal(t('zh', 'checkout.payWaffo'), '去付款');
   assert.equal(t('en', 'auth.google'), 'Continue with Google');
-  assert.equal(t('fr', 'nav.mixer'), '调音台', 'unknown locale falls back to zh');
+  assert.equal(t('fr', 'nav.recipes'), '配方', 'unknown locale falls back to zh');
   assert.equal(t('en', 'no.such.key'), 'no.such.key', 'missing key returns the key itself');
   assert.equal(normalizeLocale('en'), 'en');
   assert.equal(normalizeLocale('zh'), 'zh');

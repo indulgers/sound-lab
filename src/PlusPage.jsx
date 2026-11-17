@@ -2,8 +2,8 @@
  * 进阶页（/en/plus、/zh/plus）：免费版 + 订阅（月付 / 年付）。
  *
  * 订阅模型（2026-11-16）：免费入口是清迈 + 巴厘岛两个目的地、
- * 10 分钟调音台窗口与基础调音；订阅解锁其余 4 个目的地、不限时
- * 收听、完整调音器（全部通道 + 调参 + 保存配方）与睡眠定时。
+ * 10 分钟旅程窗口与基础调音；订阅解锁其余 4 个目的地、不限时
+ * 收听、完整调音（全部通道 + 调参 + 保存配方）与睡眠定时。
  * 三个一次性声音包已下架（无人购买），不再出售。
  *
  * 价格跟支付地区走，不跟语言走（2026-11-12 解耦规则）：
@@ -107,7 +107,7 @@ export default function PlusPage() {
                   subscription.provider === 'waffo' ? (
                     <button type="button" className="btn btn-ghost btn-sm" onClick={openPortal} disabled={portalBusy}>{t(locale, 'plus.managePortal')}</button>
                   ) : (
-                    <Link to={localizePath('/', locale)} className="btn btn-ghost btn-sm" style={{ textDecoration: 'none' }}>{t(locale, 'plus.goMixer')}</Link>
+                    <Link to={localizePath('/', locale)} className="btn btn-ghost btn-sm" style={{ textDecoration: 'none' }}>{t(locale, 'plus.goJourneys')}</Link>
                   )
                 ) : pending ? (
                   <a href={pending.checkoutUrl} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>{t(locale, 'plus.continuePay')}</a>

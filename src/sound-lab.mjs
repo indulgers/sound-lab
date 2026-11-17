@@ -2,14 +2,14 @@ import { AUDIO_LICENSES, SOUND_AUDIO } from './audio/catalog.mjs'
 import { prepareRecording, playInstrumentNote } from './audio/playback.mjs'
 import { SOUNDS, autoRecipeName, formatRecipeDate, mixSummaryText, recipeDisplay, soundDisplayName } from './catalog.mjs'
 import { createSession, freeMix, isFreeSound } from './listening-session.mjs'
-import { SLEEP_TIMER_FADE_SECONDS, applyFadeSchedule, fadeSchedule, formatSleepRemaining, sleepRemainingMs } from './sleep-timer.mjs'
+import { SLEEP_TIMER_FADE_SECONDS, applyFadeSchedule, fadeSchedule, sleepRemainingMs } from './sleep-timer.mjs'
 import { getLocale, t } from './locale.mjs'
 import { PACKS } from './packs.mjs'
 import { createRuntimeScope } from './runtime-scope.mjs'
 
 /* 单例控制器：mountSoundLab 只由根路由外壳调一次（音频引擎常驻，
    路由切换不重启）；各页面组件用 getLabController() 拿到它，再调
-   bindHero/bindMixer/bindMine/bindSources 把自己那块 DOM 接到已挂载
+   bindMine/bindSources 把自己那块 DOM 接到已挂载
    的引擎上。服务端渲染时 mountSoundLab 从不执行，这里恒为 null，
    页面组件须自行守卫（typeof window / 空值检查）。 */
 let labController = null;
@@ -17,7 +17,7 @@ export function getLabController() {
   return labController;
 }
 
-export function mountSoundLab({onFocusChange, onMixChange}) {
+export function mountSoundLab() {
   const scope=createRuntimeScope();
   const {setTimeout,clearTimeout,setInterval,clearInterval,requestAnimationFrame,cancelAnimationFrame,listen}=scope;
   let disposed=false;
@@ -47,50 +47,15 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     harp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 3.5v17M6 3.5c5 0 11 2.4 12.5 8 .9 3.4-.6 6.7-3.5 9H6"/><path d="M9.5 4.2v15M13 5.4v13.4M16 7.6v9.6"/></svg>',
   };
 
-  var GROUPS = [
-    { id:"nature" },
-    { id:"city" },
-    { id:"inst" }
-  ];
   /* cat: nature 自然 / city 城市·乡村 / inst 乐器。p 为出厂参数（密度 density / 明亮度 bright / 远近 dist / 随机度 rand / 节奏 tempo） */
-  /* Ingredients choose a clear drink tint together. Source colors stay on the faders. */
-  var CUP_TINTS={
-    amber:{colors:["#FFF1BD","#F4BE67","#CD7B36","#FFE09A"], garnish:"Lemon"},
-    tide:{colors:["#E0F5EB","#A5D9CA","#69A69F","#C7EEE2"], garnish:"Mint"},
-    green:{colors:["#F4F2C5","#C9D28E","#92AC65","#E8EBAF"], garnish:"Mint"},
-    lilac:{colors:["#F6E5F0","#DAB9D9","#AC83AC","#F4D4E8"], garnish:"Cherry"},
-    rose:{colors:["#FFE9CB","#F3B7A4","#D98B83","#FFDAC1"], garnish:"Lemon"}
-  };
-  var CUP_INGREDIENTS={
-    rain:"tide", wind:"tide", waves:"tide", stream:"tide", rainstreet:"tide", chimes:"tide",
-    birds:"green", insects:"green", rural:"green", forest:"green", boat:"tide",
-    thunder:"lilac", train:"lilac",
-    market:"rose", harp:"rose"
-  };
-  function cupMix(mix){
-    var active=SOUNDS.filter(function(s){return mix[s.id]>0.02;}).sort(function(a,b){return mix[b.id]-mix[a.id];});
-    var weight={amber:0,tide:0,green:0,lilac:0,rose:0};
-    var total=0, density=0, brightness=0, tempo=0;
-    active.forEach(function(s){
-      var n=mix[s.id], p=params[s.id];
-      weight[CUP_INGREDIENTS[s.id]||"amber"]+=n;
-      total+=n;
-      if(p){ density+=n*p.density; brightness+=n*p.bright; tempo+=n*p.tempo; }
-    });
-    var tint=Object.keys(weight).reduce(function(a,b){return weight[b]>weight[a]?b:a;});
-    return {
-      active:active, total:total, fill:Math.min(1,total/2.6), tint:tint,
-      density:total?density/total:0, brightness:total?brightness/total:0.5, tempo:total?tempo/total:0.5
-    };
-  }
-  function cupRGB(hex){return hex.match(/[0-9A-F]{2}/gi).map(function(part){return parseInt(part,16);});}
-  function cupCSS(rgb){return "rgb("+rgb.map(Math.round).join(",")+")";}
   var MASTER_CAP = 0.85;
 
   /* ============================== state ============================== */
   var levels = {}; SOUNDS.forEach(function(s){ levels[s.id]=0; });
+  /* 当前播放的配方名（now-playing 条显示用；随 engine-state 事件发出）。 */
+  var currentLabel="";
   /* per-sound synth params: density / bright / dist / rand / tempo
-     （展示名在 locale.mjs 的 mixer.param 里，按界面语言取） */
+     （出厂参数，配方保存/导入时随配比一起存） */
   var PARAM_DEFS = [
     { k:"density" }, { k:"bright" }, { k:"dist" },
     { k:"rand" }, { k:"tempo" }
@@ -123,7 +88,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   // 已拥有的包解锁的通道（服务端权益，登录后由 setOwnedPacks 传入）。
   // “能不能用” = 免费通道 或 已拥有包里的通道 或 订阅用户（全部通道）；
   // 引擎里所有 sessionTools.isFreeSound / freeMix 的调用点都走这两个包装，
-  // 所以解锁后推子、配方、随机、音源替换全部自动放行。
+  // 所以解锁后调音、配方、随机、音源替换全部自动放行。
   var ownedSounds = new Set();
   var isSubscriber = false;
   function isPlayable(id){ return isFreeSound(id) || ownedSounds.has(id) || isSubscriber; }
@@ -162,8 +127,6 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
      之后再按 URL 取语言。 */
   var repaintingLocale = null;
   function L(){ return repaintingLocale || getLocale(); }
-  function groupLabel(g){ return t(L(), 'mixer.group.' + g.id); }
-  function paramLabel(pd){ return t(L(), 'mixer.param.' + pd.k); }
   function activeSounds(){
     return SOUNDS.filter(function(s){ return levels[s.id]>0.02; })
       .map(function(s){ return { sound: s, level: levels[s.id] }; });
@@ -705,177 +668,13 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     master.gain.setTargetAtTime(masterVol*masterVol*headroom,AC.currentTime,.09);
   }
 
-  /* ============================== faders UI ============================== */
-  var faderEls={};
-  var soundFilter="all";
-  function updateSoundFilter(){
-    var visible=0;
-    SOUNDS.forEach(function(s){
-      var ui=faderEls[s.id];
-      if(!ui) return;
-      var show=soundFilter==="all" || s.cat===soundFilter || (soundFilter==="active" && levels[s.id]>.02);
-      ui.root.hidden=!show;
-      if(show) visible++;
-    });
-    var wrap=$("faders");
-    if(!wrap) return;
-    wrap.querySelectorAll(".chan-group").forEach(function(group){
-      group.hidden=!group.querySelector(".chan:not([hidden])");
-    });
-    var ef=$("emptyFilter");
-    if(ef) ef.hidden=visible!==0;
-  }
-  function buildFaders(){
-    // 可重复调用：解锁/登出时重建推子，旧节点先清掉（levels/params 在模块状态里，不受影响）。
-    // 调音台不在当前页时 #faders 不存在，直接返回（bindMixer 挂载时再建）。
-    var wrap=$("faders");
-    if(!wrap) return;
-    wrap.textContent="";
-    faderEls={};
-    GROUPS.forEach(function(g){
-      var groupSounds=SOUNDS.filter(function(s){ return s.cat===g.id; });
-      var sec=document.createElement("div"); sec.className="chan-group";
-      sec.innerHTML='<div class="chan-group-head"><h3>'+groupLabel(g)+'</h3><span class="cnt">'+t(L(),'mixer.groupCount',{n:groupSounds.length})+'</span></div>';
-      var grid=document.createElement("div"); grid.className="faders";
-      sec.appendChild(grid); wrap.appendChild(sec);
-      groupSounds.forEach(function(s){
-        var premium=!sessionTools.isFreeSound(s.id);
-        var el=document.createElement("div");
-        el.className=premium ? "chan chan-premium" : "chan";
-        el.style.setProperty("--cc", s.color);
-        var paramsHTML="";
-        PARAM_DEFS.forEach(function(pd){
-          paramsHTML+='<div class="param-row"><label for="prm-'+s.id+'-'+pd.k+'">'+paramLabel(pd)+'</label>'+
-            '<input type="range" id="prm-'+s.id+'-'+pd.k+'" min="0" max="100" value="'+Math.round(params[s.id][pd.k]*100)+'" data-param="'+pd.k+'" aria-label="'+soundDisplayName(s,L())+' '+paramLabel(pd)+'">'+
-            '<span class="pv" data-pv="'+pd.k+'">'+Math.round(params[s.id][pd.k]*100)+'</span></div>';
-        });
-        el.innerHTML =
-          '<div class="c-icon">'+ICONS[s.id]+'</div>'+
-          '<div><div class="c-name">'+soundDisplayName(s,L())+'</div></div>'+
-          '<span class="src-badge" data-cardbadge="'+s.id+'"></span>'+
-          '<div class="fader-zone"><div class="fader" role="slider" tabindex="0" aria-label="'+soundDisplayName(s,L())+' '+t(L(),'mixer.faderVolume')+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">'+
-            '<div class="ticks"><i></i><i></i><i></i><i></i><i></i><i class="r" style="top:0"></i><i class="r" style="top:25%"></i><i class="r" style="top:50%"></i><i class="r" style="top:75%"></i><i class="r" style="bottom:0;top:auto"></i></div>'+
-            '<div class="slot"><div class="fill"></div></div>'+
-            '<div class="handle"></div>'+
-          '</div><div class="meter"><i></i></div></div>'+
-          '<div class="c-pct">'+t(L(),'mixer.faderMuted')+'</div>'+
-          '<button class="tune-toggle" data-tune="'+s.id+'" aria-expanded="false">'+t(L(),'mixer.tuning')+' ▾</button>'+
-          '<div class="params" data-params="'+s.id+'">'+paramsHTML+'</div>';
-        grid.appendChild(el);
-        var fader=el.querySelector(".fader");
-        faderEls[s.id]={ root:el, fader:fader, fill:el.querySelector(".fill"), handle:el.querySelector(".handle"), pct:el.querySelector(".c-pct"), meter:el.querySelector(".meter i") };
-        var toggle=el.querySelector("[data-tune]");
-        var panel=el.querySelector("[data-params]");
-        if(premium){
-          fader.tabIndex=-1;
-          fader.setAttribute("aria-disabled","true");
-          panel.remove();
-          toggle.textContent=t(L(),'mixer.tuningPlus');
-          toggle.removeAttribute("aria-expanded");
-          toggle.addEventListener("click",function(){ showPremium(soundDisplayName(s,L())); });
-          return;
-        }
-        bindFader(s.id, fader);
-        toggle.addEventListener("click", function(){
-          var open=panel.classList.toggle("open");
-          toggle.setAttribute("aria-expanded",String(open));
-          toggle.textContent=open ? t(L(),'mixer.tuning')+" ▴" : t(L(),'mixer.tuning')+" ▾";
-        });
-        panel.querySelectorAll("[data-param]").forEach(function(inp){
-          inp.addEventListener("input",function(){
-            var k=this.getAttribute("data-param");
-            params[s.id][k]=this.value/100;
-            panel.querySelector('[data-pv="'+k+'"]').textContent=this.value;
-            applyParams(s.id);
-          });
-        });
-        updateSourceUI(s.id);
-      });
-    });
-  }
-  /* repaint one sound's param sliders (after a recipe is applied / imported) */
-  function paintParams(id){
-    var panel=document.querySelector('[data-params="'+id+'"]');
-    if(!panel) return;
-    panel.querySelectorAll("[data-param]").forEach(function(inp){
-      var k=inp.getAttribute("data-param");
-      inp.value=Math.round(params[id][k]*100);
-      panel.querySelector('[data-pv="'+k+'"]').textContent=inp.value;
-    });
-  }
   function applyParamsMap(map){
     if(!map) return;
     Object.keys(map).forEach(function(id){
       if(!params[id] || !map[id]) return;
       PARAM_DEFS.forEach(function(d){ if(typeof map[id][d.k]==="number") params[id][d.k]=clamp01(map[id][d.k]); });
-      paintParams(id); applyParams(id);
+      applyParams(id);
     });
-  }
-  function bindFader(id, fader){
-    /* v2 damped fader: display chases target with inertia; release springs back a touch */
-    var target=levels[id], raf=null, vel=0;
-    function chase(){
-      var cur=levels[id];
-      var diff=target-cur;
-      vel=vel*0.62+diff*0.34;
-      var next=clamp01(cur+vel);
-      if(Math.abs(diff)<0.002 && Math.abs(vel)<0.002){ setLevel(id, target); raf=null; return; }
-      setLevel(id, next);
-      raf=requestAnimationFrame(chase);
-    }
-    function kick(){ if(!raf) raf=requestAnimationFrame(chase); }
-    function fromEvent(e){
-      var r=fader.getBoundingClientRect();
-      target=clamp01(1-(e.clientY-r.top)/r.height);
-      kick();
-    }
-    fader.addEventListener("pointerdown", function(e){
-      e.preventDefault(); fader.setPointerCapture(e.pointerId); fromEvent(e);
-      function mv(ev){ fromEvent(ev); }
-      function up(){
-        fader.removeEventListener("pointermove",mv); fader.removeEventListener("pointerup",up); fader.removeEventListener("pointercancel",up);
-        /* micro rebound: overshoot 1.5% then settle */
-        var settled=target; target=clamp01(settled+(settled-levels[id])*0.12); kick();
-        setTimeout(function(){ target=settled; kick(); },90);
-      }
-      fader.addEventListener("pointermove",mv);
-      fader.addEventListener("pointerup",up);
-      fader.addEventListener("pointercancel",up);
-    });
-    fader.addEventListener("keydown", function(e){
-      var v=levels[id], used=true;
-      if(e.key==="ArrowUp"||e.key==="ArrowRight") v+=0.05;
-      else if(e.key==="ArrowDown"||e.key==="ArrowLeft") v-=0.05;
-      else if(e.key==="Home") v=1;
-      else if(e.key==="End") v=0;
-      else used=false;
-      if(used){ e.preventDefault(); setLevel(id, clamp01(v)); }
-    });
-    fader.addEventListener("wheel", function(e){
-      e.preventDefault();
-      setLevel(id, clamp01(levels[id] + (e.deltaY<0?0.05:-0.05)));
-    }, {passive:false});
-  }
-  var mixFrame=0;
-  function setLevel(id, v){
-    if(!sessionTools.isFreeSound(id)) return;
-    cancelAnimationFrame(mixFrame);
-    activeScene=null;
-    levels[id]=clamp01(v);
-    paintFader(id);
-    applyGain(id);
-    updateMasterGain();
-    scheduleGlass();
-    paintCurrentMix();
-  }
-  function paintFader(id){
-    var ui=faderEls[id]; if(!ui) return;
-    var v=levels[id], pct=Math.round(v*100);
-    ui.root.classList.toggle("off", v<=0.001);
-    ui.fill.style.height=(v*100)+"%";
-    ui.handle.style.bottom=(v*100)+"%";
-    ui.fader.setAttribute("aria-valuenow", pct);
-    ui.pct.innerHTML = !sessionTools.isFreeSound(id) ? t(L(),'mixer.faderPlus') : v<=0.001 ? t(L(),'mixer.faderMuted') : (t(L(),'mixer.faderVolume')+" <b>"+pct+"</b>");
   }
   function tweenTo(mix){
     cancelAnimationFrame(mixFrame);
@@ -888,11 +687,9 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       var p=Math.min(1,(ts-t0)/650), e=1-Math.pow(1-p,3);
       SOUNDS.forEach(function(s){
         levels[s.id]=start[s.id]+(target[s.id]-start[s.id])*e;
-        paintFader(s.id);
         applyGain(s.id);
       });
       updateMasterGain();
-      scheduleGlass();
       paintCurrentMix();
       if(p<1) mixFrame=requestAnimationFrame(frame);
 
@@ -900,206 +697,6 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     mixFrame=requestAnimationFrame(frame);
   }
 
-  /* Watercolor cup: continuous fill, quiet meniscus and one coordinated tint. */
-  var CUP_BOWL_BOTTOM=204, CUP_BOWL_TOP=82;
-  var WC_REDUCED=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var cupState={total:0, fill:0, tint:"amber", density:0, brightness:.5, tempo:.5};
-  var cupLevel=CUP_BOWL_BOTTOM, cupLevelSpeed=0, cupTilt=0, cupTiltSpeed=0, cupPhase=0;
-  var cupMotion=0, cupIce=0, cupCondensation=0, cupDirty=true, cupLastFrame=0;
-  var currentCupColors=CUP_TINTS.amber.colors.map(cupRGB);
-  var cupTargets=currentCupColors;
-  /* 杯身 SVG 节点：只在 Hero 挂载时存在（首页/落地页）。拆页后
-     Hero 会随路由卸载重挂，所以节点每次挂载都要重新抓；
-     没杯子时 cupNodes.liquid 为 null，easeCupFrame/renderGlass 跳过。 */
-  var cupGarnishes=[];
-  var cupNodes={ pour:null, liquid:null, wash:null, surface:null, edge:null, swing:null, condensation:null, stops:[null,null,null], ice:null, bubbles:[] };
-  function captureCupNodes(){
-    var pour=$("wcPour");
-    if(!pour || !$("wcLiquid") || !$("wcSway")){
-      cupNodes={ pour:null, liquid:null, wash:null, surface:null, edge:null, swing:null, condensation:null, stops:[null,null,null], ice:null, bubbles:[] };
-      cupGarnishes=[];
-      return false;
-    }
-    cupNodes={
-      pour:pour, liquid:$("wcLiquid"), wash:$("wcLiquidWash"), surface:$("wcSurface"),
-      edge:$("wcSurfaceEdge"), swing:$("wcSway"), condensation:$("wcCondG"),
-      stops:[$("wcLiquidTop"),$("wcLiquidMiddle"),$("wcLiquidBottom")],
-      ice:$("wcIceG"), bubbles:$("wcBubbleG") ? $("wcBubbleG").children : []
-    };
-    cupGarnishes=["Lemon","Mint","Cherry"].map(function(name){
-      return {name:name, el:$("wcGar"+name), opacity:0};
-    });
-    return true;
-  }
-  var glassQueued=false;
-  function scheduleGlass(){
-    if(glassQueued) return;
-    glassQueued=true;
-    requestAnimationFrame(function(){glassQueued=false; renderGlass();});
-  }
-  function renderGlass(){
-    var previousTotal=cupState.total;
-    cupState=cupMix(levels);
-    if(!WC_REDUCED) cupTiltSpeed+=Math.max(-16,Math.min(16,(cupState.total-previousTotal)*14));
-    var tint=CUP_TINTS[cupState.tint];
-    cupTargets=tint.colors.map(cupRGB);
-    var white=.14*cupState.brightness;
-    cupTargets=cupTargets.map(function(rgb){
-      return rgb.map(function(channel){return channel+(255-channel)*white;});
-    });
-    var ge=$("glassEmpty"); if(ge) ge.hidden=Boolean(cupState.active.length);
-    var names=cupState.active.slice(0,3).map(function(sound){ return soundDisplayName(sound,L()); });
-    var caption=names.length ? names.join(" · ")+(cupState.active.length>3 ? t(L(),'cup.more',{total:cupState.active.length,extra:cupState.active.length-3}) : "") : t(L(),'cup.emptyCap');
-    var gc=$("glassCap"); if(gc) gc.textContent=caption;
-    var mcn=$("mixerCupName"); if(mcn) mcn.textContent=caption;
-    var scene=$("ckScene"); if(scene) scene.style.setProperty("--ck-glow",tint.colors[1]);
-    if(soundFilter==="active") updateSoundFilter();
-    if(onMixChange){
-      onMixChange(cupState.active.slice(0,3).map(function(sound){ return sound.color; }),8-cupState.tempo*4);
-    }
-    if($("immersive").classList.contains("open")) renderImmersive();
-    cupDirty=true;
-  }
-
-  /* Find the liquid's width against the cubic left wall of the glass. */
-  function cupHalfWidth(y){
-    var lo=0, hi=1;
-    for(var i=0;i<12;i++){
-      var t=(lo+hi)*.5, u=1-t;
-      var wallY=78*u*u*u+384*u*u*t+603*u*t*t+204*t*t*t;
-      if(wallY<y) lo=t; else hi=t;
-    }
-    var p=(lo+hi)*.5, q=1-p;
-    return 160-(49*q*q*q+159*q*q*p+285*q*p*p+160*p*p*p);
-  }
-  function paintCupLiquid(y, ripple){
-    var width=cupHalfWidth(y);
-    var depth=Math.min(width*.135,(CUP_BOWL_BOTTOM-y)*.46);
-    var left=160-width-1, right=160+width+1;
-    var yLeft=y+ripple, yRight=y-ripple;
-    var front="M"+left+" "+yLeft+" C"+left+" "+(yLeft+depth)+" "+right+" "+(yRight+depth)+" "+right+" "+yRight;
-    var back=" C"+right+" "+(yRight-depth)+" "+left+" "+(yLeft-depth)+" "+left+" "+yLeft+" Z";
-    var body=front+" V205 H"+left+" Z";
-    cupNodes.liquid.setAttribute("d",body);
-    cupNodes.wash.setAttribute("d",body);
-    cupNodes.surface.setAttribute("d",front+back);
-    cupNodes.edge.setAttribute("d",front);
-    return width;
-  }
-  function easeCupFrame(now){
-    requestAnimationFrame(easeCupFrame);
-    /* 杯子不在当前页（配方/进阶/条款等页）：节点为空，直接跳过本帧，
-       rAF 循环本身不停，Hero 挂载后 captureCupNodes 恢复节点即恢复动画。 */
-    if(!cupNodes.liquid) return;
-    var dt=Math.min(.05,cupLastFrame?(now-cupLastFrame)/1000:.016);
-    cupLastFrame=now;
-    var animating=playing&&!WC_REDUCED&&cupState.fill>0;
-    if(!cupDirty&&!animating) return;
-    var target=CUP_BOWL_BOTTOM-cupState.fill*(CUP_BOWL_BOTTOM-CUP_BOWL_TOP);
-    var f=WC_REDUCED?1:1-Math.exp(-dt/.22);
-    if(WC_REDUCED){
-      cupLevel=target;
-    }else{
-      cupLevelSpeed+=((target-cupLevel)*33-10*cupLevelSpeed)*dt;
-      cupLevel+=cupLevelSpeed*dt;
-      cupTiltSpeed+=(-24*cupTilt-6*cupTiltSpeed)*dt;
-      cupTilt=Math.max(-3.2,Math.min(3.2,cupTilt+cupTiltSpeed*dt));
-    }
-    var motionTarget=animating?1:0;
-    cupMotion+=(motionTarget-cupMotion)*f;
-    cupPhase+=dt*(.75+cupState.tempo*.75)*cupMotion;
-    var garnish=CUP_TINTS[cupState.tint].garnish;
-    var iceTarget=cupState.fill>.22?.85:0;
-    var condTarget=cupState.fill>.22&&cupState.tint==="tide"?.67:0;
-    cupIce+=(iceTarget-cupIce)*f;
-    cupCondensation+=(condTarget-cupCondensation)*f;
-    cupDirty=Math.abs(cupLevel-target)>.025||Math.abs(cupLevelSpeed)>.045||
-      Math.abs(cupTilt)>.025||Math.abs(cupTiltSpeed)>.045||Math.abs(cupMotion-motionTarget)>.01||
-      Math.abs(cupIce-iceTarget)>.01||Math.abs(cupCondensation-condTarget)>.01;
-    cupGarnishes.forEach(function(g){
-      var alpha=cupState.fill>0&&g.name===garnish?1:0;
-      g.opacity+=(alpha-g.opacity)*f;
-      g.el.setAttribute("opacity",g.opacity.toFixed(3));
-      if(Math.abs(g.opacity-alpha)>.008) cupDirty=true;
-    });
-    currentCupColors=currentCupColors.map(function(rgb,i){
-      var next=rgb.map(function(channel,j){
-        var goal=cupTargets[i][j];
-        if(Math.abs(goal-channel)>.28) cupDirty=true;
-        return channel+(goal-channel)*f;
-      });
-      var value=cupCSS(next);
-      if(i<3) cupNodes.stops[i].setAttribute("stop-color",value);
-      else cupNodes.surface.setAttribute("fill",value);
-      return next;
-    });
-    cupNodes.swing.setAttribute("transform","rotate("+cupTilt.toFixed(3)+" 160 319)");
-    cupNodes.condensation.setAttribute("opacity",cupCondensation.toFixed(3));
-
-    var y=Math.max(CUP_BOWL_TOP,Math.min(CUP_BOWL_BOTTOM,cupLevel));
-    var height=CUP_BOWL_BOTTOM-y;
-    cupNodes.pour.setAttribute("visibility",height>.2?"visible":"hidden");
-    if(height<=.2) return;
-    var ripple=cupTilt*.75+Math.sin(cupPhase)*1.25*cupMotion;
-    var width=paintCupLiquid(y,ripple);
-    cupNodes.ice.setAttribute("opacity",cupIce.toFixed(3));
-    Array.prototype.forEach.call(cupNodes.ice.children,function(ice,i){
-      var x=160+width*(i? .25:-.38);
-      var bob=Math.sin(cupPhase+i*1.7)*1.15*cupMotion;
-      ice.setAttribute("transform","translate("+x+" "+(y+4+i*3+bob)+") rotate("+(i?12:-12)+")");
-    });
-    Array.prototype.forEach.call(cupNodes.bubbles,function(bubble,i){
-      var progress=(cupPhase*.23+(i+1)*.37)%1;
-      var bx=160+width*(i-2)*.22*(.4+progress*.6);
-      var by=y+height*(.83-progress*.7);
-      var opacity=Math.min(1,progress*5,(1-progress)*5)*(.24+cupState.density*.28);
-      bubble.setAttribute("cx",bx.toFixed(2));
-      bubble.setAttribute("cy",by.toFixed(2));
-      bubble.setAttribute("opacity",(height<14?0:opacity).toFixed(3));
-    });
-  }
-  requestAnimationFrame(easeCupFrame);
-
-  /* Hero 块（首页/落地页）：杯身节点重抓 + 拖杯摇晃监听。
-     同一个 #cupStage 重复调 bindHero 时跳过监听（只重抓节点）；
-     卸载时把杯子从沉浸遮罩搬回原位（否则 React 删节点时杯子还
-     在 #immScene 里），再撤监听、清记录。 */
-  var heroBoundStage=null, heroRemovers=[];
-  function bindHero(){
-    var stage=$("cupStage");
-    captureCupNodes();
-    if(!stage) return;
-    if(heroBoundStage===stage) return;
-    heroBoundStage=stage;
-    if(WC_REDUCED) return;
-    var pointer=null, x=0;
-    track(heroRemovers, stage, "pointerdown", function(event){
-      if(event.button!==0||pointer!==null) return;
-      pointer=event.pointerId;
-      x=event.clientX;
-      stage.setPointerCapture(pointer);
-    });
-    track(heroRemovers, stage, "pointermove", function(event){
-      if(event.pointerId!==pointer) return;
-      cupTiltSpeed+=Math.max(-10,Math.min(10,(event.clientX-x)*.34));
-      x=event.clientX;
-      cupDirty=true;
-    });
-    track(heroRemovers, stage, "lostpointercapture", function(){pointer=null;});
-  }
-  function restoreCupStage(){
-    /* 沉浸模式把 #cupStage 搬进了 #immScene；页面卸载前搬回去，
-       让它回到 Hero 的 DOM 位置（React 删节点时不报错、不丢节点）。 */
-    var stage=$("cupStage");
-    if(stageHome && stage && stage.parentNode!==stageHome.parent){
-      stageHome.parent.insertBefore(stage, stageHome.next);
-    }
-  }
-  function unbindHero(){
-    untrack(heroRemovers);
-    restoreCupStage();
-    heroBoundStage=null;
-  }
 
   function paintCurrentMix(){
     var box=$("currentMix");
@@ -1112,36 +709,13 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     var nm=$("recipeName"); if(nm && !nm.value.trim()){ var dn=defaultName(); if(dn) nm.value=dn; }
   }
 
-  /* ============================== meters ============================== */
-  var meterData=new Uint8Array(128);
-  function meterLoop(){
-    requestAnimationFrame(meterLoop);
-    if(!AC || !playing) {
-      SOUNDS.forEach(function(s){ if(faderEls[s.id]) faderEls[s.id].meter.style.transform="scaleY(0)"; });
-      return;
-    }
-    SOUNDS.forEach(function(s){
-      var ch=chans[s.id]; if(!ch) return;
-      ch.analyser.getByteTimeDomainData(meterData);
-      var sum=0; for(var i=0;i<meterData.length;i++){ var d=(meterData[i]-128)/128; sum+=d*d; }
-      var rms=Math.sqrt(sum/meterData.length);
-      var m=Math.min(1, rms*4.2)*(levels[s.id]>0.02?1:0);
-      var ui=faderEls[s.id]; if(!ui) return;
-      ui.meter.style.transform="scaleY("+m.toFixed(3)+")";
-    });
-  }
 
   /* ============================== transport ============================== */
-  var ICON_PLAY='<path d="M8 5.5v13l11-6.5z"/>';
-  var ICON_PAUSE='<path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/>';
   var stopVoicesTimer;
-  function fmtTime(seconds){
-    var minutes=Math.floor(seconds/60), rest=seconds%60;
-    return String(minutes).padStart(2,"0")+":"+String(rest).padStart(2,"0");
-  }
   // Sleep timer state: a wall-clock deadline (null = no timer) and the
-  // choice shown in the mixer-bar select (0 = off, minutes). The timer
-  // is wall-clock, like the journey timer: pausing does not extend it.
+  // choice in minutes (0 = off). The timer is wall-clock, like the
+  // journey timer: pausing does not extend it. (The mixer-bar select
+  // that armed it is gone; the machinery stays for the session logic.)
   var sleepDeadline=null, sleepFadeSeconds=SLEEP_TIMER_FADE_SECONDS, sleepChoice=0;
   function armSleepGain(){
     if(!sleepGain || !AC) return;
@@ -1150,7 +724,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     if(!schedule){ sleepGain.gain.cancelScheduledValues(now); sleepGain.gain.setValueAtTime(1,now); return; }
     applyFadeSchedule(sleepGain.gain, schedule, 1, now);
   }
-  // Arm (or clear) the mixer's sleep timer. Returns the deadline, or null.
+  // Arm (or clear) the recipe sleep timer. Returns the deadline, or null.
   // 睡眠定时是订阅功能：免费用户设定时拒绝并弹升级提示（返回 null，
   // 调用方把 select 复位到 off）；清定时（ms 为 null）任何人都可以。
   function setSleepTimer(ms, fadeSeconds){
@@ -1185,26 +759,18 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     if(remaining>0) gain.linearRampToValueAtTime(0,now+remaining/1000);
   }
   function paintSession(){
-    var remaining=session.remaining();
-    var sleepMs=sleepRemainingMs(sleepDeadline, Date.now());
-    // The effective listening window is the later of the session and the
-    // sleep timer; when a sleep timer is active it is the one that counts.
-    var effective=remaining===null ? (sleepMs===null ? 600000 : sleepMs) : (sleepMs===null ? remaining : Math.max(remaining, sleepMs));
-    // 订阅用户且没有睡眠定时：不限时，读数显示 ∞。
-    var display=(isSubscriber && sleepMs===null) ? '∞' : fmtTime(Math.ceil(effective/1000));
-    ["focusRead","immFocus"].forEach(function(id){
-      var el=$(id);
-      if(!el) return;
-      if(el.textContent!==display) el.textContent=display;
-    });
-    var sleepEl=$("sleepTimerRead");
-    if(sleepEl){
-      var sleepDisplay=sleepMs===null ? "" : formatSleepRemaining(sleepMs);
-      if(sleepEl.textContent!==sleepDisplay) sleepEl.textContent=sleepDisplay;
-    }
+    // The 10-minute countdown used to live in the mixer bar (#focusRead)
+    // and the immersive overlay (#immFocus); both are gone with the mixer.
+    // The countdown now flows to the now-playing bar via the
+    // soundcocktail:engine-tick event dispatched in tickSession.
+    // (Kept as a no-op: tickSession / setSleepTimer / pauseForScene call it.)
   }
   function tickSession(){
     paintSession();
+    // Now-playing 条的倒计时：免费窗口剩余时间（订阅用户不限时，为 null）。
+    if(playing || Object.keys(bedNodes).length){
+      window.dispatchEvent(new CustomEvent('soundcocktail:engine-tick',{detail:{playing:playing, remainingMs:isSubscriber ? null : session.remaining()}}));
+    }
     // 订阅用户且没有睡眠定时：不限时，10 分钟窗口不生效。
     if(isSubscriber && sleepDeadline===null) return;
     var sleepMs=sleepRemainingMs(sleepDeadline, Date.now());
@@ -1216,8 +782,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       if(AC && sleepGain){ var now=AC.currentTime; sleepGain.gain.cancelScheduledValues(now); sleepGain.gain.setValueAtTime(1,now); }
       if(playing) setPlaying(false);
       Object.keys(bedNodes).forEach(stopBed);
-      toast(t(L(),'mixer.sleepDone'));
-      var sel=$("sleepTimerSelect"); if(sel) sel.value="off";
+      toast(t(L(),'engine.sleepDone'));
       paintSession();
       return;
     }
@@ -1276,10 +841,9 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       },5100);
     }
     document.body.classList.toggle("is-playing",playing);
-    var pi=$("playIcon"); if(pi) pi.innerHTML=playing ? ICON_PAUSE : ICON_PLAY;
-    var pb=$("playBtn"); if(pb) pb.setAttribute("aria-label",playing ? t(L(),'mixer.pauseAria') : t(L(),'mixer.playAria'));
-    var cp=$("ctaPlay"); if(cp) cp.textContent=playing ? t(L(),'mixer.playingCta') : t(L(),'hero.ctaPlay');
-    var ip=$("immPlay"); if(ip) ip.textContent=playing ? t(L(),'overlays.immPause') : t(L(),'overlays.immResume');
+    // 调音台播放条已下线：播放状态由常驻的 now-playing 条显示
+    // （事件带当前配方名；暂停时 label 为空，条隐藏）。
+    window.dispatchEvent(new CustomEvent('soundcocktail:engine-state',{detail:{playing:playing, label:playing ? currentLabel : ''}}));
     return true;
   }
   function playMix(mix,scene){
@@ -1290,8 +854,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     tweenTo(mix);
     return true;
   }
-  /* 播放条与随机/归零按钮的监听在 bindMixer 里绑（调音台挂载时），
-     这里只留 playMix 本体。 */
+  /* playMix 本体：播放配方（调音台已下线，播放由 now-playing 条控制）。 */
 
   /* ============================== recipes ============================== */
   function mixBarHTML(mix){
@@ -1304,13 +867,11 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     });
     return '<div class="mixbar">'+bars+'</div><div class="mix-legend">'+legend+'</div>';
   }
-  /* 选一个配方并播放：只调配比、不进沉浸模式。沉浸模式是用户
-     主动选的（调音台 #immersiveBtn / Hero #ctaImmersive 两个按钮，
-     或直接打开 /focus 专注页），配方点击绝不能顺带把它打开——
-     否则外壳的 onFocusChange 会跳到 /focus，落地页挂载时又把
-     focus 预设（咖啡馆靠窗）摆到推子上，盖掉刚点的配方。
-     （2026-11-13 实报 bug：点哪个配方都变成咖啡馆靠窗 + 沉浸模式。） */
+  /* 选一个配方并播放：只调配比，不跳页、不进全屏。
+     （2026-11-13 实报 bug：点哪个配方都变成咖啡馆靠窗 + 沉浸模式；
+     沉浸模式已随调音台下线，配方点击只播放。） */
   function chooseScene(scene){
+    currentLabel=recipeDisplay(scene,L()).name;
     if(!playMix(scene.mix,scene)){
       pendingScene=scene;
       return;
@@ -1319,11 +880,10 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   }
 
   /**
-   * 落地页预设（P1）：只把配方"摆"到推子上——推子动、杯子变，不播放、
-   * 不进沉浸模式。tweenTo 本身会过滤进阶通道；applyGain 在音频未
-   * 初始化（AC 为空）时直接返回，所以页面首次打开（无用户手势）
-   * 调用也是安全的。不要用 chooseScene 做预设：它会调 playMix
-   * （手势前静默失败）。
+   * 落地页预设：只把配方"摆"到当前配比（tweenTo 过渡），不播放。
+   * tweenTo 本身会过滤进阶通道；applyGain 在音频未初始化（AC 为空）
+   * 时直接返回，所以页面首次打开（无用户手势）调用也是安全的。
+   * 不要用 chooseScene 做预设：它会调 playMix（手势前静默失败）。
    */
   function setMix(mix){
     activeScene=null;
@@ -1331,7 +891,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     return true;
   }
 
-  /** 落地页"播放这杯"：走已有的 playSavedMix（进阶通道过滤 + 提示 + 播放）。 */
+  /** 落地页"播放这个配方"：走已有的 playSavedMix（进阶通道过滤 + 提示 + 播放）。 */
   function playRecipe(recipe){
     return playSavedMix(recipe);
   }
@@ -1342,16 +902,13 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       showPremium(recipe.name);
       return false;
     }
+    currentLabel=recipe.name;
     if(!playMix(mix)) return false;
     if(recipe.params) applyParamsMap(recipe.params);
     var hasPremium=Object.keys(recipe.mix).some(function(id){
       return recipe.mix[id]>.02 && !sessionTools.isFreeSound(id);
     });
-    /* 调音台在当前页（首页/落地页）就滚过去；不在（/mine、/mix 等）
-       就发事件让外壳跳回调音台页——音频已经在播，页面跟上即可。 */
-    var mixerEl=$("mixer");
-    if(mixerEl) mixerEl.scrollIntoView({behavior:"smooth"});
-    else if(typeof window!=="undefined") window.dispatchEvent(new CustomEvent("soundcocktail:show-mixer"));
+    // 播放由常驻的 now-playing 条控制（调音台已下线，不再跳页）。
     toast(hasPremium ? t(L(),'mine.appliedPlus') : t(L(),'mine.applied',{name:recipe.name}));
     return true;
   }
@@ -1414,7 +971,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     return SOUNDS.filter(function(s){ return levels[s.id]>0.02; })
       .sort(function(a,b){ return levels[b.id]-levels[a.id]; }).slice(0,2);
   }
-  /* 存下当前一杯（保存按钮与 landing 页“存下这杯”共用）：
+  /* 存下当前配方（保存按钮与 landing 页“存下配方”共用）：
      名字由调用方给；没有配比时只提示，不存空配方。
      保存配方是订阅功能：免费用户点保存时弹升级提示，不存。 */
   function saveCurrentMix(name){
@@ -1479,57 +1036,40 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     var c=document.createElement("canvas"); c.width=900; c.height=1160;
     var x=c.getContext("2d");
     var grd=x.createLinearGradient(0,0,0,1160);
-    grd.addColorStop(0, "#fff6e7"); grd.addColorStop(1, "#f3e5e1");
+    grd.addColorStop(0, "#f6f0e4"); grd.addColorStop(1, "#e7e0cd");
     x.fillStyle=grd; x.fillRect(0,0,900,1160);
-    x.fillStyle= "#352a28";
+    x.fillStyle= "#273b30";
     x.font="600 30px Manrope,sans-serif"; x.fillText("SOUND COCKTAIL", 70, 105);
-    x.font="500 24px Manrope,sans-serif"; x.fillStyle= "#705e56";
+    x.font="500 24px Manrope,sans-serif"; x.fillStyle= "#5f6b5d";
     x.fillText(t(L(),'mine.shareTagline'), 70, 148);
-    x.font="600 72px Manrope,sans-serif"; x.fillStyle= "#352a28";
+    x.font="600 72px Manrope,sans-serif"; x.fillStyle= "#273b30";
     wrapText(x, r.name, 70, 280, 760, 92, 2);
-    var gx=270, gy=420, gw=360, bowlBot=gy+218;
-    var look=cupMix(r.mix), colors=CUP_TINTS[look.tint].colors;
-    var liqH=196*look.fill, y=bowlBot-5-liqH;
-    var half=gw*.5*cupHalfWidth(CUP_BOWL_BOTTOM-look.fill*(CUP_BOWL_BOTTOM-CUP_BOWL_TOP))/111;
-    function bowlPath(){
-      x.beginPath();
-      x.moveTo(gx, gy);
-      x.bezierCurveTo(gx+6, gy+150, gx+92, gy+212, gx+gw/2, bowlBot);
-      x.bezierCurveTo(gx+gw-92, gy+212, gx+gw-6, gy+150, gx+gw, gy);
-      x.closePath();
-    }
-    x.save(); bowlPath(); x.clip();
-    if(liqH>0){
-      var grd2=x.createLinearGradient(0,y,0,bowlBot);
-      grd2.addColorStop(0,colors[0]); grd2.addColorStop(.53,colors[1]); grd2.addColorStop(1,colors[2]);
-      x.globalAlpha=.86; x.fillStyle=grd2; x.fillRect(gx,y,gw,bowlBot-y);
-      x.globalAlpha=.86; x.fillStyle=colors[3]; x.strokeStyle="rgba(255,250,222,.85)"; x.lineWidth=2.1;
-      x.beginPath(); x.ellipse(gx+gw*.5,y,half,half*.1,0,0,Math.PI*2); x.fill(); x.stroke();
-      x.globalAlpha=1;
-    }
-    var sh=x.createLinearGradient(gx,gy,gx+gw,bowlBot);
-    sh.addColorStop(0,"rgba(255,255,255,.26)"); sh.addColorStop(.4,"rgba(255,255,255,0)");
-    x.fillStyle=sh; x.fillRect(gx,gy,gw,bowlBot-gy);
-    x.restore();
-    x.strokeStyle="#66878b"; x.lineWidth=4;
-    bowlPath(); x.stroke();
-    x.beginPath(); x.ellipse(gx+gw/2,gy,gw/2,16,0,0,Math.PI*2); x.stroke();
-    x.lineWidth=10;
-    x.beginPath(); x.moveTo(gx+gw/2-4, bowlBot+4); x.lineTo(gx+gw/2-3, bowlBot+96); x.stroke();
-    x.beginPath(); x.moveTo(gx+gw/2-70, bowlBot+108); x.lineTo(gx+gw/2+70, bowlBot+108); x.stroke();
+    // 配方配比条：按音量横向分段，画在名字与配料清单之间
+    // （改版后分享卡不再画鸡尾酒杯）。
+    var active=SOUNDS.filter(function(s){return r.mix[s.id]>0.02;}).sort(function(a,b){return r.mix[b.id]-r.mix[a.id];});
+    var total=active.reduce(function(sum,s){return sum+r.mix[s.id];},0)||1;
+    var barX=70, barY=430, barW=760, barH=46, barCursor=barX;
+    active.slice(0,4).forEach(function(s){
+      var w=barW*(r.mix[s.id]/total);
+      x.fillStyle=s.color;
+      x.fillRect(barCursor, barY, Math.max(8,w), barH);
+      barCursor+=w;
+    });
+    x.fillStyle="rgba(39,59,48,.18)";
+    x.fillRect(barX, barY+barH+10, barW, 2);
     /* ingredient list （字体按界面语言：英文用 Manrope，中文用思源字体） */
     var fontSans=L()==="en" ? "500 32px Manrope,sans-serif" : "500 32px 'Noto Sans SC',sans-serif";
     var fontSerif=L()==="en" ? "700 30px 'Cormorant Garamond',serif" : "700 30px 'Noto Serif SC',serif";
     x.font=fontSans;
     var ly=900;
-    look.active.slice(0,4).forEach(function(s){
+    active.slice(0,4).forEach(function(s){
       var id=s.id;
       x.fillStyle=s.color; x.fillRect(70, ly-26, 26, 26);
-      x.fillStyle= "#352a28";
+      x.fillStyle= "#273b30";
       x.fillText(soundDisplayName(s,L())+"  "+Math.round(r.mix[id]*100), 116, ly);
       ly+=52;
     });
-    x.font=fontSerif; x.fillStyle= "#9d5225";
+    x.font=fontSerif; x.fillStyle= "#ab6f50";
     x.fillText(t(L(),'mine.shareTagline'), 70, 1090);
     var a=document.createElement("a");
     a.download="Sound-Cocktail-"+r.name+".png";
@@ -1585,7 +1125,6 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   $("sessionDone").addEventListener("close",function(){ pendingScene=null; });
   $("sdSave").addEventListener("click",function(){
     $("sessionDone").close();
-    exitImmersive();
     /* 我的配方在当前页就滚过去聚焦名字框；不在就发事件让外壳跳过去。 */
     var mineEl=$("mine");
     if(mineEl){
@@ -1598,7 +1137,6 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   document.querySelectorAll("[data-see-plus]").forEach(function(button){
     button.addEventListener("click",function(){
       button.closest("dialog").close();
-      exitImmersive();
       /* 进阶页在当前页就滚过去；不在就发事件让外壳跳过去。 */
       var plusEl=$("plus");
       if(plusEl) plusEl.scrollIntoView({behavior:"smooth"});
@@ -1606,71 +1144,6 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     });
   });
 
-  var stageHome=null, immersiveTrigger=null;
-  function setBackgroundInert(inert){
-    document.querySelectorAll("main,.topbar-wrap").forEach(function(section){
-      section.inert=inert;
-      if(inert) section.setAttribute("aria-hidden","true");
-      else section.removeAttribute("aria-hidden");
-    });
-  }
-  function renderImmersive(){
-    var holder=$("immScene"), stage=$("cupStage");
-    /* 杯子只在 Hero 挂载时存在（配方页等没有）：没有就只更新标题与
-       流动色，跳过搬杯子。 */
-    if(stage){
-      if(!stageHome) stageHome={parent:stage.parentNode,next:stage.nextSibling};
-      if(stage.parentNode!==holder) holder.appendChild(stage);
-    }
-    var active=SOUNDS.filter(function(s){ return levels[s.id]>.02; })
-      .sort(function(a,b){ return levels[b.id]-levels[a.id]; });
-    for(var i=0;i<3;i++){
-      var color="--c"+(i+1);
-      if(active[i]) $("immFlow").style.setProperty(color,active[i].color);
-      else $("immFlow").style.removeProperty(color);
-    }
-    $("immTitle").textContent=activeScene ? recipeDisplay(activeScene,L()).name :
-      active.length ? active.slice(0,3).map(function(s){ return soundDisplayName(s,L()); }).join(" + ") : t(L(),'overlays.immTitle');
-    $("immSub").textContent=activeScene ? recipeDisplay(activeScene,L()).desc : t(L(),'overlays.immSub');
-  }
-  function enterImmersive(){
-    if(!setPlaying(true)) return;
-    showImmersive();
-    onFocusChange(true);
-  }
-  function showImmersive(){
-    var el=$("immersive");
-    if(el.classList.contains("open")) return;
-    immersiveTrigger=document.activeElement;
-    renderImmersive();
-    el.classList.add("open");
-    el.setAttribute("aria-hidden","false");
-    document.body.classList.add("is-immersive");
-    $("immPlay").textContent=playing ? t(L(),'overlays.immPause') : t(L(),'overlays.immResume');
-    $("immPlay").focus({preventScroll:true});
-    setBackgroundInert(true);
-  }
-  function exitImmersive(notify=true){
-    var el=$("immersive");
-    if(!el.classList.contains("open")) return;
-    var stage=$("cupStage");
-    if(stageHome && stage && stage.parentNode!==stageHome.parent) stageHome.parent.insertBefore(stage,stageHome.next);
-    el.classList.remove("open");
-    el.setAttribute("aria-hidden","true");
-    document.body.classList.remove("is-immersive");
-    setBackgroundInert(false);
-    if(immersiveTrigger) immersiveTrigger.focus({preventScroll:true});
-    if(notify) onFocusChange(false);
-  }
-  /* 沉浸按钮的监听在 bindMixer 里绑（调音台挂载时），遮罩内按钮
-     （#immExit、#immPlay）在外壳常驻，这里保留。 */
-  $("immExit").addEventListener("click",function(){
-    exitImmersive();
-    var m=$("mixer"); if(m) m.scrollIntoView({behavior:"smooth"});
-    var pb=$("playBtn"); if(pb) pb.focus({preventScroll:true});
-  });
-  $("immPlay").addEventListener("click",function(){ setPlaying(!playing); });
-  setInterval(function(){ if($("immersive").classList.contains("open")) renderImmersive(); },1000);
 
   function updateSourceUI(id){
     var meta=SOUND_AUDIO[id], entry=recordings[id];
@@ -1772,74 +1245,11 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   /* 底噪开关的监听在 bindSources 里绑（音源清单挂载时），这里只留本体。 */
 
   /* ============================== page binds ==============================
-     拆页后调音台/我的配方/音源清单只在各自页面挂载：页面组件挂载时
-     调对应的 bind*（建推子/清单/列表、绑按钮），卸载时调 unbind*。
+     拆页后我的配方/音源清单只在各自页面挂载：页面组件挂载时
+     调对应的 bind*（建清单/列表、绑按钮），卸载时调 unbind*。
      同一块 DOM 重复调 bind 时跳过静态按钮监听（只重建重绘）；
      unbind 撤监听、清记录。音频与配比状态在模块里，不受影响。 */
 
-  /* 调音台块（首页/落地页）：播放条、筛选、随机/归零/沉浸按钮。 */
-  var mixerBoundRoot=null, mixerRemovers=[];
-  function bindMixer(){
-    var wrap=$("faders");
-    if(!wrap) return;
-    var first=mixerBoundRoot!==wrap;
-    mixerBoundRoot=wrap;
-    if(first){
-      track(mixerRemovers, $("soundFilters"), "click", function(event){
-        var button=event.target.closest("[data-filter]");
-        if(!button) return;
-        soundFilter=button.dataset.filter;
-        this.querySelectorAll("button").forEach(function(item){
-          item.classList.toggle("on",item===button);
-          item.setAttribute("aria-pressed",String(item===button));
-        });
-        updateSoundFilter();
-      });
-      track(mixerRemovers, $("playBtn"), "click", function(){ setPlaying(!playing); });
-      track(mixerRemovers, $("ctaPlay"), "click", function(){
-        if(setPlaying(!playing)){ var m=$("mixer"); if(m) m.scrollIntoView({behavior:"smooth"}); }
-      });
-      track(mixerRemovers, $("masterVol"), "input", function(){
-        masterVol=Math.min(MASTER_CAP,this.value/100);
-        updateMasterGain();
-      });
-      track(mixerRemovers, $("clearBtn"), "click", function(){
-        activeScene=null;
-        tweenTo({});
-        toast(t(L(),'mixer.cleared'));
-      });
-      track(mixerRemovers, $("randomBtn"), "click", function(){
-        var pool=SOUNDS.filter(function(sound){ return sessionTools.isFreeSound(sound.id); });
-        var picks=[], n=2+Math.floor(Math.random()*3);
-        for(var i=0;i<n;i++){ picks.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]); }
-        var mix={};
-        picks.forEach(function(sound){ mix[sound.id]=.3+Math.random()*.6; });
-        if(playMix(mix)) toast(t(L(),'mixer.randomToast',{names:picks.map(function(sound){ return soundDisplayName(sound,L()); }).join(" + ")}));
-      });
-      track(mixerRemovers, $("immersiveBtn"), "click", enterImmersive);
-      track(mixerRemovers, $("ctaImmersive"), "click", enterImmersive);
-      track(mixerRemovers, $("sleepTimerSelect"), "change", function(){
-        sleepChoice=this.value==="off" ? 0 : Number(this.value);
-        // 免费用户设睡眠定时会被 setSleepTimer 拒绝（返回 null，
-        // 已弹升级提示）：把 select 复位到 off。
-        if(setSleepTimer(sleepChoice ? sleepChoice*60000 : null)===null && sleepChoice){
-          sleepChoice=0; this.value="off";
-        }
-      });
-    }
-    buildFaders();
-    SOUNDS.forEach(function(s){ paintFader(s.id); });
-    renderGlass();
-    // The select always shows the armed timer (or off), including after
-    // the timer was cleared by entering a journey.
-    var sleepSel=$("sleepTimerSelect");
-    if(sleepSel) sleepSel.value=sleepChoice ? String(sleepChoice) : "off";
-    paintSession();
-  }
-  function unbindMixer(){
-    untrack(mixerRemovers);
-    mixerBoundRoot=null;
-  }
 
   /* 我的配方块（/mine）：保存/导入按钮 + 渲染列表与当前配比。 */
   var mineBoundRoot=null, mineRemovers=[];
@@ -1899,7 +1309,6 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   }
 
   /* ============================== init ============================== */
-  buildFaders();
   buildSources();
   renderMine();
   // 语言切换（导航栏选择器）只改文案：引擎重绘自己负责的部分。
@@ -1909,24 +1318,18 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     repaintingLocale = (loc === 'en' || loc === 'zh') ? loc : null;
     try { repaintLocale(); } finally { repaintingLocale = null; }
   });
-  // The first cup is ready to play when the user chooses Start.
+  // 默认配比：雨 80、篝火 52、钢琴 40（用户点播放时若为空则用它）。
   levels.rain=0.80; levels.fire=0.52; levels.piano=0.40;
-  SOUNDS.forEach(function(s){ paintFader(s.id); });
-  renderGlass();
   paintCurrentMix();
   paintSession();
   setInterval(tickSession,250);
   listen(document,"visibilitychange",function(){
     if(!document.hidden){ tickSession(); armSessionGain(); }
   });
-  meterLoop();
-  listen(document,"keydown",function(event){
-    if(event.key==="Escape" && !$("sessionDone").open && !$("premiumDialog").open) exitImmersive();
-  });
 
   /**
    * 登录/登出或权益变化后调用：按已拥有的包重算可玩通道，
-   * 重建推子与音源清单（levels/params/音频节点不受影响）。
+   * 重建音源清单（levels/params/音频节点不受影响）。
    * 未登录时传 []，进阶通道重新上锁。
    */
   function setOwnedPacks(packIds){
@@ -1936,24 +1339,14 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       PACKS.forEach(function(p){ if(p.id===packId) pack=p; });
       (pack && pack.sounds || []).forEach(function(id){ ownedSounds.add(id); });
     });
-    buildFaders();
-    SOUNDS.forEach(function(s){ paintFader(s.id); });
     buildSources();
     paintCurrentMix();
   }
 
-  /** 播放/暂停按钮的文案随播放状态和语言走（语言切换时也要刷新）。
-      按钮只在调音台/hero 挂载时存在，逐个守卫。 */
-  function refreshTransportLabels(){
-    var pb=$("playBtn"); if(pb) pb.setAttribute("aria-label",playing ? t(L(),'mixer.pauseAria') : t(L(),'mixer.playAria'));
-    var cp=$("ctaPlay"); if(cp) cp.textContent=playing ? t(L(),'mixer.playingCta') : t(L(),'hero.ctaPlay');
-    var ip=$("immPlay"); if(ip) ip.textContent=playing ? t(L(),'overlays.immPause') : t(L(),'overlays.immResume');
-  }
 
   /**
-   * 语言切换时重绘引擎负责的全部文案：推子（含分组名、参数名、
-   * 徽章、音量读数）、杯身标题、当前配比、我的配方、音源清单、
-   * 播放按钮。React 负责的静态文案由 useLocale 自行重渲染。
+   * 语言切换时重绘引擎负责的全部文案：当前配比、我的配方、音源清单。
+   * React 负责的静态文案由 useLocale 自行重渲染。
    * 只改文案，不碰 levels/params/音频节点和支付状态。
    * 配方名输入框：只有值还是上一个语言的自动建议时才跟随重生成；
    * 用户自己输入过的内容原样保留，绝不翻译。
@@ -1966,20 +1359,16 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       var top=topActive();
       if(top.length) oldAuto=autoRecipeName(top.map(function(s){ return { sound: s, level: levels[s.id] }; }), lastLocale);
     }
-    buildFaders();
-    SOUNDS.forEach(function(s){ paintFader(s.id); });
-    renderGlass();
     paintCurrentMix();
     renderMine();
     buildSources();
-    refreshTransportLabels();
     if(nm && oldAuto && nm.value===oldAuto){ var dn=defaultName(); if(dn) nm.value=dn; }
     lastLocale=L();
   }
 
   const api = {
     // The place player has its own clock. Relinquish all legacy audio before
-    // it starts, including optional noise beds outside the mixer transport.
+    // it starts, including optional noise beds outside the recipe transport.
     pauseForScene() {
       if(!AC) return;
       if(playing) setPlaying(false);
@@ -1988,14 +1377,13 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
         sessionGain.gain.cancelScheduledValues(AC.currentTime);
         sessionGain.gain.setValueAtTime(0,AC.currentTime);
       }
-      // A mixer sleep timer belongs to the mixer session: clear it when
+      // The recipe sleep timer belongs to the recipe session: clear it when
       // the journey player takes over (it has its own timer).
       sleepDeadline=null; sleepChoice=0;
       if(sleepGain){
         sleepGain.gain.cancelScheduledValues(AC.currentTime);
         sleepGain.gain.setValueAtTime(1,AC.currentTime);
       }
-      var sleepSel=$("sleepTimerSelect"); if(sleepSel) sleepSel.value="off";
       paintSession();
       SOUNDS.forEach(function(sound){ stopGen(sound.id); });
       Object.keys(bedNodes).forEach(stopBed);
@@ -2010,8 +1398,6 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
      */
     setSubscriber(value) {
       isSubscriber = !!value;
-      buildFaders();
-      SOUNDS.forEach(function(s){ paintFader(s.id); });
       buildSources();
       paintCurrentMix();
       armSessionGain();
@@ -2023,27 +1409,21 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     getSleepTimerRemaining() {
       return sleepRemainingMs(sleepDeadline, Date.now());
     },
-    setFocus(open) {
-      if(open) showImmersive();
-      else exitImmersive(false);
+    // Now-playing 条的暂停/继续：切换配方播放（免费窗口到期时返回 false）。
+    togglePlaying() {
+      return setPlaying(!playing);
     },
-    /* 页面挂载时接 DOM：调音台（首页/落地页）、Hero 杯子、我的配方、音源清单。 */
-    bindHero,
-    unbindHero,
-    bindMixer,
-    unbindMixer,
+    /* 页面挂载时接 DOM：我的配方、音源清单。 */
     bindMine,
     unbindMine,
     bindSources,
     unbindSources,
-    /* 落地页“存下这杯”：不依赖保存框 DOM，直接存当前配比。 */
+    /* 落地页“存下配方”：不依赖保存框 DOM，直接存当前配比。 */
     saveMixAs(name) {
       return saveCurrentMix(name);
     },
-    restoreCupStage,
     dispose() {
       disposed=true;
-      exitImmersive(false);
       scope.dispose();
       document.body.classList.remove("is-playing");
       if(labController===api) labController=null;

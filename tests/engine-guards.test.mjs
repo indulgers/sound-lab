@@ -1,11 +1,16 @@
 /**
  * 引擎守卫测试：sound-lab.mjs 里翻译函数 t 由 ./locale.mjs 导入。
  * 2026-11-13 发现：setPlaying 内 `var t=AC.currentTime` 遮蔽了导入的 t，
- * 导致 t(L(),'mixer.pauseAria') 等调用抛 TypeError: t is not a function，
- * 播放被置 true 后立即中断，playMix 的重置/补间永远走不到（混音页
- * “在调音台打开这杯”与落地页“播放这杯”按钮因此失效，主播放键同病）。
+ * 导致 t(L(),…) 调用抛 TypeError: t is not a function，播放被置 true
+ * 后立即中断，playMix 的重置/补间永远走不到（混音页“在调音台打开这杯”
+ * 与落地页“播放这杯”按钮因此失效，主播放键同病）。
  * 本测试扫描全部顶层函数：凡在函数体内调用 t(L(),…) 的，不得在
  * 同一函数体内声明名为 t 的局部变量。
+ *
+ * 改版（2026-11-16）：调音台与沉浸模式已下线。setPlaying 不再碰
+ * 播放键/沉浸 DOM，改为发 soundcocktail:engine-state（常驻的
+ * now-playing 条显示播放状态）+ 切换 body.is-playing；控制器只剩
+ * bindMine/bindSources 两组页面绑定 + togglePlaying。
  */
 import assert from 'node:assert/strict';
 import test from 'node:test';
@@ -31,13 +36,16 @@ test('engine: no function that calls t(L(),…) declares a local t (shadowing gu
   assert.deepEqual(bad, [], `functions shadowing imported t while calling t(L(),…): ${bad.join(', ')}`);
 });
 
-test('engine: setPlaying uses the imported t for labels (regression for the play-button throw)', () => {
+test('engine: setPlaying reports state via engine-state (no mixer/hero DOM any more)', () => {
   const start = src.indexOf('  function setPlaying(');
   const end = src.indexOf('  function playMix(', start);
   assert.ok(start !== -1 && end > start, 'setPlaying/playMix spans found');
   const body = src.slice(start, end);
-  assert.ok(body.includes("t(L(),'mixer.pauseAria')"), 'setPlaying sets playBtn aria-label via t()');
+  assert.ok(body.includes('soundcocktail:engine-state'), 'setPlaying dispatches engine-state for the now-playing bar');
+  assert.ok(body.includes('document.body.classList.toggle("is-playing",playing)'), 'setPlaying toggles body.is-playing');
+  assert.ok(body.includes("t(L(),'audio.cantPlay')"), 'setPlaying still uses the imported t for the play failure toast');
   assert.ok(!/(^|\n)\s*(var|let|const)\s+t\s*=/.test(body), 'setPlaying must not declare a local t');
+  assert.doesNotMatch(body, /playBtn|ctaPlay|immPlay|mixer\.pauseAria/, 'setPlaying must not touch deleted mixer/hero/immersive DOM');
 });
 
 // --- 拆页（2026-11-13）：引擎常驻外壳，各页面组件接 DOM ---
@@ -49,19 +57,24 @@ test('split: engine exposes a module-level controller for the shell-mounted inst
   assert.ok(/if\(labController===api\) labController=null;/.test(src), 'dispose clears the controller');
 });
 
-test('split: controller exposes the per-page bind/unbind pairs plus saveMixAs and restoreCupStage', () => {
+test('split: controller exposes the recipe bindings plus togglePlaying, not the deleted mixer/hero', () => {
   const start = src.indexOf('  const api = {');
   const end = src.indexOf('  labController = api;', start);
   assert.ok(start !== -1 && end > start, 'controller object found');
   const body = src.slice(start, end);
   for (const key of [
-    'bindHero', 'unbindHero', 'bindMixer', 'unbindMixer',
     'bindMine', 'unbindMine', 'bindSources', 'unbindSources',
-    'saveMixAs', 'restoreCupStage',
+    'saveMixAs', 'togglePlaying', 'setMix', 'playRecipe',
+    'showPremium', 'setOwnedPacks', 'setSubscriber',
+    'setSleepTimer', 'getSleepTimerRemaining', 'pauseForScene', 'dispose',
   ]) {
     assert.ok(new RegExp(`(^|[^a-zA-Z_$])${key}(?=[(,\\s])`).test(body), `controller exposes ${key}`);
   }
-  // saveMixAs 直接存当前配比（落地页“存下这杯”不依赖保存框 DOM）。
+  // 调音台/沉浸已下线：这些键必须不存在。
+  for (const key of ['bindHero', 'unbindHero', 'bindMixer', 'unbindMixer', 'restoreCupStage', 'setFocus']) {
+    assert.doesNotMatch(body, new RegExp(`(^|[^a-zA-Z_$])${key}(?=[(,\\s])`), `controller must not expose deleted ${key}`);
+  }
+  // saveMixAs 直接存当前配比（落地页“存下配方”不依赖保存框 DOM）。
   assert.ok(body.includes('saveMixAs(name)'), 'saveMixAs takes a name');
   assert.ok(/saveMixAs\(name\) \{\s*\n?\s*return saveCurrentMix\(name\);/.test(body), 'saveMixAs delegates to saveCurrentMix');
 });
@@ -74,20 +87,14 @@ test('split: page-section bindings live inside their bind functions, not at modu
     assert.ok(end > start, `${name} closes`);
     return src.slice(start, end);
   };
-  const mixer = fnBody('bindMixer');
-  for (const id of ['soundFilters', 'playBtn', 'ctaPlay', 'masterVol', 'clearBtn', 'randomBtn', 'immersiveBtn', 'ctaImmersive']) {
-    assert.ok(mixer.includes(`$("${id}")`), `bindMixer binds #${id}`);
-  }
   const mine = fnBody('bindMine');
   for (const id of ['saveBtn', 'importBtn']) {
     assert.ok(mine.includes(`$("${id}")`), `bindMine binds #${id}`);
   }
   const sources = fnBody('bindSources');
   assert.ok(sources.includes('data-bed'), 'bindSources binds the [data-bed] chips');
-  const hero = fnBody('bindHero');
-  assert.ok(hero.includes('wcSvg') || hero.includes('pointermove'), 'bindHero binds the cup sway');
   // 卸载时撤监听（每组 bind 都有对应的 unbind，调同一批 remover）。
-  for (const pair of [['bindHero', 'unbindHero', 'heroRemovers'], ['bindMixer', 'unbindMixer', 'mixerRemovers'], ['bindMine', 'unbindMine', 'mineRemovers'], ['bindSources', 'unbindSources', 'sourcesRemovers']]) {
+  for (const pair of [['bindMine', 'unbindMine', 'mineRemovers'], ['bindSources', 'unbindSources', 'sourcesRemovers']]) {
     const unbind = fnBody(pair[1]);
     assert.ok(unbind.includes(pair[2]), `${pair[1]} clears ${pair[2]}`);
   }

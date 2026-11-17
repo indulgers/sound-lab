@@ -1,10 +1,13 @@
 /**
- * Sleep-timer UI wiring guards. The journey panel and the mixer bar are
- * React/DOM surfaces with no component test harness, so — like
- * engine-guards.test.mjs — these tests scan the source for the wiring
- * that must exist: the shared options, the end-of-journey choice, the
- * persisted choice, the mixer select + countdown, and the copy keys in
- * both languages.
+ * Sleep-timer UI wiring guards. The journey panel is a React/DOM surface
+ * with no component test harness, so — like engine-guards.test.mjs —
+ * these tests scan the source for the wiring that must exist: the shared
+ * options, the end-of-journey choice, the persisted choice, the journey
+ * panel timer, and the engine's expiry toast.
+ *
+ * 改版（2026-11-16）：调音台已下线，调音台播放条的 select + 倒计时
+ * 不再存在；睡眠定时只剩旅程面板的定时器与引擎的 recipe 定时器
+ * （无界面可设，locale 里只留 sleepDone 到期提示）。
  */
 import assert from 'node:assert/strict';
 import test from 'node:test';
@@ -14,7 +17,6 @@ import { dirname, join } from 'node:path';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const scene = readFileSync(join(root, 'src/scenes/SceneExperience.jsx'), 'utf8');
-const mixer = readFileSync(join(root, 'src/MixerSection.jsx'), 'utf8');
 const locale = readFileSync(join(root, 'src/locale.mjs'), 'utf8');
 const engine = readFileSync(join(root, 'src/sound-lab.mjs'), 'utf8');
 
@@ -27,13 +29,14 @@ test('sleep timer UI: journey panel offers minutes plus end of journey', () => {
   assert.ok(scene.includes('last 2 minutes') && scene.includes('最后两分钟'), 'fade length is stated in the panel copy, both languages');
 });
 
-test('sleep timer UI: mixer bar has a select and countdown in both languages', () => {
-  assert.ok(mixer.includes('sleepTimerSelect'), 'mixer bar has the timer select');
-  assert.ok(mixer.includes('sleepTimerRead'), 'mixer bar has the timer countdown');
-  for (const key of ['sleepTimer:', 'sleepOff:', 'sleepMinutes:', 'sleepDone:']) {
-    assert.ok(locale.includes(key), `mixer.${key.slice(0, -1)} exists in locale.mjs`);
-  }
-  assert.ok((locale.match(/sleepTimer:/g) || []).length >= 2, 'sleepTimer copy exists in both languages');
+test('sleep timer UI: the recipe engine keeps only the expiry toast (mixer UI is gone)', () => {
+  // 调音台已下线：locale 里只剩引擎睡眠定时到期的提示（双语各一处）。
+  assert.ok((locale.match(/sleepDone:/g) || []).length >= 2, 'engine.sleepDone exists in both languages');
+  assert.doesNotMatch(locale, /sleepTimer:|sleepOff:|sleepMinutes:/, 'mixer sleep-timer UI keys are gone');
+  // 旅程面板自己的定时器：选时长 + 剩几分钟 + 持续播放。
+  assert.ok(scene.includes('setSleepTimer'), 'journey panel arms its own timer');
+  assert.ok(scene.includes('timerLabel'), 'journey panel shows the remaining minutes');
+  assert.ok(scene.includes('C.continuous'), 'journey panel offers continuous listening');
 });
 
 test('sleep timer engine: dedicated gain, long fade, session subsumption', () => {
@@ -41,7 +44,7 @@ test('sleep timer engine: dedicated gain, long fade, session subsumption', () =>
   assert.ok(engine.includes('sessionGain.connect(sleepGain); sleepGain.connect(master)'), 'sleepGain sits between sessionGain and master');
   assert.ok(engine.includes('function setSleepTimer('), 'setSleepTimer exists');
   assert.ok(engine.includes('function armSleepGain('), 'armSleepGain exists');
-  assert.ok(engine.includes("t(L(),'mixer.sleepDone')"), 'sleep expiry toasts in the current language');
+  assert.ok(engine.includes("t(L(),'engine.sleepDone')"), 'sleep expiry toasts in the current language');
   // The sleep branch must run before the session branch in tickSession,
   // so the 10-minute window never cuts a sleep timer short.
   const tick = engine.slice(engine.indexOf('  function tickSession('), engine.indexOf('  function openListeningWindow('));
@@ -51,8 +54,8 @@ test('sleep timer engine: dedicated gain, long fade, session subsumption', () =>
   // session branch only.
   const sleepBranch = tick.slice(tick.indexOf('sleepDeadline!==null'), tick.indexOf('session.remaining()!==0'));
   assert.ok(!sleepBranch.includes('showSessionDone'), 'sleep expiry stops quietly, without the session dialog');
-  // Entering a journey clears the mixer timer (it has its own).
+  // Entering a journey clears the recipe timer (it has its own).
   const pauseStart = engine.indexOf('pauseForScene() {');
   const pause = engine.slice(pauseStart, engine.indexOf('setMix,', pauseStart));
-  assert.ok(pause.includes('sleepDeadline=null; sleepChoice=0;'), 'pauseForScene clears the mixer timer');
+  assert.ok(pause.includes('sleepDeadline=null; sleepChoice=0;'), 'pauseForScene clears the recipe timer');
 });

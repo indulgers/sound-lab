@@ -1,31 +1,31 @@
 # Sound Cocktail — full details
 
-> Sound Cocktail is a free ambient sound mixer. Mix 22 white noise and ambient sounds — rain, fire, café voices, night train, piano — and save your cup for sleep, focus or unwinding. No app to install, no account needed to start mixing. Optional one-time sound packs unlock extra channels.
+> Sound Cocktail is a free sound-therapy listening site. Tune 22 sounds — rain, fire, café voices, night train, piano — into a mix for the moment you are in, and save it for sleep, focus or unwinding. No app to install, no account needed to listen.
 
 ## What it is
 
-Sound Cocktail is a web app for mixing ambient sounds the way you mix a cocktail: pick a few sounds, set each one's level with a fader, and save the mix as a recipe. Sounds come from three sources: live field recordings, instrument samples, and a live synthesis engine with per-sound tuning (brightness, distance, density). The interface is hand-drawn and cute — a watercolor cocktail glass that fills as you mix.
+Sound Cocktail is a web app for place-inspired sound journeys: real film, original music and sound layers you can tune, for focus, sleep and meditation. Pick a state, enter the room, and tune the layers until it sounds like tonight. Sounds come from three sources: live field recordings, instrument samples, and a live synthesis engine with per-sound tuning (brightness, distance, density). The free entry is the Chiang Mai and Bali journeys, a 10-minute listening window and the basic tuner; Plus unlocks the other four destinations, unlimited listening, the full tuner and the sleep timer.
 
 ## Pages
 
-- [Sound Cocktail](https://soundcocktail.app/en): the mixer. 22 sounds across nature, places and instruments. Save mixes as recipes, share a recipe card or a recipe code (SYL-...) with a friend.
-- [Sound Cocktail （中文）](https://soundcocktail.app/zh): 免费环境音混音器：22 种白噪音与环境音，随意混搭、存成一杯，助眠或专注都用得上。
-- [Rain sounds for sleep](https://soundcocktail.app/en/sleep): Steady rain, a little piano and wind — the most-saved mix for sleep.
-- [雨声助眠](https://soundcocktail.app/zh/sleep): 稳定的雨声、一点钢琴和风，最多人保存的助眠配方。
-- [Focus sounds for studying](https://soundcocktail.app/en/focus): Café voices, keyboard taps and a little guitar for deep work and studying.
-- [专注白噪音](https://soundcocktail.app/zh/focus): 咖啡馆人声、键盘轻敲和一点吉他，陪你深度工作与学习。
-- [Relaxing sounds to wind down](https://soundcocktail.app/en/relax): Fire, wind and a little piano — slow sounds for the last hour of the day.
-- [放松白噪音](https://soundcocktail.app/zh/relax): 篝火、风和一点钢琴，给一天最后一小时的慢声音。
-- [Rain sounds](https://soundcocktail.app/en/rain): Rain on a window with a stream underneath — the plainest mix, and the most-played.
-- [雨声](https://soundcocktail.app/zh/rain): 窗边的雨，下面一条溪流，站里最简单、也最多人听的配方。
-- [Café ambience for writing](https://soundcocktail.app/en/cafe): Low voices, keyboard taps and a little piano — a café where nobody bothers you.
-- [咖啡馆背景音](https://soundcocktail.app/zh/cafe): 低声交谈、键盘轻敲和一点钢琴，那种没人打扰你的咖啡馆的声音。
+- [Sound Cocktail](https://soundcocktail.app/en): Sound therapy, mixed for the moment you are in — focus, sleep, meditation — with real places to look at while you listen. 22 sounds across nature, places and instruments. Save mixes as recipes, share a recipe card or a recipe code (SYL-...) with a friend.
+- [Sound Cocktail （中文）](https://soundcocktail.app/zh): 免费的音疗聆听站：22 种声音，随意搭配、存成配方，助眠或专注都用得上。
+- [Sound Therapy for Sleep · Rain & Night Sounds](https://soundcocktail.app/en/sleep): Steady rain, a little piano and wind — the most-saved mix for sleep.
+- [助眠音疗 · 雨声与夜晚声音](https://soundcocktail.app/zh/sleep): 稳定的雨声、一点钢琴和风，最多人保存的助眠配方。
+- [Sound Therapy for Focus · Deep Work & Study](https://soundcocktail.app/en/focus): Café voices, keyboard taps and a little guitar for deep work and studying.
+- [专注音疗 · 深度工作与学习](https://soundcocktail.app/zh/focus): 咖啡馆人声、键盘轻敲和一点吉他，陪你深度工作与学习。
+- [Guided Wind-Down · Sound Therapy for Relaxation](https://soundcocktail.app/en/relax): Fire, wind and a little piano — slow sounds for the last hour of the day.
+- [放松音疗 · 睡前放慢的仪式](https://soundcocktail.app/zh/relax): 篝火、风和一点钢琴，给一天最后一小时的慢声音。
+- [Rain Sounds for Meditation · Sound Therapy](https://soundcocktail.app/en/rain): Rain on a window with a stream underneath — the plainest mix, and the most-played.
+- [雨声冥想 · 音疗](https://soundcocktail.app/zh/rain): 窗边的雨，下面一条溪流，站里最简单、也最多人听的配方。
+- [Café Sounds for Writing · A Quiet Room of Your Own](https://soundcocktail.app/en/cafe): Low voices, keyboard taps and a little piano — a café where nobody bothers you.
+- [咖啡馆写作音 · 属于自己的安静房间](https://soundcocktail.app/zh/cafe): 低声交谈、键盘轻敲和一点钢琴，那种没人打扰你的咖啡馆的声音。
 - [About Sound Cocktail](https://soundcocktail.app/en/about): Made by one independent developer. How the sounds were made, what it costs, and what it is not.
 - [关于 Sound Cocktail](https://soundcocktail.app/zh/about): 一个独立开发者的作品：声音是怎么来的、多少钱、它不是什么。
-- [Sound recipes](https://soundcocktail.app/en/recipes): Free ambient sound recipes for sleep, focus and rain — open any one in the mixer and make it yours.
-- [声音配方](https://soundcocktail.app/zh/recipes): 助眠、专注与雨声的免费声音配方——在调音台打开任意配方，调成你的。
-- [Sound Cocktail Plus](https://soundcocktail.app/en/plus): One-time sound packs — Focus Pack, Sleep Pack and Rain Night Pack. No subscription.
-- [Sound Cocktail 进阶](https://soundcocktail.app/zh/plus): 一次购买的声音包：专注包、助眠包与雨夜包，不订阅。
+- [Sound recipes](https://soundcocktail.app/en/recipes): Free ambient sound recipes for sleep, focus and rain — open any one and make it yours.
+- [声音配方](https://soundcocktail.app/zh/recipes): 助眠、专注与雨声的免费声音配方——打开任意配方，调成你的。
+- [Sound Cocktail Plus](https://soundcocktail.app/en/plus): Subscription: all six destinations, unlimited listening, the full tuner and the sleep timer. $7.99/month, $79.90/year (¥18/month, ¥180/year in China). 7-day free trial on overseas subscriptions.
+- [Sound Cocktail 进阶](https://soundcocktail.app/zh/plus): 订阅：全部六个目的地、不限时收听、完整调音与睡眠定时。月付 $7.99 / ¥18，年付 $79.90 / ¥180。海外订阅含 7 天免费试用。
 - [Sources & licences](https://soundcocktail.app/en/sources): Where every sound comes from — real recordings, instrument samples and live synthesis, with authors and licences.
 - [音源与授权](https://soundcocktail.app/zh/sources): 每个声音的出处：真实录音、乐器采样与实时合成，附作者与授权说明。
 
@@ -35,16 +35,15 @@ Nature: rain, wind, waves, stream, thunder, birds, insects, fire, forest.
 Places: café voices, traffic, night train, rural night, market, rainy street, boat cabin, keyboard taps.
 Instruments: piano, guitar, wind chimes, wooden fish & drum, harp notes.
 
-## Sound packs (one-time purchase, no subscription)
+## Sound Cocktail Plus (subscription)
 
-- Focus Pack ($1.99 / ¥6): market voices, wooden fish & drum, wind chimes.
-- Sleep Pack ($2.99 / ¥9): insects, night train, harp notes, forest, boat cabin.
-- Rain Night Pack ($3.99 / ¥12): thunder, rainy street.
+- Monthly ($7.99 / ¥18): all six destinations, unlimited listening, the full tuner, saved mixes and the sleep timer.
+- Yearly ($79.90 / ¥180): the same, for a year. Overseas subscriptions include a 7-day free trial; domestic Alipay cards are one-time purchases with no trial.
 
 Payment follows the visitor's region: China pays in CNY via Alipay; elsewhere pays in USD via Waffo. The interface language (English / 中文) is independent of payment — switching language never changes the price or payment method.
 
 ## Facts
 
-- Free mixing works without an account. Accounts (email or Google) are only needed to buy packs and keep entitlements.
+- Listening is free, with sessions of up to 10 minutes each, and no account needed to listen. Accounts (email or Google) are only needed to subscribe and keep entitlements.
 - Sound Cocktail is made by an independent developer. It is not a medical product and does not treat insomnia, anxiety or tinnitus — it is for winding down, focusing and relaxing.
 - Real field recordings on the site are listed with their source and license on the site's sources section.

@@ -26,8 +26,8 @@ export function webApplicationLd(locale) {
     operatingSystem: 'Web browser',
     inLanguage: en ? 'en' : 'zh-CN',
     description: en
-      ? 'A free ambient sound mixer. Mix rain, fire, café voices and instruments into a cup, and save it.'
-      : '一款免费的环境音混音器。把雨声、篝火、咖啡馆人声和乐器调成一杯，存下来。',
+      ? 'A free sound-therapy listening site. Tune rain, fire, café voices and instruments into a mix for the moment you are in, and save it.'
+      : '一个免费的音疗聆听站。把雨声、篝火、咖啡馆人声和乐器调成一段此刻需要的声音，存下来。',
     offers: {
       '@type': 'Offer',
       price: '0',

@@ -103,20 +103,18 @@ test('seo: home and /focus have different English titles and descriptions', () =
       }
     }
   }
-  // Place home describes the new music/video experience. The classic sound
-  // mixer retains its own category copy and canonical route at /studio.
-  assert.match(metaOf(home, 'description').content, /music/i);
-  assert.match(metaOf(home, 'description').content, /video/i);
-  const studio = headForRoute('studio', 'en');
-  assert.match(metaOf(studio, 'description').content, /white noise/);
-  assert.match(metaOf(studio, 'description').content, /ambient sound mixer/);
+  // Place home describes the new sound-therapy experience. The classic
+  // sound mixer is gone, and /studio is a 308 redirect, not a page.
+  assert.match(metaOf(home, 'description').content, /Sound therapy/i);
+  assert.match(metaOf(home, 'description').content, /real places/i);
+  assert.throws(() => headForRoute('studio', 'en'), /unknown seo route: studio/);
   // /focus 标题与描述不同于首页。
   assert.match(metaOf(focus, 'description').content, /focus/i);
   assert.doesNotMatch(metaOf(focus, 'description').content, /white noise/);
 });
 
 test('seo: head carries absolute og:image, twitter card and self-referencing canonical', () => {
-  assert.equal(OG_IMAGE_URL, `${SITE_URL}/og-image.png`);
+  assert.equal(OG_IMAGE_URL, `${SITE_URL}/og-image.jpg`);
   for (const [key, canonical] of [['home', `${SITE_URL}/en`], ['focus', `${SITE_URL}/en/focus`]]) {
     const head = headForRoute(key, 'en');
     const ogImage = head.meta.find((m) => m.property === 'og:image');
@@ -224,25 +222,45 @@ test('seo: llms.txt and llms-full.txt exist in public/ and map the key pages', (
   assert.ok(full.includes('22'));
 });
 
-test('seo: og-image.png exists in public/ at exactly 1200x630', () => {
-  const buf = fs.readFileSync(path.join(projectRoot, 'public/og-image.png'));
-  assert.deepEqual([...buf.subarray(0, 8)], [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-  assert.equal(buf.readUInt32BE(16), 1200);
-  assert.equal(buf.readUInt32BE(20), 630);
+test('seo: og-image.jpg exists in public/ at exactly 1200x630', () => {
+  const buf = fs.readFileSync(path.join(projectRoot, 'public/og-image.jpg'));
+  // JPEG magic: FF D8 FF.
+  assert.deepEqual([...buf.subarray(0, 3)], [0xff, 0xd8, 0xff]);
+  // Walk segments to the first SOF marker (baseline/progressive frame);
+  // its payload is: precision (1B), height (2B), width (2B).
+  let offset = 2;
+  let dims = null;
+  while (offset + 9 < buf.length) {
+    assert.equal(buf[offset], 0xff, 'segment marker');
+    const marker = buf[offset + 1];
+    const len = buf.readUInt16BE(offset + 2);
+    if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+      dims = { height: buf.readUInt16BE(offset + 5), width: buf.readUInt16BE(offset + 7) };
+      break;
+    }
+    offset += 2 + len;
+  }
+  assert.ok(dims, 'JPEG SOF marker found');
+  assert.equal(dims.width, 1200);
+  assert.equal(dims.height, 630);
 });
 
 // --- 首页介绍区文案 ---
 
-test('seo: about section copy carries the category keywords in English', async () => {
-  const { STRINGS, t } = await import('../src/locale.mjs');
-  assert.ok(STRINGS.en.about.lead.includes('ambient sound mixer'));
-  assert.ok(STRINGS.en.about.lead.includes('white noise'));
-  assert.ok(STRINGS.en.about.lead.includes('rain'));
-  assert.ok(STRINGS.en.about.points[0].includes('Rain sounds for sleep and focus'));
-  assert.ok(STRINGS.en.about.points[1].includes('Café ambience'));
-  assert.ok(STRINGS.en.about.points[2].includes('Mix your own sounds'));
-  // 中文版同样存在（水合后切换用）。
-  assert.ok(STRINGS.zh.about.lead.includes('白噪音'));
-  assert.ok(STRINGS.zh.about.lead.includes('环境音混音器'));
-  assert.equal(t('en', 'about.points.0'), STRINGS.en.about.points[0]);
+test('seo: about page copy carries the sound-therapy positioning in both languages', async () => {
+  // 改版：About 文案已从 locale.mjs 的 about 段搬到 landing.mjs 的
+  // ABOUT_PAGE（事实来源唯一），locale.mjs 里不再有 about 段。
+  const { ABOUT_PAGE } = await import('../src/landing.mjs');
+  const en = ABOUT_PAGE.content.en;
+  const zh = ABOUT_PAGE.content.zh;
+  assert.ok(en.lead.includes('place-inspired sound journeys'));
+  assert.ok(en.lead.includes('real film'));
+  assert.ok(en.lead.includes('recipes you can save'));
+  assert.ok(en.sections[0].body.includes('Kyoto'));
+  assert.ok(en.sections[1].body.includes('18 are real field recordings'));
+  assert.ok(en.sections[2].body.includes('Listening is free'));
+  assert.doesNotMatch(en.lead, /mix a cup|Mix a cup|调一杯/);
+  assert.ok(zh.lead.includes('声音旅程小站'));
+  assert.ok(zh.lead.includes('真实影像'));
+  assert.ok(zh.sections[2].body.includes('收听免费'));
 });

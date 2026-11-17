@@ -4,8 +4,8 @@
  * 路由 loader 已在服务端用 recipe-code.mjs 解码（decodeRecipeCode）：
  * recipe 为 null 表示码无效——页面展示中性提示并 noindex（head 由
  * 路由层定），不生成任何编造内容。有效时展示配方名、配料（声音名 +
- * 音量）与"在调音台打开这杯"按钮；按钮发 soundcocktail:play-mix
- * 事件，外壳转交引擎 playRecipe（播放并应用整杯）。
+ * 音量）与"打开这份配方"按钮；按钮发 soundcocktail:play-mix
+ * 事件，外壳转交引擎 playRecipe（播放并应用整份配方）。
  * 只有真实分享的混音才有 URL，不自动生成薄页面（也不进 sitemap）。
  */
 import { Link } from '@tanstack/react-router';
@@ -40,10 +40,10 @@ export default function MixPage({ recipe, locale }) {
   const total = ingredients.reduce((sum, { level }) => sum + level, 0);
   const name = recipe.name || MIX_DEFAULT_NAME[loc];
 
-  function openInMixer() {
+  function openMix() {
     if (typeof window === 'undefined') return;
-    // 引擎的 playSavedMix 在本页没有 #mixer 时会发
-    // soundcocktail:show-mixer，外壳跳回首页——这里只发事件即可。
+    // 发 soundcocktail:play-mix，外壳转交引擎 playRecipe 播放；
+    // 播放状态显示在顶部的正在播放条。
     window.dispatchEvent(
       new CustomEvent('soundcocktail:play-mix', { detail: { name, mix: recipe.mix, params: recipe.params } }),
     );
@@ -54,7 +54,7 @@ export default function MixPage({ recipe, locale }) {
       <div className="sec-head">
         <h1>{name}</h1>
       </div>
-      <p className="sec-sub">{t(loc, 'mix.sharedCup')}</p>
+      <p className="sec-sub">{t(loc, 'mix.sharedMix')}</p>
       <h2>{t(loc, 'mix.ingredients')}</h2>
       <div className="mixbar" aria-hidden="true">
         {ingredients.map(({ sound, level }) => (
@@ -70,8 +70,8 @@ export default function MixPage({ recipe, locale }) {
         ))}
       </div>
       <div className="cta-row">
-        <button className="btn btn-primary" type="button" onClick={openInMixer}>
-          ▶ {t(loc, 'mix.openInMixer')}
+        <button className="btn btn-primary" type="button" onClick={openMix}>
+          ▶ {t(loc, 'mix.openMix')}
         </button>
       </div>
       <p>

@@ -49,7 +49,7 @@ export const TERMS_PAGE = {
     en: {
       title: 'Terms of Service · Sound Cocktail',
       description:
-        'Terms of Service for Sound Cocktail — a free ambient sound mixer by one independent developer. Plus subscription ($7.99/month, $79.90/year), 7-day refunds, and the rules for using the site.',
+        'Terms of Service for Sound Cocktail — a free sound-therapy listening site by one independent developer. Plus subscription ($7.99/month, $79.90/year), 7-day refunds, and the rules for using the site.',
       ogTitle: 'Terms of Service · Sound Cocktail',
       ogDescription:
         'The rules for using Sound Cocktail: Plus subscription, refunds within 7 days, and acceptable use.',
@@ -57,7 +57,7 @@ export const TERMS_PAGE = {
     zh: {
       title: '服务条款 · Sound Cocktail',
       description:
-        'Sound Cocktail 服务条款——一个独立开发者做的免费环境音混音器。进阶版订阅（月付 $7.99 / ¥18，年付 $79.90 / ¥180）、7 天内可退款，以及使用本站的规则。',
+        'Sound Cocktail 服务条款——一个独立开发者做的免费音疗聆听站。进阶版订阅（月付 $7.99 / ¥18，年付 $79.90 / ¥180）、7 天内可退款，以及使用本站的规则。',
       ogTitle: '服务条款 · Sound Cocktail',
       ogDescription: '使用 Sound Cocktail 的规则：进阶版订阅、7 天内可退款，以及可接受使用范围。',
     },
@@ -76,7 +76,7 @@ export const TERMS_PAGE = {
         {
           h2: '2. What the Service is',
           body: [
-            'Sound Cocktail is a free ambient sound mixer. Mix 22 sounds — rain, fire, café voices, piano and more — into a cup and save it. Mixing is free, with sessions of up to 10 minutes each, and the Chiang Mai and Bali sound journeys are free to explore.',
+            'Sound Cocktail is a free sound-therapy listening site. Tune 22 sounds — rain, fire, café voices, piano and more — into a mix for the moment you are in, and save it. Listening is free, with sessions of up to 10 minutes each, and the Chiang Mai and Bali sound journeys are free to explore.',
             'Plus is the subscription that unlocks the rest: the other four destinations (Da Nang, Kyoto, Lisbon and Hoi An), unlimited listening, the full tuner (all channels, tuning and saved mixes) and the sleep timer. It is a virtual good delivered instantly: when your payment succeeds, Plus is unlocked in your account until the end of the paid period.',
           ],
         },
@@ -124,7 +124,7 @@ export const TERMS_PAGE = {
         {
           h2: '8. Intellectual property',
           body: [
-            '18 sounds are real field recordings, each credited in the Sources section of the mixer; piano, guitar and harp use note samples from Frank Wen’s FluidR3 GM soundfont (CC BY 3.0); the wooden fish and drum are synthesized live in your browser.',
+            '18 sounds are real field recordings, each credited on the Sources page; piano, guitar and harp use note samples from Frank Wen’s FluidR3 GM soundfont (CC BY 3.0); the wooden fish and drum are synthesized live in your browser.',
             'You may listen to the sounds for yourself, but you may not copy, redistribute, re-upload or commercially use them. The mixes you make and the names you give them are yours; we store them only so we can show them back to you.',
           ],
         },
@@ -183,8 +183,8 @@ export const TERMS_PAGE = {
         {
           h2: '二、服务是什么',
           body: [
-            'Sound Cocktail 是一款免费的环境音混音器。您可以把 22 种声音——雨声、篝火、咖啡馆人声、钢琴等等——调成一杯存下来。混音免费，每次最多 10 分钟；清迈与巴厘岛的声音旅程免费开放。',
-            '进阶版（Plus）是订阅，解锁其余内容：另外 4 个目的地（岘港、京都、里斯本、会安）、不限时收听、完整调音器（全部通道、调参、保存配方）与睡眠定时。订阅是虚拟商品，付款成功后立刻交付：进阶版会在您的账号里解锁，直到已付周期的最后一天。',
+            'Sound Cocktail 是一个免费的音疗聆听站。您可以把 22 种声音——雨声、篝火、咖啡馆人声、钢琴等等——调成一段此刻需要的声音存下来。收听免费，每次最多 10 分钟；清迈与巴厘岛的声音旅程免费开放。',
+            '进阶版（Plus）是订阅，解锁其余内容：另外 4 个目的地（岘港、京都、里斯本、会安）、不限时收听、完整调音（全部通道、调参、保存配方）与睡眠定时。订阅是虚拟商品，付款成功后立刻交付：进阶版会在您的账号里解锁，直到已付周期的最后一天。',
           ],
         },
         {
@@ -206,7 +206,7 @@ export const TERMS_PAGE = {
         {
           h2: '五、退款',
           body: [
-            '因为订阅是即时交付的，请先试用免费声音和免费旅程，确认混音器是您想要的再订阅。如果出了问题，我们会负责：首次订阅后 7 天内写信到 weiyezhu180@gmail.com，如果进阶版没有解锁、被重复扣费，或者您对订阅不满意，我们会全额退款。',
+            '因为订阅是即时交付的，请先试用免费声音和免费旅程，确认完整调音是您想要的再订阅。如果出了问题，我们会负责：首次订阅后 7 天内写信到 weiyezhu180@gmail.com，如果进阶版没有解锁、被重复扣费，或者您对订阅不满意，我们会全额退款。',
             '退款由支付处理方执行，通常在 5–10 个工作日内回到您的账上。首个 7 天之后，当期费用无法退款；已经退过款的订阅也不能再次退款。取消订阅会停止以后的扣费，但已付的当期费用不退。',
           ],
         },
@@ -232,7 +232,7 @@ export const TERMS_PAGE = {
         {
           h2: '八、知识产权',
           body: [
-            '声音与本站是运营者的作品。18 种声音是真实的野外录音，每一段的作者、来源和授权都标在调音台的音源清单里。钢琴、吉他和竖琴用的是 Frank Wen 的 FluidR3 GM 音色库采样（CC BY 3.0）。木鱼和手鼓由浏览器实时合成。设计、调音台和代码都属于运营者。',
+            '声音与本站是运营者的作品。18 种声音是真实的野外录音，每一段的作者、来源和授权都标在音源清单页里。钢琴、吉他和竖琴用的是 Frank Wen 的 FluidR3 GM 音色库采样（CC BY 3.0）。木鱼和手鼓由浏览器实时合成。设计、调音与代码都属于运营者。',
             '您可以自己收听这些声音，但不得复制、再分发、重新上传或商业使用。您调出的配方和起的名字属于您；我们保存它们只是为了再展示给您。',
           ],
         },

@@ -7,7 +7,7 @@
  * 向 Waffo 查这笔订单有没有成功的付款，查到就立刻标记已付并发
  * 权益，不用干等 webhook），再查 GET /api/entitlements（同账号的
  * 服务端权益记录）兜底；一旦订阅出现在权益记录里，就展示“已解锁”
- * 并给出去调音台的链接；轮询约 60 秒仍未出现时，说明 webhook
+ * 并给出回旅程的链接；轮询约 60 秒仍未出现时，说明 webhook
  * 还没到或支付未完成，如实展示“仍在处理”，不伪装成功。
  * ?plan= 只用于展示计划名（显示用，不作为发放依据）。
  * 回跳页明确提示“不要重复付款”：webhook 慢到时用户容易回去
@@ -42,7 +42,7 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
 <h1 id="title">Payment result</h1>
 <p id="status">Payment received — confirming with Waffo, this usually takes a few seconds. Please don’t pay again.</p>
 <p id="unlocked" hidden></p>
-<div id="actions" hidden><a href="/" class="go" id="goMixer">Go to the mixer</a></div>
+<div id="actions" hidden><a href="/" class="go" id="goJourneys">Go to journeys</a></div>
 <p><a href="/" id="backHome">Back to Sound Cocktail</a></p>
 <script>
 (function () {
@@ -52,32 +52,32 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
     en: {
       title: 'Payment result',
       checking: 'Payment received — confirming with Waffo, this usually takes a few seconds. Please don’t pay again.',
-      unlocked: function (name) { return 'Unlocked: ' + name + '. It is ready in the mixer on this account.'; },
-      processing: 'Still processing — the payment confirmation has not arrived yet. Please don’t pay again; check the mixer in a moment — your subscription will appear there once it is confirmed.',
-      needLogin: 'Please sign in with the same account you bought with, then check the mixer.',
+      unlocked: function (name) { return 'Unlocked: ' + name + '. It is ready in your journeys on this account.'; },
+      processing: 'Still processing — the payment confirmation has not arrived yet. Please don’t pay again; check your journeys in a moment — your subscription will appear there once it is confirmed.',
+      needLogin: 'Please sign in with the same account you bought with, then check your journeys.',
       failed: 'Could not confirm the payment. Please refresh and try again.',
-      goMixer: 'Go to the mixer',
+      goJourneys: 'Go to journeys',
       backHome: 'Back to Sound Cocktail'
     },
     zh: {
       title: '支付结果',
       checking: '已收到付款，正在向 Waffo 确认，通常几秒内完成。请不要重复付款。',
-      unlocked: function (name) { return '已解锁：' + name + '。登录同一账号即可在调音台使用。'; },
-      processing: '仍在处理：支付确认还没到。请不要重复付款，稍后去调音台看看，确认后订阅会自动出现。',
-      needLogin: '请用购买时用的账号登录，再去调音台查看。',
+      unlocked: function (name) { return '已解锁：' + name + '。登录同一账号即可在旅程里使用。'; },
+      processing: '仍在处理：支付确认还没到。请不要重复付款，稍后去旅程里看看，确认后订阅会自动出现。',
+      needLogin: '请用购买时用的账号登录，再去旅程里查看。',
       failed: '确认失败，请稍后刷新重试。',
-      goMixer: '去调音台',
+      goJourneys: '去听旅程',
       backHome: '返回 Sound Cocktail'
     }
   }[locale];
   document.documentElement.lang = locale === 'en' ? 'en' : 'zh-CN';
   document.title = T.title + ' · Sound Cocktail';
   document.getElementById('title').textContent = T.title;
-  document.getElementById('goMixer').textContent = T.goMixer;
+  document.getElementById('goJourneys').textContent = T.goJourneys;
   document.getElementById('backHome').textContent = T.backHome;
-  // 回调音台的链接按用户语言走 /en 或 /zh（P1：裸 / 会 308 到 /en，
+  // 回旅程的链接按用户语言走 /en 或 /zh（P1：裸 / 会 308 到 /en，
   // 中文用户直接给 /zh，少一次跳转、语言也不闪一下英文）。
-  document.getElementById('goMixer').href = '/' + locale;
+  document.getElementById('goJourneys').href = '/' + locale;
   document.getElementById('backHome').href = '/' + locale;
   var planId = ${JSON.stringify(safePlan)};
   var orderNo = ${JSON.stringify(safeOrder)};
