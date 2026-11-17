@@ -243,7 +243,14 @@ export default function SceneExperience() {
     void player.current?.setScene(place, nextLevels, { play: playing || loading });
     closePanel();
   }
-  function chooseIntent(id) { selectJourney(recommendedJourneyForIntent(id)); }
+  // 意图入口：免费用户优先进该意图下的免费旅程（放松→雨林慢呼吸），
+  // 否则推荐旅程被锁时只剩一条 toast、进不去（订阅门在 selectJourney 里）。
+  // 订阅用户仍进各意图的首选旅程。
+  function chooseIntent(id) {
+    const options = journeysForIntent(id);
+    const next = (!isSubscriber ? options.find(journey => isFreeJourney(journey)) : null) || options[0];
+    selectJourney(next);
+  }
   function changeIntent() {
     player.current?.pause();
     setIntentId(null);
