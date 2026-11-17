@@ -153,10 +153,12 @@ try {
   await mobile.locator('.sc-dialog[open] .sc-voices-control').waitFor();
   const quickSave=mobile.locator('.sc-dialog[open] .sc-quick-save');
   assert.equal(await quickSave.isVisible(),true,'Save should be reachable on phones without scrolling to the footer');
+  // Saving mixes is a Plus feature: anonymous visitors get the upgrade toast
+  // and nothing is persisted (subscription gate in saveMix).
   await quickSave.click();
+  await mobile.waitForFunction(() => document.querySelector('.sc-toast')?.textContent.includes('进阶版'), null, { timeout: 5000 });
   const mobileMix=await mobile.evaluate(()=>JSON.parse(window.localStorage.getItem('sound-cocktail.places.v1')||'{}').mixes?.['focus-chiang-mai']);
-  assert.ok(mobileMix,'top Save must actually persist the current Journey');
-  assert.equal(mobileMix.ambience,0,'quiet default must remain muted when saved');
+  assert.equal(mobileMix, undefined, 'anonymous save must not persist a mix');
   await mobile.screenshot({path:'preview-qa/mobile-quiet-cafe-mixer.png',fullPage:true});
   const narrowOverflow=await mobile.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
   assert.ok(narrowOverflow<=1,'mobile mixer and quiet control must not overflow');
@@ -219,8 +221,10 @@ try {
       assert.match(await review.locator('.sc-film-caption').innerText(), /实景移动镜头/);
       await review.screenshot({path:`preview-qa/real-place-${slug}.png`,fullPage:true});
     } else {
+      // The banner stays mounted across cards, so wait for it to show THIS
+      // journey's name instead of trusting the already-visible stale one.
+      await review.waitForFunction((label) => document.querySelector('.sc-dialog[open] .sc-locked-banner')?.textContent.includes(label), label, { timeout: 5000 });
       const banner=review.locator('.sc-dialog[open] .sc-locked-banner');
-      await banner.waitFor({ state: 'visible' });
       assert.match(await banner.innerText(), new RegExp(label));
       assert.equal(await review.locator('.scene-experience').getAttribute('data-scene'), sceneBefore, 'locked card must not switch the scene');
       await review.screenshot({path:`preview-qa/real-place-${slug}-locked.png`,fullPage:true});
