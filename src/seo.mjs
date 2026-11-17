@@ -147,19 +147,19 @@ export const ROUTE_SEO = {
   plus: {
     path: '/plus',
     en: {
-      title: 'Sound Cocktail Plus — one-time sound packs',
+      title: 'Sound Cocktail Plus — subscription',
       description:
-        'Unlock more sounds with a one-time purchase: Focus Pack, Sleep Pack and Rain Night Pack. No subscription — buy once, keep forever.',
-      ogTitle: 'Sound Cocktail Plus — one-time sound packs',
+        'Plus subscription: all six destinations, unlimited listening, the full tuner and the sleep timer. $7.99/month, $79.90/year (¥18/month, ¥180/year in China). Cancel anytime.',
+      ogTitle: 'Sound Cocktail Plus — subscription',
       ogDescription:
-        'Focus Pack, Sleep Pack and Rain Night Pack — one-time purchases, no subscription.',
+        'Plus: all six destinations, unlimited listening, the full tuner, saved mixes and the sleep timer.',
     },
     zh: {
-      title: 'Sound Cocktail 进阶 · 一次购买的声音包',
+      title: 'Sound Cocktail 进阶 · 订阅',
       description:
-        '一次性购买解锁更多声音：专注包、助眠包与雨夜包。不订阅，买一次，永久用。',
-      ogTitle: 'Sound Cocktail 进阶 · 一次购买的声音包',
-      ogDescription: '专注包、助眠包与雨夜包——一次性购买，不订阅。',
+        '进阶版订阅：全部六个目的地、不限时收听、完整调音器与睡眠定时。月付 $7.99 / ¥18，年付 $79.90 / ¥180。随时取消。',
+      ogTitle: 'Sound Cocktail 进阶 · 订阅',
+      ogDescription: '进阶版：全部六个目的地、不限时收听、完整调音器、保存配方与睡眠定时。',
     },
   },
   sources: {

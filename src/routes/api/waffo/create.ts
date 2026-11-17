@@ -4,11 +4,12 @@
  * 与支付宝 POST /api/pay/create 对称：
  * - 金额、商品、订单号一律由服务端决定；下单只传 productId。
  * - 下单必须登录：订单要归属到用户，支付成功后才能把权益发给这个用户。
- * - 金额用服务端 USD 定价（focus $1.99 / sleep $2.99 / rain-night $3.99），
- *   不用 priceSnapshot 覆盖商品价（商品价就是定价）。
+ * - 金额用服务端 USD 定价（月付订阅 $7.99 / 年付订阅 $79.90），
+ *   不用 priceSnapshot 覆盖商品价（商品价就是定价）。订阅商品与
+ *   一次性包共用同一结账入口（checkout.authenticated.create）。
  * - 成功返回 { checkoutUrl }：前端在新标签页打开（点击处理里同步
  *   window.open 空白页再跳转，避免 Safari/移动端拦截弹窗）。
- * - 防重复付款：同一用户对同一个包已有未过期的进行中订单时，
+ * - 防重复付款：同一用户对同一个订阅计划已有未过期的进行中订单时，
  *   不建新订单、不建新会话，返回 { resumed: true, checkoutUrl } 续付
  *   原来的收银台；会话过期后才允许重新下单。会话创建失败的订单
  *   会直接关掉，不会留下“进行中”的孤儿单挡住重新下单。
@@ -101,7 +102,7 @@ export const Route = createFileRoute('/api/waffo/create')({
               buyerIdentity: sessionUser.userId,
               buyerEmail: sessionUser.email,
               orderMerchantExternalId: outTradeNo,
-              successUrl: `${origin}/waffo-return?order=${outTradeNo}&pack=${product.productId}`,
+              successUrl: `${origin}/waffo-return?order=${outTradeNo}&plan=${product.productId}`,
               metadata: { outTradeNo, productId: product.productId, userId: sessionUser.userId },
               language: 'en',
             },

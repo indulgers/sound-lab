@@ -2,6 +2,7 @@ import { AUDIO_LICENSES, SOUND_AUDIO } from './audio/catalog.mjs'
 import { prepareRecording, playInstrumentNote } from './audio/playback.mjs'
 import { SOUNDS, autoRecipeName, formatRecipeDate, mixSummaryText, recipeDisplay, soundDisplayName } from './catalog.mjs'
 import { createSession, freeMix, isFreeSound } from './listening-session.mjs'
+import { SLEEP_TIMER_FADE_SECONDS, applyFadeSchedule, fadeSchedule, formatSleepRemaining, sleepRemainingMs } from './sleep-timer.mjs'
 import { getLocale, t } from './locale.mjs'
 import { PACKS } from './packs.mjs'
 import { createRuntimeScope } from './runtime-scope.mjs'
@@ -120,11 +121,12 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   var playing = false;
   var masterVol = .55;
   // 已拥有的包解锁的通道（服务端权益，登录后由 setOwnedPacks 传入）。
-  // “能不能用” = 免费通道 或 已拥有包里的通道；引擎里所有
-  // sessionTools.isFreeSound / freeMix 的调用点都走这两个包装，
+  // “能不能用” = 免费通道 或 已拥有包里的通道 或 订阅用户（全部通道）；
+  // 引擎里所有 sessionTools.isFreeSound / freeMix 的调用点都走这两个包装，
   // 所以解锁后推子、配方、随机、音源替换全部自动放行。
   var ownedSounds = new Set();
-  function isPlayable(id){ return isFreeSound(id) || ownedSounds.has(id); }
+  var isSubscriber = false;
+  function isPlayable(id){ return isFreeSound(id) || ownedSounds.has(id) || isSubscriber; }
   function playableMix(mix){
     return Object.fromEntries(Object.entries(mix).filter(function(entry){
       return isPlayable(entry[0]) && Number.isFinite(entry[1]) && entry[1] > 0;
@@ -172,7 +174,7 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
   }
 
   /* ============================== audio engine ============================== */
-  var AC=null, master=null, transport=null, sessionGain=null, masterAnalyser=null;
+  var AC=null, master=null, transport=null, sessionGain=null, sleepGain=null, masterAnalyser=null;
   var buffers={};
   var chans={};
   var recordings={};
@@ -185,7 +187,12 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     comp.threshold.value=-18; comp.knee.value=14; comp.ratio.value=8;
     comp.attack.value=.005; comp.release.value=.25;
     master = AC.createGain(); master.gain.value=masterVol*masterVol;
-    sessionGain=AC.createGain(); sessionGain.gain.value=0; sessionGain.connect(master);
+    sessionGain=AC.createGain(); sessionGain.gain.value=0;
+    // Sleep timer's own gain, after the session gain: transport ->
+    // sessionGain -> sleepGain -> master. It sits at 1 and only fades
+    // when a sleep timer is armed (see armSleepGain).
+    sleepGain=AC.createGain(); sleepGain.gain.value=1;
+    sessionGain.connect(sleepGain); sleepGain.connect(master);
     transport=AC.createGain(); transport.gain.value=0; transport.connect(sessionGain);
     masterAnalyser = AC.createAnalyser(); masterAnalyser.fftSize=256;
     master.connect(comp); comp.connect(masterAnalyser); masterAnalyser.connect(AC.destination);
@@ -1132,26 +1139,88 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     var minutes=Math.floor(seconds/60), rest=seconds%60;
     return String(minutes).padStart(2,"0")+":"+String(rest).padStart(2,"0");
   }
+  // Sleep timer state: a wall-clock deadline (null = no timer) and the
+  // choice shown in the mixer-bar select (0 = off, minutes). The timer
+  // is wall-clock, like the journey timer: pausing does not extend it.
+  var sleepDeadline=null, sleepFadeSeconds=SLEEP_TIMER_FADE_SECONDS, sleepChoice=0;
+  function armSleepGain(){
+    if(!sleepGain || !AC) return;
+    var now=AC.currentTime;
+    var schedule=fadeSchedule({deadlineMs:sleepDeadline, nowMs:Date.now(), audioNow:now, fadeSeconds:sleepFadeSeconds});
+    if(!schedule){ sleepGain.gain.cancelScheduledValues(now); sleepGain.gain.setValueAtTime(1,now); return; }
+    applyFadeSchedule(sleepGain.gain, schedule, 1, now);
+  }
+  // Arm (or clear) the mixer's sleep timer. Returns the deadline, or null.
+  // 睡眠定时是订阅功能：免费用户设定时拒绝并弹升级提示（返回 null，
+  // 调用方把 select 复位到 off）；清定时（ms 为 null）任何人都可以。
+  function setSleepTimer(ms, fadeSeconds){
+    if(!isSubscriber && Number.isFinite(ms) && ms>0){
+      showPremium(t(L(),'overlays.premiumSleepTimer'));
+      return null;
+    }
+    sleepFadeSeconds=Number.isFinite(fadeSeconds) && fadeSeconds>0 ? fadeSeconds : SLEEP_TIMER_FADE_SECONDS;
+    sleepDeadline=Number.isFinite(ms) && ms>0 ? Date.now()+ms : null;
+    armSessionGain();
+    paintSession();
+    return sleepDeadline;
+  }
   function armSessionGain(){
+    // The sleep fade is armed together with the session gain so the two
+    // can never drift apart (both are re-armed on resume/visibility).
+    armSleepGain();
     if(!sessionGain) return;
     var remaining=session.remaining()||0, now=AC.currentTime;
+    // While a sleep timer is active it governs: the 10-minute free window
+    // must not cut a 30/60/90-minute sleep timer short, so the session
+    // gain follows the later of the two deadlines.
+    var sleepMs=sleepRemainingMs(sleepDeadline, Date.now());
+    // 订阅用户且没有睡眠定时：不限时，sessionGain 恒为 1（不安排淡出）。
+    if(isSubscriber && sleepMs===null) remaining=Infinity;
+    if(sleepMs!==null) remaining=Math.max(remaining, sleepMs);
     var gain=sessionGain.gain;
     gain.cancelScheduledValues(now);
+    if(!Number.isFinite(remaining)){ gain.setValueAtTime(1,now); return; }
     gain.setValueAtTime(Math.min(1,remaining/5000),now);
     if(remaining>5000) gain.setValueAtTime(1,now+(remaining-5000)/1000);
     if(remaining>0) gain.linearRampToValueAtTime(0,now+remaining/1000);
   }
   function paintSession(){
     var remaining=session.remaining();
-    var display=fmtTime(remaining===null ? 600 : Math.ceil(remaining/1000));
+    var sleepMs=sleepRemainingMs(sleepDeadline, Date.now());
+    // The effective listening window is the later of the session and the
+    // sleep timer; when a sleep timer is active it is the one that counts.
+    var effective=remaining===null ? (sleepMs===null ? 600000 : sleepMs) : (sleepMs===null ? remaining : Math.max(remaining, sleepMs));
+    // 订阅用户且没有睡眠定时：不限时，读数显示 ∞。
+    var display=(isSubscriber && sleepMs===null) ? '∞' : fmtTime(Math.ceil(effective/1000));
     ["focusRead","immFocus"].forEach(function(id){
       var el=$(id);
       if(!el) return;
       if(el.textContent!==display) el.textContent=display;
     });
+    var sleepEl=$("sleepTimerRead");
+    if(sleepEl){
+      var sleepDisplay=sleepMs===null ? "" : formatSleepRemaining(sleepMs);
+      if(sleepEl.textContent!==sleepDisplay) sleepEl.textContent=sleepDisplay;
+    }
   }
   function tickSession(){
     paintSession();
+    // 订阅用户且没有睡眠定时：不限时，10 分钟窗口不生效。
+    if(isSubscriber && sleepDeadline===null) return;
+    var sleepMs=sleepRemainingMs(sleepDeadline, Date.now());
+    if(sleepDeadline!==null){
+      if(sleepMs>0) return; // Sleep timer governs; the session window is subsumed.
+      // The timer has run out: the fade is complete (sleepGain is 0).
+      // Stop quietly — no paywall dialog for someone who fell asleep.
+      sleepDeadline=null; sleepChoice=0;
+      if(AC && sleepGain){ var now=AC.currentTime; sleepGain.gain.cancelScheduledValues(now); sleepGain.gain.setValueAtTime(1,now); }
+      if(playing) setPlaying(false);
+      Object.keys(bedNodes).forEach(stopBed);
+      toast(t(L(),'mixer.sleepDone'));
+      var sel=$("sleepTimerSelect"); if(sel) sel.value="off";
+      paintSession();
+      return;
+    }
     if(session.remaining()!==0 || (!playing && !Object.keys(bedNodes).length)) return;
     replayMix=playing;
     replayBeds=Object.keys(bedNodes);
@@ -1161,6 +1230,12 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     showSessionDone();
   }
   function openListeningWindow(){
+    // 订阅用户不限时：不走 10 分钟窗口，只确保音频上下文可用。
+    if(isSubscriber){
+      try{ ensureCtx(); }
+      catch(error){ toast(t(L(),'audio.cantPlay')); return false; }
+      return true;
+    }
     if(session.remaining()!==0){
       try{ ensureCtx(); }
       catch(error){ toast(t(L(),'audio.cantPlay')); return false; }
@@ -1340,8 +1415,10 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       .sort(function(a,b){ return levels[b.id]-levels[a.id]; }).slice(0,2);
   }
   /* 存下当前一杯（保存按钮与 landing 页“存下这杯”共用）：
-     名字由调用方给；没有配比时只提示，不存空配方。 */
+     名字由调用方给；没有配比时只提示，不存空配方。
+     保存配方是订阅功能：免费用户点保存时弹升级提示，不存。 */
   function saveCurrentMix(name){
+    if(!isSubscriber){ showPremium(t(L(),'overlays.premiumSave')); return false; }
     var active=SOUNDS.filter(function(s){ return levels[s.id]>0.02; });
     if(!active.length){ toast(t(L(),'mine.saveFirst')); return false; }
     var mix={}; active.forEach(function(s){ mix[s.id]=levels[s.id]; });
@@ -1741,10 +1818,22 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
       });
       track(mixerRemovers, $("immersiveBtn"), "click", enterImmersive);
       track(mixerRemovers, $("ctaImmersive"), "click", enterImmersive);
+      track(mixerRemovers, $("sleepTimerSelect"), "change", function(){
+        sleepChoice=this.value==="off" ? 0 : Number(this.value);
+        // 免费用户设睡眠定时会被 setSleepTimer 拒绝（返回 null，
+        // 已弹升级提示）：把 select 复位到 off。
+        if(setSleepTimer(sleepChoice ? sleepChoice*60000 : null)===null && sleepChoice){
+          sleepChoice=0; this.value="off";
+        }
+      });
     }
     buildFaders();
     SOUNDS.forEach(function(s){ paintFader(s.id); });
     renderGlass();
+    // The select always shows the armed timer (or off), including after
+    // the timer was cleared by entering a journey.
+    var sleepSel=$("sleepTimerSelect");
+    if(sleepSel) sleepSel.value=sleepChoice ? String(sleepChoice) : "off";
     paintSession();
   }
   function unbindMixer(){
@@ -1899,6 +1988,15 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
         sessionGain.gain.cancelScheduledValues(AC.currentTime);
         sessionGain.gain.setValueAtTime(0,AC.currentTime);
       }
+      // A mixer sleep timer belongs to the mixer session: clear it when
+      // the journey player takes over (it has its own timer).
+      sleepDeadline=null; sleepChoice=0;
+      if(sleepGain){
+        sleepGain.gain.cancelScheduledValues(AC.currentTime);
+        sleepGain.gain.setValueAtTime(1,AC.currentTime);
+      }
+      var sleepSel=$("sleepTimerSelect"); if(sleepSel) sleepSel.value="off";
+      paintSession();
       SOUNDS.forEach(function(sound){ stopGen(sound.id); });
       Object.keys(bedNodes).forEach(stopBed);
     },
@@ -1906,6 +2004,25 @@ export function mountSoundLab({onFocusChange, onMixChange}) {
     playRecipe,
     showPremium,
     setOwnedPacks,
+    /**
+     * 订阅状态（登录/权益变化后由外壳调用）：订阅用户解锁全部通道、
+     * 不限时收听、能用睡眠定时与保存配方。未登录/未订阅时传 false。
+     */
+    setSubscriber(value) {
+      isSubscriber = !!value;
+      buildFaders();
+      SOUNDS.forEach(function(s){ paintFader(s.id); });
+      buildSources();
+      paintCurrentMix();
+      armSessionGain();
+      paintSession();
+    },
+    // Mixer sleep timer: setSleepTimer(ms) arms it (null clears), the
+    // fade is the last 2 minutes; getSleepTimerRemaining() is ms or null.
+    setSleepTimer,
+    getSleepTimerRemaining() {
+      return sleepRemainingMs(sleepDeadline, Date.now());
+    },
     setFocus(open) {
       if(open) showImmersive();
       else exitImmersive(false);

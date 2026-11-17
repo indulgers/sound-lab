@@ -73,10 +73,9 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
   var status = document.getElementById('status');
   if (!${safeNo ? 'true' : 'false'}) { status.textContent = T.noOrder; return; }
   status.textContent = T.checking;
-  var PACK_NAMES = {
-    'focus-pack': { zh: '专注包', en: 'Focus Pack' },
-    'sleep-pack': { zh: '助眠包', en: 'Sleep Pack' },
-    'rain-night-pack': { zh: '雨夜包', en: 'Rain Night Pack' }
+  var PLAN_NAMES = {
+    'subscription-monthly': { zh: '订阅（月付）', en: 'Subscription · Monthly' },
+    'subscription-yearly': { zh: '订阅（年付）', en: 'Subscription · Yearly' }
   };
   fetch('/api/pay/query/${encodeURIComponent(outTradeNo)}')
     .then(r => r.json())
@@ -86,7 +85,7 @@ a.go{display:inline-block;margin-top:8px;padding:10px 20px;border-radius:99px;ba
         el.textContent = T.paid(d.outTradeNo);
         // 查询确认支付成功时，后端已把权益发给下单的账号；
         // 这里只展示结果，不信任回跳链接里的任何参数。
-        var name = (PACK_NAMES[d.productId] || {})[locale] || d.productId || '';
+        var name = (PLAN_NAMES[d.productId] || {})[locale] || d.productId || '';
         if (name) {
           var u = document.getElementById('unlocked');
           u.textContent = T.unlocked(name);

@@ -76,6 +76,7 @@ import { Route as ApiPayRefundQueryRouteImport } from './routes/api/pay/refund-q
 import { Route as ApiWaffoCreateRouteImport } from './routes/api/waffo/create'
 import { Route as ApiWaffoOrderStatusRouteImport } from './routes/api/waffo/order-status'
 import { Route as ApiWaffoPendingRouteImport } from './routes/api/waffo/pending'
+import { Route as ApiWaffoPortalRouteImport } from './routes/api/waffo/portal'
 import { Route as ApiWaffoWebhookRouteImport } from './routes/api/waffo/webhook'
 import { Route as EnMixCodeRouteImport } from './routes/en/mix.$code'
 import { Route as ZhMixCodeRouteImport } from './routes/zh/mix.$code'
@@ -418,6 +419,11 @@ const ApiWaffoPendingRoute = ApiWaffoPendingRouteImport.update({
   path: '/api/waffo/pending',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWaffoPortalRoute = ApiWaffoPortalRouteImport.update({
+  id: '/api/waffo/portal',
+  path: '/api/waffo/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWaffoWebhookRoute = ApiWaffoWebhookRouteImport.update({
   id: '/api/waffo/webhook',
   path: '/api/waffo/webhook',
@@ -517,6 +523,7 @@ export interface FileRoutesByFullPath {
   '/api/waffo/create': typeof ApiWaffoCreateRoute
   '/api/waffo/order-status': typeof ApiWaffoOrderStatusRoute
   '/api/waffo/pending': typeof ApiWaffoPendingRoute
+  '/api/waffo/portal': typeof ApiWaffoPortalRoute
   '/api/waffo/webhook': typeof ApiWaffoWebhookRoute
   '/en/mix/$code': typeof EnMixCodeRoute
   '/zh/mix/$code': typeof ZhMixCodeRoute
@@ -592,6 +599,7 @@ export interface FileRoutesByTo {
   '/api/waffo/create': typeof ApiWaffoCreateRoute
   '/api/waffo/order-status': typeof ApiWaffoOrderStatusRoute
   '/api/waffo/pending': typeof ApiWaffoPendingRoute
+  '/api/waffo/portal': typeof ApiWaffoPortalRoute
   '/api/waffo/webhook': typeof ApiWaffoWebhookRoute
   '/en/mix/$code': typeof EnMixCodeRoute
   '/zh/mix/$code': typeof ZhMixCodeRoute
@@ -668,6 +676,7 @@ export interface FileRoutesById {
   '/api/waffo/create': typeof ApiWaffoCreateRoute
   '/api/waffo/order-status': typeof ApiWaffoOrderStatusRoute
   '/api/waffo/pending': typeof ApiWaffoPendingRoute
+  '/api/waffo/portal': typeof ApiWaffoPortalRoute
   '/api/waffo/webhook': typeof ApiWaffoWebhookRoute
   '/en/mix/$code': typeof EnMixCodeRoute
   '/zh/mix/$code': typeof ZhMixCodeRoute
@@ -745,6 +754,7 @@ export interface FileRouteTypes {
     | '/api/waffo/create'
     | '/api/waffo/order-status'
     | '/api/waffo/pending'
+    | '/api/waffo/portal'
     | '/api/waffo/webhook'
     | '/en/mix/$code'
     | '/zh/mix/$code'
@@ -820,6 +830,7 @@ export interface FileRouteTypes {
     | '/api/waffo/create'
     | '/api/waffo/order-status'
     | '/api/waffo/pending'
+    | '/api/waffo/portal'
     | '/api/waffo/webhook'
     | '/en/mix/$code'
     | '/zh/mix/$code'
@@ -895,6 +906,7 @@ export interface FileRouteTypes {
     | '/api/waffo/create'
     | '/api/waffo/order-status'
     | '/api/waffo/pending'
+    | '/api/waffo/portal'
     | '/api/waffo/webhook'
     | '/en/mix/$code'
     | '/zh/mix/$code'
@@ -971,6 +983,7 @@ export interface RootRouteChildren {
   ApiWaffoCreateRoute: typeof ApiWaffoCreateRoute
   ApiWaffoOrderStatusRoute: typeof ApiWaffoOrderStatusRoute
   ApiWaffoPendingRoute: typeof ApiWaffoPendingRoute
+  ApiWaffoPortalRoute: typeof ApiWaffoPortalRoute
   ApiWaffoWebhookRoute: typeof ApiWaffoWebhookRoute
   EnMixCodeRoute: typeof EnMixCodeRoute
   ZhMixCodeRoute: typeof ZhMixCodeRoute
@@ -1450,6 +1463,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWaffoPendingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/waffo/portal': {
+      id: '/api/waffo/portal'
+      path: '/api/waffo/portal'
+      fullPath: '/api/waffo/portal'
+      preLoaderRoute: typeof ApiWaffoPortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/waffo/webhook': {
       id: '/api/waffo/webhook'
       path: '/api/waffo/webhook'
@@ -1563,6 +1583,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiWaffoCreateRoute: ApiWaffoCreateRoute,
   ApiWaffoOrderStatusRoute: ApiWaffoOrderStatusRoute,
   ApiWaffoPendingRoute: ApiWaffoPendingRoute,
+  ApiWaffoPortalRoute: ApiWaffoPortalRoute,
   ApiWaffoWebhookRoute: ApiWaffoWebhookRoute,
   EnMixCodeRoute: EnMixCodeRoute,
   ZhMixCodeRoute: ZhMixCodeRoute,

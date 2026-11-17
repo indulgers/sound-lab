@@ -24,6 +24,10 @@ export function readScenePreferences(storage) {
     sceneId: sceneById(data.sceneId).id,
     master: clamp(data.master, .7),
     motion: typeof data.motion === 'boolean' ? data.motion : true,
+    // The sleep timer's last choice: 0 (off), minutes, 'journey', or
+    // null (never picked). Remembered, never auto-armed.
+    sleepMinutes: data.sleepMinutes === 'journey' ? 'journey'
+      : (typeof data.sleepMinutes === 'number' && Number.isFinite(data.sleepMinutes) && data.sleepMinutes >= 0 ? data.sleepMinutes : null),
     mixes,
   };
 }

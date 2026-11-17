@@ -5,6 +5,8 @@
  * periodic drift correction and crossfaded 15-minute programme repeats.
  * Silent until a real user starts playback. Video never controls this clock.
  */
+import { SLEEP_TIMER_FADE_SECONDS, fadeSchedule, applyFadeSchedule } from '../sleep-timer.mjs';
+
 const clamp = (v, fallback = 0) => Number.isFinite(Number(v)) ? Math.max(0, Math.min(1, Number(v))) : fallback;
 const CROSSFADE_SECONDS = 9;
 const FADE_SECONDS = 1.1;
@@ -44,7 +46,7 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
   const advanced = {bass:.5,mid:.5,treble:.5,width:.5,reverb:.5};
   let targetMaster = .7, warmth = .55, space = .35, energy = .4, nature = .35;
   let playing = false, disposed = false, generation = 0, ticker = null;
-  let timerDeadline = null, startedAt = 0, totalElapsed = 0, error = null, cycle = 0;
+  let timerDeadline = null, timerFadeSeconds = SLEEP_TIMER_FADE_SECONDS, startedAt = 0, totalElapsed = 0, error = null, cycle = 0;
   const retired = new Set();
   const emit = (status, problem = null) => onState({
     status, sceneId: selected?.id ?? null, error: problem,
@@ -179,17 +181,20 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
     fadeDeck(deck, 1, isReplacement ? CROSSFADE_SECONDS : FADE_SECONDS);
     return true;
   }
+  // The sleep timer fades the master out over the last `timerFadeSeconds`
+  // (default 2 minutes) and the ticker pauses at the deadline. A 4-second
+  // fade was a cliff, not a drift-off — see src/sleep-timer.mjs.
   function setTimerAutomation() {
     if (!context || !master) return;
     const g = master.gain, t = context.currentTime;
-    g.cancelScheduledValues(t); g.setValueAtTime(g.value, t);
     if (timerDeadline) {
-      const seconds = Math.max(0, (timerDeadline - now()) / 1000);
-      if (seconds <= 0) { g.setValueAtTime(0, t); return; }
-      g.setTargetAtTime(targetMaster, t, .12);
-      if (seconds > 4.5) g.setValueAtTime(targetMaster, t + seconds - 4);
-      g.linearRampToValueAtTime(0, t + seconds);
-    } else g.setTargetAtTime(targetMaster, t, .08);
+      const schedule = fadeSchedule({ deadlineMs: timerDeadline, nowMs: now(), audioNow: t, fadeSeconds: timerFadeSeconds });
+      if (!schedule) { g.cancelScheduledValues(t); g.setValueAtTime(0, t); return; }
+      applyFadeSchedule(g, schedule, targetMaster, t);
+    } else {
+      g.cancelScheduledValues(t); g.setValueAtTime(g.value, t);
+      g.setTargetAtTime(targetMaster, t, .08);
+    }
   }
   async function play() {
     if (disposed || !selected) return false;
@@ -288,7 +293,8 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
     for(const key of Object.keys(advanced)) if (key in values) advanced[key]=clamp(values[key],advanced[key]);
     applyTone(); applyDeck(current); applyDeck(next);
   }
-  function setSleepTimer(ms) {
+  function setSleepTimer(ms, fadeSeconds = SLEEP_TIMER_FADE_SECONDS) {
+    timerFadeSeconds = Number.isFinite(fadeSeconds) && fadeSeconds > 0 ? fadeSeconds : SLEEP_TIMER_FADE_SECONDS;
     timerDeadline = Number.isFinite(ms) && ms > 0 ? now() + ms : null;
     setTimerAutomation(); return timerDeadline;
   }

@@ -56,7 +56,7 @@ export function fetchProviders() {
   return authJson('/api/auth/providers');
 }
 
-/** GET /api/entitlements：当前用户已拥有的包 { packs: [...] }。 */
+/** GET /api/entitlements：当前用户的权益 { packs: [...], subscription: { active, plan, provider, status, currentPeriodEnd } | null }。 */
 export function fetchEntitlements() {
   return authJson('/api/entitlements');
 }

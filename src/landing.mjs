@@ -69,8 +69,8 @@ export const LANDING_FAQS = [
       zh: '雨声加雷声能助眠吗？',
     },
     a: {
-      en: "Yes — it is the most-saved combination on Sound Cocktail. Keep the rain steady and up front, and the thunder low and far away; thunder that is too close or too loud wakes people up instead of settling them. On this site, thunder and rainy street are in the Rain Night Pack ($3.99 / ¥12, one-time), while rain itself is free.",
-      zh: '可以——这是 Sound Cocktail 上最多人保存的搭配。雨声保持稳定、放在前面，雷声放低、放远；雷声太近太响反而会把人吵醒。站内雷声和雨夜街道在雨夜包里（$3.99 / ¥12，一次性买断），雨声本身免费。',
+      en: "Yes — it is the most-saved combination on Sound Cocktail. Keep the rain steady and up front, and the thunder low and far away; thunder that is too close or too loud wakes people up instead of settling them. On this site, thunder and rainy street are Plus sounds (part of the $7.99/month subscription), while rain itself is free.",
+      zh: '可以——这是 Sound Cocktail 上最多人保存的搭配。雨声保持稳定、放在前面，雷声放低、放远；雷声太近太响反而会把人吵醒。站内雷声和雨夜街道属于进阶版（订阅 $7.99/月），雨声本身免费。',
     },
   },
   {
@@ -105,8 +105,8 @@ export const LANDING_FAQS = [
       zh: 'Sound Cocktail 免费吗？付费包包含什么？',
     },
     a: {
-      en: 'Mixing is free — 22 sounds, no app to install, no account needed to start. Free sessions run up to 10 minutes each. Three one-time packs unlock extra channels: Focus Pack ($1.99 / ¥6) unlocks market voices, wooden fish & drum and wind chimes; Sleep Pack ($2.99 / ¥9) unlocks insects, night train, harp, forest and boat cabin; Rain Night Pack ($3.99 / ¥12) unlocks thunder and rainy street. There is no subscription.',
-      zh: '混音免费——22 种声音，不用下载应用，不用注册就能开始调。免费体验每次最多 10 分钟。三个一次性买断的包解锁更多通道：专注包（$1.99 / ¥6）解锁市场人声、木鱼/手鼓和风铃；助眠包（$2.99 / ¥9）解锁虫鸣、夜行火车、竖琴、森林和船舱；雨夜包（$3.99 / ¥12）解锁雷声和雨夜街道。没有订阅。',
+      en: 'Mixing is free — 22 sounds, no app to install, no account needed to start. Free sessions run up to 10 minutes each, and the Chiang Mai and Bali journeys are free. Plus ($7.99/month, $79.90/year; ¥18/month, ¥180/year in China) unlocks the other four destinations, unlimited listening, the full tuner and the sleep timer.',
+      zh: '混音免费——22 种声音，不用下载应用，不用注册就能开始调。免费体验每次最多 10 分钟，清迈与巴厘岛旅程免费。进阶版订阅（月付 $7.99 / ¥18，年付 $79.90 / ¥180）解锁另外 4 个目的地、不限时收听、完整调音器与睡眠定时。',
     },
   },
   {
@@ -480,14 +480,14 @@ export const ABOUT_PAGE = {
         'Sound Cocktail is a free ambient sound mixer made by limer, an independent full-stack developer. 22 sounds: real field recordings and live synthesis. Not a medical product.',
       ogTitle: 'About Sound Cocktail',
       ogDescription:
-        'A free ambient sound mixer, made by one independent developer. Real recordings, live synthesis, no subscription.',
+        'A free ambient sound mixer, made by one independent developer. Real recordings, live synthesis, Plus subscription.',
     },
     zh: {
       title: '关于 Sound Cocktail — 一个独立开发者的作品',
       description:
         'Sound Cocktail 是一款免费的环境音混音器，作者 limer，一名独立全栈开发者。22 种声音：真实野外录音与实时合成。不是医疗产品。',
       ogTitle: '关于 Sound Cocktail',
-      ogDescription: '一款免费的环境音混音器，一个独立开发者做的。真实录音、实时合成、没有订阅。',
+      ogDescription: '一款免费的环境音混音器，一个独立开发者做的。真实录音、实时合成、进阶版订阅。',
     },
   },
   content: {
@@ -505,7 +505,7 @@ export const ABOUT_PAGE = {
         },
         {
           h2: 'What it costs, and what it is not',
-          body: 'Mixing is free, with sessions of up to 10 minutes each. Three one-time packs unlock extra channels — Focus ($1.99 / ¥6), Sleep ($2.99 / ¥9) and Rain Night ($3.99 / ¥12). There is no subscription and no account needed to mix; an account is only needed to buy a pack. Sound Cocktail is not a medical product. It does not treat insomnia, anxiety or tinnitus, and it is not a substitute for medical advice — if sleep problems persist, talk to a doctor. It is a way to make a room sound better while you work, read or wind down.',
+          body: 'Mixing is free, with sessions of up to 10 minutes each, and no account needed to mix. Plus ($7.99/month, $79.90/year; ¥18/month, ¥180/year in China) unlocks the other four destinations, unlimited listening, the full tuner and the sleep timer. An account is only needed to subscribe. Sound Cocktail is not a medical product. It does not treat insomnia, anxiety or tinnitus, and it is not a substitute for medical advice — if sleep problems persist, talk to a doctor. It is a way to make a room sound better while you work, read or wind down.',
         },
       ],
     },
@@ -523,7 +523,7 @@ export const ABOUT_PAGE = {
         },
         {
           h2: '多少钱，以及它不是什么',
-          body: '混音免费，每次最多 10 分钟。三个一次性买断的包解锁更多通道——专注包（$1.99 / ¥6）、助眠包（$2.99 / ¥9）、雨夜包（$3.99 / ¥12）。没有订阅，调音不用注册；账号只在买包时才需要。Sound Cocktail 不是医疗产品，不治疗失眠、焦虑或耳鸣，也不能代替医生的建议——睡眠问题持续存在的话，请去看医生。它只是在你工作、读书或放松时，让房间听起来好一点。',
+          body: '混音免费，每次最多 10 分钟。进阶版订阅（月付 $7.99 / ¥18，年付 $79.90 / ¥180）解锁另外 4 个目的地、不限时收听、完整调音器与睡眠定时。调音不用注册；账号只在订阅时才需要。Sound Cocktail 不是医疗产品，不治疗失眠、焦虑或耳鸣，也不能代替医生的建议——睡眠问题持续存在的话，请去看医生。它只是在你工作、读书或放松时，让房间听起来好一点。',
         },
       ],
     },

@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
-import { findPack, packDisplay } from './packs.mjs';
+import { findPlan, planDisplay } from './subscription.mjs';
 import { createPayment, createWaffoPayment, fetchProducts, fetchWaffoPending } from './pay-api.js';
 import { checkoutConfig, useRegion } from './region.mjs';
 import { localizePath, t, useLocale } from './locale.mjs';
 
 /**
- * 结账页（路由 /en/checkout 与 /zh/checkout，?pack=<id>）。
+ * 结账页（路由 /en/checkout 与 /zh/checkout，?plan=<id>）。
  *
+ * 订阅结账（2026-11-16）：月付 / 年付两个计划。海外走 Waffo 订阅
+ * （自动续费，客户中心可取消/换计划），国内走支付宝 Vibe Pay
+ * 月卡/年卡（一次性购买，30 天/365 天，到期不自动续费，买新卡续费）。
+ * 免费试用（limer 2026-11-16 确认）：只给海外 Waffo 订阅开，7 天，
+ * 结账页会注明；国内支付宝月卡/年卡不设试用，不显示试用字样。
  * 文案语言与支付选择已解耦（2026-11-12 用户明确规则）：
  * - 文案只看 locale（浏览器语言自动判断，导航栏手动切换覆盖）；
  * - 支付渠道和金额只看支付地区 region（服务端 Cloudflare 国家，
@@ -28,15 +33,16 @@ import { localizePath, t, useLocale } from './locale.mjs';
  * 登录框；登录成功后（soundcocktail:auth-changed 事件）自动重试下单。
  */
 export default function CheckoutView() {
-  // ?pack= 从路由状态读（两个语言路由共用本组件；useSearch 只能绑定
+  // ?plan= 从路由状态读（两个语言路由共用本组件；useSearch 只能绑定
   // 一条 from 路径，/en/checkout 与 /zh/checkout 不能共用）。
-  const { pack: packId } = useRouterState({ select: (state) => state.location.search });
-  const pack = findPack(packId);
+  // 兼容旧链接 ?pack=<id>：当作 plan 读，旧包 id 会走到“无此商品”。
+  const { plan: planId, pack: legacyPlanId } = useRouterState({ select: (state) => state.location.search });
+  const plan = findPlan(planId || legacyPlanId);
   const [locale] = useLocale();
   const { region } = useRegion();
   const cfg = checkoutConfig(region);
   const isWaffo = cfg.isWaffo;
-  const display = packDisplay(pack, locale, cfg.currency);
+  const display = planDisplay(plan, locale, cfg.currency);
   const formHostRef = useRef(null);
 
   const [serverPrice, setServerPrice] = useState(null);
@@ -51,35 +57,35 @@ export default function CheckoutView() {
 
   // 先向后端校验服务端价格（按支付地区的币种）；校验失败时用页面标价，并如实注明。
   useEffect(() => {
-    if (!pack) return;
+    if (!plan) return;
     let cancelled = false;
     fetchProducts(locale, cfg.currency)
       .then((products) => {
         if (cancelled) return;
-        const serverPack = products.find((item) => item.productId === pack.id);
-        if (serverPack) setServerPrice(serverPack.totalAmount);
+        const serverPlan = products.find((item) => item.productId === plan.id);
+        if (serverPlan) setServerPrice(serverPlan.totalAmount);
         else setPriceNote(t(locale, 'checkout.priceNoteMissing'));
       })
       .catch(() => {
         if (!cancelled) setPriceNote(t(locale, 'checkout.priceNoteUnverified'));
       });
     return () => { cancelled = true; };
-  }, [pack, locale, cfg.currency]);
+  }, [plan, locale, cfg.currency]);
 
   // 海外地区：先查这个包有没有进行中的 Waffo 订单，有就展示“继续付款”。
   // 未登录时接口回 401，忽略即可（登录流程会处理）。
   useEffect(() => {
-    if (!pack || !isWaffo) return;
+    if (!plan || !isWaffo) return;
     let cancelled = false;
     fetchWaffoPending()
       .then((orders) => {
         if (cancelled) return;
-        const found = (orders || []).find((item) => item.productId === pack.id && item.checkoutUrl);
+        const found = (orders || []).find((item) => item.productId === plan.id && item.checkoutUrl);
         if (found) setPendingOrder(found);
       })
       .catch(() => { /* 未登录或网络问题：下单时再处理 */ });
     return () => { cancelled = true; };
-  }, [pack, isWaffo]);
+  }, [plan, isWaffo]);
 
   // 订单创建成功后，把支付宝返回的 HTML 表单渲染出来并提交。
   // innerHTML 插入的 <script> 不会执行，所以这里手动提交表单。
@@ -96,7 +102,7 @@ export default function CheckoutView() {
   }, [status, order]);
 
   async function handlePay() {
-    if (!pack || status === 'creating' || status === 'redirecting' || status === 'opened') return;
+    if (!plan || status === 'creating' || status === 'redirecting' || status === 'opened') return;
     setStatus('creating');
     setError(null);
     setNeedsLogin(false);
@@ -114,7 +120,7 @@ export default function CheckoutView() {
         if (!pending) {
           try {
             const orders = await fetchWaffoPending();
-            pending = (orders || []).find((item) => item.productId === pack.id && item.checkoutUrl) || null;
+            pending = (orders || []).find((item) => item.productId === plan.id && item.checkoutUrl) || null;
             if (pending) setPendingOrder(pending);
           } catch (fetchErr) {
             // 401 = 未登录：继续走正常下单，后端会回 401 触发登录流程。
@@ -128,13 +134,13 @@ export default function CheckoutView() {
           else window.location.href = pending.checkoutUrl;
           return;
         }
-        const data = await createWaffoPayment(pack.id);
+        const data = await createWaffoPayment(plan.id);
         setOrder(data);
         setStatus('opened');
         if (tab && !tab.closed) tab.location.href = data.checkoutUrl;
         else window.location.href = data.checkoutUrl;
       } else {
-        const data = await createPayment(pack.id);
+        const data = await createPayment(plan.id);
         setOrder(data);
         setStatus('redirecting');
       }
@@ -178,7 +184,7 @@ export default function CheckoutView() {
       <div className="checkout-inner">
         <div className="sec-head"><h2>{t(locale, 'checkout.title')}</h2>{locale === 'en' ? <span className="en">{t(locale, 'checkout.en')}</span> : null}</div>
 
-        {!pack ? (
+        {!plan ? (
           <div className="card">
             <h3>{t(locale, 'checkout.noProductTitle')}</h3>
             <p>{t(locale, 'checkout.noProductDesc')}</p>
@@ -188,7 +194,7 @@ export default function CheckoutView() {
           </div>
         ) : (
           <div className="card">
-            <h3>{display.name} <span className="tag">{t(locale, 'checkout.onceTag')}</span></h3>
+            <h3>{display.name} <span className="tag">{display.periodLabel}</span></h3>
             <p>{display.desc}</p>
 
             <div className="sum">
@@ -201,6 +207,7 @@ export default function CheckoutView() {
             <div className="sum-row"><span className="k">{t(locale, 'checkout.method')}</span><span>{isWaffo ? t(locale, 'checkout.waffo') : t(locale, 'checkout.alipay')}</span></div>
             {priceNote ? <p className="fine">{priceNote}</p> : null}
             <p className="fine">{isWaffo ? t(locale, 'checkout.noteWaffo') : t(locale, 'checkout.note')}</p>
+            {display.trialDays ? <p className="fine">{t(locale, 'checkout.trialNoteWaffo')}</p> : null}
 
             {status === 'error' && error ? (
               needsLogin ? (

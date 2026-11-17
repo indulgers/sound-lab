@@ -3,12 +3,13 @@
  *
  * 事实来源与 About 页一致（landing.mjs 的 ABOUT_PAGE）：一人运营
  * （limer，独立全栈开发者）、22 种声音、18 段真实录音 + FluidR3
- * 采样（CC BY 3.0）+ 浏览器实时合成、三包一次性价格、无订阅、
- * 医疗免责。内容按 Waffo Pancake 的商家审核清单写：
+ * 采样（CC BY 3.0）+ 浏览器实时合成、订阅定价（月付 $7.99 / ¥18，
+ * 年付 $79.90 / ¥180）、医疗免责。内容按 Waffo Pancake 的商家审核清单写：
  * - ToS 模板（docs.waffo.ai/mor/account-reviews/tos）：第 1–3、8、
- *   10–16 节为通用节；计费按一次性买断写（无 V1 订阅 / V2 点数 /
- *   V3 混合）；第 11 节点名 Waffo Pancake 为支付处理方；第 14 节
- *   为可选，写明运营者为个人、不编造公司地址与管辖地。
+ *   10–16 节为通用节；计费按 V1 订阅写（海外 Waffo 自动续费，
+ *   国内支付宝月卡/年卡一次性购买、手动续费）；第 11 节点名
+ *   Waffo Pancake 为支付处理方；第 14 节为可选，写明运营者为
+ *   个人、不编造公司地址与管辖地。
  * - Privacy 模板（docs.waffo.ai/mor/account-reviews/privacy-policy）：
  *   14 节；只写实际收集的数据；卡号不经本站；Waffo Pancake 为
  *   PCI-DSS 处理方；保留期给数字；权利 30 天内答复；变更 15 天。
@@ -32,8 +33,8 @@ export const LEGAL_OPERATOR = {
 
 /** 两页的更新日期（同一天；含“最后更新”前缀，组件直接渲染）。 */
 export const LEGAL_UPDATED = {
-  en: 'Last updated: 13 November 2026',
-  zh: '最后更新：2026年11月13日',
+  en: 'Last updated: 16 November 2026',
+  zh: '最后更新：2026年11月16日',
 };
 
 export const LEGAL_KEYS = ['terms', 'privacy'];
@@ -48,23 +49,23 @@ export const TERMS_PAGE = {
     en: {
       title: 'Terms of Service · Sound Cocktail',
       description:
-        'Terms of Service for Sound Cocktail — a free ambient sound mixer by one independent developer. One-time sound packs, no subscription, 7-day refunds, and the rules for using the site.',
+        'Terms of Service for Sound Cocktail — a free ambient sound mixer by one independent developer. Plus subscription ($7.99/month, $79.90/year), 7-day refunds, and the rules for using the site.',
       ogTitle: 'Terms of Service · Sound Cocktail',
       ogDescription:
-        'The rules for using Sound Cocktail: one-time packs, no subscription, refunds within 7 days, and acceptable use.',
+        'The rules for using Sound Cocktail: Plus subscription, refunds within 7 days, and acceptable use.',
     },
     zh: {
       title: '服务条款 · Sound Cocktail',
       description:
-        'Sound Cocktail 服务条款——一个独立开发者做的免费环境音混音器。一次性买断声音包、无订阅、7 天内可退款，以及使用本站的规则。',
+        'Sound Cocktail 服务条款——一个独立开发者做的免费环境音混音器。进阶版订阅（月付 $7.99 / ¥18，年付 $79.90 / ¥180）、7 天内可退款，以及使用本站的规则。',
       ogTitle: '服务条款 · Sound Cocktail',
-      ogDescription: '使用 Sound Cocktail 的规则：一次性买断、无订阅、7 天内可退款，以及可接受使用范围。',
+      ogDescription: '使用 Sound Cocktail 的规则：进阶版订阅、7 天内可退款，以及可接受使用范围。',
     },
   },
   content: {
     en: {
       h1: 'Terms of Service',
-      lead: 'These Terms govern your use of Sound Cocktail — made by one person, Zhu Weiye, an independent full-stack developer, not a company. By using the site or buying a pack, you agree to these Terms; if you do not agree, please do not use the Service.',
+      lead: 'These Terms govern your use of Sound Cocktail — made by one person, Zhu Weiye, an independent full-stack developer, not a company. By using the site or subscribing to Plus, you agree to these Terms; if you do not agree, please do not use the Service.',
       sections: [
         {
           h2: '1. Who we are',
@@ -75,8 +76,8 @@ export const TERMS_PAGE = {
         {
           h2: '2. What the Service is',
           body: [
-            'Sound Cocktail is a free ambient sound mixer. Mix 22 sounds — rain, fire, café voices, piano and more — into a cup and save it. Mixing is free, with sessions of up to 10 minutes each.',
-            'Three one-time packs unlock extra channels: Focus ($1.99 / ¥6), Sleep ($2.99 / ¥9) and Rain Night ($3.99 / ¥12). No subscription; an account is only needed to buy a pack. Packs are virtual goods delivered instantly: when your payment succeeds, the pack is unlocked in your account.',
+            'Sound Cocktail is a free ambient sound mixer. Mix 22 sounds — rain, fire, café voices, piano and more — into a cup and save it. Mixing is free, with sessions of up to 10 minutes each, and the Chiang Mai and Bali sound journeys are free to explore.',
+            'Plus is the subscription that unlocks the rest: the other four destinations (Da Nang, Kyoto, Lisbon and Hoi An), unlimited listening, the full tuner (all channels, tuning and saved mixes) and the sleep timer. It is a virtual good delivered instantly: when your payment succeeds, Plus is unlocked in your account until the end of the paid period.',
           ],
         },
         {
@@ -87,17 +88,18 @@ export const TERMS_PAGE = {
           ],
         },
         {
-          h2: '4. Packs, prices and payment',
+          h2: '4. Plus subscription, prices and payment',
           body: [
-            'Outside China you pay in US dollars through Waffo Pancake, our merchant of record — by card (Visa, Mastercard), Apple Pay, Google Pay, WeChat Pay or Alipay. In China you pay in yuan through Alipay. The price shown at checkout is the price you pay; taxes are handled by the payment processor.',
-            'Every purchase is a one-time charge — no recurring payments, nothing to cancel. We never see or store your card details — payment is handled entirely by Waffo Pancake or Alipay. Delivery is instant: a pack is unlocked as soon as the payment succeeds; if it does not unlock, contact support.',
+            'Plus costs $7.99 per month or $79.90 per year (two months free) outside China, paid in US dollars through Waffo Pancake, our merchant of record — by card (Visa, Mastercard), Apple Pay, Google Pay, WeChat Pay or Alipay. In China it costs ¥18 per month (30-day card) or ¥180 per year, paid in yuan through Alipay. The price shown at checkout is the price you pay; taxes are handled by the payment processor.',
+            'Waffo subscriptions renew automatically; cancel anytime in the Waffo Customer Portal (linked from the Plus page) or by emailing us at weiyezhu180@gmail.com. Cancellation stops future charges, and your access continues until the end of the period you already paid for. Alipay monthly and yearly cards are one-time purchases that do not renew automatically: to keep Plus after a card ends, buy a new card, and a new card starts a new period from the day you pay.',
+            'We never see or store your card details — payment is handled entirely by Waffo Pancake or Alipay. Plus is unlocked as soon as the payment succeeds; if it does not unlock, contact support.',
           ],
         },
         {
           h2: '5. Refunds',
           body: [
-            'Because the packs are delivered instantly, please try the free sounds first. If something goes wrong, contact us at weiyezhu180@gmail.com within 7 days and we will give you a full refund if the pack did not unlock, if you were charged twice, or if you are not satisfied.',
-            'Refunds are processed through our payment processor and usually appear on your statement within 5–10 business days. After 7 days we cannot refund a purchase, and a purchase that has already been refunded cannot be refunded again.',
+            'Plus is delivered instantly, so please try the free sounds and free journeys first. Within 7 days of your first subscription, email us at weiyezhu180@gmail.com for a full refund if Plus did not unlock, if you were charged twice, or if you are not satisfied.',
+            'Refunds go through our payment processor and usually appear within 5–10 business days. After the first 7 days we cannot refund the current period, and a refunded subscription cannot be refunded again. Cancelling stops future charges but does not refund the period already paid for.',
           ],
         },
         {
@@ -112,10 +114,10 @@ export const TERMS_PAGE = {
             'Use the Service for personal listening. You must not:',
           ],
           list: [
-            'Resell, redistribute or give away the sounds or the packs.',
+            'Resell, redistribute or give away the sounds or Plus access.',
             'Download the audio files in bulk or scrape the site.',
             'Use automated tools to hammer the service.',
-            'Share or sell your account, or try to unlock packs without paying.',
+            'Share or sell your account, or try to unlock Plus without paying.',
             'Use the Service for anything illegal.',
           ],
         },
@@ -129,7 +131,7 @@ export const TERMS_PAGE = {
         {
           h2: '9. Your data and privacy',
           body: [
-            'We collect as little as possible: your email and a hashed password, your orders and packs, and the mixes you save. Card details never touch our servers — Waffo Pancake is our payment processor and handles payments under PCI-DSS.',
+            'We collect as little as possible: your email and a hashed password, your orders and subscription, and the mixes you save. Card details never touch our servers — Waffo Pancake is our payment processor and handles payments under PCI-DSS.',
             'Our Privacy Policy explains what we collect, how we use it and how to delete it, and you can ask us to delete your account and data at any time.',
           ],
         },
@@ -145,7 +147,7 @@ export const TERMS_PAGE = {
           h2: '11. Ending your account',
           body: [
             'You can stop using the Service at any time. To delete your account, email us at weiyezhu180@gmail.com and we will delete your account and personal data within 90 days.',
-            'Deleting your account also removes access to the packs you bought, and we cannot restore them afterwards. We may suspend or close an account that breaks these Terms or abuses the Service.',
+            'Deleting your account also removes access to Plus, and we cannot restore it. It does not by itself cancel a Waffo subscription — cancel that in the Customer Portal or by email first, so you are not charged again. We may suspend or close an account that breaks these Terms or abuses the Service.',
           ],
         },
         {
@@ -170,7 +172,7 @@ export const TERMS_PAGE = {
     },
     zh: {
       h1: '服务条款',
-      lead: '本条款约束您对 Sound Cocktail 的使用。Sound Cocktail 是一个小网页应用，作者只有一个人——朱伟晔，一名独立全栈开发者——不是一家公司。使用本站或购买声音包，即表示您同意本条款；如果不同意，请不要使用本服务。',
+      lead: '本条款约束您对 Sound Cocktail 的使用。Sound Cocktail 是一个小网页应用，作者只有一个人——朱伟晔，一名独立全栈开发者——不是一家公司。使用本站或订阅进阶版，即表示您同意本条款；如果不同意，请不要使用本服务。',
       sections: [
         {
           h2: '一、我们是谁',
@@ -181,8 +183,8 @@ export const TERMS_PAGE = {
         {
           h2: '二、服务是什么',
           body: [
-            'Sound Cocktail 是一款免费的环境音混音器。您可以把 22 种声音——雨声、篝火、咖啡馆人声、钢琴等等——调成一杯存下来。混音免费，每次最多 10 分钟。',
-            '三个一次性买断的声音包解锁更多通道：专注包（$1.99 / ¥6）、助眠包（$2.99 / ¥9）、雨夜包（$3.99 / ¥12）。没有订阅，没有重复扣费，调音不用注册；账号只在买包时才需要。声音包是虚拟商品，付款成功后立刻交付：包会在您的账号里马上解锁。',
+            'Sound Cocktail 是一款免费的环境音混音器。您可以把 22 种声音——雨声、篝火、咖啡馆人声、钢琴等等——调成一杯存下来。混音免费，每次最多 10 分钟；清迈与巴厘岛的声音旅程免费开放。',
+            '进阶版（Plus）是订阅，解锁其余内容：另外 4 个目的地（岘港、京都、里斯本、会安）、不限时收听、完整调音器（全部通道、调参、保存配方）与睡眠定时。订阅是虚拟商品，付款成功后立刻交付：进阶版会在您的账号里解锁，直到已付周期的最后一天。',
           ],
         },
         {
@@ -193,18 +195,19 @@ export const TERMS_PAGE = {
           ],
         },
         {
-          h2: '四、声音包、价格与付款',
+          h2: '四、进阶版订阅、价格与付款',
           body: [
-            '价格在付款前就标在站上：专注包 $1.99 / ¥6，助眠包 $2.99 / ¥9，雨夜包 $3.99 / ¥12。中国以外地区用美元付款，走 Waffo Pancake（我们的收款代理）——支持银行卡（Visa、Mastercard）、Apple Pay、Google Pay、微信支付或支付宝。中国大陆地区用人民币走支付宝付款。',
-            '结账时显示的价格就是实付价格，税费由支付处理方处理。每笔购买都是一次性扣费。我们绝不会要求您授权重复扣费，也没有什么需要取消的订阅。',
-            '我们看不到、也不保存您的银行卡信息——付款全程由 Waffo Pancake 或支付宝处理。交付是即时的：付款成功后，包会在您的账号里马上解锁。如果没有解锁，请联系客服，我们会处理。',
+            '价格在付款前就标在站上：中国以外地区，月付 $7.99，年付 $79.90（等于白送两个月），用美元付款，走 Waffo Pancake（我们的收款代理）——支持银行卡（Visa、Mastercard）、Apple Pay、Google Pay、微信支付或支付宝。中国大陆地区，月卡 ¥18（30 天），年卡 ¥180，用人民币走支付宝付款。',
+            'Waffo 订阅会在每个周期结束时自动续费。您可以随时在 Waffo 客户中心取消（进阶页有入口），也可以写信到 weiyezhu180@gmail.com 请我们取消——取消后不再扣费，已经付过的周期仍可使用到到期日。',
+            '支付宝月卡/年卡是一次性购买，不会自动续费。到期后想继续使用，买一张新卡即可；新卡从付款当天起算新的有效期。',
+            '我们看不到、也不保存您的银行卡信息——付款全程由 Waffo Pancake 或支付宝处理。交付是即时的：付款成功后，进阶版会在您的账号里马上解锁。如果没有解锁，请联系客服，我们会处理。',
           ],
         },
         {
           h2: '五、退款',
           body: [
-            '因为声音包是即时交付的，请先试用免费声音，确认混音器是您想要的再买。如果出了问题，我们会负责：购买后 7 天内写信到 weiyezhu180@gmail.com，如果包没有解锁、被重复扣费，或者您对包不满意，我们会全额退款。',
-            '退款由支付处理方执行，通常在 5–10 个工作日内回到您的账上。超过 7 天的购买无法退款；已经退过款的购买也不能再次退款。',
+            '因为订阅是即时交付的，请先试用免费声音和免费旅程，确认混音器是您想要的再订阅。如果出了问题，我们会负责：首次订阅后 7 天内写信到 weiyezhu180@gmail.com，如果进阶版没有解锁、被重复扣费，或者您对订阅不满意，我们会全额退款。',
+            '退款由支付处理方执行，通常在 5–10 个工作日内回到您的账上。首个 7 天之后，当期费用无法退款；已经退过款的订阅也不能再次退款。取消订阅会停止以后的扣费，但已付的当期费用不退。',
           ],
         },
         {
@@ -219,10 +222,10 @@ export const TERMS_PAGE = {
             '本服务仅供个人收听。您不得：',
           ],
           list: [
-            '转售、再分发或赠送本站的声音或声音包。',
+            '转售、再分发或赠送本站的声音或进阶版权限。',
             '批量下载音频文件或爬取本站。',
             '用自动化工具大量访问本站。',
-            '共享或出售账号，或绕过付费解锁声音包。',
+            '共享或出售账号，或绕过付费解锁进阶版。',
             '将本服务用于任何违法用途。',
           ],
         },
@@ -236,7 +239,7 @@ export const TERMS_PAGE = {
         {
           h2: '九、您的数据与隐私',
           body: [
-            '我们收集的数据越少越好：您的邮箱和加密后的密码（绝不是明文密码）、您的订单和拥有的包、以及您保存的配方。银行卡信息绝不会经过我们的服务器——Waffo Pancake 是我们的支付处理方，按 PCI-DSS 处理付款。',
+            '我们收集的数据越少越好：您的邮箱和加密后的密码（绝不是明文密码）、您的订单和订阅、以及您保存的配方。银行卡信息绝不会经过我们的服务器——Waffo Pancake 是我们的支付处理方，按 PCI-DSS 处理付款。',
             '我们的隐私政策说明了我们收集什么、怎么用、怎么删除；您可以随时要求我们删除您的账号和数据。',
           ],
         },
@@ -252,7 +255,7 @@ export const TERMS_PAGE = {
           h2: '十一、结束账号',
           body: [
             '您可以随时停止使用本服务。要删除账号，请写信到 weiyezhu180@gmail.com，我们会在 90 天内删除您的账号和个人数据。',
-            '删除账号后，您购买的包也无法再使用，而且无法恢复，请确认后再申请。如果账号违反本条款或滥用服务，我们可能暂停或关闭它。',
+            '删除账号后，进阶版也无法再使用，而且无法恢复，请确认后再申请。只删账号不会自动取消 Waffo 订阅——请先在客户中心取消，或写邮件请我们取消，以免继续扣费。如果账号违反本条款或滥用服务，我们可能暂停或关闭它。',
           ],
         },
         {
@@ -316,7 +319,7 @@ export const PRIVACY_PAGE = {
           list: [
             'Account information: your email address and a hashed password. We never store your password in plain text, and we never see it.',
             'Google sign-in: if you sign in with Google, we receive your name, email address and profile photo from Google. We do not store any Google tokens.',
-            'Orders and entitlements: which packs you bought, the price and currency, the order number, the payment status and the date — so we can unlock your packs and show them to you.',
+            'Orders and entitlements: which subscription plan you have, the price and currency, the order number, the payment status, the subscription period end and the date — so we can unlock Plus and show it to you.',
             'Your mixes: the recipes you save and the names you give them.',
             'Preferences: your language choice, stored in your browser.',
           ],
@@ -324,7 +327,7 @@ export const PRIVACY_PAGE = {
         {
           h2: '3. How we use it',
           body: [
-            'We use your information only to run the Service: to let you mix sounds and keep your account (contract); to take payment and unlock your packs (contract); to keep you signed in (contract); to prevent abuse and fraud (legitimate interest); to answer your support messages (contract); and to keep the transaction records the law requires (legal obligation).',
+            'We use your information only to run the Service: to let you mix sounds and keep your account (contract); to take payment, manage your subscription and unlock Plus (contract); to keep you signed in (contract); to prevent abuse and fraud (legitimate interest); to answer your support messages (contract); and to keep the transaction records the law requires (legal obligation).',
             'We do not send marketing emails, and we do not use your data for advertising.',
           ],
         },
@@ -426,7 +429,7 @@ export const PRIVACY_PAGE = {
           list: [
             '账号信息：您的邮箱地址和加密后的密码。我们绝不以明文保存密码，也看不到您的密码。',
             'Google 登录：如果您用 Google 登录，我们会从 Google 收到您的姓名、邮箱地址和头像。我们不保存任何 Google 令牌。',
-            '订单与权益：您买了哪个包、价格与币种、订单号、付款状态和日期——用来给您解锁包、展示给您看。',
+            '订单与权益：您的订阅计划、价格与币种、订单号、付款状态、订阅到期日和日期——用来给您解锁进阶版、展示给您看。',
             '您的配方：您保存的配方和起的名字。',
             '偏好设置：您的语言选择，存在浏览器里。',
           ],
@@ -434,7 +437,7 @@ export const PRIVACY_PAGE = {
         {
           h2: '三、我们怎么用',
           body: [
-            '我们只把您的信息用于运行本服务：让您调音、维持账号（履行合同）；收款并解锁您的包（履行合同）；保持登录状态（履行合同）；防止滥用与欺诈（正当利益）；回复您的客服消息（履行合同）；以及保存法律要求的交易记录（法定义务）。',
+            '我们只把您的信息用于运行本服务：让您调音、维持账号（履行合同）；收款、管理订阅并解锁进阶版（履行合同）；保持登录状态（履行合同）；防止滥用与欺诈（正当利益）；回复您的客服消息（履行合同）；以及保存法律要求的交易记录（法定义务）。',
             '我们不发营销邮件，也不把您的数据用于广告。',
           ],
         },

@@ -2,13 +2,18 @@
  * Sound Cocktail 商品目录（服务端定价，唯一可信来源）。
  *
  * 价格、商品名由服务端决定，前端只传 productId，不得信任前端传来的金额。
- * 与 Express 版（sound-cocktail-pay-server/src/products.js）完全一致：
- * 三档解锁包（演示价，与原型一致）。
+ *
+ * 2026-11-16 订阅模型（用户确认）：三个一次性声音包已下架（无人购买），
+ * 改为订阅——月付 $7.99 / ¥18（30 天），年付 $79.90 / ¥180（365 天，
+ * 年付 = 月费 ×10）。海外走 Waffo Pancake 订阅（自动续费），
+ * 国内走支付宝 Vibe Pay 月卡/年卡（一次性购买，手动续费）。
+ * CNY 价 ¥18/¥180 是 limer 2026-11-16 确认的国内价（¥58 占位价已否决：
+ * 国内竞品 ¥18–28/月）。
+ * 旧包的 productId（focus-pack / sleep-pack / rain-night-pack）
+ * 不再出现在目录里；已发放的旧包权益仍保留在 entitlements 记录中
+ * （见 server/auth.ts 的 legacy packs），不影响老用户。
  *
  * 双币种：CNY 走支付宝，USD 走 Waffo Pancake（海外版）。
- * USD 定价 2026-11-12 由用户确认：focus $1.99 / sleep $2.99 / rain-night $3.99
- * （保持 6:9:12 的档位比例；Waffo 每笔收 3.9% + $0.50，直接按汇率换算
- * 只有 $0.85/$1.27/$1.70，固定费会吃掉一半以上，所以不定低价）。
  */
 export type Currency = 'CNY' | 'USD'
 
@@ -21,37 +26,44 @@ export interface Product {
   totalAmount: string
   /** USD 金额（Waffo 用，显示金额字符串，不是分）。 */
   totalAmountUsd: string
+  /** 有效期天数（订阅用；一次性商品为 0）。 */
+  durationDays: number
 }
 
 const PRODUCTS: Record<string, Product> = {
-  'sleep-pack': {
-    productId: 'sleep-pack',
-    name: '助眠包',
-    nameEn: 'Sleep Pack',
-    subject: 'Sound Cocktail · 助眠包',
-    totalAmount: '9.00',
-    totalAmountUsd: '2.99',
+  'subscription-monthly': {
+    productId: 'subscription-monthly',
+    name: '订阅（月付）',
+    nameEn: 'Subscription · Monthly',
+    subject: 'Sound Cocktail · 订阅（月付）',
+    totalAmount: '18.00',
+    totalAmountUsd: '7.99',
+    durationDays: 30,
   },
-  'focus-pack': {
-    productId: 'focus-pack',
-    name: '专注包',
-    nameEn: 'Focus Pack',
-    subject: 'Sound Cocktail · 专注包',
-    totalAmount: '6.00',
-    totalAmountUsd: '1.99',
-  },
-  'rain-night-pack': {
-    productId: 'rain-night-pack',
-    name: '雨夜包',
-    nameEn: 'Rain Night Pack',
-    subject: 'Sound Cocktail · 雨夜包',
-    totalAmount: '12.00',
-    totalAmountUsd: '3.99',
+  'subscription-yearly': {
+    productId: 'subscription-yearly',
+    name: '订阅（年付）',
+    nameEn: 'Subscription · Yearly',
+    subject: 'Sound Cocktail · 订阅（年付）',
+    totalAmount: '180.00',
+    totalAmountUsd: '79.90',
+    durationDays: 365,
   },
 }
 
+/** 旧的一次性包 productId（已下架，仅用于识别老订单/老权益）。 */
+export const LEGACY_PACK_PRODUCT_IDS = ['focus-pack', 'sleep-pack', 'rain-night-pack']
+
 export function getProduct(productId: string): Product | null {
   return PRODUCTS[productId] || null
+}
+
+export function isSubscriptionProduct(productId: string): boolean {
+  return productId === 'subscription-monthly' || productId === 'subscription-yearly'
+}
+
+export function isLegacyPackProduct(productId: string): boolean {
+  return LEGACY_PACK_PRODUCT_IDS.includes(productId)
 }
 
 /** 取指定币种的金额（服务端决定；未知币种回落到 CNY）。 */
@@ -71,7 +83,7 @@ export function normalizeCurrency(value: unknown): Currency {
 export function listProducts(
   currency: Currency = 'CNY',
   locale: string = 'zh',
-): Array<{ productId: string; name: string; nameEn: string; totalAmount: string; currency: Currency }> {
+): Array<{ productId: string; name: string; nameEn: string; totalAmount: string; currency: Currency; durationDays: number }> {
   const useEn = String(locale || '').trim().toLowerCase() === 'en'
   return Object.values(PRODUCTS).map((p) => ({
     productId: p.productId,
@@ -79,5 +91,6 @@ export function listProducts(
     nameEn: p.nameEn,
     totalAmount: productAmount(p, currency),
     currency,
+    durationDays: p.durationDays,
   }))
 }

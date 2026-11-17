@@ -14,6 +14,7 @@
 import { useEffect, useLayoutEffect } from 'react';
 import { Link } from '@tanstack/react-router';
 import { getLabController } from './sound-lab.mjs';
+import { SLEEP_TIMER_OPTIONS_MINUTES } from './sleep-timer.mjs';
 import { useLab } from './lab-context.jsx';
 import { recipeDisplay } from './catalog.mjs';
 import { localizePath, t, useLocale } from './locale.mjs';
@@ -212,6 +213,7 @@ function Hero({ recipes, onPlayRecipe }) {
 
 function Mixer() {
   const [locale] = useLocale();
+  const { isSubscriber } = useLab();
   return (
     <section className="blk" id="mixer">
       <div className="sec-head"><h2>{t(locale, 'mixer.title')}</h2>{locale === 'en' ? <span className="en">{t(locale, 'mixer.en')}</span> : null}</div>
@@ -226,15 +228,26 @@ function Mixer() {
             <input type="range" className="master-vol" id="masterVol" min="0" max="85" defaultValue={55} aria-label={t(locale, 'mixer.masterAria')} />
           </div>
           <div className="mb-group">
-            <span className="mb-label">{t(locale, 'mixer.remaining')}</span>
+            <span className="mb-label">{t(locale, isSubscriber ? 'mixer.remainingUnlimited' : 'mixer.remaining')}</span>
             <span className="timer-read" id="focusRead" role="timer">10:00</span>
+          </div>
+          <div className="mb-group">
+            <label className="mb-label" htmlFor="sleepTimerSelect">{t(locale, 'mixer.sleepTimer')}</label>
+            {!isSubscriber ? <Link className="badge" to={localizePath('/plus', locale)}>{t(locale, 'mixer.plusBadge')}</Link> : null}
+            <span className="sleep-timer-wrap">
+              <select className="sleep-timer-select" id="sleepTimerSelect" aria-label={t(locale, 'mixer.sleepTimer')} disabled={!isSubscriber} title={isSubscriber ? undefined : t(locale, 'mixer.sleepLocked')}>
+                <option value="off">{t(locale, 'mixer.sleepOff')}</option>
+                {SLEEP_TIMER_OPTIONS_MINUTES.map(minutes => <option key={minutes} value={minutes}>{minutes} {t(locale, 'mixer.sleepMinutes')}</option>)}
+              </select>
+              <span className="timer-read" id="sleepTimerRead" role="timer"></span>
+            </span>
           </div>
           <div className="spacer"></div>
           <button className="text-btn" id="immersiveBtn">{t(locale, 'mixer.immersive')}</button>
           <button className="text-btn" id="randomBtn">{t(locale, 'mixer.random')}</button>
           <button className="text-btn" id="clearBtn">{t(locale, 'mixer.clear')}</button>
         </div>
-        <p className="comfort-note" style={{ margin: '0 0 18px' }}>{t(locale, 'mixer.comfort')}</p>
+        <p className="comfort-note" style={{ margin: '0 0 18px' }}>{t(locale, isSubscriber ? 'mixer.comfortPlus' : 'mixer.comfort')}</p>
         <div className="mixer-controls">
           <div className="mixer-cup" aria-hidden="true">
             <svg viewBox="42 38 241 286"><use href="#wcSway" /></svg>

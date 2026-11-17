@@ -42,6 +42,7 @@ const EN_ONLY_SUBTITLES = new Set([
 // 路由与存储标识（/api、ORDERS_KV、wrangler.jsonc、kv_namespaces）。
 const ALLOWED_LATIN = [
   'Sound Cocktail',
+  'Waffo',
   'Apple Pay',
   'Google Pay',
   'Google',

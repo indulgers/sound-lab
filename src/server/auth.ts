@@ -11,7 +11,10 @@
  *   user:<userId>              用户记录
  *   user:email:<小写邮箱>       邮箱 → userId 索引
  *   sess:<token>               会话 { userId, expiresAt }（30 天，KV 自动过期）
- *   ent:<userId>               权益 { packs: [packId...] }（集合语义，发放幂等）
+ *   ent:<userId>               权益 { packs: [packId...], subscription?: {...} }（集合语义，发放幂等）
+ *                         packs 是 2026-11-16 前下架的一次性包（legacy，
+ *                         不再出售，已发放的保留）；subscription 是时效性
+ *                         订阅授权（见下），expiresAt = currentPeriodEnd。
  *   loginfail:<邮箱>:<小时桶>   登录失败计数（1 小时过期，满 10 次锁 1 小时）
  *
  * 会话凭证两种携带方式（都接受）：
@@ -21,6 +24,8 @@
  * 注意：本文件只用可擦除的 TypeScript 语法（接口 + 类型标注），
  * 不用枚举/命名空间/参数属性，以便 node --test 能直接加载它做单元测试。
  */
+
+import { getProduct, isSubscriptionProduct, isLegacyPackProduct } from './products.ts'
 
 export const SESSION_COOKIE_NAME = 'sc_session'
 export const SESSION_TTL_SECONDS = 30 * 24 * 3600 // 30 天
@@ -64,7 +69,47 @@ export interface SessionRecord {
 }
 
 export interface EntitlementRecord {
+  /** 旧的一次性包（2026-11-16 已下架，不再出售；已发放的保留）。 */
   packs: string[]
+  /** 时效性订阅授权（2026-11-16 订阅模型）。 */
+  subscription?: SubscriptionRecord | null
+}
+
+/**
+ * 订阅授权记录（时效性）。
+ *
+ * - provider: 'waffo'（海外，自动续费）| 'alipay'（国内，月卡/年卡手动续费）。
+ * - plan: 'subscription-monthly'（30 天）| 'subscription-yearly'（365 天）。
+ * - status: 'trialing' | 'active' | 'past_due' | 'canceling' | 'canceled'。
+ *   past_due（续费失败）当天保留访问；canceling（已申请取消）保留访问
+ *   到周期结束；canceled（已彻底结束）即失效。
+ * - currentPeriodEnd: 当前周期结束时间（ms 时间戳）；权益有效期就看它。
+ * - subscriptionId: 支付方订阅号（Waffo 订单号 ORD_xxx；支付宝月卡无此项）。
+ */
+export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceling' | 'canceled'
+
+export interface SubscriptionRecord {
+  provider: 'waffo' | 'alipay'
+  plan: 'subscription-monthly' | 'subscription-yearly'
+  status: SubscriptionStatus
+  currentPeriodEnd: number
+  subscriptionId?: string | null
+  updatedAt: string
+}
+
+/** 订阅有效的状态（past_due / canceling 保留访问到周期结束）。 */
+export const SUBSCRIPTION_ACTIVE_STATUSES: SubscriptionStatus[] = ['trialing', 'active', 'past_due', 'canceling']
+
+/** 订阅是否有效：状态在有效列表里，且当前周期未结束。 */
+export function isSubscriptionActive(
+  subscription: SubscriptionRecord | null | undefined,
+  nowMs: number = Date.now(),
+): boolean {
+  if (!subscription || typeof subscription !== 'object') return false
+  if (!SUBSCRIPTION_ACTIVE_STATUSES.includes(subscription.status)) return false
+  const end = Number(subscription.currentPeriodEnd)
+  if (!Number.isFinite(end)) return false
+  return end > nowMs
 }
 
 type Kv = Pick<KVNamespace, 'get' | 'put' | 'delete' | 'list'>
@@ -323,6 +368,131 @@ export async function getPacks(kv: Kv, userId: string): Promise<string[]> {
   const record = await kv.get(`${ENT_PREFIX}${userId}`, 'json')
   const packs = (record as EntitlementRecord | null)?.packs
   return Array.isArray(packs) ? [...packs] : []
+}
+
+async function readEntitlement(kv: Kv, userId: string): Promise<EntitlementRecord> {
+  const record = (await kv.get(`${ENT_PREFIX}${userId}`, 'json')) as EntitlementRecord | null
+  return {
+    packs: Array.isArray(record?.packs) ? [...record.packs] : [],
+    subscription: record?.subscription ?? null,
+  }
+}
+
+async function writeEntitlement(kv: Kv, userId: string, record: EntitlementRecord): Promise<void> {
+  await kv.put(`${ENT_PREFIX}${userId}`, JSON.stringify(record))
+}
+
+export async function getSubscription(kv: Kv, userId: string): Promise<SubscriptionRecord | null> {
+  const record = await readEntitlement(kv, userId)
+  return record.subscription ?? null
+}
+
+/**
+ * 授予 / 延长订阅授权（幂等，重复调用无副作用）。
+ * - 首次授予：按传入的 currentPeriodEnd 写一条记录。
+ * - 续费延长：只有新的 currentPeriodEnd 更晚时才更新（防止旧事件
+ *   晚到把周期往回拨）；同计划续费保留原 provider/plan。
+ * - 升降级（换 plan）：按新 plan 的 currentPeriodEnd 直接写。
+ * 返回写完后的订阅记录。
+ */
+export async function grantSubscription(
+  kv: Kv,
+  userId: string,
+  input: {
+    provider: 'waffo' | 'alipay'
+    plan: 'subscription-monthly' | 'subscription-yearly'
+    status?: SubscriptionStatus
+    currentPeriodEnd: number
+    subscriptionId?: string | null
+  },
+): Promise<SubscriptionRecord> {
+  const record = await readEntitlement(kv, userId)
+  const prev = record.subscription
+  const next: SubscriptionRecord = {
+    provider: input.provider,
+    plan: input.plan,
+    status: input.status ?? 'active',
+    currentPeriodEnd: input.currentPeriodEnd,
+    subscriptionId: input.subscriptionId ?? prev?.subscriptionId ?? null,
+    updatedAt: new Date().toISOString(),
+  }
+  // 同计划续费：只接受更晚的周期结束时间（防旧事件晚到回拨）。
+  // 注意用严格大于：周期结束时间相同时仍要接受新状态
+  // （例如 past_due → recovered 恢复 active，周期不变）。
+  if (prev && prev.plan === next.plan && prev.status !== 'canceled' && prev.currentPeriodEnd > next.currentPeriodEnd) {
+    return prev
+  }
+  record.subscription = next
+  await writeEntitlement(kv, userId, record)
+  return next
+}
+
+/**
+ * 更新订阅状态（不改周期结束时间，除非同时传入）。
+ * 用于 past_due（续费失败，保留访问）、canceling（已申请取消，
+ * 保留访问到周期结束）、recovered/uncanceled（恢复 active）。
+ */
+export async function updateSubscriptionStatus(
+  kv: Kv,
+  userId: string,
+  status: SubscriptionStatus,
+  currentPeriodEnd?: number,
+): Promise<SubscriptionRecord | null> {
+  const record = await readEntitlement(kv, userId)
+  const prev = record.subscription
+  if (!prev) return null
+  const next: SubscriptionRecord = {
+    ...prev,
+    status,
+    currentPeriodEnd: Number.isFinite(currentPeriodEnd) ? (currentPeriodEnd as number) : prev.currentPeriodEnd,
+    updatedAt: new Date().toISOString(),
+  }
+  record.subscription = next
+  await writeEntitlement(kv, userId, record)
+  return next
+}
+
+/** 撤销订阅授权（周期结束时调用；记录保留 packs，subscription 清掉）。 */
+export async function revokeSubscription(kv: Kv, userId: string): Promise<void> {
+  const record = await readEntitlement(kv, userId)
+  if (!record.subscription) return
+  record.subscription = null
+  await writeEntitlement(kv, userId, record)
+}
+
+/**
+ * 按订单商品类型发权益（支付宝 notify / query 与 Waffo confirm 的
+ * 共享入口，绝不各自另写一份发放逻辑）：
+ * - 订阅商品 → 时效性订阅授权，到期 = 付款时刻 + 计划天数
+ *   （月卡 30 天 / 年卡 365 天；paidAtMs 默认现在）。
+ * - 旧包商品 → legacy 包授权（只对 2026-11-16 前的老订单）。
+ * - 其他 → 不发，返回 null。
+ * 返回发了哪种权益（调用方据此写日志/响应）。
+ */
+export async function grantOrderEntitlement(
+  kv: Kv,
+  userId: string,
+  productId: string,
+  options: { provider: 'waffo' | 'alipay'; paidAtMs?: number; subscriptionId?: string | null },
+): Promise<'subscription' | 'pack' | null> {
+  if (isSubscriptionProduct(productId)) {
+    const product = getProduct(productId)
+    const days = product?.durationDays ?? 30
+    const paidAt = options.paidAtMs ?? Date.now()
+    await grantSubscription(kv, userId, {
+      provider: options.provider,
+      plan: productId as 'subscription-monthly' | 'subscription-yearly',
+      status: 'active',
+      currentPeriodEnd: paidAt + days * 24 * 60 * 60 * 1000,
+      subscriptionId: options.subscriptionId ?? null,
+    })
+    return 'subscription'
+  }
+  if (isLegacyPackProduct(productId)) {
+    await grantPack(kv, userId, productId)
+    return 'pack'
+  }
+  return null
 }
 
 /* ============================== Google OAuth ============================== */

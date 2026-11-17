@@ -114,6 +114,45 @@ test('elapsed focus time pauses with listening while sleep timer does not extend
   assert.equal(h.player.getPlaying(),false);
   h.player.dispose();
 });
+
+test('sleep timer fades over the last two minutes, not four seconds', async () => {
+  const h=setup();await h.player.setScene(scene);await h.player.play();
+  const master=h.context.gains[0].gain;
+  master.events.length=0;
+  const deadline=h.player.setSleepTimer(30*60_000);
+  assert.equal(deadline,1_000_000+1_800_000);
+  const linears=master.events.filter(([type])=>type==='linear');
+  assert.equal(linears.length,1);
+  // The ramp reaches zero exactly at the deadline (audio clock 10 + 1800s).
+  assert.deepEqual(linears[0],['linear',0,10+1800]);
+  // Full level (0.7) is held until 120 seconds before the deadline.
+  assert.ok(master.events.some(([type,value,time])=>type==='set'&&value===0.7&&time===10+1800-120),'holds full level until the fade starts');
+  h.player.dispose();
+});
+
+test('sleep timer shorter than the fade fades over its whole length', async () => {
+  const h=setup();await h.player.setScene(scene);await h.player.play();
+  const master=h.context.gains[0].gain;
+  master.events.length=0;
+  h.player.setSleepTimer(60_000);
+  const linears=master.events.filter(([type])=>type==='linear');
+  assert.deepEqual(linears,[['linear',0,10+60]]);
+  // No later hold: the fade starts immediately when it covers everything.
+  assert.ok(!master.events.some(([type,,time])=>type==='set'&&time>10));
+  h.player.dispose();
+});
+
+test('cancelling the sleep timer restores full level', async () => {
+  const h=setup();await h.player.setScene(scene);await h.player.play();
+  const master=h.context.gains[0].gain;
+  h.player.setSleepTimer(30*60_000);
+  master.events.length=0;
+  assert.equal(h.player.setSleepTimer(null),null);
+  assert.ok(!master.events.some(([type])=>type==='linear'),'no fade to zero after cancel');
+  assert.ok(master.events.some(([type,value])=>type==='target'&&value===0.7),'level returns to the master setting');
+  h.player.dispose();
+});
+
 test('passage activity gate and chapter boundaries are deterministic',()=>{
   assert.equal(densityGate(90,1,2),1);
   assert.equal(densityGate(90,.25,2),densityGate(90,.25,2));
