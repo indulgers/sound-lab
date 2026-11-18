@@ -50,7 +50,8 @@
     "alipay:keygen": "node scripts/alipay-keygen.mjs",
     "alipay:check": "node scripts/alipay-check-keys.mjs",
     "assets:sync": "node scripts/sync-local-media.mjs",
-    "assets:check": "node scripts/sync-local-media.mjs --check"
+    "assets:check": "node scripts/sync-local-media.mjs --check",
+    "dev:ready": "node scripts/sync-local-media.mjs && vite dev --port 3000"
   },
   "type": "module",
   "version": "1.0.0"
