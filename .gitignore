@@ -24,3 +24,10 @@ dist-ssr/
 /public/assets/scenes/*-travel-mobile.jpg
 /public/assets/scenes/real-travel-films.json
 /journey-audio-qa.json
+
+
+# AI-film pilot source videos / QA outputs are generated media, not product code.
+# Keep prompt cards/docs in Git, but never commit provider outputs or API keys.
+/private/ai-film-inputs/
+/public/assets/scenes/ai-pilot/
+/public/ai-film-pilot-preview.html
