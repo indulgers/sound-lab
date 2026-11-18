@@ -117,7 +117,7 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
   const [remaining, setRemaining] = useState(0);
   // 订阅状态（外壳从 /api/entitlements 传入）：免费用户只能进
   // 清迈 / 巴厘岛旅程，其余旅程、定时停止、保存配比都要订阅。
-  const { isSubscriber } = useLab();
+  const { isSubscriber, subscription } = useLab();
   // 免费用户点中的被锁旅程：在“去往哪里”面板里展示升级提示。
   const [lockedJourney, setLockedJourney] = useState(null);
   // 免费收听的 10 分钟窗口：与配方播放共用同一个 listening-session
@@ -437,7 +437,7 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
         <button onClick={openTuner}>{M.studio}</button>
         <button onClick={()=>openPanel('saved')}>{C.saved}</button>
       </nav>
-      <div className="sc-header-end"><span className="sc-tiny-flower">✳</span><select value={locale} onChange={changeLanguage} aria-label={locale==='zh'?'语言':'Language'}><option value="en">EN</option><option value="zh">中</option></select></div>
+      <div className="sc-header-end">{subscription?.isTest && isSubscriber && <span className="sc-qa-plus" aria-label={locale==='zh'?'测试 Plus 已开启':'QA Plus active'}>QA PLUS</span>}<span className="sc-tiny-flower">✳</span><select value={locale} onChange={changeLanguage} aria-label={locale==='zh'?'语言':'Language'}><option value="en">EN</option><option value="zh">中</option></select></div>
     </header>
 
     {intentId && <div className="sc-scene-top"><span className="sc-live-dot"/><span>{T(scene.name)} · {T(scene.location)}</span></div>}
