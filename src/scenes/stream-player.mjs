@@ -269,19 +269,71 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
         scene.layers.some(layer => !layer.file || !layer.id)) {
       error = 'This journey has no playable stems'; emit('error', error); return false;
     }
+    const nextLevels = Object.fromEntries(scene.layers.map(layer => [
+      layer.id, clamp(savedLevels[layer.id], clamp(layer.defaultLevel, .55)),
+    ]));
     const same = selected?.id === scene.id && selected?.journeyId === scene.journeyId
       && selected?.audioVersion === scene.audioVersion
       && selected.layers.length === scene.layers.length
       && selected.layers.every((layer, i) => layer.id === scene.layers[i].id && layer.file === scene.layers[i].file);
-    selected = scene;
-    levels = Object.fromEntries(scene.layers.map(layer => [layer.id, clamp(savedLevels[layer.id], clamp(layer.defaultLevel, .55))]));
-    if (!same) {
-      const wasPlaying = playing;
-      pause(); if (current) retire(current); current = null;
-      if (wasPlaying && autoPlay) return play();
-    } else applyDeck(current);
+
+    // Changing just the mix should never trigger a new audio play() or restart.
+    if (same) {
+      selected = scene; levels = nextLevels;
+      applyDeck(current); applyDeck(next);
+      if (autoPlay && !playing) return play();
+      emit(playing ? 'playing' : 'idle');
+      return true;
+    }
+
+    // Keep the active programme audible while the next programme actually
+    // starts. Both decks share the existing Web Audio graph and master timer.
+    // This is a real crossfade, not pause/replace/play with a short silence.
+    if (autoPlay && playing && current && context) {
+      const previousSelected = selected, previousLevels = levels;
+      const token = ++generation;
+      // Rapid changes during a programme-loop or scene transition: settle
+      // the already audible incoming deck before starting another one.
+      if (next) {
+        const retiring = current;
+        current = next; next = null;
+        retire(retiring);
+        fadeDeck(current, 1, .15);
+      }
+      const outgoing = current;
+      selected = scene; levels = nextLevels;
+      const incoming = makeDeck(scene);
+      next = incoming;
+      try {
+        await startDeck(incoming, true);
+        if (disposed || generation !== token || next !== incoming) {
+          retire(incoming);
+          return false;
+        }
+        fadeDeck(outgoing, 0, CROSSFADE_SECONDS);
+        emit('playing');
+        return true;
+      } catch (err) {
+        if (next === incoming) next = null;
+        retire(incoming);
+        // A failed new track must never silence the working old track.
+        if (!disposed && token === generation) {
+          selected = previousSelected;
+          levels = previousLevels;
+          fadeDeck(outgoing, 1, FADE_SECONDS);
+          emit('playing');
+        }
+        return false;
+      }
+    }
+
+    selected = scene; levels = nextLevels;
+    pause();
+    if (current) retire(current);
+    current = null;
     if (autoPlay) return play();
-    emit('idle'); return true;
+    emit('idle');
+    return true;
   }
   function setLevel(id, value) { levels[id] = clamp(value, levels[id] || .5); applyDeck(current); applyDeck(next); }
   function setMaster(value) { targetMaster = clamp(value, .7); setTimerAutomation(); }
