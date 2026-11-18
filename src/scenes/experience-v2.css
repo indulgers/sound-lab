@@ -106,6 +106,44 @@
   line-height: 1;
   font-weight: 300;
 }
+.sc-discover-footer {
+  margin-top: clamp(72px, 8vw, 130px);
+  padding-top: 30px;
+  border-top: 1px solid #c8cfc7;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 32px;
+}
+.sc-discover-footer > span {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 25px;
+  line-height: 1.1;
+}
+.sc-discover-footer small {
+  display: block;
+  margin-top: 8px;
+  color: #66766b;
+  font: 11px/1.5 Manrope, system-ui, sans-serif;
+}
+.sc-discover-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  max-width: 520px;
+}
+.sc-discover-footer nav a {
+  color: #4e5d52;
+  font-size: 11px;
+  line-height: 1.6;
+  text-decoration: none;
+  text-underline-offset: 4px;
+}
+.sc-discover-footer nav a:hover { text-decoration: underline; }
+@media (max-width: 680px) {
+  .sc-discover-footer { flex-direction: column; }
+  .sc-discover-footer nav { gap: 15px 22px; }
+}
 .sc-discover-card-text { padding-top: 19px; }
 .sc-discover-card-text h3 {
   font-family: 'Cormorant Garamond', Georgia, serif;
