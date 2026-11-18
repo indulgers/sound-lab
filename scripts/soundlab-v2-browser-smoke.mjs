@@ -90,6 +90,7 @@ try {
   await advanced.click();
   assert.equal(await studio.locator('.sc-eq-controls input[type=range]').count(), 5);
   await advanced.click();
+  await studio.evaluate(element => { element.scrollTop = 0; });
   await desktop.screenshot({ path: 'preview-qa/soundlab-v2/desktop-studio.jpg', type: 'jpeg', quality: 70 });
   console.log('PASS: scene editorial route and in-place Studio panel');
 
@@ -110,7 +111,12 @@ try {
   await navigate(mobile, '/zh/scenes/bali-sound-bath');
   assert.equal(await mobile.locator('.scene-experience').getAttribute('data-scene'), 'bali');
   await mobile.screenshot({ path: 'preview-qa/soundlab-v2/mobile-bali.jpg', type: 'jpeg', quality: 68, fullPage: true });
-  console.log('PASS: mobile Discover and Bali scene layout');
+  await mobile.locator('.sc-article-cta').click();
+  await mobile.locator('.sc-dialog[open]').waitFor();
+  assert.equal(await mobile.locator('.sc-dialog[open] .sc-layer').count(), 4);
+  await mobile.locator('.sc-dialog[open]').evaluate(element => { element.scrollTop = 0; });
+  await mobile.screenshot({ path: 'preview-qa/soundlab-v2/mobile-studio.jpg', type: 'jpeg', quality: 72 });
+  console.log('PASS: mobile Discover, Bali scene and Studio interaction');
 
   assert.deepEqual(errors, [], 'browser runtime errors');
   console.log('PASS: browser runtime has no uncaught page errors');
