@@ -69,6 +69,11 @@ async function validAsset(asset, root, filmManifest) {
   try {
     const s = await stat(path);
     if (!s.isFile() || s.size < sizeThreshold(asset)) return false;
+    const header=(await readFile(path)).subarray(0,16);
+    if (asset.endsWith('.mp3') && !(header.toString('ascii',0,3)==='ID3' ||
+        (header[0]===0xff && (header[1]&0xe0)===0xe0))) return false;
+    if (asset.endsWith('.mp4') && header.toString('ascii',4,8)!=='ftyp') return false;
+    if (asset.endsWith('.jpg') && !(header[0]===0xff && header[1]===0xd8 && header[2]===0xff)) return false;
     const expected = expectedFilmHash(asset, filmManifest);
     if (expected) {
       const actual = createHash('sha256').update(await readFile(path)).digest('hex');
