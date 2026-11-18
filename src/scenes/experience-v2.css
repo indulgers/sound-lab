@@ -430,3 +430,17 @@
 @media (prefers-reduced-motion: reduce) {
   .sc-discover-image img { transition: none; }
 }
+
+/* Clearly distinguish test-only membership from a paid subscription. */
+.scene-experience .sc-qa-plus {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border: 1px solid rgba(252, 244, 212, .45);
+  border-radius: 100px;
+  color: #f9efd0;
+  background: rgba(19, 39, 30, .45);
+  font: 600 9px/1.2 Manrope, system-ui, sans-serif;
+  letter-spacing: .1em;
+  white-space: nowrap;
+}
