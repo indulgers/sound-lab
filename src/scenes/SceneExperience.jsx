@@ -155,7 +155,9 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
     const activeJourney = requested || (shared ? journeyById(shared.journeyId) : null);
     const initial = activeJourney ? sceneForJourney(activeJourney) : SCENES[0];
     const stored = saved.mixes[activeJourney?.id || initial.id] || {};
-    const source = shared?.journeyId === activeJourney?.id ? { ...stored, ...shared.levels, ...shared.controls } : stored;
+    const source = shared && activeJourney && shared.journeyId === activeJourney.id
+      ? { ...stored, ...shared.levels, ...shared.controls }
+      : stored;
     const initialLevels = activeJourney ? levelsForJourney(activeJourney, source) : levelsForScene(initial, source);
     const initialControls = activeJourney ? controlsForJourney(activeJourney, source) : {warmth:.55,space:.35,energy:.4,nature:.35};
     setSceneId(initial.id);
