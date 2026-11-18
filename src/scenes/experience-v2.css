@@ -229,6 +229,7 @@
   font-size: 13px;
   transition: background .2s ease;
 }
+.sc-article-cta { border: 0; cursor: pointer; font-family: inherit; }
 .sc-article-cta:hover { background: #4c6852; }
 .sc-article-layers ul {
   list-style: none;
