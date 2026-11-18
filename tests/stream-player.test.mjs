@@ -212,6 +212,13 @@ test('switching scenes while playing keeps the original playing and preserves el
   assert.equal(h.context.sources.length,6,'new stems start in a parallel deck');
   assert.ok(h.media.slice(0,3).every(x=>!x.paused),'outgoing audio must not be interrupted');
   assert.ok(h.media.slice(3).every(x=>!x.paused),'incoming audio must actually start');
+  const oldHarmony = h.context.sources[0].source.connections[0].gain;
+  const newHarmony = h.context.sources[3].source.connections[0].gain;
+  assert.equal(oldHarmony.value,.7,'outgoing deck must keep its original volume');
+  assert.equal(newHarmony.value,.2,'incoming deck must use the next scene mix');
+  h.player.setLevel('harmony',.27);
+  assert.equal(oldHarmony.value,.7,'editing new scene must not rebalance the fading old scene');
+  assert.equal(newHarmony.value,.27,'incoming scene receives the new editor value');
   assert.equal(h.player.getPlaying(),true);
   assert.ok(h.player.getElapsedSeconds()>=before && h.player.getElapsedSeconds()<before+2);
   assert.equal(h.states.at(-1).sceneId,'bali');
