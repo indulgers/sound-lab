@@ -49,11 +49,37 @@ try {
   assert.equal(await desktop.locator('.scene-experience').getAttribute('data-intent'), 'focus');
   assert.match(await desktop.locator('.sc-article h2').innerText(), /Chiang Mai Focus/);
   assert.equal(await desktop.locator('.sc-article-sections section').count(), 3);
+  // Force lazy posters to decode before capturing a full-page comparison.
+  await desktop.locator('.sc-discover-card img').last().scrollIntoViewIfNeeded();
+  await desktop.locator('.sc-discover-card img').last().evaluate(async img => { await img.decode(); });
+  await desktop.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await desktop.screenshot({ path: 'preview-qa/soundlab-v2/desktop-scene.jpg', type: 'jpeg', quality: 68, fullPage: true });
   const cta = desktop.locator('.sc-article-cta');
   await cta.click();
   await desktop.locator('.sc-dialog[open]').waitFor({ timeout: 15000 });
   assert.equal(await desktop.locator('.sc-layer-action').count(), 8);
+  const studio = desktop.locator('.sc-dialog[open]');
+  const firstLayer = studio.locator('.sc-layer').first();
+  const original = Number(await firstLayer.locator('input[type=range]').inputValue());
+  await firstLayer.locator('input[type=range]').focus();
+  await firstLayer.locator('input[type=range]').press('ArrowLeft');
+  assert.ok(Number(await firstLayer.locator('input[type=range]').inputValue()) < original, 'layer volume responds to user input');
+  const solo = firstLayer.getByRole('button', { name: /Solo/ });
+  const mute = firstLayer.getByRole('button', { name: /Mute/ });
+  await solo.click();
+  assert.equal(await solo.getAttribute('aria-pressed'), 'true');
+  await mute.click();
+  assert.equal(await mute.getAttribute('aria-pressed'), 'true');
+  await solo.click();
+  await mute.click();
+  assert.equal(await solo.getAttribute('aria-pressed'), 'false');
+  assert.equal(await mute.getAttribute('aria-pressed'), 'false');
+  await studio.getByRole('button', { name: 'Reset', exact: true }).click();
+  assert.equal(Number(await firstLayer.locator('input[type=range]').inputValue()), original);
+  const advanced = studio.locator('.sc-advanced-toggle');
+  await advanced.click();
+  assert.equal(await studio.locator('.sc-eq-controls input[type=range]').count(), 5);
+  await advanced.click();
   await desktop.screenshot({ path: 'preview-qa/soundlab-v2/desktop-studio.jpg', type: 'jpeg', quality: 70 });
   console.log('PASS: scene editorial route and in-place Studio panel');
 
