@@ -54,10 +54,20 @@ try {
   await desktop.locator('.sc-discover-card img').last().evaluate(async img => { await img.decode(); });
   await desktop.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await desktop.screenshot({ path: 'preview-qa/soundlab-v2/desktop-scene.jpg', type: 'jpeg', quality: 68, fullPage: true });
+  // Verify the actual streamed MP3 tracks can start under a real click.
+  const lead = desktop.locator('.scene-experience .sc-enter');
+  await lead.click();
+  await desktop.waitForFunction(
+    () => document.querySelector('.scene-experience')?.dataset.audioState === 'playing',
+    null,
+    { timeout: 60000 },
+  );
+  assert.equal(await desktop.locator('.scene-experience').getAttribute('data-audio-state'),'playing');
   const cta = desktop.locator('.sc-article-cta');
   await cta.click();
   await desktop.locator('.sc-dialog[open]').waitFor({ timeout: 15000 });
   assert.equal(await desktop.locator('.sc-layer-action').count(), 8);
+  assert.equal(await desktop.locator('.scene-experience').getAttribute('data-audio-state'), 'playing', 'Studio must not interrupt the same listening session');
   const studio = desktop.locator('.sc-dialog[open]');
   const firstLayer = studio.locator('.sc-layer').first();
   const original = Number(await firstLayer.locator('input[type=range]').inputValue());
