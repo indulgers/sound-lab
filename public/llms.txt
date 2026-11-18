@@ -4,6 +4,16 @@
 
 ## Pages
 
+## Curated soundscapes (film + editable listening)
+
+- [Chiang Mai Focus Soundscape](https://soundcocktail.app/en/scenes/chiang-mai-focus): Royal Park Rajapruek moving footage with an original, adjustable focus composition. It is **not** rainy café interior footage or local café audio.
+- [清迈 · 花园里的专注音景](https://soundcocktail.app/zh/scenes/chiang-mai-focus): 清迈皇家花园实景航拍与可调配原创音乐；并非雨中咖啡馆实拍或现场收音。
+- [Bali Sound Bath & Rice Terrace Film](https://soundcocktail.app/en/scenes/bali-sound-bath): Credited Bali rice terrace aerial film, combined with original bowl-inspired soundscape; not a spa recording or clinical therapy.
+- [巴厘岛 · 梯田声浴](https://soundcocktail.app/zh/scenes/bali-sound-bath): 巴厘岛梯田实景航拍与独立原创声浴；并非 SPA 实录，也不作医疗承诺。
+- [Hoi An Lantern River Evening Soundscape](https://soundcocktail.app/en/scenes/hoi-an-evening): Credited moving footage of Hoi An's lantern-lit river paired with independently produced ambient music (Plus journey).
+- [会安 · 灯笼河畔夜色音景](https://soundcocktail.app/zh/scenes/hoi-an-evening): 会安灯笼河道实景移动影像与原创音乐（进阶旅程）。
+- [Sound Studio](https://soundcocktail.app/en/studio): Browser-based audio-layer editing, volume, mute, solo and shareable mixes. This is a tool route (noindex), not an editorial article.
+
 - [Sound Cocktail](https://soundcocktail.app/en): Sound therapy, mixed for the moment you are in — focus, sleep, meditation — with real places to look at while you listen. 22 sounds, live recordings, instrument samples and live synthesis. Save mixes as recipes and share them.
 - [Sound Cocktail （中文）](https://soundcocktail.app/zh): 免费的音疗聆听站：22 种声音，随意搭配、存成配方，助眠或专注都用得上。
 - [Sound Therapy for Sleep · Rain & Night Sounds](https://soundcocktail.app/en/sleep): Steady rain, a little piano and wind — the most-saved mix for sleep.
