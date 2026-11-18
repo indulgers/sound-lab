@@ -62,6 +62,8 @@ jobs:
             public/assets/scenes/*-travel-mobile.jpg
             public/assets/scenes/real-travel-films.json
           key: pr5-real-travel-v1-${{ hashFiles('scripts/build-travel-films.py') }}
+      - name: Verify locally required video and audio resources
+        run: npm run assets:check
       - name: Production build
         run: npm run build
       - name: SSR route and SEO smoke
