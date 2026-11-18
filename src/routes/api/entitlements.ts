@@ -9,9 +9,9 @@
  */
 import { createFileRoute } from '@tanstack/react-router'
 import { env } from 'cloudflare:workers'
-import { getPacks, getSubscription, getSessionUserRecord, isSubscriptionActive } from '../../server/auth'
+import { getPacks, getSubscription, getSessionUserRecord, isSubscriptionActive } from '../../server/auth.ts'
 import { qaPlusGrant } from '../../server/qa-plus.mjs'
-import { jsonError } from '../../server/pay-shared'
+import { jsonError } from '../../server/pay-shared.ts'
 
 export const Route = createFileRoute('/api/entitlements')({
   server: {
