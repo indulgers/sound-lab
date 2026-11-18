@@ -4,6 +4,20 @@
 
 > 注意：仓库没有提交新版 6 个地点的旅行视频、对应封面和 18 条 15 分钟长音频。它们由 CI 构建生成，新电脑或新分支需要先恢复媒体。
 
+## 巴厘岛 / 清迈 AI 场景试制
+
+优先使用真实感强的 AI 视频重新打造两个标杆场景：巴厘岛乌布雨林露天 SPA、清迈雨季木质咖啡馆。原有视频暂不替换，避免未验收素材被当成真实实景。制作流程：AI 视频镜头提示 → 1080p 独立横/竖屏候选 → FFmpeg 画质编码 → 与旧版视频并排审核 → 通过后更新来源标注、场景、SEO 与部署资源。
+
+完整生产步骤见 [Bali + Chiang Mai AI Video Pilot](docs/ai-video-bali-chiangmai-pilot.md)。
+
+\`\`\`bash
+pnpm film:plan -- --scene bali --shot hero           # 安全 dry-run，不扣费
+pnpm film:plan -- --scene chiang-mai --shot hero     # 先审 prompt
+# 真正付费生成必须手动传 --execute --max-usd，并配置私有 API 密钥
+\`\`\`
+
+当前会话未连接 AI 视频生成服务账号，因此仅实现可执行生产管线与候选镜头方案，**没有产生真实 AI MP4、没有收费、也没有上架。**
+
 ## 临时 QA Plus 测试账号（本地 / 线上）
 
 需要体验所有高级场景和完整调音功能时，可以为**已登录的指定 userId** 开启短期测试 Plus；无需真实付款，其他账号不会被影响。
