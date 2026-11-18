@@ -10,6 +10,7 @@ import { SLEEP_TIMER_OPTIONS_MINUTES, sleepChoiceToMs } from '../sleep-timer.mjs
 import { INTENTS, JOURNEYS, intentById, journeyById, journeysForIntent, recommendedJourneyForIntent, levelsForJourney, controlsForJourney, sceneForJourney } from './journeys.mjs';
 import { createStreamingJourneyPlayer } from './stream-player.mjs';
 import { createSession } from '../listening-session.mjs';
+import { encodeJourneyShare, decodeJourneyShare } from './scene-share.mjs';
 
 const iconPaths = {
   play: <path d="m9 5 11 7-11 7Z" fill="currentColor" stroke="none" />,
@@ -79,26 +80,29 @@ function SceneVideo({ scene, motion, onUnavailable }) {
   </div>;
 }
 
-export default function SceneExperience() {
+export default function SceneExperience({ initialJourneyId = null, startInStudio = false } = {}) {
   const [locale] = useLocale();
   const C = copy[locale] || copy.en;
   const G = goalCopy[locale] || goalCopy.en;
   const M = moodCopy[locale] || moodCopy.en;
   const T = value => sceneText(value, locale);
+  const seededJourney = journeyById(initialJourneyId);
   const navigate = useNavigate();
   const [prefs, setPrefs] = useState(() => readScenePreferences(null));
   const [ready, setReady] = useState(false);
-  const [intentId, setIntentId] = useState(null);
-  const [sceneId, setSceneId] = useState('bali');
-  const [journeyId, setJourneyId] = useState(null);
+  const [intentId, setIntentId] = useState(seededJourney?.intentId ?? null);
+  const [sceneId, setSceneId] = useState(seededJourney?.sceneId ?? 'bali');
+  const [journeyId, setJourneyId] = useState(seededJourney?.id ?? null);
   const [audioVersion, setAudioVersion] = useState('3.2');
   const journey = journeyById(journeyId);
   const intent = intentById(intentId);
   const scene = journey ? sceneForJourney(journey, audioVersion) : sceneById(sceneId);
   const filmLicenseUrl = scene?.filmLicenseUrl || (scene?.filmLicense === 'CC BY 3.0' ? 'https://creativecommons.org/licenses/by/3.0/' : 'https://www.pexels.com/license/');
-  const [levels, setLevels] = useState(() => levelsForScene(SCENES[0]));
-  const [controls, setControls] = useState({warmth:.55,space:.35,energy:.40,nature:.35});
-  const [advanced, setAdvanced] = useState(false);
+  const [levels, setLevels] = useState(() => seededJourney ? levelsForJourney(seededJourney) : levelsForScene(SCENES[0]));
+  const [controls, setControls] = useState(() => seededJourney ? controlsForJourney(seededJourney) : {warmth:.55,space:.35,energy:.40,nature:.35});
+  const [advanced, setAdvanced] = useState(startInStudio);
+  const [mutedLayers, setMutedLayers] = useState({});
+  const [soloLayer, setSoloLayer] = useState(null);
   const [showAllJourneys, setShowAllJourneys] = useState(false);
   const [breath, setBreath] = useState(false);
   const [focusSession, setFocusSession] = useState(null);
@@ -107,7 +111,7 @@ export default function SceneExperience() {
   const [immersive, setImmersive] = useState(false);
   const [motion, setMotion] = useState(false);
   const [videoUnavailable, setVideoUnavailable] = useState(false);
-  const [panel, setPanel] = useState(null);
+  const [panel, setPanel] = useState(startInStudio ? 'mix' : null);
   const [toast, setToast] = useState('');
   const [deadline, setDeadline] = useState(null);
   const [remaining, setRemaining] = useState(0);
@@ -143,11 +147,22 @@ export default function SceneExperience() {
   useEffect(() => {
     let saved;
     try { saved = readScenePreferences(window.localStorage); } catch { saved = readScenePreferences(null); }
-    preferences.current = saved; setPrefs(saved); setSceneId(SCENES[0].id);
+    preferences.current = saved; setPrefs(saved);
     setChosen(saved.sleepMinutes === null || saved.sleepMinutes === undefined ? 0 : saved.sleepMinutes);
-    const initial = SCENES[0];
-    const initialLevels = levelsForScene(initial,saved.mixes[initial.id]);
+    const query = new URLSearchParams(window.location.search);
+    const requested = journeyById(query.get('journey')) || seededJourney;
+    const shared = decodeJourneyShare(query.get('mix'));
+    const activeJourney = requested || (shared ? journeyById(shared.journeyId) : null);
+    const initial = activeJourney ? sceneForJourney(activeJourney) : SCENES[0];
+    const stored = saved.mixes[activeJourney?.id || initial.id] || {};
+    const source = shared?.journeyId === activeJourney?.id ? { ...stored, ...shared.levels, ...shared.controls } : stored;
+    const initialLevels = activeJourney ? levelsForJourney(activeJourney, source) : levelsForScene(initial, source);
+    const initialControls = activeJourney ? controlsForJourney(activeJourney, source) : {warmth:.55,space:.35,energy:.4,nature:.35};
+    setSceneId(initial.id);
+    setIntentId(activeJourney?.intentId ?? null);
+    setJourneyId(activeJourney?.id ?? null);
     setLevels(initialLevels);
+    setControls(initialControls);
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     setMotion(saved.motion && !reduced.matches);
     const onReduced = () => { if (reduced.matches) setMotion(false); };
@@ -155,6 +170,7 @@ export default function SceneExperience() {
     const engine = createStreamingJourneyPlayer({ onState:setAudio, claimAudio:() => getLabController()?.pauseForScene?.() });
     player.current = engine;
     engine.setMaster(saved.master);
+    engine.setMixControls(initialControls);
     engine.setScene(initial,initialLevels,{play:false});
     const pauseForStudio = () => engine.pause();
     const onFull = () => setFull(document.fullscreenElement === root.current);
@@ -237,6 +253,8 @@ export default function SceneExperience() {
     setSceneId(place.id);
     setLevels(nextLevels);
     setControls(nextControls);
+    setMutedLayers({});
+    setSoloLayer(null);
     setBreath(false);
     persist({ ...preferences.current, sceneId: place.id });
     player.current?.setMixControls(nextControls);
@@ -275,6 +293,7 @@ export default function SceneExperience() {
   }
   function toggleListening() {
     if (playing || loading) { player.current?.pause(); return true; }
+    if (journey && !isSubscriber && !isFreeJourney(journey)) { setToast(C.lockedToast); return false; }
     if (!guardFreeListening()) return false;
     getLabController()?.pauseForScene?.();
     setEntered(true);
@@ -289,8 +308,42 @@ export default function SceneExperience() {
     setEntered(true);
     void player.current?.play();
   }
+  function applyAudibleLevels(nextLevels, nextMuted = mutedLayers, nextSolo = soloLayer) {
+    for (const layer of scene.layers) {
+      const value = nextLevels[layer.id] ?? layer.defaultLevel;
+      player.current?.setLevel(layer.id, nextMuted[layer.id] || (nextSolo && nextSolo !== layer.id) ? 0 : value);
+    }
+  }
   function changeLevel(id, value) {
-    const next = Number(value); setLevels(previous => ({...previous,[id]:next})); player.current?.setLevel(id,next);
+    const next = Number(value);
+    const adjusted = {...levels,[id]:next};
+    setLevels(adjusted);
+    applyAudibleLevels(adjusted);
+  }
+  function toggleMute(id) {
+    const next = {...mutedLayers,[id]:!mutedLayers[id]};
+    setMutedLayers(next);
+    applyAudibleLevels(levels,next,soloLayer);
+  }
+  function toggleSolo(id) {
+    const next = soloLayer === id ? null : id;
+    setSoloLayer(next);
+    applyAudibleLevels(levels,mutedLayers,next);
+  }
+  async function shareMix() {
+    if (!journey) return;
+    const code = encodeJourneyShare(journey.id,levels,controls);
+    const url = new URL(localizePath('/',locale),window.location.origin);
+    url.searchParams.set('journey',journey.id);
+    url.searchParams.set('mix',code);
+    try {
+      if (navigator.share) await navigator.share({title:T(journey.name),url:url.toString()});
+      else if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(url.toString());
+      else { window.prompt(locale === 'zh' ? '复制分享链接' : 'Copy this mix link',url.toString()); return; }
+      setToast(locale === 'zh' ? '已分享这份声音配方。' : 'Mix link ready to share.');
+    } catch (error) {
+      if (error?.name !== 'AbortError') setToast(locale === 'zh' ? '分享失败，请重试。' : 'Sharing failed. Please try again.');
+    }
   }
   function changeMaster(value) { const master=Number(value); player.current?.setMaster(master); persist({...preferences.current,master}); }
   function saveMix() {
@@ -307,6 +360,7 @@ export default function SceneExperience() {
     const reset = journey ? levelsForJourney(journey) : levelsForScene(scene);
     const nextControls = controlsForJourney(journey);
     setLevels(reset); setControls(nextControls);
+    setMutedLayers({}); setSoloLayer(null);
     Object.entries(reset).forEach(([id, value]) => player.current?.setLevel(id, value));
     player.current?.setMixControls(nextControls);
     setToast(C.resetToast);
@@ -470,14 +524,14 @@ export default function SceneExperience() {
               <input id={`sc-advanced-${key}`} type="range" min="0" max="1" step=".01" value={controls[key]??.5} onChange={event=>changeControl(key,event.target.value)} style={{'--range-value':`${(controls[key]??.5)*100}%`}}/>
             </div>)}</div>
             <div className="sc-layers">{scene.layers.map(layer=><div className="sc-layer" key={layer.id}>
-              <div className="sc-layer-title"><span><Icon name={layer.icon}/>{T(layer.label)}</span><output>{Math.round((levels[layer.id] ?? layer.defaultLevel)*100)}<small>%</small></output></div>
+              <div className="sc-layer-title"><span><Icon name={layer.icon}/>{T(layer.label)}</span><div className="sc-layer-actions"><output>{Math.round((levels[layer.id] ?? layer.defaultLevel)*100)}<small>%</small></output><button type="button" className="sc-layer-action" aria-pressed={soloLayer===layer.id} aria-label={(locale==='zh'?'独奏 ':'Solo ')+T(layer.label)} onClick={()=>toggleSolo(layer.id)}>S</button><button type="button" className="sc-layer-action" aria-pressed={!!mutedLayers[layer.id]} aria-label={(locale==='zh'?'静音 ':'Mute ')+T(layer.label)} onClick={()=>toggleMute(layer.id)}>M</button></div></div>
               <input type="range" min="0" max="1" step=".01" value={levels[layer.id] ?? layer.defaultLevel} aria-label={T(layer.label)} onChange={event=>changeLevel(layer.id,event.target.value)} style={{'--range-value':`${(levels[layer.id]??layer.defaultLevel)*100}%`}}/><small>{T(layer.detail)}</small>
             </div>)}</div>
             {scene.legacyLayers?.length>0 && <button className="sc-version-button" onClick={switchVersion}>{audioVersion==='3.2'?M.compare:M.newVersion} · {audioVersion}</button>}
             <div className="sc-mixer-provenance">{locale==='zh'?'长时音景为程序合成实验；音符密度控制通过细节声部分段门控实现。':'Long-form music is a procedural prototype. Musical activity gates intervals of the detail stem.'}</div>
           </div>}
           <div className="sc-sheet-master"><label htmlFor="sc-sheet-volume"><Icon name="sound"/>{C.volume}<output>{Math.round(prefs.master*100)}%</output></label><input id="sc-sheet-volume" type="range" min="0" max="1" step=".01" value={prefs.master} onChange={event=>changeMaster(event.target.value)} style={{'--range-value':`${prefs.master*100}%`}}/></div>
-          <div className="sc-sheet-status" role="status">{toast}</div><div className="sc-panel-buttons"><button onClick={resetMix}>{C.reset}</button><button className="sc-primary" onClick={saveMix}><Icon name="bookmark"/>{M.save}</button></div>
+          <div className="sc-sheet-status" role="status">{toast}</div><div className="sc-panel-buttons"><button onClick={resetMix}>{C.reset}</button><button type="button" className="sc-share-button" onClick={shareMix}>{locale==='zh'?'分享配方':'Share mix'} ↗</button><button className="sc-primary" onClick={saveMix}><Icon name="bookmark"/>{M.save}</button></div>
         </>}
         {(panel==='places'||panel==='saved') && <>
           <p className="sc-panel-sub">{panel==='saved'?C.savedSub:C.chooseSub}</p>
