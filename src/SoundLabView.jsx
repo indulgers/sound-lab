@@ -185,7 +185,8 @@ function Overlays() {
 export default function SoundLabView({ user = null, onAuthChange }) {
   const [locale] = useLocale();
   const pathname = useRouterState({ select: state => state.location.pathname });
-  const sceneHome = (stripLocalePrefix(pathname).replace(/\/$/, '') || '/') === '/';
+  const section = stripLocalePrefix(pathname).replace(/\/$/, '') || '/';
+  const sceneHome = section === '/' || section === '/studio' || section.startsWith('/scenes/');
   return (
     <div className={sceneHome ? 'scene-home' : 'studio-shell'}>
       <a className="skip-link" href="#main">{t(locale, 'skipLink')}</a>
