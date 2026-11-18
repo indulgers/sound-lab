@@ -14,14 +14,25 @@ const errors = [];
 
 async function newPage(viewport) {
   const page = await browser.newPage({ viewport, deviceScaleFactor: 1, reducedMotion: 'reduce' });
-  page.on('pageerror', error => errors.push(error.message));
+  page.on('pageerror', error => { errors.push(error.message); console.log('BROWSER PAGEERROR:', error.message); });
+  page.on('console', msg => { if (msg.type() === 'error') console.log('BROWSER CONSOLE ERROR:', msg.text()); });
+  page.on('requestfailed', request => console.log('BROWSER REQUEST FAILED:', request.url(), request.failure()?.errorText));
   return page;
 }
 
 async function navigate(page, path) {
   const res = await page.goto(origin + path, { waitUntil: 'domcontentloaded', timeout: 45000 });
   assert.ok(res?.ok(), path + ': HTTP ' + res?.status());
-  await page.locator('.scene-experience[data-hydrated="true"]').waitFor({ timeout: 30000 });
+  try {
+    await page.locator('.scene-experience[data-hydrated="true"]').waitFor({ timeout: 12000 });
+  } catch (error) {
+    console.log('HYDRATION DEBUG:', path, 'url:', page.url(), 'title:', await page.title());
+    console.log('HYDRATION DEBUG: scene count', await page.locator('.scene-experience').count());
+    console.log('HYDRATION DEBUG: body', (await page.locator('body').innerText()).slice(0, 1200));
+    console.log('HYDRATION DEBUG: page errors', errors);
+    await page.screenshot({ path: 'preview-qa/soundlab-v2/debug-hydration.jpg', type: 'jpeg', quality: 55, fullPage: false }).catch(() => {});
+    throw error;
+  }
 }
 
 try {
