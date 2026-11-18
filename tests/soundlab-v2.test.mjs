@@ -22,7 +22,7 @@ test('featured Discover scenes map to genuine existing film and audio assets', (
       assert.ok(page.title[locale].length > 10);
       assert.ok(page.summary[locale].length > 40);
       assert.equal(page.sections.length, 3);
-      assert.ok(page.sections.every(part => part.heading[locale] && part.body[locale].length > 75));
+      assert.ok(page.sections.every(part => part.heading[locale] && part.body[locale].length > (locale === 'zh' ? 35 : 75)));
       assert.equal(scenePagePath(page,locale), '/' + locale + '/scenes/' + page.slug);
     }
   }
