@@ -517,8 +517,8 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
           <p className="sc-panel-sub">{C.soundSub}</p>
 
           <div className="sc-layer-intro">
-            <h3 className="sc-mixer-section">${locale === 'zh' ? '声音图层' : 'Sound layers'}</h3>
-            <span>${locale === 'zh' ? 'M 静音 · S 独奏' : 'M mute · S solo'}</span>
+            <h3 className="sc-mixer-section">{locale === 'zh' ? '声音图层' : 'Sound layers'}</h3>
+            <span>{locale === 'zh' ? 'M 静音 · S 独奏' : 'M mute · S solo'}</span>
           </div>
             <div className="sc-layers">{scene.layers.map(layer=><div className="sc-layer" key={layer.id}>
               <div className="sc-layer-title"><span><Icon name={layer.icon}/>{T(layer.label)}</span><div className="sc-layer-actions"><output>{Math.round((levels[layer.id] ?? layer.defaultLevel)*100)}<small>%</small></output><button type="button" className="sc-layer-action" aria-pressed={soloLayer===layer.id} aria-label={(locale==='zh'?'独奏 ':'Solo ')+T(layer.label)} onClick={()=>toggleSolo(layer.id)}>S</button><button type="button" className="sc-layer-action" aria-pressed={!!mutedLayers[layer.id]} aria-label={(locale==='zh'?'静音 ':'Mute ')+T(layer.label)} onClick={()=>toggleMute(layer.id)}>M</button></div></div>
@@ -536,7 +536,6 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
             <h3 className="sc-mixer-section">{M.simple}</h3>
             <p>{locale === 'zh' ? '调整整体温度与空间感' : 'Fine-tune the character of your room'}</p>
           </div>
-          <h3 className="sc-mixer-section">{M.simple}</h3>
           <div className="sc-emotion-controls">{['warmth','space','energy','nature'].map(key=><div className="sc-emotion-control" key={key}>
             <label htmlFor={`sc-mix-${key}`}><span>{M[key]}</span><output>{Math.round((controls[key] ?? .5)*100)}%</output></label>
             <input id={`sc-mix-${key}`} type="range" min="0" max="1" step=".01" value={controls[key] ?? .5} onChange={event=>changeControl(key,event.target.value)} style={{'--range-value':`${(controls[key]??.5)*100}%`}}/>
