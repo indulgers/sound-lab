@@ -20,7 +20,7 @@ export default function SoundScenePage({ slug, locale = 'en' }) {
 
   return (
     <>
-      <SceneExperience initialJourneyId={page.journeyId} />
+      <SceneExperience key={page.journeyId} initialJourneyId={page.journeyId} />
       <article className="sc-article" aria-labelledby="sc-scene-story">
         <div className="sc-article-top">
           <span className="sc-section-kicker">SOUNDSCAPES / {sceneText(page.eyebrow, locale)}</span>
