@@ -24,6 +24,23 @@ jobs:
         run: npm ci
       - name: Unit tests
         run: npm test
+      - name: Restore all six long-form audio stem groups
+        uses: actions/cache/restore@v4
+        with:
+          path: public/assets/audio/journeys
+          key: pr5-journeys-v3-${{ hashFiles('scripts/render_journeys.py', 'public/assets/audio/scenes/manifest.json') }}
+      - name: Check and prepare real audio stems
+        run: |
+          set -euo pipefail
+          if ! command -v ffprobe >/dev/null || ! command -v ffmpeg >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq ffmpeg
+          fi
+          if [ ! -s public/assets/audio/journeys/manifest.json ]; then
+            python -m pip install --disable-pip-version-check --quiet 'numpy==2.0.2' 'scipy==1.14.1'
+            python scripts/render_journeys.py
+          fi
+          python scripts/validate_journey_audio.py
       - name: Restore licensed footage for browser screenshots
         uses: actions/cache/restore@v4
         with:
