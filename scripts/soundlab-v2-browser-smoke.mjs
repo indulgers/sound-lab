@@ -4,7 +4,7 @@
  * Images are review artifacts, not a claim that the video/audio was mastered.
  */
 import assert from 'node:assert/strict';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 
 const origin = process.env.PREVIEW_URL || 'http://127.0.0.1:4173';
@@ -79,8 +79,10 @@ try {
   assert.deepEqual(errors, [], 'browser runtime errors');
   console.log('PASS: browser runtime has no uncaught page errors');
   // A small visual sample can be inspected without downloading private CI artifacts.
-  const jpeg = await desktop.locator('.sc-article').screenshot({ type: 'jpeg', quality: 45 });
-  console.log('SOUNDLAB_V2_VISUAL_JPEG_BASE64=' + jpeg.toString('base64'));
+  const homePreview = await readFile('preview-qa/soundlab-v2/desktop-home.jpg');
+  console.log('SOUNDLAB_V2_HOME_JPEG_BASE64=' + homePreview.toString('base64'));
+  const studioPreview = await desktop.locator('.sc-dialog[open]').screenshot({ type: 'jpeg', quality: 45 });
+  console.log('SOUNDLAB_V2_STUDIO_JPEG_BASE64=' + studioPreview.toString('base64'));
 } finally {
   await browser.close();
 }
