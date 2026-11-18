@@ -45,6 +45,17 @@ Four landscape shots are approximately $4 at today's listed rate (no paid refere
 
 After a successful generation, source MP4 and provenance JSON are saved in private/ai-film-inputs/<scene>/ and are gitignored. Outputs are temporary provider URLs, so the script downloads them. On timeout it prints the task ID for resuming without a second generation.
 
+### Alternative: generate in a visual UI such as Sora, Kling, Veo or another licensed service
+
+There is no requirement to use Runway. If a different video generator produces more natural rain, foliage, architecture or camera motion, export its actual 1080p MP4 outputs and place them at these exact paths:
+
+    private/ai-film-inputs/bali/bali-hero-1920x1080.mp4
+    private/ai-film-inputs/bali/bali-detail-1920x1080.mp4
+    private/ai-film-inputs/chiang-mai/chiang-mai-hero-1920x1080.mp4
+    private/ai-film-inputs/chiang-mai/chiang-mai-detail-1920x1080.mp4
+
+For mobile, use filenames ending in -1080x1920.mp4 instead of -1920x1080.mp4. Do not simply rename 720p clips to 1080p; the builder probes the actual codec dimensions. Record the actual generating model, service and prompt for editorial provenance; a filename alone is not a proof of where the video came from. The encoding, verification and side-by-side review scripts accept any valid video input and will never claim it is documentary footage.
+
 ### 3. Optimise with ffmpeg; make a review-only clip
 
     pnpm assets:sync
