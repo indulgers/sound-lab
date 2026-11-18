@@ -36,6 +36,7 @@ export function parseFilmArgs(argv) {
   const values = { scene: 'bali', shot: 'hero', ratio: '1920:1080', execute: false, maxUsd: null, task: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
+    if (a === '--') continue;
     if (a === '--execute') values.execute = true;
     else if (a === '--help' || a === '-h') values.help = true;
     else if (['--scene','--shot','--ratio','--max-usd','--task'].includes(a)) {
