@@ -26,3 +26,22 @@ jobs:
         run: npm test
       - name: Production build
         run: npm run build
+      - name: SSR route and SEO smoke
+        run: |
+          set -euo pipefail
+          (npx vite preview --host 127.0.0.1 --port 4173 > /tmp/soundlab-v2-preview.log 2>&1 & echo $! > /tmp/soundlab-v2-pid)
+          trap 'kill "$(cat /tmp/soundlab-v2-pid)" 2>/dev/null || true' EXIT
+          for i in {1..25}; do
+            if curl -fsS http://127.0.0.1:4173/health >/dev/null; then break; fi
+            sleep 2
+          done
+          curl --fail --silent --show-error http://127.0.0.1:4173/en/scenes/chiang-mai-focus -o /tmp/scene-en.html
+          curl --fail --silent --show-error http://127.0.0.1:4173/zh/scenes/bali-sound-bath -o /tmp/scene-zh.html
+          curl --fail --silent --show-error http://127.0.0.1:4173/en/studio -o /tmp/studio.html
+          curl --fail --silent --show-error http://127.0.0.1:4173/sitemap.xml -o /tmp/sitemap.xml
+          grep -q 'Chiang Mai Focus Soundscape' /tmp/scene-en.html
+          grep -q '巴厘岛' /tmp/scene-zh.html
+          grep -q 'noindex' /tmp/studio.html
+          grep -q '/en/scenes/chiang-mai-focus' /tmp/sitemap.xml
+          grep -q '/zh/scenes/bali-sound-bath' /tmp/sitemap.xml
+          echo 'PASS: bilingual scene SSR, Studio noindex and sitemap'
