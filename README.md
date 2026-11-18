@@ -4,6 +4,16 @@
 
 > 注意：仓库没有提交新版 6 个地点的旅行视频、对应封面和 18 条 15 分钟长音频。它们由 CI 构建生成，新电脑或新分支需要先恢复媒体。
 
+## 临时 QA Plus 测试账号（本地 / 线上）
+
+需要体验所有高级场景和完整调音功能时，可以为**已登录的指定 userId** 开启短期测试 Plus；无需真实付款，其他账号不会被影响。
+
+- 本地：在私有 \`.dev.vars\` 里设置 \`SOUNDLAB_QA_PLUS_USER_IDS\` 与 \`SOUNDLAB_QA_PLUS_EXPIRES_AT\`，然后重启。
+- 线上预览 Worker：另设 \`SOUNDLAB_QA_PLUS_ALLOWED_HOSTS\` 为**精确的域名**，通过 Worker Secret 管理，不提供公开免登录 Plus URL。
+- 测试授权最长 30 天，不写入订单或正式订阅；页面显示 \`QA PLUS\`。
+
+具体获取账号 userId、设置方式、取消与验收见 [docs/qa-plus.md](docs/qa-plus.md)。
+
 ## 本地声音/视频资源（先执行）
 
 ```sh
