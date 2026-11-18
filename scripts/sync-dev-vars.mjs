@@ -64,5 +64,21 @@ const lines = [
 if (sellerId) lines.push(`ALIPAY_SELLER_ID=${sellerId}`)
 if (sellerEmail) lines.push(`ALIPAY_SELLER_EMAIL=${sellerEmail}`)
 
+// Keep local QA Plus tester settings when regenerating Alipay sandbox vars.
+// Without this, `pnpm sync-dev-vars` would silently switch the test account
+// back to Free. Never print the user ID or the operator's private env values.
+const qaKeys = new Set([
+  'SOUNDLAB_QA_PLUS_USER_IDS',
+  'SOUNDLAB_QA_PLUS_EXPIRES_AT',
+  'SOUNDLAB_QA_PLUS_ALLOWED_HOSTS',
+])
+if (existsSync(DEV_VARS_PATH)) {
+  const previous = readFileSync(DEV_VARS_PATH, 'utf8')
+  for (const entry of previous.split(/\r?\n/)) {
+    const key = entry.split('=', 1)[0]?.trim()
+    if (qaKeys.has(key)) lines.push(entry)
+  }
+}
+
 writeFileSync(DEV_VARS_PATH, `${lines.join('\n')}\n`, { mode: 0o600 })
 console.log(`已写入 .dev.vars（变量：${lines.filter((l) => l.startsWith('ALIPAY_')).map((l) => l.split('=')[0]).join('、')}；凭据值未打印）。`)
