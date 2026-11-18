@@ -14,7 +14,10 @@ Discover → Immerse → Studio → Save / Share.
 - /en/scenes/:slug and /zh/scenes/:slug with SSR-capable semantic story content, sound layers, explicit provenance, canonical, hreflang, social metadata, structured data and bilingual sitemap references.
 - /en/studio and /zh/studio now open the existing live mixer instead of redirecting to the homepage. These tool pages are noindex.
 - The scene page can open the same Studio panel without destroying the playing scene or audio engine.
-- Studio provides layer mute and solo, plus validated share links. Shared query mixes are intentionally not sitemap entries. There is no glass editor.
+- Studio now places actual sound stems first: volume, mute (M) and solo (S) are always visible, while ambience shaping and EQ remain secondary. Save/reset/share actions are kept near the panel bottom.
+- Studio provides validated share links that round-trip mix settings without autoplay. Shared query mixes are intentionally not sitemap entries. There is no glass editor.
+- The streaming engine crossfades for 9 seconds when changing scenes or A/B versions. During the fade, each deck retains its own stem levels and an incoming-track failure restores the outgoing track. Browser checks verify existing audio keeps playing when Studio opens.
+- The sitemap avoids misleading dynamically generated modification dates; lastmod is only emitted when a known content update date is supplied.
 - Existing Cloudflare Workers, TanStack Start, session system, payment routes, original music and film attribution are preserved.
 
 ## Evidence and limitations
@@ -37,15 +40,15 @@ Do not retitle these as actual rain-café, spa or ocean footage. The original, 1
 
 ## Manual release checks (required before merge)
 
-- [ ] Node 22: npm ci, npm test, npm run build.
-- [ ] /en and /zh: Discover shelf renders with licensed posters and no broken images.
-- [ ] /en/scenes/chiang-mai-focus: initial hero is Chiang Mai; playback begins only after an explicit click.
+- [x] CI Node 22: npm ci, npm test (188 tests), npm run build. CI workflow also validates six groups of real, 15-minute MP3 stems.
+- [x] /en and /zh: Discover shelf renders in Chromium at desktop and mobile sizes with no horizontal overflow. The CI artifact contains browser screenshots.
+- [x] /en/scenes/chiang-mai-focus: initial hero is Chiang Mai; actual MP3 streaming reaches playing state after a real browser click. Opening Studio keeps playback active.
 - [ ] /en/scenes/bali-sound-bath: corresponding Bali arrangement, not the Chiang Mai arrangement.
 - [ ] /en/scenes/hoi-an-evening: cannot play without a Plus entitlement.
-- [ ] /en/studio, /zh/studio: Studio panel opens; the page is noindex.
-- [ ] Within a playing scene, Studio opens and closes without restarting sound; mute/solo and reset restore the expected audible levels.
+- [x] /en/studio: Studio panel opens, with controllable layers. /en and /zh Studio SSR report noindex; Chinese interactive screen still merits final human review.
+- [x] Browser: same-scene Studio opens without stopping audio, and layer controls (mute, solo, reset, advanced toggle) update. Unit tests cover audio gain logic and nine-second crossfade.
 - [ ] Share a free scene mix, reopen the URL, confirm the controls and layers are restored. Human conversations must never silently opt in for Chiang Mai focus.
-- [ ] Run desktop + mobile visual inspection; compare screenshot against previous layout, inspect panel overflow and focus management.
+- [x] Automated desktop/mobile screenshot capture and responsive layout checks. Manual subjective design review and accessibility focus walk-through remain pending.
 - [ ] Check video network fallback and audio errors on a throttled connection.
 - [ ] Fetch /sitemap.xml, /robots.txt and scene-page HTML from the **deployed Worker** to verify canonical/hreflang and server-rendered text.
 - [ ] Google Search Console / Bing submission after production deploy, monitor actual indexing rather than assuming it happens.
@@ -58,6 +61,6 @@ Do not retitle these as actual rain-café, spa or ocean footage. The original, 1
 - A noninterruptive, cross-route continuous playback service if a user leaves the scene route entirely; within a scene, opening Studio does not remount the engine.
 - Reassessment of 10-minute free listening and subscriber-only saving, as these are active commercial rules. Do not silently change payment/entitlement assumptions.
 - Production clickstream instrumentation and actual SEO/GEO indexing/traffic data, which require the live deployment.
-- Real device screenshots / comparative visual sign-off and production Cloudflare deployment.
+- Real-device (not headless Chromium) screenshots / comparative human visual sign-off and production Cloudflare deployment. CI captures true browser screenshots; the before/after Studio layout can be compared from the saved artifact.
 
 These gaps are explicitly **not complete**. Do not merge or deploy based only on the presence of this branch.
