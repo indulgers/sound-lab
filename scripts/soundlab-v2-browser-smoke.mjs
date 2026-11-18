@@ -101,6 +101,33 @@ try {
   await desktop.screenshot({ path: 'preview-qa/soundlab-v2/desktop-studio-direct.jpg', type: 'jpeg', quality: 70 });
   console.log('PASS: direct Studio loads focus mix without autoplay');
 
+  // Exercise the real share action with an isolated clipboard sink, then
+  // navigate back through the generated URL and verify the live layer value.
+  await desktop.evaluate(() => {
+    Object.defineProperty(navigator, 'share', { configurable: true, value: undefined });
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: async value => { window.__studioSharedUrl = value; } },
+    });
+  });
+  const directVolume = desktop.locator('.sc-dialog[open] .sc-layer input[type=range]').first();
+  await directVolume.focus();
+  await directVolume.press('ArrowLeft');
+  await directVolume.press('ArrowLeft');
+  const expectedLevel = Number(await directVolume.inputValue());
+  await desktop.locator('.sc-dialog[open] .sc-share-button').click();
+  const sharedUrl = await desktop.evaluate(() => window.__studioSharedUrl);
+  assert.match(sharedUrl, /[?&]journey=focus-chiang-mai/);
+  assert.match(sharedUrl, /[?&]mix=SC2-/);
+  await desktop.goto(sharedUrl, { waitUntil: 'domcontentloaded' });
+  await desktop.locator('.scene-experience[data-hydrated="true"]').waitFor({ timeout: 12000 });
+  assert.equal(await desktop.locator('.scene-experience').getAttribute('data-scene'), 'chiang-mai');
+  assert.equal(await desktop.locator('.scene-experience').getAttribute('data-audio-state'), 'idle');
+  await desktop.locator('.sc-player-actions button[aria-label="Sound"]').click();
+  await desktop.locator('.sc-dialog[open]').waitFor();
+  assert.equal(Number(await desktop.locator('.sc-dialog[open] .sc-layer input[type=range]').first().inputValue()), expectedLevel);
+  console.log('PASS: Studio mix is shared and restores on fresh deep-link without autoplay');
+
   const mobile = await newPage({ width: 390, height: 844 });
   await navigate(mobile, '/zh');
   assert.equal(await mobile.locator('.sc-discover-card').count(), 3);
