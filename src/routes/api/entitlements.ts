@@ -9,7 +9,8 @@
  */
 import { createFileRoute } from '@tanstack/react-router'
 import { env } from 'cloudflare:workers'
-import { getPacks, getSubscription, getSessionUser, isSubscriptionActive } from '../../server/auth'
+import { getPacks, getSubscription, getSessionUserRecord, isSubscriptionActive } from '../../server/auth'
+import { qaPlusGrant } from '../../server/qa-plus.mjs'
 import { jsonError } from '../../server/pay-shared'
 
 export const Route = createFileRoute('/api/entitlements')({
@@ -18,22 +19,28 @@ export const Route = createFileRoute('/api/entitlements')({
       GET: async ({ request }) => {
         const kv = env.ORDERS_KV
         if (!kv) return jsonError(500, 'STORE_NOT_CONFIGURED', '用户存储未配置：缺少 ORDERS_KV 绑定。')
-        const session = await getSessionUser(kv, request)
-        if (!session) return jsonError(401, 'UNAUTHORIZED', '请先登录。')
-        const packs = await getPacks(kv, session.userId)
-        const subscription = await getSubscription(kv, session.userId)
+        // Confirm the session resolves to an existing user record; never trust
+        // a caller-supplied email, URL flag, or userId query parameter.
+        const user = await getSessionUserRecord(kv, request)
+        if (!user) return jsonError(401, 'UNAUTHORIZED', '请先登录。')
+        const packs = await getPacks(kv, user.userId)
+        const subscription = await getSubscription(kv, user.userId)
+        const paid = subscription
+          ? {
+              active: isSubscriptionActive(subscription),
+              plan: subscription.plan,
+              provider: subscription.provider,
+              status: subscription.status,
+              currentPeriodEnd: subscription.currentPeriodEnd,
+            }
+          : null
+        // Real paid subscriptions take precedence. A QA grant is a response
+        // overlay only: it never writes to KV, creates a payment, or renews.
+        const qa = !paid?.active ? qaPlusGrant(env, user.userId, request.url) : null
         return Response.json({
           packs,
-          subscription: subscription
-            ? {
-                active: isSubscriptionActive(subscription),
-                plan: subscription.plan,
-                provider: subscription.provider,
-                status: subscription.status,
-                currentPeriodEnd: subscription.currentPeriodEnd,
-              }
-            : null,
-        })
+          subscription: paid?.active ? paid : (qa ?? paid),
+        }, { headers: { 'Cache-Control': 'private, no-store' } })
       },
     },
   },
