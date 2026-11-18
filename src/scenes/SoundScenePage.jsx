@@ -52,7 +52,7 @@ export default function SoundScenePage({ slug, locale = 'en' }) {
             <p className="sc-section-kicker">{zh ? '声音结构' : 'THE SOUND PALETTE'}</p>
             <h3>{zh ? '多一点喜欢的声音，少一点不需要的。' : 'Hear every layer. Adjust what matters.'}</h3>
             <p>{zh ? '这些是本场景正在使用的声音层，均可在 Studio 中独立调节。' : 'These are the layers used by this journey. Each can be tuned independently in Studio.'}</p>
-            <Link className="sc-article-cta" to={localizePath('/studio', locale)} search={{ journey: page.journeyId }}>{zh ? '打开声音 Studio' : 'Open Sound Studio'} <span aria-hidden="true">↗</span></Link>
+            <button type="button" className="sc-article-cta" onClick={() => window.dispatchEvent(new Event('soundcocktail:open-scene-studio'))}>{zh ? '打开声音 Studio' : 'Open Sound Studio'} <span aria-hidden="true">↗</span></button>
           </div>
           <ul>
             {scene.layers.map((layer, index) => (
