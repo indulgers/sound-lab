@@ -196,7 +196,7 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
     if (!panel && dialog.current?.open) dialog.current.close();
   }, [panel]);
   useEffect(() => {
-    const openStudioFromArticle = () => openTuner();
+    const openStudioFromArticle = () => { setAdvanced(true); setPanel('mix'); };
     window.addEventListener('soundcocktail:open-scene-studio', openStudioFromArticle);
     return () => window.removeEventListener('soundcocktail:open-scene-studio', openStudioFromArticle);
   }, []);
