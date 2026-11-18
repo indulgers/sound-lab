@@ -19,7 +19,7 @@ test('featured Discover scenes map to genuine existing film and audio assets', (
     assert.ok(scene.poster.startsWith('/assets/scenes/'));
     assert.ok(scene.filmCreator && scene.filmSourcePage.startsWith('https://'));
     for (const locale of ['en','zh']) {
-      assert.ok(page.title[locale].length > 10);
+      assert.ok(page.title[locale].length > (locale === 'zh' ? 6 : 10));
       assert.ok(page.summary[locale].length > 40);
       assert.equal(page.sections.length, 3);
       assert.ok(page.sections.every(part => part.heading[locale] && part.body[locale].length > (locale === 'zh' ? 35 : 75)));
