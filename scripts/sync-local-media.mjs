@@ -33,6 +33,7 @@ export function parseMediaArgs(argv) {
     scenes: [...SCENE_IDS], force: false };
   for (let i=0;i<argv.length;i++) {
     const [key,inline] = argv[i].split('=',2);
+    if (key === '--') continue; // pnpm/npm argument separator
     if (key === '--check') result.mode = 'check';
     else if (key === '--force') result.force = true;
     else if (key === '--help' || key === '-h') result.mode = 'help';
