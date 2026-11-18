@@ -236,6 +236,7 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
   function closePanel() { setPanel(null); setLockedJourney(null); dialog.current?.close(); opener.current?.focus?.(); }
   // 调音面板：直接打开当前场景的调音（调音台已下线，不再跳 /studio）。
   function openTuner() {
+    if (!journey) selectJourney(recommendedJourneyForIntent('focus'));
     setAdvanced(true); setPanel('mix');
   }
   function selectJourney(next) {
@@ -381,6 +382,7 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
     const place = sceneForJourney(journey, nextVersion);
     const nextLevels = Object.fromEntries(place.layers.map(layer => [layer.id, levels[layer.id] ?? layer.defaultLevel]));
     setAudioVersion(nextVersion); setLevels(nextLevels);
+    setMutedLayers({}); setSoloLayer(null);
     void player.current?.setScene(place, nextLevels, { play: playing || loading });
   }
   function startFocus(minutes) {
@@ -408,7 +410,9 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
     catch { setImmersive(true); }
   }
   function changeLanguage(event) {
-    const next=event.target.value; setLocale(next); void navigate({to:localizePath('/',next),resetScroll:false});
+    const next=event.target.value;
+    setLocale(next);
+    void navigate({to:localizePath(window.location.pathname,next),resetScroll:false});
   }
   const timerLabel = deadline ? `${Math.ceil(remaining/60000)} ${C.minutes}` : C.continuous;
   const focusLabel = focusSession ? `${Math.floor(focusSecondsRemaining/60)}:${String(focusSecondsRemaining%60).padStart(2,'0')}` : null;
