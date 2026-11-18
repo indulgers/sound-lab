@@ -400,8 +400,11 @@ export function robotsTxt() {
  * 每个 <url> 带 xhtml:link hreflang 标注（全部语言版本 + x-default）。
  * /mix/:code 不进 sitemap（只有真实分享的混音才有 URL）。
  */
-export function sitemapXml(date = new Date()) {
-  const lastmod = date instanceof Date ? date.toISOString().slice(0, 10) : String(date).slice(0, 10)
+export function sitemapXml(date = null) {
+  // Last modification is an editorial fact, not the time this request ran.
+  // Only include it when an actual content-deploy date is supplied.
+  const lastmod = date == null ? null
+    : (date instanceof Date ? date.toISOString().slice(0, 10) : String(date).slice(0, 10))
   const urls = INDEXABLE_SEGMENTS.flatMap((seg) =>
     LOCALES.map((l) => {
       const loc = `${SITE_URL}/${l}${seg}`
@@ -412,7 +415,7 @@ export function sitemapXml(date = new Date()) {
         ),
         `    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}/${DEFAULT_LOCALE}${seg}"/>`,
       ].join('\n')
-      return `  <url>\n    <loc>${loc}</loc>\n${alternates}\n    <lastmod>${lastmod}</lastmod>\n  </url>`
+      return `  <url>\n    <loc>${loc}</loc>\n${alternates}${lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : ''}\n  </url>`
     }),
   ).join('\n')
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls}\n</urlset>\n`
