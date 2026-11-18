@@ -41,6 +41,16 @@ export default function DiscoverGallery({ locale: explicitLocale, exclude = null
           );
         })}
       </div>
+      {!exclude && <footer className="sc-discover-footer">
+        <span>Sound Cocktail <small>{zh ? '让一段声音，带你去别处。' : 'A quieter place, wherever you are.'}</small></span>
+        <nav aria-label={zh ? '网站信息' : 'Site information'}>
+          <Link to={`/${locale}/about`}>{zh ? '关于' : 'About'}</Link>
+          <Link to={`/${locale}/sources`}>{zh ? '声音来源' : 'Sources'}</Link>
+          <Link to={`/${locale}/plus`}>Plus</Link>
+          <Link to={`/${locale}/terms`}>{zh ? '服务条款' : 'Terms'}</Link>
+          <Link to={`/${locale}/privacy`}>{zh ? '隐私政策' : 'Privacy'}</Link>
+        </nav>
+      </footer>}
     </section>
   );
 }
