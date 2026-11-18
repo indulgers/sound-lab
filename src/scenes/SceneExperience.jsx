@@ -100,7 +100,7 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
   const filmLicenseUrl = scene?.filmLicenseUrl || (scene?.filmLicense === 'CC BY 3.0' ? 'https://creativecommons.org/licenses/by/3.0/' : 'https://www.pexels.com/license/');
   const [levels, setLevels] = useState(() => seededJourney ? levelsForJourney(seededJourney) : levelsForScene(SCENES[0]));
   const [controls, setControls] = useState(() => seededJourney ? controlsForJourney(seededJourney) : {warmth:.55,space:.35,energy:.40,nature:.35});
-  const [advanced, setAdvanced] = useState(startInStudio);
+  const [advanced, setAdvanced] = useState(false);
   const [mutedLayers, setMutedLayers] = useState({});
   const [soloLayer, setSoloLayer] = useState(null);
   const [showAllJourneys, setShowAllJourneys] = useState(false);
@@ -198,7 +198,7 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
     if (!panel && dialog.current?.open) dialog.current.close();
   }, [panel]);
   useEffect(() => {
-    const openStudioFromArticle = () => { setAdvanced(true); setPanel('mix'); };
+    const openStudioFromArticle = () => { setAdvanced(false); setPanel('mix'); };
     window.addEventListener('soundcocktail:open-scene-studio', openStudioFromArticle);
     return () => window.removeEventListener('soundcocktail:open-scene-studio', openStudioFromArticle);
   }, []);
@@ -239,7 +239,7 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
   // 调音面板：直接打开当前场景的调音（调音台已下线，不再跳 /studio）。
   function openTuner() {
     if (!journey) selectJourney(recommendedJourneyForIntent('focus'));
-    setAdvanced(true); setPanel('mix');
+    setAdvanced(false); setPanel('mix');
   }
   function selectJourney(next) {
     if (!next) return;
@@ -515,11 +515,15 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
         <h2 id="sc-dialog-title">{dialogTitle}</h2>
         {panel==='mix' && <>
           <p className="sc-panel-sub">{C.soundSub}</p>
-          <h3 className="sc-mixer-section">{M.simple}</h3>
-          <div className="sc-emotion-controls">{['warmth','space','energy','nature'].map(key=><div className="sc-emotion-control" key={key}>
-            <label htmlFor={`sc-mix-${key}`}><span>{M[key]}</span><output>{Math.round((controls[key] ?? .5)*100)}%</output></label>
-            <input id={`sc-mix-${key}`} type="range" min="0" max="1" step=".01" value={controls[key] ?? .5} onChange={event=>changeControl(key,event.target.value)} style={{'--range-value':`${(controls[key]??.5)*100}%`}}/>
-          </div>)}</div>
+
+          <div className="sc-layer-intro">
+            <h3 className="sc-mixer-section">${locale === 'zh' ? '声音图层' : 'Sound layers'}</h3>
+            <span>${locale === 'zh' ? 'M 静音 · S 独奏' : 'M mute · S solo'}</span>
+          </div>
+            <div className="sc-layers">{scene.layers.map(layer=><div className="sc-layer" key={layer.id}>
+              <div className="sc-layer-title"><span><Icon name={layer.icon}/>{T(layer.label)}</span><div className="sc-layer-actions"><output>{Math.round((levels[layer.id] ?? layer.defaultLevel)*100)}<small>%</small></output><button type="button" className="sc-layer-action" aria-pressed={soloLayer===layer.id} aria-label={(locale==='zh'?'独奏 ':'Solo ')+T(layer.label)} onClick={()=>toggleSolo(layer.id)}>S</button><button type="button" className="sc-layer-action" aria-pressed={!!mutedLayers[layer.id]} aria-label={(locale==='zh'?'静音 ':'Mute ')+T(layer.label)} onClick={()=>toggleMute(layer.id)}>M</button></div></div>
+              <input type="range" min="0" max="1" step=".01" value={levels[layer.id] ?? layer.defaultLevel} aria-label={T(layer.label)} onChange={event=>changeLevel(layer.id,event.target.value)} style={{'--range-value':`${(levels[layer.id]??layer.defaultLevel)*100}%`}}/><small>{T(layer.detail)}</small>
+            </div>)}</div>
           {sceneId==='chiang-mai' && <div className="sc-voices-control" role="group" aria-label={M.voices}>
             <div className="sc-voices-title">{M.voices}</div>
             <div className="sc-voices-options">
@@ -528,15 +532,20 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
             </div>
             <p className="sc-voices-hint">{M.voicesHint}</p>
           </div>}
+          <div className="sc-mood-subheading">
+            <h3 className="sc-mixer-section">{M.simple}</h3>
+            <p>{locale === 'zh' ? '调整整体温度与空间感' : 'Fine-tune the character of your room'}</p>
+          </div>
+          <h3 className="sc-mixer-section">{M.simple}</h3>
+          <div className="sc-emotion-controls">{['warmth','space','energy','nature'].map(key=><div className="sc-emotion-control" key={key}>
+            <label htmlFor={`sc-mix-${key}`}><span>{M[key]}</span><output>{Math.round((controls[key] ?? .5)*100)}%</output></label>
+            <input id={`sc-mix-${key}`} type="range" min="0" max="1" step=".01" value={controls[key] ?? .5} onChange={event=>changeControl(key,event.target.value)} style={{'--range-value':`${(controls[key]??.5)*100}%`}}/>
+          </div>)}</div>
           <button className="sc-advanced-toggle" onClick={()=>setAdvanced(v=>!v)} aria-expanded={advanced}>{M.advanced} <Icon name="tune"/></button>
           {advanced && <div className="sc-advanced-mixer">
             <div className="sc-eq-controls">{['bass','mid','treble','width','reverb'].map(key=><div className="sc-emotion-control" key={key}>
               <label htmlFor={`sc-advanced-${key}`}><span>{M[key]}</span><output>{Math.round((controls[key]??.5)*100)}%</output></label>
               <input id={`sc-advanced-${key}`} type="range" min="0" max="1" step=".01" value={controls[key]??.5} onChange={event=>changeControl(key,event.target.value)} style={{'--range-value':`${(controls[key]??.5)*100}%`}}/>
-            </div>)}</div>
-            <div className="sc-layers">{scene.layers.map(layer=><div className="sc-layer" key={layer.id}>
-              <div className="sc-layer-title"><span><Icon name={layer.icon}/>{T(layer.label)}</span><div className="sc-layer-actions"><output>{Math.round((levels[layer.id] ?? layer.defaultLevel)*100)}<small>%</small></output><button type="button" className="sc-layer-action" aria-pressed={soloLayer===layer.id} aria-label={(locale==='zh'?'独奏 ':'Solo ')+T(layer.label)} onClick={()=>toggleSolo(layer.id)}>S</button><button type="button" className="sc-layer-action" aria-pressed={!!mutedLayers[layer.id]} aria-label={(locale==='zh'?'静音 ':'Mute ')+T(layer.label)} onClick={()=>toggleMute(layer.id)}>M</button></div></div>
-              <input type="range" min="0" max="1" step=".01" value={levels[layer.id] ?? layer.defaultLevel} aria-label={T(layer.label)} onChange={event=>changeLevel(layer.id,event.target.value)} style={{'--range-value':`${(levels[layer.id]??layer.defaultLevel)*100}%`}}/><small>{T(layer.detail)}</small>
             </div>)}</div>
             {scene.legacyLayers?.length>0 && <button className="sc-version-button" onClick={switchVersion}>{audioVersion==='3.2'?M.compare:M.newVersion} · {audioVersion}</button>}
             <div className="sc-mixer-provenance">{locale==='zh'?'长时音景为程序合成实验；音符密度控制通过细节声部分段门控实现。':'Long-form music is a procedural prototype. Musical activity gates intervals of the detail stem.'}</div>
