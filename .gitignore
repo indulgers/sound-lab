@@ -14,3 +14,13 @@ dist-ssr/
 .alipay-sandbox.json
 # 本地生成的支付宝正式密钥，永不提交
 .secrets/
+
+# Large, reproducibly built 15-minute stems and destination films. Restore
+# locally with pnpm assets:sync; do not commit multi-MB derivatives.
+/public/assets/audio/journeys/
+/public/assets/scenes/*-travel.mp4
+/public/assets/scenes/*-travel-mobile.mp4
+/public/assets/scenes/*-travel.jpg
+/public/assets/scenes/*-travel-mobile.jpg
+/public/assets/scenes/real-travel-films.json
+/journey-audio-qa.json
