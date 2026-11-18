@@ -28,6 +28,14 @@ jobs:
         run: npm ci
       - name: Unit tests
         run: npm test
+      - name: AI film script syntax and dry-run (no provider calls)
+        run: |
+          python3 -m py_compile scripts/build-ai-film-pilot.py
+          node scripts/generate-ai-film.mjs --scene bali --shot hero > /tmp/bali-ai-film-plan.json
+          node scripts/generate-ai-film.mjs --scene chiang-mai --shot detail > /tmp/chiangmai-ai-film-plan.json
+          grep -q 'DRY_RUN' /tmp/bali-ai-film-plan.json
+          grep -q 'DRY_RUN' /tmp/chiangmai-ai-film-plan.json
+          echo 'AI film candidate scripts are parseable and non-billable by default'
       - name: Restore all six long-form audio stem groups
         id: audio-cache
         uses: actions/cache/restore@v4
