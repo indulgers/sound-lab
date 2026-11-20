@@ -1,0 +1,116 @@
+name: Sound Lab V2 — build and tests
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: soundlab-v2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # The repository still contains files from its pre-TanStack SPA era.
+      # Match the clean-up already used in the existing Worker deployment job.
+      - name: Remove stale SPA files
+        run: rm -f vite.config.mjs index.html src/main.jsx
+      - name: Install
+        run: npm ci
+      - name: Unit tests
+        run: npm test
+      - name: AI film script syntax and dry-run (no provider calls)
+        run: |
+          python3 -m py_compile scripts/build-ai-film-pilot.py
+          node scripts/generate-ai-film.mjs --scene bali --shot hero > /tmp/bali-ai-film-plan.json
+          node scripts/generate-ai-film.mjs --scene chiang-mai --shot detail > /tmp/chiangmai-ai-film-plan.json
+          grep -q 'DRY_RUN' /tmp/bali-ai-film-plan.json
+          grep -q 'DRY_RUN' /tmp/chiangmai-ai-film-plan.json
+          echo 'AI film candidate scripts are parseable and non-billable by default'
+      - name: Restore all six long-form audio stem groups
+        id: audio-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: public/assets/audio/journeys
+          key: pr5-journeys-v3-${{ hashFiles('scripts/render_journeys.py', 'public/assets/audio/scenes/manifest.json') }}
+      - name: Check and prepare real audio stems
+        run: |
+          set -euo pipefail
+          if ! command -v ffprobe >/dev/null || ! command -v ffmpeg >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq ffmpeg
+          fi
+          if [ ! -s public/assets/audio/journeys/manifest.json ]; then
+            python -m pip install --disable-pip-version-check --quiet 'numpy==2.0.2' 'scipy==1.14.1'
+            python scripts/render_journeys.py
+          fi
+          python scripts/validate_journey_audio.py
+      - name: Cache verified long-form audio stems
+        if: steps.audio-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: public/assets/audio/journeys
+          key: pr5-journeys-v3-${{ hashFiles('scripts/render_journeys.py', 'public/assets/audio/scenes/manifest.json') }}
+      - name: Restore licensed footage for browser screenshots
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            public/assets/scenes/*-travel.mp4
+            public/assets/scenes/*-travel-mobile.mp4
+            public/assets/scenes/*-travel.jpg
+            public/assets/scenes/*-travel-mobile.jpg
+            public/assets/scenes/real-travel-films.json
+          key: pr5-real-travel-v1-${{ hashFiles('scripts/build-travel-films.py') }}
+      - name: Verify locally required video and audio resources
+        run: npm run assets:check
+      - name: Production build
+        run: npm run build
+      - name: SSR route and SEO smoke
+        run: |
+          set -euo pipefail
+          (npx vite preview --host 127.0.0.1 --port 4173 > /tmp/soundlab-v2-preview.log 2>&1 & echo $! > /tmp/soundlab-v2-pid)
+          trap 'kill "$(cat /tmp/soundlab-v2-pid)" 2>/dev/null || true' EXIT
+          for i in {1..25}; do
+            if curl -fsS http://127.0.0.1:4173/health >/dev/null; then break; fi
+            sleep 2
+          done
+          curl --fail --silent --show-error http://127.0.0.1:4173/en/scenes/chiang-mai-focus -o /tmp/scene-en.html
+          curl --fail --silent --show-error http://127.0.0.1:4173/zh/scenes/bali-sound-bath -o /tmp/scene-zh.html
+          curl --fail --silent --show-error http://127.0.0.1:4173/en/studio -o /tmp/studio.html
+          curl --fail --silent --show-error http://127.0.0.1:4173/sitemap.xml -o /tmp/sitemap.xml
+          grep -q 'Chiang Mai Focus Soundscape' /tmp/scene-en.html
+          grep -q '巴厘岛' /tmp/scene-zh.html
+          grep -q 'noindex' /tmp/studio.html
+          grep -q '/en/scenes/chiang-mai-focus' /tmp/sitemap.xml
+          grep -q '/zh/scenes/bali-sound-bath' /tmp/sitemap.xml
+          echo 'PASS: bilingual scene SSR, Studio noindex and sitemap'
+      - name: Install Chromium for browser review
+        run: |
+          npm install --no-save --package-lock=false playwright@1.65.0
+          npx playwright install --with-deps chromium
+      - name: Desktop and mobile visual smoke
+        run: |
+          set -euo pipefail
+          (npx vite preview --host 127.0.0.1 --port 4173 > /tmp/soundlab-v2-visual-server.log 2>&1 & echo $! > /tmp/soundlab-v2-visual-pid)
+          trap 'kill "$(cat /tmp/soundlab-v2-visual-pid)" 2>/dev/null || true' EXIT
+          for i in {1..25}; do
+            if curl -fsS http://127.0.0.1:4173/health >/dev/null; then break; fi
+            sleep 2
+          done
+          node scripts/soundlab-v2-browser-smoke.mjs
+      - name: Upload visual review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soundlab-v2-visual-review
+          path: preview-qa/soundlab-v2/
+          if-no-files-found: ignore

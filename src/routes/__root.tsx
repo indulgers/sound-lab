@@ -13,6 +13,7 @@ import { verificationMiddleware } from '../server/verification-middleware'
 import { mountSoundLab } from '../sound-lab.mjs'
 import appCss from '../styles.css?url'
 import scenesCss from '../scenes/scenes.css?url'
+import experienceV2Css from '../scenes/experience-v2.css?url'
 
 // 字体自托管（P0）：不再请求 Google Fonts。Fontsource 包随构建
 // 打包进 dist，浏览器只下载 unicode-range 命中的子集。
@@ -102,6 +103,7 @@ export const Route = createRootRoute({
       { rel: 'icon', href: FAVICON },
       { rel: 'stylesheet', href: appCss },
       { rel: 'stylesheet', href: scenesCss },
+      { rel: 'stylesheet', href: experienceV2Css },
     ],
   }),
   shellComponent: RootDocument,

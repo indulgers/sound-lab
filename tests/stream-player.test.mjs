@@ -43,10 +43,10 @@ const scene={id:'chiang-mai',journeyId:'focus-chiang-mai',durationSeconds:900,la
   {id:'details',file:'/assets/audio/journeys/chiang-mai-details.mp3',defaultLevel:.4},
   {id:'atmosphere',file:'/assets/audio/journeys/chiang-mai-atmosphere.mp3',defaultLevel:.3},
 ]};
-function setup() {
+function setup({ mediaFactory = () => new TestMedia() } = {}) {
   const context=new TestContext(),media=[],states=[], timers=[];
   let wall=1_000_000,claims=0;
-  const player=createStreamingJourneyPlayer({newContext:()=>context,newMedia:()=>{const m=new TestMedia();media.push(m);return m;},
+  const player=createStreamingJourneyPlayer({newContext:()=>context,newMedia:()=>{const m=mediaFactory();media.push(m);return m;},
     now:()=>wall,onState:s=>states.push(s),claimAudio:()=>{claims++;},
     interval:cb=>{timers.push(cb);return timers.length;},clearIntervalFn:()=>{}});
   return {player,context,media,states,timers,get claims(){return claims;},time:v=>wall=v};
@@ -173,7 +173,10 @@ test('A/B original switch reloads the actual audio files within the same Journey
   await h.player.setScene(v31,{}, {play:true});
   assert.equal(h.media.length,6,'must start a new set of media elements');
   assert.deepEqual(h.media.slice(3).map(x=>x.src),v31.layers.map(x=>x.file));
-  assert.ok(h.media.slice(0,3).every(x=>x.paused));
+  assert.ok(h.media.slice(0,3).every(x=>!x.paused),'old score remains audible during the crossfade');
+  h.media.slice(3).forEach(x=>{x.currentTime=10;});
+  h.timers[0]();
+  assert.ok(h.media.slice(0,3).every(x=>x.paused),'old score retires after the actual crossfade');
   assert.equal(h.player.getPlaying(),true);
   h.player.dispose();
 });
@@ -195,5 +198,53 @@ test('Nature control never amplifies the opt-in cafe conversation lane', async (
   assert.ok(Math.abs(gain.value-.045)<1e-6,'Nature cannot amplify human speech');
   h.player.setLevel('ambience',0);
   assert.equal(gain.value,0,'quiet button must fully mute crowd');
+  h.player.dispose();
+});
+
+test('switching scenes while playing keeps the original playing and preserves elapsed focus time', async () => {
+  const h=setup(); await h.player.setScene(scene); await h.player.play();
+  h.time(1_013_000);
+  const before=h.player.getElapsedSeconds();
+  const nextScene={...scene,id:'bali',journeyId:'meditate-bali',
+    layers:scene.layers.map(layer=>({...layer,file:layer.file.replace('chiang-mai','bali')}))};
+  const okay=await h.player.setScene(nextScene,{harmony:.2,details:.1,atmosphere:.8},{play:true});
+  assert.equal(okay,true);
+  assert.equal(h.context.sources.length,6,'new stems start in a parallel deck');
+  assert.ok(h.media.slice(0,3).every(x=>!x.paused),'outgoing audio must not be interrupted');
+  assert.ok(h.media.slice(3).every(x=>!x.paused),'incoming audio must actually start');
+  const oldHarmony = h.context.sources[0].source.connections[0].gain;
+  const newHarmony = h.context.sources[3].source.connections[0].gain;
+  assert.equal(oldHarmony.value,.7,'outgoing deck must keep its original volume');
+  assert.equal(newHarmony.value,.2,'incoming deck must use the next scene mix');
+  h.player.setLevel('harmony',.27);
+  assert.equal(oldHarmony.value,.7,'editing new scene must not rebalance the fading old scene');
+  assert.equal(newHarmony.value,.27,'incoming scene receives the new editor value');
+  assert.equal(h.player.getPlaying(),true);
+  assert.ok(h.player.getElapsedSeconds()>=before && h.player.getElapsedSeconds()<before+2);
+  assert.equal(h.states.at(-1).sceneId,'bali');
+  h.media.slice(3).forEach(x=>x.currentTime=10);
+  h.timers[0]();
+  assert.ok(h.media.slice(0,3).every(x=>x.paused),'outgoing stems retire once crossfade is complete');
+  h.player.dispose();
+});
+
+test('failed incoming scene never silences the previous, working soundscape', async () => {
+  const h=setup({mediaFactory:()=> {
+    const media=new TestMedia();
+    const play=media.play.bind(media);
+    media.play=function() {
+      if(this.src?.includes('unavailable')) return Promise.reject(new Error('file unavailable'));
+      return play();
+    };
+    return media;
+  }});
+  await h.player.setScene(scene);
+  await h.player.play();
+  const missing={...scene,id:'unavailable',journeyId:'unavailable',
+    layers:scene.layers.map(layer=>({...layer,file:'/unavailable/'+layer.id+'.mp3'}))};
+  assert.equal(await h.player.setScene(missing,{}, {play:true}),false);
+  assert.ok(h.media.slice(0,3).every(x=>!x.paused));
+  assert.equal(h.player.getPlaying(),true);
+  assert.equal(h.states.at(-1).sceneId,'chiang-mai');
   h.player.dispose();
 });

@@ -1,5 +1,5 @@
 /**
- * 首页（/en、/zh）：只有旅程（SceneExperience）。
+ * 首页（/en、/zh）：沉浸旅程、精选场景和 SEO 可见的工具发现入口。
  *
  * 旧版页内锚点兼容：有人带着 #recipes / #plus / #mine / #sources
  * 打开首页（旧书签、旧外链），直接跳到对应的新页面（replace，
@@ -8,6 +8,7 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import SceneExperience from './scenes/SceneExperience.jsx';
+import DiscoverGallery from './scenes/DiscoverGallery.jsx';
 import { routeForAnchor } from './redirects.mjs';
 import { localizePath, useLocale } from './locale.mjs';
 
@@ -32,6 +33,7 @@ export default function HomePage() {
   return (
     <>
       <SceneExperience />
+      <DiscoverGallery />
       <section className="sc-seo-discover" aria-labelledby="sc-seo-discover-heading">
         <div className="sc-seo-discover-intro">
           <p className="sc-seo-eyebrow">{zh ? '声音空间 · SOUND COCKTAIL' : 'SOUND COCKTAIL / EXPLORE'}</p>
