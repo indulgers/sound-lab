@@ -358,8 +358,8 @@ export function verificationFromContext(context) {
 }
 
 /** robots.txt 内容：明确放行所有主流爬虫与 AI 爬虫，不屏蔽任何一方；指向 sitemap。
- * 唯一 Disallow 是 B6 蜜罐 /honeypot/（见 src/bot-guard.mjs）：正常爬虫不会去，
- * 踩进去的机器人会被封 IP。 */
+ * Retired /honeypot (410) is disallowed for every explicit crawler group.
+ * This prevents discovery and avoids a mismatch with the historic /honeypot path. */
 export function robotsTxt() {
   return [
     '# Sound Cocktail — robots.txt',
@@ -367,22 +367,27 @@ export function robotsTxt() {
     '',
     'User-agent: *',
     'Allow: /',
-    'Disallow: /honeypot/',
+    'Disallow: /honeypot',
     '',
     'User-agent: Googlebot',
     'Allow: /',
+    'Disallow: /honeypot',
     '',
     'User-agent: OAI-SearchBot',
     'Allow: /',
+    'Disallow: /honeypot',
     '',
     'User-agent: PerplexityBot',
     'Allow: /',
+    'Disallow: /honeypot',
     '',
     'User-agent: ClaudeBot',
     'Allow: /',
+    'Disallow: /honeypot',
     '',
     'User-agent: Bingbot',
     'Allow: /',
+    'Disallow: /honeypot',
     '',
     `Sitemap: ${SITE_URL}/sitemap.xml`,
     '',
@@ -394,8 +399,9 @@ export function robotsTxt() {
  * 每个 <url> 带 xhtml:link hreflang 标注（全部语言版本 + x-default）。
  * /mix/:code 不进 sitemap（只有真实分享的混音才有 URL）。
  */
-export function sitemapXml(date = new Date()) {
-  const lastmod = date instanceof Date ? date.toISOString().slice(0, 10) : String(date).slice(0, 10)
+export function sitemapXml(date = null) {
+  // Only emit lastmod for known editorial changes, not today's request date.
+  const lastmod = date == null ? null : (date instanceof Date ? date.toISOString().slice(0, 10) : String(date).slice(0, 10))
   const urls = PUBLIC_PAGES.flatMap(([, seg]) =>
     LOCALES.map((l) => {
       const loc = `${SITE_URL}/${l}${seg}`
@@ -406,7 +412,7 @@ export function sitemapXml(date = new Date()) {
         ),
         `    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}/${DEFAULT_LOCALE}${seg}"/>`,
       ].join('\n')
-      return `  <url>\n    <loc>${loc}</loc>\n${alternates}\n    <lastmod>${lastmod}</lastmod>\n  </url>`
+      return `  <url>\n    <loc>${loc}</loc>\n${alternates}${lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : ''}\n  </url>`
     }),
   ).join('\n')
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls}\n</urlset>\n`
