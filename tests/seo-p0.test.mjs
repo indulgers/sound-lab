@@ -36,7 +36,7 @@ test('seo: robots.txt allows the named crawlers and points at the sitemap', () =
   }
   assert.match(txt, new RegExp(`^Sitemap: ${SITE_URL.replace(/\//g, '\\/')}/sitemap\\.xml$`, 'm'));
   // The universal rule matches exactly the retired URL without trailing slash.
-  assert.ok(txt.includes('User-agent: *\\nAllow: /\\nDisallow: /honeypot'));
+  assert.ok(txt.includes('User-agent: *\nAllow: /\nDisallow: /honeypot'));
   assert.ok(!txt.includes('Disallow: /honeypot/'));
   assert.equal((txt.match(/Disallow:/g) || []).length, 6);
 });
