@@ -18,6 +18,8 @@
 import { LANDING_PAGES, ABOUT_PAGE } from './landing.mjs';
 import { TERMS_PAGE, PRIVACY_PAGE } from './legal.mjs';
 import { SOUNDS, soundDisplayName } from './catalog.mjs';
+import { FEATURED_SCENE_PAGES, getFeaturedScenePage, scenePagePath } from './scenes/scene-pages.mjs';
+import { sceneById, sceneText } from './scenes/catalog.mjs';
 
 const SOUND_BY_ID = new Map(SOUNDS.map((s) => [s.id, s]));
 
@@ -58,7 +60,11 @@ export const NON_INDEXED_PAGES = [
 ]
 
 /** 可收录页面的全部语言版本 URL 路径（sitemap 用）。 */
-export const PUBLIC_PATHS = PUBLIC_PAGES.flatMap(([, seg]) => LOCALES.map((l) => `/${l}${seg}`))
+export const INDEXABLE_SEGMENTS = [
+  ...PUBLIC_PAGES.map(([, seg]) => seg),
+  ...FEATURED_SCENE_PAGES.map(page => '/scenes/' + page.slug),
+]
+export const PUBLIC_PATHS = INDEXABLE_SEGMENTS.flatMap(seg => LOCALES.map(l => `/${l}${seg}`))
 
 /** 某页某语言的规范路径（home 为 /en、/zh，无尾斜杠）。 */
 export function canonicalPath(key, locale) {
@@ -394,9 +400,12 @@ export function robotsTxt() {
  * 每个 <url> 带 xhtml:link hreflang 标注（全部语言版本 + x-default）。
  * /mix/:code 不进 sitemap（只有真实分享的混音才有 URL）。
  */
-export function sitemapXml(date = new Date()) {
-  const lastmod = date instanceof Date ? date.toISOString().slice(0, 10) : String(date).slice(0, 10)
-  const urls = PUBLIC_PAGES.flatMap(([, seg]) =>
+export function sitemapXml(date = null) {
+  // Last modification is an editorial fact, not the time this request ran.
+  // Only include it when an actual content-deploy date is supplied.
+  const lastmod = date == null ? null
+    : (date instanceof Date ? date.toISOString().slice(0, 10) : String(date).slice(0, 10))
+  const urls = INDEXABLE_SEGMENTS.flatMap((seg) =>
     LOCALES.map((l) => {
       const loc = `${SITE_URL}/${l}${seg}`
       const alternates = [
@@ -406,7 +415,7 @@ export function sitemapXml(date = new Date()) {
         ),
         `    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}/${DEFAULT_LOCALE}${seg}"/>`,
       ].join('\n')
-      return `  <url>\n    <loc>${loc}</loc>\n${alternates}\n    <lastmod>${lastmod}</lastmod>\n  </url>`
+      return `  <url>\n    <loc>${loc}</loc>\n${alternates}${lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : ''}\n  </url>`
     }),
   ).join('\n')
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls}\n</urlset>\n`
@@ -415,4 +424,60 @@ export function sitemapXml(date = new Date()) {
 /** llms.txt 用页面列表：全部可收录页的双语 URL（绝对地址）。 */
 export function llmsPages() {
   return PUBLIC_PATHS.map((p) => `${SITE_URL}${p}`)
+}
+
+
+/**
+ * Bilingual scene pages have real footage/arrangements and substantial unique
+ * narrative copy. User-generated query mixes do not become separate SEO URLs.
+ */
+export function headForSoundScene(slug, locale = 'en') {
+  const page = getFeaturedScenePage(slug)
+  if (!page || !LOCALES.includes(locale)) {
+    return { meta: [{ title: 'Soundscape not found' }, { name: 'robots', content: 'noindex' }], links: [] }
+  }
+  const scene = sceneById(page.sceneId)
+  const canonical = SITE_URL + scenePagePath(page, locale)
+  const title = sceneText(page.title, locale) + ' | Sound Cocktail'
+  const description = sceneText(page.summary, locale)
+  const poster = SITE_URL + scene.poster
+  const alternate = LOCALES.map(lang => ({
+    rel: 'alternate', hreflang: HREFLANG[lang], href: SITE_URL + scenePagePath(page, lang),
+  }))
+  alternate.push({ rel: 'alternate', hreflang: 'x-default', href: SITE_URL + scenePagePath(page, 'en') })
+  const schema = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: title,
+      description,
+      url: canonical,
+      inLanguage: locale === 'zh' ? 'zh-CN' : 'en',
+      primaryImageOfPage: poster,
+      isPartOf: { '@type': 'WebSite', name: 'Sound Cocktail', url: SITE_URL },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: locale === 'zh' ? '探索' : 'Discover', item: SITE_URL + '/' + locale },
+        { '@type': 'ListItem', position: 2, name: sceneText(page.title, locale), item: canonical },
+      ],
+    },
+  ]
+  return {
+    meta: [
+      { title },
+      { name: 'description', content: description },
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: description },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: canonical },
+      { property: 'og:image', content: poster },
+      { property: 'og:locale', content: locale === 'zh' ? 'zh_CN' : 'en_US' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { key: 'script:scene-ld', tag: 'script', type: 'application/ld+json', content: JSON.stringify(schema) },
+    ],
+    links: [{ rel: 'canonical', href: canonical }, ...alternate],
+  }
 }

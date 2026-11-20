@@ -57,6 +57,7 @@ export default function PlusPage() {
   // CNY 展示时年卡在前；USD 展示时月付在前。
   const plans = currency === 'CNY' ? [...SUBSCRIPTION_PLANS].reverse() : SUBSCRIPTION_PLANS;
   const currentPlanId = isSubscriber ? subscription?.plan : null;
+  const qaPlus = isSubscriber && subscription?.isTest === true;
   const expiry = subscription?.currentPeriodEnd ? formatExpiry(subscription.currentPeriodEnd, locale) : '';
 
   async function openPortal() {
@@ -80,14 +81,26 @@ export default function PlusPage() {
       <p className="sec-sub">{t(locale, 'plus.sub')}</p>
       {isSubscriber && subscription ? (
         <p className="plus-status" role="status">
-          {t(locale, 'plus.currentPlan', { plan: (planDisplay(SUBSCRIPTION_PLANS.find((p) => p.id === subscription.plan), locale, currency) || {}).name || subscription.plan })}
+          {qaPlus
+            ? (locale === 'zh'
+                ? '测试 Plus 已开启（非付费订阅，不会扣费或自动续费）'
+                : 'QA Plus enabled — no payment or automatic renewal')
+            : t(locale, 'plus.currentPlan', { plan: (planDisplay(SUBSCRIPTION_PLANS.find((p) => p.id === subscription.plan), locale, currency) || {}).name || subscription.plan })}
           {' · '}
-          {subscription.provider === 'waffo'
-            ? t(locale, 'plus.renewsAuto', { date: expiry })
-            : t(locale, 'plus.endsOn', { date: expiry })}
+          {qaPlus
+            ? (locale === 'zh' ? '到期：' : 'Expires: ') + expiry
+            : subscription.provider === 'waffo'
+              ? t(locale, 'plus.renewsAuto', { date: expiry })
+              : t(locale, 'plus.endsOn', { date: expiry })}
         </p>
       ) : null}
-      <div className="cards access-cards">
+      {qaPlus ? <div className="cards access-cards">
+        <article className="card">
+          <h3>{locale === 'zh' ? '测试 Plus 权益' : 'QA Plus access'}</h3>
+          <p>{locale === 'zh' ? '当前登录账号已临时解锁全部声景、无限制收听、完整调音与保存功能。此权限只用于产品测试，没有真实付款，也不会进入支付方的订阅记录。' : 'Your signed-in test account can explore every scene, listen without the free time limit, edit all sound layers and save mixes. No real purchase or billing subscription was created.'}</p>
+          <Link to={localizePath('/', locale)} className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>{t(locale, 'plus.goJourneys')}</Link>
+        </article>
+      </div> : <div className="cards access-cards">
         <article className="card"><h3>{t(locale, 'plus.freeTitle')}</h3><p>{t(locale, 'plus.freeDesc')}</p></article>
         {plans.map((plan) => {
           const isCurrent = plan.id === currentPlanId;
@@ -120,7 +133,7 @@ export default function PlusPage() {
             </article>
           );
         })}
-      </div>
+      </div>}
       {portalError ? <p className="plus-error" role="alert">{portalError}</p> : null}
       <p className="plus-notes">{t(locale, 'plus.cancelNote')} {t(locale, 'plus.refundNote')}</p>
     </section>

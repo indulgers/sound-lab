@@ -127,7 +127,7 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
       mediaSource.connect(gain).connect(output);
       return { id: layer.id, media, mediaSource, gain, layer };
     });
-    return { sceneId: scene.id, output, parts, target: 1, started: false, retired: false };
+    return { sceneId: scene.id, output, parts, mixLevels: { ...levels }, target: 1, started: false, retired: false };
   }
   function applyDeck(deck) {
     if (!deck || !context) return;
@@ -136,7 +136,10 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
       const isSpeech = Boolean(part.layer.containsSpeech);
       const isNature = !isSpeech && (part.id === 'atmosphere' || part.id === 'ambience' || part.id === 'air');
       const isDetails = part.id === 'details' || part.id === 'texture';
-      const base = clamp(levels[part.id], clamp(part.layer.defaultLevel, .55));
+      // Each deck retains its own mix while scene transitions overlap.
+      // Otherwise changing the selected scene would abruptly rebalance
+      // the outgoing music before its 9-second fade has finished.
+      const base = clamp(deck.mixLevels[part.id], clamp(part.layer.defaultLevel, .55));
       const passage = isDetails ? densityGate(p, energy, sceneSeed()) : 1;
       // Natural-air controls must never turn conversation recordings up.
       // Passage changes should emerge gradually, not interrupt focused work.
@@ -269,21 +272,82 @@ export function createStreamingJourneyPlayer({ onState = () => {}, claimAudio = 
         scene.layers.some(layer => !layer.file || !layer.id)) {
       error = 'This journey has no playable stems'; emit('error', error); return false;
     }
+    const nextLevels = Object.fromEntries(scene.layers.map(layer => [
+      layer.id, clamp(savedLevels[layer.id], clamp(layer.defaultLevel, .55)),
+    ]));
     const same = selected?.id === scene.id && selected?.journeyId === scene.journeyId
       && selected?.audioVersion === scene.audioVersion
       && selected.layers.length === scene.layers.length
       && selected.layers.every((layer, i) => layer.id === scene.layers[i].id && layer.file === scene.layers[i].file);
-    selected = scene;
-    levels = Object.fromEntries(scene.layers.map(layer => [layer.id, clamp(savedLevels[layer.id], clamp(layer.defaultLevel, .55))]));
-    if (!same) {
-      const wasPlaying = playing;
-      pause(); if (current) retire(current); current = null;
-      if (wasPlaying && autoPlay) return play();
-    } else applyDeck(current);
+
+    // Changing just the mix should never trigger a new audio play() or restart.
+    if (same) {
+      selected = scene; levels = nextLevels;
+      if (current) current.mixLevels = { ...nextLevels };
+      if (next) next.mixLevels = { ...nextLevels };
+      applyDeck(current); applyDeck(next);
+      if (autoPlay && !playing) return play();
+      emit(playing ? 'playing' : 'idle');
+      return true;
+    }
+
+    // Keep the active programme audible while the next programme actually
+    // starts. Both decks share the existing Web Audio graph and master timer.
+    // This is a real crossfade, not pause/replace/play with a short silence.
+    if (autoPlay && playing && current && context) {
+      const previousSelected = selected, previousLevels = levels;
+      const token = ++generation;
+      // Rapid changes during a programme-loop or scene transition: settle
+      // the already audible incoming deck before starting another one.
+      if (next) {
+        const retiring = current;
+        current = next; next = null;
+        retire(retiring);
+        fadeDeck(current, 1, .15);
+      }
+      const outgoing = current;
+      selected = scene; levels = nextLevels;
+      const incoming = makeDeck(scene);
+      next = incoming;
+      try {
+        await startDeck(incoming, true);
+        if (disposed || generation !== token || next !== incoming) {
+          retire(incoming);
+          return false;
+        }
+        fadeDeck(outgoing, 0, CROSSFADE_SECONDS);
+        emit('playing');
+        return true;
+      } catch (err) {
+        if (next === incoming) next = null;
+        retire(incoming);
+        // A failed new track must never silence the working old track.
+        if (!disposed && token === generation) {
+          selected = previousSelected;
+          levels = previousLevels;
+          fadeDeck(outgoing, 1, FADE_SECONDS);
+          emit('playing');
+        }
+        return false;
+      }
+    }
+
+    selected = scene; levels = nextLevels;
+    pause();
+    if (current) retire(current);
+    current = null;
     if (autoPlay) return play();
-    emit('idle'); return true;
+    emit('idle');
+    return true;
   }
-  function setLevel(id, value) { levels[id] = clamp(value, levels[id] || .5); applyDeck(current); applyDeck(next); }
+  function setLevel(id, value) {
+    levels[id] = clamp(value, levels[id] || .5);
+    // During a scene transition, do not mutate the outgoing deck's balance;
+    // only the incoming deck should follow the editor.
+    if (current && (!next || selected?.id === current.sceneId)) current.mixLevels[id] = levels[id];
+    if (next) next.mixLevels[id] = levels[id];
+    applyDeck(current); applyDeck(next);
+  }
   function setMaster(value) { targetMaster = clamp(value, .7); setTimerAutomation(); }
   function setMixControls(values = {}) {
     if ('warmth' in values) warmth = clamp(values.warmth, warmth);

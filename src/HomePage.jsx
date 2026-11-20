@@ -8,6 +8,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import SceneExperience from './scenes/SceneExperience.jsx';
+import DiscoverGallery from './scenes/DiscoverGallery.jsx';
 import { routeForAnchor } from './redirects.mjs';
 import { localizePath, useLocale } from './locale.mjs';
 
@@ -19,5 +20,5 @@ export default function HomePage() {
     const seg = routeForAnchor(window.location.hash);
     if (seg) void navigate({ to: localizePath(seg, locale), replace: true });
   }, []);
-  return <SceneExperience />;
+  return <><SceneExperience /><DiscoverGallery /></>;
 }

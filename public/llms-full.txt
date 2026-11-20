@@ -8,6 +8,15 @@ Sound Cocktail is a web app for place-inspired sound journeys: real film, origin
 
 ## Pages
 
+## Soundscapes with verified production distinctions
+
+The following public pages are editorially curated rather than auto-generated copies. Every page explains what the picture actually shows, the separate origin of the music and the sounds a listener can adjust. Footage attribution and audio attribution are not interchangeable.
+
+- [Chiang Mai Focus Soundscape](https://soundcocktail.app/en/scenes/chiang-mai-focus) / [中文](https://soundcocktail.app/zh/scenes/chiang-mai-focus): Royal Park Rajapruek drone footage; a slow ambient focus composition inspired by the city. **Not** real café footage, rain ambience or a synchronous field recording.
+- [Bali Sound Bath & Rice Terrace Film](https://soundcocktail.app/en/scenes/bali-sound-bath) / [中文](https://soundcocktail.app/zh/scenes/bali-sound-bath): Bali rice terrace travel footage; separately composed resonance and forest textures. **Not** a resort spa video, Bali field recording, or medical therapy.
+- [Hoi An Lantern River Evening Soundscape](https://soundcocktail.app/en/scenes/hoi-an-evening) / [中文](https://soundcocktail.app/zh/scenes/hoi-an-evening): Hoi An lantern river footage; original atmospheric composition. **Not** ocean footage. This journey is Plus-gated for playback.
+- [Sound Studio](https://soundcocktail.app/en/studio) / [中文](https://soundcocktail.app/zh/studio): Editor for the selected journey's real musical stems. Change individual layer volumes, mute or solo a layer, adjust mood controls, and share a validated mix URL. There is no glass/cup editor; the word Cocktail describes mixing only.
+
 - [Sound Cocktail](https://soundcocktail.app/en): Sound therapy, mixed for the moment you are in — focus, sleep, meditation — with real places to look at while you listen. 22 sounds across nature, places and instruments. Save mixes as recipes, share a recipe card or a recipe code (SYL-...) with a friend.
 - [Sound Cocktail （中文）](https://soundcocktail.app/zh): 免费的音疗聆听站：22 种声音，随意搭配、存成配方，助眠或专注都用得上。
 - [Sound Therapy for Sleep · Rain & Night Sounds](https://soundcocktail.app/en/sleep): Steady rain, a little piano and wind — the most-saved mix for sleep.

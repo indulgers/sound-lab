@@ -23,3 +23,11 @@ WAFFO_PRODUCT_FOCUS_PACK=
 WAFFO_PRODUCT_SLEEP_PACK=
 WAFFO_PRODUCT_RAIN_NIGHT_PACK=
 
+
+# QA Plus 测试账号：必须是登录后 /api/auth/me 返回的随机 userId，
+# 不要填写邮箱。失效或超出未来 30 天会自动关闭。
+# 本地 localhost 默认允许；线上 Worker 还需显式设置 QA_ALLOWED_HOSTS。
+# 不配置这两个变量时，所有用户正常按真实订阅判断。
+# SOUNDLAB_QA_PLUS_USER_IDS=
+# SOUNDLAB_QA_PLUS_EXPIRES_AT=2026-11-25T12:00:00Z
+# SOUNDLAB_QA_PLUS_ALLOWED_HOSTS=staging.example.workers.dev

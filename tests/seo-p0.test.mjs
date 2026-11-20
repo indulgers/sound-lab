@@ -23,7 +23,7 @@ const seo = await import('../src/seo.mjs');
 const robotsRoute = (await import('../src/routes/robots[.]txt.ts')).Route;
 const sitemapRoute = (await import('../src/routes/sitemap[.]xml.ts')).Route;
 
-const { SITE_URL, OG_IMAGE_URL, ROUTE_SEO, headForRoute, verificationMeta, verificationTokensFromEnv, verificationFromContext, robotsTxt, sitemapXml } = seo;
+const { SITE_URL, OG_IMAGE_URL, ROUTE_SEO, PUBLIC_PATHS, headForRoute, verificationMeta, verificationTokensFromEnv, verificationFromContext, robotsTxt, sitemapXml } = seo;
 
 const projectRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -70,9 +70,9 @@ test('seo: sitemap.xml lists only the public pages with absolute URLs and lastmo
   assert.ok(xml.includes(`<xhtml:link rel="alternate" hreflang="en" href="${SITE_URL}/en/sleep"/>`));
   assert.ok(xml.includes(`<xhtml:link rel="alternate" hreflang="zh-CN" href="${SITE_URL}/zh/sleep"/>`));
   assert.ok(xml.includes(`<xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}/en/sleep"/>`));
-  // 结构完整：每个 <url> 都有开闭标签，数量与 PUBLIC_PATHS 一致（20）。
-  assert.equal((xml.match(/<url>/g) || []).length, 20);
-  assert.equal((xml.match(/<\/url>/g) || []).length, 20);
+  // 结构完整：数量与全部双语公共页面（含经过人工编辑的精品场景）一致。
+  assert.equal((xml.match(/<url>/g) || []).length, PUBLIC_PATHS.length);
+  assert.equal((xml.match(/<\/url>/g) || []).length, PUBLIC_PATHS.length);
 });
 
 test('seo: GET /sitemap.xml returns well-formed XML', async () => {
