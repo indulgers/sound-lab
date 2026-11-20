@@ -1,0 +1,54 @@
+name: SEO Crawl & Discovery P0
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'scripts/seo-crawl-smoke.mjs'
+      - 'package.json'
+      - '.github/workflows/seo-crawl-check.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: seo-crawl-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  crawl-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Retire previous Vite-SPA files in current main
+        run: rm -f vite.config.mjs index.html src/main.jsx
+      - name: Install
+        run: npm ci
+      - name: All unit tests
+        run: npm test
+      - name: Production build
+        run: npm run build
+      - name: SSR & Googlebot-UA crawl smoke
+        run: |
+          set -euo pipefail
+          npx vite preview --host 127.0.0.1 --port 4173 > /tmp/seo-preview.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for i in {1..40}; do
+            if curl -fsS http://127.0.0.1:4173/health >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" != 1 ]; then
+            cat /tmp/seo-preview.log
+            exit 1
+          fi
+          npm run seo:check -- http://127.0.0.1:4173
