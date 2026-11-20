@@ -631,3 +631,85 @@ html[lang="zh-CN"] .scene-experience .sc-copy h1 {
 .sc-limit-actions a svg{width:14px; height:14px;}
 .sc-limit-actions button:not(.sc-primary){font-size:12px; text-decoration:underline; background:none; border:0; padding:0; cursor:pointer; color:inherit;}
 @media (max-width:700px){ .sc-limit{bottom:150px;} }
+
+
+/* Indexable home discovery — visible SSR links into the existing playable
+   sound pages. Kept outside the full-height visual player for both crawlers
+   and actual users. No invisible SEO-only text or decorative fake cards. */
+.sc-seo-discover {
+  background: #f4f0e7;
+  color: #273b30;
+  padding: clamp(64px, 7vw, 112px) clamp(24px, 7vw, 112px) 38px;
+  font-family: Manrope, system-ui, sans-serif;
+}
+.sc-seo-discover-intro { max-width: 790px; margin-bottom: clamp(32px, 4vw, 60px); }
+.sc-seo-eyebrow {
+  margin: 0 0 12px;
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: .19em;
+  font-weight: 700;
+  color: #718271;
+}
+.sc-seo-discover h2 {
+  margin: 0 0 18px;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(42px, 5vw, 72px);
+  line-height: 1.03;
+  font-weight: 600;
+  letter-spacing: -.018em;
+}
+.sc-seo-discover-intro > p:not(.sc-seo-eyebrow) {
+  margin: 0;
+  max-width: 670px;
+  color: #596a5d;
+  font-size: 14px;
+  line-height: 1.85;
+}
+.sc-seo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid #cbd4c9;
+  border-left: 1px solid #cbd4c9;
+}
+.sc-seo-link {
+  position: relative;
+  display: block;
+  min-height: 190px;
+  padding: 30px 28px 24px;
+  color: inherit;
+  border-right: 1px solid #cbd4c9;
+  border-bottom: 1px solid #cbd4c9;
+  text-decoration: none;
+  transition: background-color .2s ease;
+}
+.sc-seo-link:hover,
+.sc-seo-link:focus-visible { background: #e5e9de; }
+.sc-seo-link:focus-visible { outline: 2px solid #466d52; outline-offset: -4px; }
+.sc-seo-link h3 {
+  max-width: 320px;
+  margin: 20px 0 9px;
+  font: 600 clamp(23px, 2.2vw, 33px)/1.12 'Cormorant Garamond', Georgia, serif;
+}
+.sc-seo-link p { max-width: 340px; margin: 0; font-size: 12px; line-height: 1.7; color: #6a776d; }
+.sc-seo-arrow { position: absolute; top: 19px; right: 23px; font-size: 20px; line-height: 1; }
+.sc-seo-footer {
+  margin-top: 48px;
+  padding-top: 22px;
+  border-top: 1px solid #cbd4c9;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px 28px;
+}
+.sc-seo-footer a { font-size: 12px; color: #526f58; text-underline-offset: 4px; }
+@media (max-width: 980px) {
+  .sc-seo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .sc-seo-grid { grid-template-columns: 1fr; }
+  .sc-seo-link { min-height: 150px; padding: 23px 24px; }
+  .sc-seo-link h3 { margin: 13px 0 7px; }
+  .sc-seo-footer { gap: 14px 20px; }
+}

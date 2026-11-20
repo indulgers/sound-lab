@@ -364,8 +364,8 @@ export function verificationFromContext(context) {
 }
 
 /** robots.txt 内容：明确放行所有主流爬虫与 AI 爬虫，不屏蔽任何一方；指向 sitemap。
- * 唯一 Disallow 是 B6 蜜罐 /honeypot/（见 src/bot-guard.mjs）：正常爬虫不会去，
- * 踩进去的机器人会被封 IP。 */
+ * Retired /honeypot (410) is disallowed for every explicit crawler group.
+ * This prevents discovery and avoids a mismatch with the historic /honeypot path. */
 export function robotsTxt() {
   return [
     '# Sound Cocktail — robots.txt',
@@ -373,22 +373,27 @@ export function robotsTxt() {
     '',
     'User-agent: *',
     'Allow: /',
-    'Disallow: /honeypot/',
+    'Disallow: /honeypot',
     '',
     'User-agent: Googlebot',
     'Allow: /',
+    'Disallow: /honeypot',
     '',
     'User-agent: OAI-SearchBot',
     'Allow: /',
+    'Disallow: /honeypot',
     '',
     'User-agent: PerplexityBot',
     'Allow: /',
+    'Disallow: /honeypot',
     '',
     'User-agent: ClaudeBot',
     'Allow: /',
+    'Disallow: /honeypot',
     '',
     'User-agent: Bingbot',
     'Allow: /',
+    'Disallow: /honeypot',
     '',
     `Sitemap: ${SITE_URL}/sitemap.xml`,
     '',

@@ -32,12 +32,13 @@ const projectRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..'
 test('seo: robots.txt allows the named crawlers and points at the sitemap', () => {
   const txt = robotsTxt();
   for (const bot of ['Googlebot', 'OAI-SearchBot', 'PerplexityBot', 'ClaudeBot', 'Bingbot']) {
-    assert.match(txt, new RegExp(`User-agent: ${bot}\\nAllow: /`), bot);
+    assert.match(txt, new RegExp(`User-agent: ${bot}\\nAllow: /\\nDisallow: /honeypot`), bot);
   }
   assert.match(txt, new RegExp(`^Sitemap: ${SITE_URL.replace(/\//g, '\\/')}/sitemap\\.xml$`, 'm'));
-  // 唯一 Disallow 是 B6 蜜罐 /honeypot/：正常爬虫不会去，踩进去的机器人会被封 IP。
-  assert.match(txt, /User-agent: \*\nAllow: \/\nDisallow: \/honeypot\//);
-  assert.equal((txt.match(/Disallow:/g) || []).length, 1);
+  // The universal rule matches exactly the retired URL without trailing slash.
+  assert.ok(txt.includes('User-agent: *\nAllow: /\nDisallow: /honeypot'));
+  assert.ok(!txt.includes('Disallow: /honeypot/'));
+  assert.equal((txt.match(/Disallow:/g) || []).length, 6);
 });
 
 test('seo: GET /robots.txt returns the robots file as text/plain', async () => {
@@ -63,6 +64,7 @@ test('seo: sitemap.xml lists only the public pages with absolute URLs and lastmo
   assert.doesNotMatch(xml, /<loc>https:\/\/soundcocktail\.app\/<\/loc>/);
   assert.doesNotMatch(xml, /<loc>https:\/\/soundcocktail\.app\/focus<\/loc>/);
   assert.ok(xml.includes('<lastmod>2026-11-13</lastmod>'));
+  assert.doesNotMatch(sitemapXml(), /<lastmod>/, 'do not fake lastmod for unchanged pages');
   for (const excluded of ['/checkout', '/return', '/waffo-return', '/api/', '/mix/', '/terms', '/privacy', '/mine']) {
     assert.doesNotMatch(xml, new RegExp(`<loc>[^<]*${excluded.replace(/\//g, '\\/')}`), excluded);
   }

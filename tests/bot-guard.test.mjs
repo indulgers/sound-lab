@@ -334,33 +334,18 @@ test('bot-guard: without KV, UA blocking and rate limiting still work', async ()
 
 // --- 蜜罐路由 ---
 
-test('bot-guard: GET /honeypot returns a tiny 200 and traps the IP in KV', async () => {
+test('bot-guard: retired honeypot returns 410 without writing to the KV blacklist', async () => {
   resetBotGuardStats();
   const kv = new FakeKV();
   env.ORDERS_KV = kv;
-  const ip = '203.0.113.99';
   const res = await honeypotRoute.options.server.handlers.GET({
-    request: req('/honeypot', { ip, ua: 'SomeBot/9.9' }),
+    request: req('/honeypot', { ip: '203.0.113.99', ua: 'Googlebot/2.1' }),
   });
-  assert.equal(res.status, 200);
-  assert.match(res.headers.get('content-type'), /text\/plain/);
-  const body = await res.text();
-  assert.ok(body.length < 50, `honeypot body must be tiny, got ${body.length} bytes`);
-  const rec = await kv.get(botBlockKey(ip), 'json');
-  assert.ok(rec);
-  assert.equal(rec.ip, ip);
-  assert.equal(rec.hits, 1);
-  assert.ok(rec.firstSeen > 0);
-  // 一小时内再踩一次：不重复写 KV（hits 仍为 1）。
-  const putCalls = kv.putCalls.length;
-  await honeypotRoute.options.server.handlers.GET({ request: req('/honeypot', { ip, ua: 'SomeBot/9.9' }) });
-  assert.equal(kv.putCalls.length, putCalls);
-  assert.equal((await kv.get(botBlockKey(ip), 'json')).hits, 1);
-  // 此后该 IP 的页面请求被 403。
-  const limiter = createRateLimiter();
-  const blocked = await guardRequest({ request: req('/en', { ip }), env: { ORDERS_KV: kv }, rateLimiter: limiter });
-  assert.equal(blocked.status, 403);
-  assert.equal(getBotGuardStats().honeypotHits, 2);
+  assert.equal(res.status, 410);
+  assert.equal(res.headers.get('x-robots-tag'), 'noindex');
+  assert.equal(kv.putCalls.length, 0);
+  assert.equal(await kv.get(botBlockKey('203.0.113.99'), 'json'), null);
+  assert.equal(getBotGuardStats().honeypotHits, 0);
 });
 
 test('bot-guard: honeypot record carries a 30-day TTL', async () => {
@@ -390,7 +375,7 @@ test('bot-guard: GET /health reports the guard counters', async () => {
 
 // --- 根路由中间件（server.middleware）---
 
-test('bot-guard: root server middleware blocks bad UA, blocks trapped IPs, passes clean requests', async () => {
+test('bot-guard: root middleware still limits bad UA but bypasses legacy KV IP bans during indexing recovery', async () => {
   resetBotGuardStats();
   const kv = new FakeKV();
   env.ORDERS_KV = kv;
@@ -410,9 +395,15 @@ test('bot-guard: root server middleware blocks bad UA, blocks trapped IPs, passe
   const webhook = await run(req('/api/waffo/webhook', { ua: 'Bytespider/1.0', ip: '203.0.113.203', method: 'POST' }));
   assert.equal(webhook.status, 200);
 
-  // 蜜罐封掉的 IP → 403（走真实 KV，不是纯函数推演）。
+  // Historical honeypot bans remain in KV until TTL expiry, but this
+  // middleware must no longer block a legitimate request from that IP.
   await recordHoneypotHit(kv, '203.0.113.204', 'EvilBot/1.0', 4_000_000);
   const trapped = await run(req('/en/sleep', { ip: '203.0.113.204' }));
-  assert.equal(trapped.status, 403);
-  assert.equal(trapped.headers.get('x-block-reason'), 'ip-blocked');
+  assert.equal(trapped.status, 200);
+  assert.equal(await trapped.text(), 'ok');
+  const google = await run(req('/en', {
+    ip: '203.0.113.204',
+    ua: 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+  }));
+  assert.equal(google.status, 200);
 });

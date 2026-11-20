@@ -54,7 +54,8 @@
     "dev:ready": "node scripts/sync-local-media.mjs && vite dev --port 3000",
     "film:plan": "node scripts/generate-ai-film.mjs",
     "film:build": "python3 scripts/build-ai-film-pilot.py",
-    "film:review": "node scripts/create-ai-film-preview.mjs"
+    "film:review": "node scripts/create-ai-film-preview.mjs",
+    "seo:check": "node scripts/seo-crawl-smoke.mjs"
   },
   "type": "module",
   "version": "1.0.0"

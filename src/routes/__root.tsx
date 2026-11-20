@@ -134,13 +134,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         <Scripts />
-        {/* B6 蜜罐链接（见 src/bot-guard.mjs）：全站每页一个隐藏链接指向
-            /honeypot/。正常用户看不到、点不到（aria-hidden + display:none）；
-            只有无视 robots.txt 又到处跟链接的机器人会踩进去，踩中即封 IP。
-            链接文本是零宽连接符（U+200D），人眼不可见。 */}
-        <a id="honey" aria-hidden="true" tabIndex={-1} href="/honeypot">
-          {'\u200d'}
-        </a>
       </body>
     </html>
   )
