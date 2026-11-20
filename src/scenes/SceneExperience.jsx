@@ -98,6 +98,7 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
   const intent = intentById(intentId);
   const scene = journey ? sceneForJourney(journey, audioVersion) : sceneById(sceneId);
   const filmLicenseUrl = scene?.filmLicenseUrl || (scene?.filmLicense === 'CC BY 3.0' ? 'https://creativecommons.org/licenses/by/3.0/' : 'https://www.pexels.com/license/');
+  const isAiFilm = scene?.filmLocationEvidence === 'ai-generated';
   const [levels, setLevels] = useState(() => seededJourney ? levelsForJourney(seededJourney) : levelsForScene(SCENES[0]));
   const [controls, setControls] = useState(() => seededJourney ? controlsForJourney(seededJourney) : {warmth:.55,space:.35,energy:.40,nature:.35});
   const [advanced, setAdvanced] = useState(false);
@@ -593,13 +594,17 @@ export default function SceneExperience({ initialJourneyId = null, startInStudio
           <p>{C.inspiredText}</p>
           <h3>{C.musicCredit.replace('V3.2','V'+audioVersion)}</h3>
           <p>{audioVersion==='3.1' ? (locale==='zh'?'这是保留作对照的早期三分钟编曲。':'An earlier three-minute composition retained for listening comparisons.') : C.continuousNote}</p>
-          <h3>{locale==='zh'?'实景视频与授权':'Live-action film and licensing'}</h3>
+          <h3>{isAiFilm ? (locale==='zh'?'AI 生成视频':'AI-generated film') : (locale==='zh'?'实景视频与授权':'Live-action film and licensing')}</h3>
           <p><strong>{T(scene.filmPlace)}</strong></p>
-          <p>{locale==='zh'?'音乐情境以该地为灵感；画面来自实景视频素材，并非本团队当地实录。':'Music is place-inspired. The moving scene uses licensed location-described footage, not our own on-location recording.'}</p>
-          <p><a href={scene.filmSourcePage} target="_blank" rel="noreferrer">{scene.filmCreator}</a> · <a href={filmLicenseUrl} target="_blank" rel="noreferrer">{scene.filmLicense}</a></p>
+          <p>{isAiFilm ? (locale==='zh'?'音乐情境以该地为灵感；画面由 AI 生成，并非实景拍摄。':'Music is place-inspired. The moving scene is AI-generated, not real footage.') : (locale==='zh'?'音乐情境以该地为灵感；画面来自实景视频素材，并非本团队当地实录。':'Music is place-inspired. The moving scene uses licensed location-described footage, not our own on-location recording.')}</p>
+          {isAiFilm
+            ? <p>{scene.filmCreator} · {scene.filmLicense}</p>
+            : <p><a href={scene.filmSourcePage} target="_blank" rel="noreferrer">{scene.filmCreator}</a> · <a href={filmLicenseUrl} target="_blank" rel="noreferrer">{scene.filmLicense}</a></p>}
           {scene.filmArrivalSourcePage && <p><a href={scene.filmArrivalSourcePage} target="_blank" rel="noreferrer">{locale==='zh'?'抵达镜头：金阁寺全景慢移 · Stephan Leuzinger':'Arrival: slow pan across Kinkaku-ji · Stephan Leuzinger'}</a></p>}
           {scene.filmExtraSourcePage && <p><a href={scene.filmExtraSourcePage} target="_blank" rel="noreferrer">{locale==='zh'?'收尾：京都竹筒清泉 · Brian Zhang':'Closing: bamboo fountain · Brian Zhang'}</a></p>}
-          <p>{scene.filmLocationEvidence==='recognizable-landmark'
+          <p>{scene.filmLocationEvidence==='ai-generated'
+            ? (locale==='zh'?'画面为 AI 生成的虚构场景，以当地氛围为灵感，并非真实地点实拍。':'The scene is an AI-generated fictional setting inspired by the place, not real footage of the location.')
+            : scene.filmLocationEvidence==='recognizable-landmark'
             ? (locale==='zh'?'清迈皇家花园的可识别地标；并非咖啡馆内部。原视频按 CC BY 3.0 授权，已裁剪、调色并做循环接缝处理。':'Recognizable Royal Park Rajapruek landmark, not a café interior. Original CC BY 3.0 footage, cropped, colour-graded and loop-blended.')
             : scene.filmLocationEvidence==='geolocated-commons'
               ? (locale==='zh'?'京都爱宕山实景航拍；原作者公开拍摄坐标为 35.042564°N, 135.661303°E。静音、裁剪、调色和循环处理后的派生视频仍按 CC BY-SA 4.0 授权。':'Mount Atago, Kyoto Prefecture. The original author provides coordinates 35.042564°N, 135.661303°E. The muted, cropped, colour-graded and loop-blended video derivative remains licensed under CC BY-SA 4.0.')
