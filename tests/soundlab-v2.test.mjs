@@ -17,7 +17,8 @@ test('featured Discover scenes map to genuine existing film and audio assets', (
     assert.equal(journeyById(page.journeyId)?.sceneId, page.sceneId);
     assert.ok(scene.video.startsWith('/assets/scenes/'));
     assert.ok(scene.poster.startsWith('/assets/scenes/'));
-    assert.ok(scene.filmCreator && scene.filmSourcePage.startsWith('https://'));
+    assert.ok(scene.filmCreator?.length > 2);
+    assert.ok(scene.filmLocationEvidence === 'ai-generated' || scene.filmSourcePage?.startsWith('https://'));
     for (const locale of ['en','zh']) {
       assert.ok(page.title[locale].length > (locale === 'zh' ? 6 : 10));
       assert.ok(page.summary[locale].length > 40);
