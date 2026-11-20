@@ -49,6 +49,12 @@ export default function HomePage() {
             </Link>
           ))}
         </nav>
+        <nav className="sc-seo-footer" aria-label={zh ? '关于和法律' : 'About and legal'}>
+          <Link to={localizePath('/about', locale)}>{zh ? '关于 Sound Cocktail' : 'About Sound Cocktail'}</Link>
+          <Link to={localizePath('/sources', locale)}>{zh ? '声音来源及授权' : 'Sound sources and licences'}</Link>
+          <Link to={localizePath('/terms', locale)}>{zh ? '服务条款' : 'Terms'}</Link>
+          <Link to={localizePath('/privacy', locale)}>{zh ? '隐私政策' : 'Privacy'}</Link>
+        </nav>
       </section>
     </>
   );
