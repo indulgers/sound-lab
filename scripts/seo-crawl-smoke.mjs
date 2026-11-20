@@ -52,7 +52,7 @@ const robots = await get('/robots.txt')
 check(robots.response.status === 200, 'robots status')
 for (const crawler of ['Googlebot','OAI-SearchBot','PerplexityBot','ClaudeBot','Bingbot']) {
   const part = robots.body.split(/\n\n/).find(x => x.startsWith('User-agent: ' + crawler + '\n'))
-  check(Boolean(part?.includes('Disallow: /honeypot\n')), crawler + ' exact retired-trap disallow')
+  check(Boolean(part?.split('\n').some(line => line.trim() === 'Disallow: /honeypot')), crawler + ' exact retired-trap disallow')
 }
 check(robots.body.includes('Sitemap: https://soundcocktail.app/sitemap.xml'), 'robots advertises canonical sitemap')
 const sitemap = await get('/sitemap.xml')
